@@ -1,0 +1,440 @@
+/*
+ * Esta folha organiza a primeira tela da Aline com os tokens definidos no
+ * styleguide. O layout parte do celular e ganha duas colunas maiores apenas
+ * quando existe espaço suficiente para facilitar a leitura.
+ */
+.pagina-pedido {
+  width: min(100%, 960px);
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.cabecalho-pagina {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.marca-pequena,
+.contexto-usuario,
+.texto-saudacao,
+.ajuda-formulario {
+  margin-bottom: 0;
+}
+
+.marca-pequena {
+  color: var(--cor-verde-escuro);
+  font-size: var(--texto-grande);
+  font-weight: var(--peso-negrito);
+}
+
+.contexto-usuario {
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+.etiqueta-perfil {
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: var(--cor-verde-escuro);
+  background: var(--cor-verde-claro);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-semi);
+  white-space: nowrap;
+}
+
+.cabecalho-acoes {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.botao-navegacao {
+  padding: 8px 12px;
+  border: 2px solid var(--cor-verde-horta);
+  border-radius: 8px;
+  color: var(--cor-verde-escuro);
+  background: var(--cor-branco);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-semi);
+}
+
+.botao-navegacao:hover {
+  background: var(--cor-verde-claro);
+}
+
+.introducao-pedido {
+  max-width: 680px;
+  padding: 40px 0 24px;
+}
+
+.texto-saudacao {
+  margin-bottom: 8px;
+  color: var(--cor-terracota);
+  font-size: var(--texto-grande);
+  font-weight: var(--peso-semi);
+}
+
+.introducao-pedido h1 {
+  margin-bottom: 12px;
+}
+
+.introducao-pedido p:last-child {
+  max-width: 620px;
+  margin-bottom: 0;
+}
+
+.formulario-pedido {
+  display: grid;
+  gap: 24px;
+}
+
+.grupo-formulario {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.grupo-formulario legend {
+  margin-bottom: 8px;
+  color: var(--cor-verde-escuro);
+  font-size: var(--titulo-3);
+  font-weight: var(--peso-negrito);
+}
+
+.ajuda-formulario {
+  margin-bottom: 16px;
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+.opcoes-tamanho,
+.opcoes-modo {
+  display: grid;
+  gap: 12px;
+}
+
+.opcao-tamanho,
+.opcao-modo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 72px;
+  padding: 16px;
+  border: 2px solid var(--cor-borda);
+  border-radius: 12px;
+  background: var(--cor-branco);
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.opcao-tamanho:hover,
+.opcao-modo:hover {
+  border-color: var(--cor-verde-horta);
+}
+
+.opcao-selecionada {
+  border-color: var(--cor-verde-horta);
+  background: var(--cor-verde-claro);
+}
+
+.opcao-tamanho input,
+.opcao-modo input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--cor-verde-horta);
+  flex: 0 0 auto;
+}
+
+.conteudo-opcao {
+  display: grid;
+  gap: 4px;
+}
+
+.conteudo-opcao strong {
+  color: var(--cor-verde-escuro);
+  font-size: var(--texto-base);
+}
+
+.conteudo-opcao span {
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+.mensagem {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-semi);
+}
+
+.mensagem-erro {
+  color: var(--cor-erro);
+  background: var(--cor-fundo-erro);
+}
+
+.mensagem-sucesso {
+  color: var(--cor-sucesso);
+  background: var(--cor-fundo-sucesso);
+}
+
+.botao {
+  min-height: 48px;
+  padding: 12px 20px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-weight: var(--peso-semi);
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.botao-primario {
+  color: var(--cor-branco);
+  background: var(--cor-verde-horta);
+}
+
+.botao-primario:hover {
+  background: var(--cor-verde-escuro);
+}
+
+.botao-secundario {
+  border-color: var(--cor-verde-horta);
+  color: var(--cor-verde-escuro);
+  background: var(--cor-branco);
+}
+
+.botao-secundario:hover,
+.botao-secundario[aria-pressed='true'] {
+  color: var(--cor-verde-escuro);
+  background: var(--cor-verde-claro);
+}
+
+.resumo-cestas {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px;
+  border-left: 4px solid var(--cor-verde-horta);
+  border-radius: 8px;
+  color: var(--cor-texto-escuro);
+  background: var(--cor-branco);
+}
+
+.resumo-valor {
+  color: var(--cor-verde-escuro);
+  font-size: var(--titulo-2);
+  font-weight: var(--peso-negrito);
+}
+
+.conteudo-minhas-cestas {
+  display: grid;
+  gap: 24px;
+}
+
+.lista-cestas {
+  display: grid;
+  gap: 16px;
+}
+
+.cartao-cesta,
+.detalhes-cesta {
+  padding: 20px;
+  border: 2px solid var(--cor-borda);
+  border-radius: 12px;
+  background: var(--cor-branco);
+}
+
+.cartao-selecionado {
+  border-color: var(--cor-verde-horta);
+}
+
+.cabecalho-cartao-cesta,
+.cabecalho-detalhes {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cabecalho-cartao-cesta h2,
+.cabecalho-detalhes h2 {
+  margin-bottom: 0;
+}
+
+.rotulo-cartao {
+  margin-bottom: 4px;
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-semi);
+}
+
+.status-cesta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-semi);
+  white-space: nowrap;
+}
+
+.status-pedida {
+  color: var(--cor-pedida);
+  background: var(--cor-fundo-etiqueta-pedida);
+}
+
+.status-em-separacao {
+  color: var(--cor-texto-separacao);
+  background: var(--cor-fundo-etiqueta-separacao);
+}
+
+.resumo-produtos {
+  margin: 16px 0;
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+.detalhes-cesta > p {
+  margin: 20px 0;
+}
+
+.produtos-cesta {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.produto-cesta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--cor-verde-claro);
+}
+
+.produto-cesta strong {
+  color: var(--cor-verde-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+.estado-vazio {
+  margin: 0;
+  padding: 24px;
+  border-radius: 8px;
+  color: var(--cor-texto-escuro);
+  background: var(--cor-branco);
+}
+
+.estado-vazio-detalhes {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--cor-creme-natural);
+  font-size: var(--texto-rotulo);
+}
+
+.composicao-cesta {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 2px solid var(--cor-verde-horta);
+  border-radius: 12px;
+  background: var(--cor-branco);
+}
+
+.composicao-cesta h2 {
+  margin-bottom: 0;
+}
+
+.lista-produtos-prontos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.item-produto-pronto {
+  min-width: 0;
+}
+
+.botao-produto-pronto {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+  padding: 8px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  color: var(--cor-texto-escuro);
+  text-align: left;
+  background: var(--cor-verde-claro);
+  cursor: pointer;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.botao-produto-pronto:hover,
+.botao-produto-pronto:focus-visible,
+.botao-produto-pronto.produto-em-foco {
+  border-color: var(--cor-verde-horta);
+  transform: translateY(-2px);
+}
+
+.imagem-produto {
+  display: block;
+  width: 50%;
+  aspect-ratio: 1;
+  justify-self: center;
+  border-radius: 7px;
+  object-fit: cover;
+}
+
+.nome-produto {
+  font-weight: 700;
+}
+
+.botao-produto-pronto strong {
+  color: var(--cor-verde-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+.estado-vazio-composicao {
+  background: var(--cor-creme-natural);
+}
+
+@media (min-width: 700px) {
+  .pagina-pedido {
+    padding: 32px 32px 64px;
+  }
+
+  .opcoes-tamanho {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .opcoes-modo {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .lista-produtos-prontos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .botao-primario {
+    justify-self: start;
+  }
+
+  .conteudo-minhas-cestas {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    align-items: start;
+  }
+}

@@ -1,0 +1,122 @@
+:root {
+  --cor-verde-horta: #2f6b3b;
+  --cor-verde-escuro: #1f4d2e;
+  --cor-verde-claro: #dcebd2;
+  --cor-terracota: #a84f35;
+  --cor-amarelo-colheita: #e6a23c;
+  --cor-creme-natural: #f7f5ef;
+  --cor-branco: #ffffff;
+  --cor-texto-escuro: #24302a;
+  --cor-pedida: #2f6b8a;
+  --cor-texto-separacao: #7a4b00;
+  --cor-sucesso: #2f7d32;
+  --cor-erro: #b42318;
+
+  --cor-fundo-etiqueta-pedida: #e8f1f5;
+  --cor-fundo-etiqueta-separacao: #fff1d6;
+  --cor-fundo-sucesso: #e5f3e5;
+  --cor-fundo-erro: #fde8e7;
+  --cor-borda: #cbd5cc;
+
+  --fonte-principal: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --peso-regular: 400;
+  --peso-medio: 500;
+  --peso-semi: 600;
+  --peso-negrito: 700;
+  --texto-pequeno: 0.75rem;
+  --texto-rotulo: 0.875rem;
+  --texto-base: 1rem;
+  --texto-grande: 1.125rem;
+  --titulo-3: 1.25rem;
+  --titulo-2: 1.5rem;
+  --titulo-1: 2rem;
+
+  font-family: var(--fonte-principal);
+  font-size: var(--texto-base);
+  line-height: 1.5;
+  font-weight: var(--peso-regular);
+  color: var(--cor-texto-escuro);
+  background: var(--cor-creme-natural);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--cor-creme-natural);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--cor-verde-escuro);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--cor-verde-escuro);
+  font-weight: var(--peso-negrito);
+}
+
+h1 {
+  font-size: var(--titulo-1);
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: var(--titulo-2);
+  line-height: 1.33;
+}
+
+h3 {
+  font-size: var(--titulo-3);
+  line-height: 1.4;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.75rem;
+    line-height: 1.29;
+  }
+}

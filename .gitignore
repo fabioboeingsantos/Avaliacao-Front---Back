@@ -1,0 +1,9 @@
+backend/.env
+backend/.venv/
+.imagegen-venv/
+__pycache__/
+node_modules/
+dist/
+.uv-cache/
+.uv-python/
+tmp/
