@@ -2,6 +2,17 @@
 # Ela fica no repositório porque o projeto ainda não utiliza banco de dados.
 cestas = []
 
+
+# O identificador é inteiro nesta primeira versão em memória. No MySQL, ele
+# será substituído pelo autoincremento da tabela de cestas.
+def proximo_id():
+    """Gera o próximo identificador sem depender do frontend."""
+
+    if not cestas:
+        return 1
+
+    return max(cesta["id"] for cesta in cestas) + 1
+
 # Este catálogo concentra os produtos que podem aparecer nas composições.
 # O serviço poderá consultar estes dados sem depender de uma lista no frontend.
 produtos_disponiveis = [

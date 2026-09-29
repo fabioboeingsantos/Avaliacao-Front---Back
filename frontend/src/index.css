@@ -1,3 +1,4 @@
+/* Define as cores, a tipografia e os tamanhos reutilizados por toda a aplicação. */
 :root {
   --cor-verde-horta: #2f6b3b;
   --cor-verde-escuro: #1f4d2e;
@@ -43,10 +44,12 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Mantém o cálculo de dimensões previsível para todos os elementos. */
 * {
   box-sizing: border-box;
 }
 
+/* Prepara a página para ocupar a altura da janela sem margens do navegador. */
 body {
   min-width: 320px;
   min-height: 100vh;
@@ -54,6 +57,7 @@ body {
   background: var(--cor-creme-natural);
 }
 
+/* Faz os controles de formulário usarem a mesma tipografia do restante da interface. */
 button,
 input,
 select,
@@ -72,6 +76,7 @@ textarea:disabled {
   cursor: not-allowed;
 }
 
+/* Indica visualmente quando um controle pode receber interação pelo teclado. */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
@@ -81,6 +86,7 @@ a:focus-visible {
   outline-offset: 2px;
 }
 
+/* Remove o espaçamento superior padrão dos textos principais. */
 h1,
 h2,
 h3,
@@ -88,6 +94,7 @@ p {
   margin-top: 0;
 }
 
+/* Aplica a hierarquia visual padrão aos títulos da aplicação. */
 h1,
 h2,
 h3 {
@@ -110,10 +117,12 @@ h3 {
   line-height: 1.4;
 }
 
+/* Garante que a raiz do React ocupe toda a altura disponível. */
 #root {
   min-height: 100vh;
 }
 
+/* Reduz o título principal em telas estreitas para preservar a leitura. */
 @media (max-width: 640px) {
   h1 {
     font-size: 1.75rem;

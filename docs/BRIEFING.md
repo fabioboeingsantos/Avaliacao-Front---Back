@@ -14,17 +14,24 @@
 
 ### Nota sobre esta atualização
 
-Esta revisão do briefing acrescenta duas necessidades que não aparecem literalmente na cartilha
-original:
+Esta revisão do briefing registra as decisões de produto definidas para o acesso e para o pedido:
 
-- escolher entre uma cesta pronta e uma cesta personalizada;
-- repetir a composição da última cesta em um novo pedido.
+- uma página de login compartilhada pelas duas personas;
+- cadastro com confirmação de senha;
+- recuperação de senha pelo usuário;
+- escolha entre cesta pronta e cesta selecionável.
 
-Esses pontos foram registrados como decisões de produto em avaliação. Antes da implementação,
-precisamos confirmar o comportamento detalhado e verificar se alguma regra técnica do `REGRAS.md`
-precisa ser atualizada para suportá-los.
+Esses pontos devem ser conectados ao backend quando as rotas de autenticação forem implementadas.
 
 ### O problema descrito pela cartilha
+
+### Acesso compartilhado pelas duas personas
+
+- O sistema terá uma única página de login para Aline e Vanderlei.
+- O acesso será básico, usando somente usuário e senha.
+- O cadastro terá usuário, senha e confirmação de senha.
+- A recuperação de senha será iniciada pelo usuário informado.
+- O sistema identificará a persona a partir da conta autenticada; não haverá um campo de perfil no login.
 
 Os pedidos da horta comunitária chegam hoje em um grupo de mensagens. O produtor monta as cestas
 no chute e precisa de uma forma de saber, cesta por cesta, o que já foi separado e quanto ainda
@@ -155,13 +162,14 @@ Não fazem parte desta solução:
 - estoque em quilos;
 - troca de produto;
 - aviso por mensagem;
-- login, senha ou proteção de rota neste ciclo;
 - banco de dados, SQL ou ORM neste ciclo.
 
 ## 2. Premissas que não podem ser alteradas
 
-- Antes do login, o front deixa escolher o perfil em uma lista, sem senha.
-- A tela da pessoa informa ao back quem ela é na própria requisição.
+- O front terá uma página de login compartilhada, com usuário e senha.
+- O cadastro confirma a senha antes de enviar os dados.
+- A recuperação de senha começa informando o usuário.
+- A autenticação informa ao back qual conta foi usada, e o back identifica a persona.
 - Os dados ficam em listas na memória, dentro dos repositórios.
 - O back será organizado em rotas, serviços, repositórios e esquemas.
 - A chamada seguirá `rota → serviço → repositório`.

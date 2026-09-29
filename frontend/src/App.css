@@ -9,6 +9,234 @@
   padding: 24px 16px 48px;
 }
 
+/* Organiza a tela de login e permite que ela use duas colunas em telas maiores. */
+.pagina-login {
+  min-height: 100vh;
+  padding: 24px 16px;
+}
+
+.layout-login {
+  display: grid;
+  width: min(100%, 1060px);
+  gap: 24px;
+  margin: auto;
+  align-items: center;
+}
+
+/* Apresenta a proposta da horta ao lado do formulário de acesso. */
+.painel-marketing {
+  padding: 8px 4px;
+  text-align: center;
+}
+
+.logo-marca-login {
+  display: block;
+  width: min(100%, 360px);
+  height: auto;
+  margin: 0 auto 32px;
+}
+
+.painel-marketing h1 {
+  max-width: 560px;
+  margin: 8px auto 14px;
+  color: var(--cor-verde-escuro);
+}
+
+.painel-marketing > p:not(.rotulo-cartao) {
+  max-width: 560px;
+  margin: 0 auto 24px;
+}
+
+/* Exibe os benefícios do sistema como cartões curtos e fáceis de escanear. */
+.lista-beneficios {
+  display: grid;
+  gap: 12px;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.lista-beneficios li {
+  display: grid;
+  gap: 2px;
+  padding: 14px 16px;
+  border-top: 4px solid var(--cor-terracota);
+  border-radius: 8px;
+  background: var(--cor-branco);
+}
+
+.lista-beneficios strong {
+  color: var(--cor-verde-escuro);
+}
+
+.lista-beneficios span {
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+.cartao-login {
+  width: min(100%, 460px);
+  padding: 28px 22px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 16px;
+  background: var(--cor-branco);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--cor-verde-escuro) 10%, transparent);
+}
+
+/* Separa visualmente a identificação do formulário de acesso. */
+.cabecalho-login {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: center;
+}
+
+.marca-login,
+.contexto-login {
+  margin: 0;
+}
+
+.marca-login {
+  color: var(--cor-verde-escuro);
+  font-size: var(--titulo-2);
+  font-weight: var(--peso-negrito);
+}
+
+.contexto-login {
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+.introducao-login {
+  padding: 28px 0 20px;
+  text-align: center;
+}
+
+.introducao-login h1 {
+  margin: 6px 0 10px;
+}
+
+.introducao-login p:last-child {
+  margin-bottom: 0;
+}
+
+.acesso-teste {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  color: var(--cor-texto-escuro);
+  background: var(--cor-creme-natural);
+  font-size: var(--texto-pequeno);
+  text-align: center;
+}
+
+.acesso-teste strong {
+  color: var(--cor-verde-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+.formulario-login {
+  display: grid;
+  gap: 16px;
+}
+
+/* Padroniza rótulos, campos e foco do formulário de login. */
+.campo-login {
+  display: grid;
+  gap: 6px;
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-semi);
+}
+
+.campo-login input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--cor-borda);
+  border-radius: 8px;
+  color: var(--cor-texto-escuro);
+  background: var(--cor-branco);
+}
+
+/* Mantém os campos de filtro e fechamento alinhados ao padrão dos inputs. */
+.campo-login select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--cor-borda);
+  border-radius: 8px;
+  color: var(--cor-texto-escuro);
+  background: var(--cor-branco);
+}
+
+.campo-senha {
+  position: relative;
+  display: block;
+}
+
+.campo-senha input {
+  padding-right: 48px;
+}
+
+.botao-visibilidade {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  color: var(--cor-verde-escuro);
+  background: transparent;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.botao-visibilidade:hover {
+  background: var(--cor-verde-claro);
+}
+
+.campo-login input:focus {
+  border-color: var(--cor-verde-horta);
+  outline: 3px solid var(--cor-verde-claro);
+}
+
+.botao-login {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.acoes-login {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.acoes-login button {
+  padding: 0;
+  border: 0;
+  color: var(--cor-verde-escuro);
+  background: transparent;
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-semi);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Reorganiza o login em duas colunas quando há espaço horizontal suficiente. */
+@media (min-width: 700px) {
+  .layout-login {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 460px);
+  }
+}
+
+/* Estrutura o cabeçalho e a introdução do pedido da assinante. */
 .cabecalho-pagina {
   display: flex;
   align-items: flex-start;
@@ -94,6 +322,7 @@
   gap: 24px;
 }
 
+/* Apresenta os grupos de escolha sem a aparência padrão do fieldset. */
 .grupo-formulario {
   min-width: 0;
   margin: 0;
@@ -120,6 +349,7 @@
   gap: 12px;
 }
 
+/* Destaca opções selecionáveis e mantém o limite dos cartões consistente. */
 .opcao-tamanho,
 .opcao-modo {
   display: flex;
@@ -357,6 +587,7 @@
   margin-bottom: 0;
 }
 
+/* Organiza os produtos em cartões que funcionam tanto para prévia quanto para seleção. */
 .lista-produtos-prontos {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -383,6 +614,38 @@
   transition: border-color 160ms ease, transform 160ms ease;
 }
 
+.opcoes-produtos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.produto-selecionavel {
+  position: relative;
+}
+
+.campo-produto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.produto-selecionavel:focus-within {
+  border-color: var(--cor-verde-horta);
+}
+
+.produto-selecionavel.produto-em-foco {
+  border-color: var(--cor-verde-horta);
+  background: var(--cor-creme-natural);
+  box-shadow: 0 0 0 3px var(--cor-verde-claro);
+}
+
+.produto-selecionavel:has(.campo-produto:disabled) {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .botao-produto-pronto:hover,
 .botao-produto-pronto:focus-visible,
 .botao-produto-pronto.produto-em-foco {
@@ -392,7 +655,8 @@
 
 .imagem-produto {
   display: block;
-  width: 50%;
+  width: 75%;
+  max-width: 150px;
   aspect-ratio: 1;
   justify-self: center;
   border-radius: 7px;
@@ -406,6 +670,10 @@
 .botao-produto-pronto strong {
   color: var(--cor-verde-escuro);
   font-size: var(--texto-rotulo);
+}
+
+.indicador-selecao {
+  color: var(--cor-verde-escuro);
 }
 
 .estado-vazio-composicao {
@@ -429,6 +697,10 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .opcoes-produtos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .botao-primario {
     justify-self: start;
   }
@@ -436,5 +708,394 @@
   .conteudo-minhas-cestas {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
     align-items: start;
+  }
+}
+
+/* Mantém as abas de pedido agrupadas sem esconder a ação de sair. */
+.abas-pedido {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* Representa cada etapa navegável do fluxo de pedidos. */
+.aba-navegacao {
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--cor-texto-escuro);
+  background: transparent;
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-semi);
+}
+
+.aba-navegacao:hover,
+.aba-navegacao.aba-ativa {
+  color: var(--cor-verde-escuro);
+  background: var(--cor-verde-claro);
+}
+
+/* Organiza o resumo da etapa de conferência antes do envio do pedido. */
+.resumo-finalizacao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  border-left: 4px solid var(--cor-terracota);
+  border-radius: 8px;
+  background: var(--cor-branco);
+}
+
+.resumo-finalizacao h2 {
+  margin-bottom: 4px;
+}
+
+.resumo-pedido-detalhe {
+  margin-bottom: 0;
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+/* Exibe os produtos novamente para que a pessoa possa confirmar a cesta. */
+.lista-resumo-pedido {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item-resumo-pedido {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--cor-verde-claro);
+}
+
+/* Separa as ações de confirmação, salvamento e edição do pedido. */
+.acoes-finalizacao {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+/* Agrupa as ações disponíveis depois que a seleção da cesta foi preenchida. */
+.acoes-pedido {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.botao-link {
+  padding: 8px 4px;
+  border: 0;
+  color: var(--cor-verde-escuro);
+  background: transparent;
+  font-weight: var(--peso-semi);
+  text-decoration: underline;
+}
+
+/* Mostra o total do histórico e a quantidade em cada situação. */
+.resumo-historico {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.cartao-resumo-historico {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--cor-branco);
+}
+
+.cartao-resumo-historico strong {
+  color: var(--cor-verde-escuro);
+  font-size: var(--titulo-2);
+}
+
+.cartao-resumo-historico span {
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+/* Permite consultar o histórico completo ou apenas uma situação. */
+.filtros-historico {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.filtros-historico .filtro-ativo {
+  color: var(--cor-verde-escuro);
+  background: var(--cor-verde-claro);
+}
+
+/* Empilha os pedidos em cartões para facilitar a leitura no celular. */
+.lista-historico {
+  display: grid;
+  gap: 16px;
+}
+
+.cartao-historico {
+  padding: 20px;
+  border: 2px solid var(--cor-borda);
+  border-radius: 12px;
+  background: var(--cor-branco);
+}
+
+.cabecalho-historico {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cabecalho-historico h2 {
+  margin-bottom: 0;
+}
+
+/* Diferencia rapidamente pedidos finalizados de rascunhos salvos. */
+.status-historico {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-semi);
+  white-space: nowrap;
+}
+
+.status-concluido {
+  color: var(--cor-sucesso);
+  background: var(--cor-fundo-sucesso);
+}
+
+.status-nao-concluido {
+  color: var(--cor-texto-separacao);
+  background: var(--cor-fundo-etiqueta-separacao);
+}
+
+.produtos-resumo-historico {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.produtos-resumo-historico li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--cor-verde-claro);
+}
+
+.produtos-resumo-historico strong {
+  color: var(--cor-verde-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+/* Mantém uma mensagem clara quando ainda não há pedidos para exibir. */
+.estado-vazio-historico {
+  display: grid;
+  gap: 12px;
+}
+
+.estado-vazio-historico h2,
+.estado-vazio-historico p {
+  margin-bottom: 0;
+}
+
+/* Dá mais espaço horizontal para o produtor consultar várias cestas no computador. */
+.pagina-produtor {
+  width: min(100%, 1120px);
+}
+
+/* Agrupa os filtros que ajudam o produtor a localizar uma cesta. */
+.filtros-separacao {
+  margin-bottom: 24px;
+  padding: 20px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+  background: var(--cor-branco);
+}
+
+.filtros-separacao h2 {
+  margin-bottom: 16px;
+}
+
+.campos-filtro-separacao {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Apresenta as cestas como cartões com situação e limite visíveis. */
+.lista-cestas-produtor {
+  display: grid;
+  gap: 16px;
+}
+
+.cartao-cesta-produtor {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 2px solid var(--cor-borda);
+  border-radius: 12px;
+  background: var(--cor-branco);
+}
+
+.cabecalho-cartao-produtor {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cabecalho-cartao-produtor h2 {
+  margin-bottom: 0;
+}
+
+/* Destaca o limite que orienta a separação sem exigir cálculos manuais. */
+.resumo-separacao {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border-left: 4px solid var(--cor-verde-horta);
+  border-radius: 8px;
+  color: var(--cor-texto-escuro);
+  background: var(--cor-verde-claro);
+}
+
+.resumo-separacao strong {
+  color: var(--cor-verde-escuro);
+}
+
+/* Resume a cesta na tela de fechamento e mantém o limite sempre visível. */
+.resumo-fechamento {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  border-left: 4px solid var(--cor-terracota);
+  border-radius: 8px;
+  background: var(--cor-branco);
+}
+
+.resumo-fechamento div {
+  display: grid;
+  gap: 4px;
+}
+
+.resumo-fechamento span:not(.status-cesta) {
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+.resumo-fechamento strong {
+  color: var(--cor-verde-escuro);
+  font-size: var(--titulo-2);
+}
+
+/* Organiza a composição e o andamento de cada produto separado. */
+.detalhes-fechamento {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  border: 2px solid var(--cor-verde-horta);
+  border-radius: 12px;
+  background: var(--cor-branco);
+}
+
+.detalhes-fechamento h2,
+.formulario-fechamento h2 {
+  margin-bottom: 0;
+}
+
+.lista-produtos-fechamento {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lista-produtos-fechamento li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--cor-verde-claro);
+}
+
+.lista-produtos-fechamento strong {
+  color: var(--cor-verde-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+/* Mantém o lançamento de um produto separado simples e visível. */
+.formulario-fechamento {
+  display: grid;
+  gap: 16px;
+  max-width: 520px;
+  padding: 20px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+  background: var(--cor-branco);
+}
+
+@media (max-width: 640px) {
+  .cabecalho-pagina,
+  .resumo-finalizacao,
+  .cabecalho-historico {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cabecalho-acoes {
+    justify-content: flex-start;
+  }
+
+  .resumo-historico {
+    grid-template-columns: 1fr;
+  }
+
+  .acoes-finalizacao .botao {
+    width: 100%;
+  }
+
+  .lista-resumo-pedido {
+    grid-template-columns: 1fr;
+  }
+
+  .campos-filtro-separacao {
+    grid-template-columns: 1fr;
+  }
+
+  .cabecalho-cartao-produtor,
+  .resumo-separacao,
+  .resumo-fechamento,
+  .lista-produtos-fechamento li {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
