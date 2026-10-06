@@ -2,3 +2,6 @@ fastapi
 fastapi-cli
 uvicorn
 python-dotenv
+SQLAlchemy>=2.0,<3.0
+PyMySQL>=1.1,<2.0
+alembic>=1.13,<2.0

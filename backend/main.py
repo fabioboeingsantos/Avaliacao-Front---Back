@@ -4,12 +4,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from configuracao import obter_origens_frontend
+from rotas.autenticacao import router as rotas_de_autenticacao
 from rotas.cestas import router as rotas_de_cestas
+from rotas.sistema import router as rotas_de_sistema
 
 
 app = FastAPI(
     title="Cesta do Vale API",
-    description="API em memória para pedidos e separação de cestas semanais.",
+    description="API para pedidos e separação de cestas com persistência SQLAlchemy.",
     version="1.0.0",
 )
 
@@ -23,10 +25,5 @@ app.add_middleware(
 )
 
 app.include_router(rotas_de_cestas)
-
-
-@app.get("/saude", tags=["Sistema"])
-def verificar_saude():
-    """Confirma rapidamente que a API está ligada para os testes."""
-
-    return {"status": "ok", "mensagem": "Cesta do Vale API online"}
+app.include_router(rotas_de_autenticacao)
+app.include_router(rotas_de_sistema)
