@@ -72,10 +72,15 @@ def preparar_produtos(sessao: Session, produtos: list[dict]) -> list[tuple[dict,
     return produtos_preparados
 
 
-def listar_cestas(sessao: Session, assinante: str | None = None, tamanho: str | None = None) -> list[dict]:
+def listar_cestas(
+    sessao: Session,
+    assinante: str | None = None,
+    tamanho: str | None = None,
+    usuario_id: int | None = None,
+) -> list[dict]:
     """Lista cestas aplicando os filtros opcionais da tela do produtor."""
 
-    resultado = repositorio.listar_cestas(sessao)
+    resultado = repositorio.listar_cestas(sessao, usuario_id=usuario_id)
 
     if assinante:
         resultado = [cesta for cesta in resultado if cesta["assinante"] == assinante]
@@ -89,16 +94,16 @@ def listar_cestas(sessao: Session, assinante: str | None = None, tamanho: str | 
     return [serializar_cesta(cesta) for cesta in resultado]
 
 
-def buscar_cesta(sessao: Session, id_cesta: int) -> dict:
+def buscar_cesta(sessao: Session, id_cesta: int, usuario_id: int | None = None) -> dict:
     """Localiza uma cesta pelo identificador informado na URL."""
 
-    cesta = repositorio.buscar_cesta_por_id(sessao, id_cesta)
+    cesta = repositorio.buscar_cesta_por_id(sessao, id_cesta, usuario_id=usuario_id)
     if cesta is None:
         raise CestaNaoEncontrada("Cesta não encontrada.")
     return cesta
 
 
-def criar_cesta(sessao: Session, dados: dict) -> dict:
+def criar_cesta(sessao: Session, dados: dict, usuario_id: int) -> dict:
     """Valida e registra uma nova cesta com situacao inicial pedida."""
 
     limite = obter_limite(dados["tamanho"])
@@ -130,20 +135,26 @@ def criar_cesta(sessao: Session, dados: dict) -> dict:
         ],
     }
 
-    return serializar_cesta(repositorio.adicionar_cesta(sessao, dados_cesta))
+    return serializar_cesta(repositorio.adicionar_cesta(sessao, dados_cesta, usuario_id=usuario_id))
 
 
-def listar_separacoes(sessao: Session, id_cesta: int) -> list[dict]:
+def listar_separacoes(sessao: Session, id_cesta: int, usuario_id: int | None = None) -> list[dict]:
     """Retorna os produtos ja separados ou recusa uma cesta inexistente."""
 
-    cesta = buscar_cesta(sessao, id_cesta)
+    cesta = buscar_cesta(sessao, id_cesta, usuario_id=usuario_id)
     return cesta["separacoes"]
 
 
-def separar_produto(sessao: Session, id_cesta: int, produto_id: str, quantidade: int) -> dict:
+def separar_produto(
+    sessao: Session,
+    id_cesta: int,
+    produto_id: str,
+    quantidade: int,
+    usuario_id: int | None = None,
+) -> dict:
     """Registra a separacao respeitando o pedido e o limite da cesta."""
 
-    cesta = buscar_cesta(sessao, id_cesta)
+    cesta = buscar_cesta(sessao, id_cesta, usuario_id=usuario_id)
     item_pedido = next((item for item in cesta["produtos"] if item["id"] == produto_id), None)
     if item_pedido is None:
         raise ProdutoNaoPertenceCesta("O produto não pertence a esta cesta.")

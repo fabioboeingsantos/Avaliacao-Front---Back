@@ -24,15 +24,22 @@ function TelaFechamento({ cesta, aoAbrirSeparacao, aoRegistrarSeparacao, aoSair 
   // Calcula o total separado e o limite antes de aceitar um novo lançamento.
   const totalSeparado = (cesta.separacoes ?? []).reduce((total, item) => total + item.quantidade, 0)
   const limite = cesta.limite ?? cesta.produtos.reduce((total, produto) => total + produto.quantidade, 0)
-  const restante = limite - totalSeparado
+  const totalPedido = cesta.produtos.reduce((total, produto) => total + produto.quantidade, 0)
+  const restantePedido = totalPedido - totalSeparado
+  const espacoLivre = limite - totalSeparado
 
   // Busca a quantidade já registrada de um produto para exibir o andamento da cesta.
   function obterQuantidadeSeparada(produtoId) {
     return cesta.separacoes?.find((item) => item.produtoId === produtoId)?.quantidade ?? 0
   }
 
+  const produtoAtual = cesta.produtos.find((produto) => produto.id === produtoSelecionado)
+  const restanteProduto = produtoAtual
+    ? produtoAtual.quantidade - obterQuantidadeSeparada(produtoAtual.id)
+    : 0
+
   // Valida o lançamento e envia somente uma quantidade que ainda cabe na cesta.
-  function registrarProduto(evento) {
+  async function registrarProduto(evento) {
     evento.preventDefault()
     const quantidadeInformada = Number(quantidade)
 
@@ -46,16 +53,28 @@ function TelaFechamento({ cesta, aoAbrirSeparacao, aoRegistrarSeparacao, aoSair 
       return
     }
 
-    if (quantidadeInformada > restante) {
-      setErro(`A cesta comporta mais ${restante} item(ns).`)
+    if (quantidadeInformada > restanteProduto) {
+      setErro(`O produto comporta mais ${restanteProduto} item(ns).`)
       return
     }
 
-    aoRegistrarSeparacao({
+    if (quantidadeInformada > espacoLivre) {
+      setErro(`A cesta comporta mais ${espacoLivre} item(ns).`)
+      return
+    }
+
+    const resultado = await aoRegistrarSeparacao({
       pedidoId: cesta.id,
       produtoId: produtoSelecionado,
       quantidade: quantidadeInformada,
     })
+
+    if (!resultado?.sucesso) {
+      setMensagem('')
+      setErro(resultado?.erro ?? 'Não foi possível registrar a separação.')
+      return
+    }
+
     setMensagem('Produto separado com sucesso.')
     setErro('')
     setProdutoSelecionado('')
@@ -97,10 +116,20 @@ function TelaFechamento({ cesta, aoAbrirSeparacao, aoRegistrarSeparacao, aoSair 
           <strong>{totalSeparado} itens</strong>
         </div>
         <div>
-          <span>Ainda cabe</span>
-          <strong>{restante} itens</strong>
+          <span>Falta separar</span>
+          <strong>{restantePedido} itens</strong>
         </div>
-        <span className={`status-cesta status-${cesta.situacao.toLowerCase().replace(' ', '-')}`}>
+        <div>
+          <span>Espaço livre</span>
+          <strong>{espacoLivre} itens</strong>
+        </div>
+        <span
+          className={`status-cesta status-${cesta.situacao
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/g, '-')}`}
+        >
           {cesta.situacao}
         </span>
       </section>
@@ -140,8 +169,12 @@ function TelaFechamento({ cesta, aoAbrirSeparacao, aoRegistrarSeparacao, aoSair 
           <select value={produtoSelecionado} onChange={(evento) => setProdutoSelecionado(evento.target.value)}>
             <option value="">Selecione um produto</option>
             {cesta.produtos.map((produto) => (
-              <option value={produto.id} key={produto.id}>
-                {produto.nome}
+              <option
+                value={produto.id}
+                key={produto.id}
+                disabled={obterQuantidadeSeparada(produto.id) >= produto.quantidade}
+              >
+                {produto.nome} ({obterQuantidadeSeparada(produto.id)} de {produto.quantidade})
               </option>
             ))}
           </select>
@@ -155,11 +188,13 @@ function TelaFechamento({ cesta, aoAbrirSeparacao, aoRegistrarSeparacao, aoSair 
             step="1"
             value={quantidade}
             onChange={(evento) => setQuantidade(evento.target.value)}
+            max={produtoAtual ? Math.min(espacoLivre, restanteProduto) : espacoLivre}
+            disabled={restantePedido === 0}
           />
         </label>
 
-        <button className="botao botao-primario" type="submit">
-          Registrar separação
+        <button className="botao botao-primario" type="submit" disabled={restantePedido === 0}>
+          {restantePedido === 0 ? 'Separação concluída' : 'Registrar separação'}
         </button>
       </form>
     </main>

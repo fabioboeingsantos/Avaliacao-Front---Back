@@ -1,28 +1,24 @@
 import { useState } from 'react'
 
-// Estas duas contas existem somente para testar os dois fluxos no frontend.
-const contasDeTeste = {
-  aline: { senha: 'aline123', perfil: 'assinante' },
-  vanderlei: { senha: 'vanderlei123', perfil: 'produtor' },
-}
-
 // A mesma tela representa o acesso inicial de Aline e Vanderlei.
-// A autenticação real será conectada ao backend em uma etapa posterior.
-function TelaLogin({ aoEntrar }) {
+function TelaLogin({ aoEntrar, aoCadastrar }) {
   // Mantém o modo atual e os valores preenchidos para controlar cada fluxo de acesso.
   const [modo, setModo] = useState('entrar')
   const [usuario, setUsuario] = useState('')
+  const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [confirmarSenha, setConfirmarSenha] = useState('')
   const [mostrarSenha, setMostrarSenha] = useState(false)
   const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false)
   const [erro, setErro] = useState('')
   const [mensagem, setMensagem] = useState('')
+  const [carregando, setCarregando] = useState(false)
 
   // Troca entre entrar, criar cadastro e recuperar senha, limpando dados do fluxo anterior.
   function trocarModo(novoModo) {
     setModo(novoModo)
     setSenha('')
+    setEmail('')
     setConfirmarSenha('')
     setMostrarSenha(false)
     setMostrarConfirmarSenha(false)
@@ -30,14 +26,19 @@ function TelaLogin({ aoEntrar }) {
     setMensagem('')
   }
 
-  // Simula a validação dos três fluxos enquanto a API ainda não foi criada.
-  function enviarFormulario(evento) {
+  // Valida o formulário e delega o login ao backend por meio do componente principal.
+  async function enviarFormulario(evento) {
     evento.preventDefault()
     setErro('')
     setMensagem('')
 
     if (!usuario.trim()) {
       setErro('Informe seu usuário.')
+      return
+    }
+
+    if (modo === 'cadastro' && !email.trim()) {
+      setErro('Informe seu e-mail.')
       return
     }
 
@@ -53,19 +54,34 @@ function TelaLogin({ aoEntrar }) {
 
     if (modo === 'entrar') {
       const usuarioNormalizado = usuario.trim().toLowerCase()
-      const conta = contasDeTeste[usuarioNormalizado]
+      setCarregando(true)
+      const resultado = await aoEntrar({ usuario: usuarioNormalizado, senha })
+      setCarregando(false)
 
-      if (!conta || conta.senha !== senha) {
-        setErro('Usuário ou senha de teste inválidos.')
-        return
+      if (!resultado?.sucesso) {
+        setErro(resultado?.erro ?? 'Não foi possível entrar no sistema.')
       }
-
-      aoEntrar({ usuario: usuarioNormalizado, perfil: conta.perfil })
       return
     }
 
     if (modo === 'cadastro') {
-      setMensagem('Cadastro de teste validado visualmente.')
+      setCarregando(true)
+      const resultado = await aoCadastrar({
+        usuario: usuario.trim().toLowerCase(),
+        email: email.trim().toLowerCase(),
+        senha,
+      })
+      setCarregando(false)
+
+      if (resultado?.sucesso) {
+        setMensagem('Cadastro realizado. Agora você pode entrar no sistema.')
+        setModo('entrar')
+        setSenha('')
+        setConfirmarSenha('')
+      } else {
+        setErro(resultado?.erro ?? 'Não foi possível criar o cadastro.')
+      }
+      return
     }
 
     if (modo === 'recuperar') {
@@ -129,26 +145,32 @@ function TelaLogin({ aoEntrar }) {
             </p>
           </div>
 
-          {modo === 'entrar' && (
-            <aside className="acesso-teste" aria-label="Contas disponíveis para teste">
-              <strong>Acessos de teste</strong>
-              <span>Assinante: aline / aline123</span>
-              <span>Produtor: vanderlei / vanderlei123</span>
-            </aside>
-          )}
-
           <form className="formulario-login" onSubmit={enviarFormulario}>
             <label className="campo-login">
-              <span>Usuário</span>
+                <span>Usuário ou e-mail</span>
               <input
                 type="text"
                 name="usuario"
                 value={usuario}
                 onChange={(evento) => setUsuario(evento.target.value)}
                 autoComplete="username"
-                placeholder="Digite seu usuário"
+                placeholder="Digite seu usuário ou e-mail"
               />
             </label>
+
+            {modo === 'cadastro' && (
+              <label className="campo-login">
+                <span>E-mail</span>
+                <input
+                  type="email"
+                  name="email"
+                  value={email}
+                  onChange={(evento) => setEmail(evento.target.value)}
+                  autoComplete="email"
+                  placeholder="voce@exemplo.com"
+                />
+              </label>
+            )}
 
             {modo !== 'recuperar' && (
               <label className="campo-login">
@@ -212,8 +234,8 @@ function TelaLogin({ aoEntrar }) {
               </p>
             )}
 
-            <button className="botao botao-primario botao-login" type="submit">
-              {modo === 'entrar' && 'Entrar'}
+            <button className="botao botao-primario botao-login" type="submit" disabled={carregando}>
+              {modo === 'entrar' && (carregando ? 'Validando...' : 'Entrar')}
               {modo === 'cadastro' && 'Criar cadastro'}
               {modo === 'recuperar' && 'Recuperar senha'}
             </button>

@@ -1,7 +1,10 @@
 backend/.env
 backend/.venv/
+backend/venv/
+backend/*.db
 .imagegen-venv/
 __pycache__/
+.pytest_cache/
 node_modules/
 dist/
 .uv-cache/

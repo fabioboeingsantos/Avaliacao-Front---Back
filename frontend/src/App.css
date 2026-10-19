@@ -527,6 +527,11 @@
   background: var(--cor-fundo-etiqueta-separacao);
 }
 
+.status-separacao-concluida {
+  color: var(--cor-sucesso);
+  background: var(--cor-fundo-sucesso);
+}
+
 .resumo-produtos {
   margin: 16px 0;
   color: var(--cor-texto-escuro);
@@ -897,6 +902,7 @@
 
 .produtos-resumo-historico li {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 8px 12px;
@@ -904,9 +910,77 @@
   background: var(--cor-verde-claro);
 }
 
+.produto-historico-identificacao {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+}
+
+.imagem-produto-historico {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
 .produtos-resumo-historico strong {
   color: var(--cor-verde-escuro);
   font-size: var(--texto-rotulo);
+}
+
+.botao-detalhes-cesta {
+  margin-top: 16px;
+}
+
+.resumo-detalhes-cesta {
+  margin-bottom: 24px;
+}
+
+.detalhes-cesta-assinante {
+  display: grid;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.lista-detalhes-cesta {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item-detalhes-cesta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--cor-verde-claro);
+}
+
+.item-detalhes-cesta > div {
+  display: grid;
+  gap: 4px;
+}
+
+.item-detalhes-cesta span {
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+.item-detalhes-cesta .quantidade-separada {
+  color: var(--cor-verde-escuro);
+  font-weight: var(--peso-semi);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.lista-produtos-separados .item-detalhes-cesta {
+  background: var(--cor-creme-natural);
 }
 
 /* Mantém uma mensagem clara quando ainda não há pedidos para exibir. */

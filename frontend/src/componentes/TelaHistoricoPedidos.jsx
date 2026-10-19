@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 // Esta tela reúne pedidos finalizados e rascunhos salvos para consulta da assinante.
-function TelaHistoricoPedidos({ pedidos, aoAbrirPedido, aoSair }) {
+function TelaHistoricoPedidos({ pedidos, aoAbrirPedido, aoAbrirDetalhes, aoSair }) {
   // Controla qual grupo de pedidos aparece na lista do histórico.
   const [filtro, setFiltro] = useState('todos')
 
@@ -114,10 +114,25 @@ function TelaHistoricoPedidos({ pedidos, aoAbrirPedido, aoSair }) {
               <ul className="produtos-resumo-historico">
                 {pedido.produtos.map((produto) => (
                   <li key={produto.id}>
-                    {produto.nome} <strong>{produto.quantidade} item</strong>
+                    <span className="produto-historico-identificacao">
+                      <img
+                        className="imagem-produto-historico"
+                        src={produto.imagem}
+                        alt=""
+                      />
+                      <span>{produto.nome}</span>
+                    </span>
+                    <strong>{produto.quantidade} item</strong>
                   </li>
                 ))}
               </ul>
+              <button
+                className="botao botao-secundario botao-detalhes-cesta"
+                type="button"
+                onClick={() => aoAbrirDetalhes(pedido)}
+              >
+                Ver detalhes e separacao
+              </button>
             </article>
           ))}
         </section>

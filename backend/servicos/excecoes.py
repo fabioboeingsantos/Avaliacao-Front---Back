@@ -5,8 +5,16 @@ class ErroDeAplicacao(Exception):
     """Base para recusas conhecidas da regra de negocio."""
 
 
+class UsuarioJaExiste(ErroDeAplicacao):
+    """Indica que nome de usuário ou e-mail já está cadastrado."""
+
+
 class CestaNaoEncontrada(ErroDeAplicacao):
     """Indica que o identificador da cesta nao existe."""
+
+
+class AcessoNegado(ErroDeAplicacao):
+    """Indica que o perfil atual nao pode executar a operacao."""
 
 
 class TamanhoInvalido(ErroDeAplicacao):

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Roadmap de Apresentação | Cesta do Vale</title>
+    <style>
+      :root {
+        --primary: #2f6b3f;
+        --background: #faf7ef;
+        --accent: #c96f45;
+        --text: #26352a;
+        --primary-dark: #245432;
+        --primary-soft: #e5efe5;
+        --accent-soft: #f7e4da;
+        --muted: #68766a;
+        --line: #e4ded1;
+        --card: rgba(255, 255, 255, 0.94);
+        --blue: #58786a;
+        --blue-soft: #e7efe8;
+        --shadow: 0 22px 60px rgba(38, 53, 42, 0.12);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
+
+      body {
+        color: var(--text);
+        background: #e8e1d4;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body { margin: 0; }
+      button, input, select, textarea { font-family: Arial, Helvetica, sans-serif; }
+
+      button { border: 0; font: inherit; cursor: pointer; transition: background .2s ease, transform .2s ease, box-shadow .2s ease; }
+      .deck { min-height: 100vh; padding: 28px; }
+
+      .slide {
+        display: none;
+        position: relative;
+        width: min(1400px, 100%);
+        aspect-ratio: 16 / 9;
+        min-height: 560px;
+        margin: 0 auto;
+        overflow: hidden;
+        padding: clamp(42px, 5vw, 82px);
+        border: 1px solid rgba(38, 53, 42, .08);
+        border-radius: 28px;
+        background:
+          radial-gradient(circle at 93% 4%, #e5efe5 0, transparent 27%),
+          radial-gradient(circle at 3% 100%, #f7e4da 0, transparent 28%),
+          var(--background);
+        box-shadow: var(--shadow);
+      }
+
+      .slide.active { display: block; animation: slideIn .35s ease both; }
+      @keyframes slideIn { from { opacity: 0; transform: translateY(10px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+      .slide::after {
+        content: attr(data-number) " / 07";
+        position: absolute;
+        right: 42px;
+        bottom: 28px;
+        color: var(--muted);
+        font-size: .78rem;
+        font-weight: 800;
+        letter-spacing: .12em;
+      }
+
+      .eyebrow { color: var(--primary); font-size: clamp(.7rem, 1vw, .88rem); font-weight: 850; letter-spacing: .15em; text-transform: uppercase; }
+      h1, h2, h3, p { margin: 0; }
+      h1, h2, h3 { line-height: 1.08; }
+      h1 { max-width: 880px; margin-top: 20px; font-size: clamp(2.6rem, 6vw, 6.8rem); letter-spacing: -.07em; }
+      h2 { margin-top: 12px; font-size: clamp(2rem, 4vw, 4.2rem); letter-spacing: -.06em; }
+      h3 { font-size: clamp(1rem, 1.5vw, 1.45rem); }
+      p, li { color: var(--muted); font-size: clamp(.82rem, 1.15vw, 1.13rem); line-height: 1.45; }
+      .lead { max-width: 720px; margin-top: 24px; font-size: clamp(1.05rem, 1.8vw, 1.55rem); }
+
+      .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 34px; }
+      .pill { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.75); color: var(--primary); font-size: .86rem; font-weight: 800; transition: color .2s ease, background .2s ease, transform .2s ease; }
+      .pill:hover { color: white; background: var(--accent); transform: translateY(-2px); }
+
+      .grid { display: grid; gap: 16px; }
+      .grid-4 { grid-template-columns: repeat(4, 1fr); }
+      .grid-3 { grid-template-columns: repeat(3, 1fr); }
+      .grid-2 { grid-template-columns: repeat(2, 1fr); }
+      .cards { margin-top: 34px; }
+      .card { padding: clamp(18px, 2vw, 28px); border: 1px solid var(--line); border-radius: 20px; background: var(--card); box-shadow: 0 10px 28px rgba(38, 53, 42, .06); transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+      .card:hover { border-color: var(--accent); box-shadow: 0 16px 34px rgba(201, 111, 69, .15); transform: translateY(-4px); }
+      .metric { min-height: 164px; display: flex; flex-direction: column; justify-content: space-between; }
+      .metric strong { color: var(--primary); font-size: clamp(2rem, 4vw, 4rem); letter-spacing: -.08em; }
+      .metric.blue strong { color: var(--blue); }
+      .metric.amber strong { color: var(--accent); }
+      .metric span { color: var(--muted); font-size: .9rem; font-weight: 700; }
+
+      .status { display: flex; align-items: flex-start; gap: 13px; }
+      .dot { flex: 0 0 13px; width: 13px; height: 13px; margin-top: 5px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 6px var(--primary-soft); }
+      .dot.amber { background: var(--accent); box-shadow: 0 0 0 6px var(--accent-soft); }
+      .dot.blue { background: var(--blue); box-shadow: 0 0 0 6px var(--blue-soft); }
+      ul { margin: 18px 0 0; padding-left: 20px; }
+      li + li { margin-top: 7px; }
+
+      .review-table { margin-top: 30px; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.74); }
+      .review-row { display: grid; grid-template-columns: 1.05fr 2.8fr 1.15fr; align-items: center; min-height: 54px; border-bottom: 1px solid var(--line); }
+      .review-row:last-child { border-bottom: 0; }
+      .review-row > * { padding: 12px 18px; }
+      .review-head { color: #7183a1; background: rgba(231, 239, 232, .55); font-size: .82rem; font-weight: 850; letter-spacing: .16em; text-transform: uppercase; }
+      .review-cell { color: #40516a; font-size: clamp(.85rem, 1.08vw, 1.08rem); }
+      .review-cell strong { color: var(--text); }
+      .review-note { margin-top: 18px; padding: 16px 22px; border-left: 5px solid #2e66df; border-radius: 0 14px 14px 0; background: #e3ebff; color: #17223a; font-size: clamp(.92rem, 1.3vw, 1.25rem); }
+      .review-note strong { color: #2e66df; }
+
+      /* O slide de revisão tem mais conteúdo; estes ajustes mantêm tudo dentro do 16:9. */
+      .slide[data-number="03"] { padding-top: 36px; padding-bottom: 38px; }
+      .slide[data-number="03"] h2 { font-size: clamp(1.8rem, 3.2vw, 3.25rem); }
+      .slide[data-number="03"] .review-table { margin-top: 18px; }
+      .slide[data-number="03"] .review-row { min-height: 42px; }
+      .slide[data-number="03"] .review-row > * { padding: 8px 12px; }
+      .slide[data-number="03"] .review-cell { font-size: clamp(.82rem, 1.02vw, 1.04rem); line-height: 1.22; }
+      .slide[data-number="03"] .review-note { margin-top: 12px; padding: 12px 17px; font-size: clamp(.86rem, 1.05vw, 1.05rem); }
+
+      .timeline { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 48px; }
+      .timeline::before { content: ""; position: absolute; top: 24px; right: 8%; left: 8%; height: 3px; background: var(--line); }
+      .milestone { position: relative; z-index: 1; text-align: center; }
+      .number { display: grid; place-items: center; width: 48px; height: 48px; margin: 0 auto 18px; border: 6px solid var(--background); border-radius: 50%; color: white; background: var(--primary); font-weight: 900; box-shadow: 0 0 0 2px var(--primary); transition: background .2s ease, transform .2s ease; }
+      .milestone:hover .number { background: var(--accent); transform: scale(1.08); }
+      .milestone p { margin-top: 10px; font-size: .9rem; }
+      .tag { display: inline-block; margin-top: 14px; padding: 5px 10px; border-radius: 999px; color: var(--primary); background: var(--primary-soft); font-size: .73rem; font-weight: 850; }
+
+      .architecture { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 34px; overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: var(--card); }
+      .architecture div { min-height: 160px; padding: 24px; border-right: 1px solid var(--line); }
+      .architecture div:last-child { border-right: 0; }
+      .architecture strong { display: block; margin-bottom: 10px; color: var(--primary); font-size: 1.1rem; }
+      .architecture span { color: var(--muted); font-size: .95rem; line-height: 1.45; }
+
+      @media (max-width: 900px) {
+        .deck { padding: 12px; }
+        .slide { min-height: 620px; padding: 34px; }
+        .grid-4, .grid-3 { grid-template-columns: repeat(2, 1fr); }
+        .timeline { gap: 8px; }
+        .architecture { grid-template-columns: repeat(2, 1fr); }
+        .architecture div:nth-child(2) { border-right: 0; }
+        .architecture div:nth-child(-n + 2) { border-bottom: 1px solid var(--line); }
+      }
+
+      @media (max-width: 600px) {
+        .slide { aspect-ratio: auto; min-height: 720px; padding: 28px 22px 54px; border-radius: 18px; }
+        .grid-4, .grid-3, .grid-2, .timeline, .architecture { grid-template-columns: 1fr; }
+        .timeline::before { top: 0; bottom: 0; left: 23px; width: 3px; height: auto; }
+        .milestone { display: grid; grid-template-columns: 48px 1fr; gap: 16px; text-align: left; }
+        .number { margin: 0; }
+        .slide[data-number="03"] .review-head { display: none; }
+        .slide[data-number="03"] .review-row { grid-template-columns: 1fr; min-height: 0; }
+        .slide[data-number="03"] .review-row > * { padding: 7px 12px; }
+        .architecture div, .architecture div:nth-child(2) { border-right: 0; border-bottom: 1px solid var(--line); }
+        .architecture div:last-child { border-bottom: 0; }
+      }
+
+      @media print {
+        body { background: white; }
+        .deck { padding: 0; }
+        .slide, .slide.active { display: block; width: 100%; min-height: 0; height: 100vh; aspect-ratio: auto; border: 0; border-radius: 0; box-shadow: none; page-break-after: always; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="deck" aria-label="Apresentação do roadmap do projeto Cesta do Vale">
+      <section class="slide active" data-number="01">
+        <div class="eyebrow">Cesta do Vale · Roadmap do produto</div>
+        <h1>De uma demonstração funcional para um sistema seguro e pronto para evoluir.</h1>
+        <p class="lead">Resumo do que já foi construído, da análise do passo a passo e da ordem recomendada para concluir a entrega.</p>
+        <div class="meta">
+          <span class="pill">Atualizado em 19/10/2026</span>
+          <span class="pill">Backend FastAPI</span>
+          <span class="pill">Frontend React + Vite</span>
+          <span class="pill">Banco SQLAlchemy</span>
+        </div>
+      </section>
+
+      <section class="slide" data-number="02">
+        <div class="eyebrow">Resumo do estado atual</div>
+        <h2>O sistema já possui uma base segura.</h2>
+        <div class="grid grid-4 cards">
+          <article class="card metric"><span>Testes automatizados</span><strong>11</strong><span>Casos documentados</span></article>
+          <article class="card metric"><span>Senhas</span><strong>Argon2</strong><span>Hash seguro no backend</span></article>
+          <article class="card metric blue"><span>Autenticação</span><strong>JWT</strong><span>Cookie HttpOnly</span></article>
+          <article class="card metric amber"><span>Próxima frente</span><strong>E2E</strong><span>Validação integrada</span></article>
+        </div>
+        <div class="grid grid-2 cards">
+          <article class="card"><div class="status"><span class="dot"></span><div><h3>Controle de acesso</h3><p>Rotas protegidas, perfis e regras de propriedade das cestas.</p></div></div></article>
+          <article class="card"><div class="status"><span class="dot blue"></span><div><h3>Banco e aplicação</h3><p>Modelos, migrações, dados iniciais e comunicação React–API.</p></div></div></article>
+        </div>
+      </section>
+
+      <section class="slide" data-number="03">
+        <div class="eyebrow">Revisão do projeto</div>
+        <h2>Como cada camada atende às necessidades.</h2>
+        <div class="review-table" role="table" aria-label="Responsabilidades das partes do sistema">
+          <div class="review-row review-head" role="row"><div role="columnheader">Parte</div><div role="columnheader">O que faz e exemplo no sistema</div><div role="columnheader">Necessidade</div></div>
+          <div class="review-row" role="row"><div class="review-cell" role="cell"><strong>React · App.jsx</strong></div><div class="review-cell" role="cell">Mantém a sessão e controla as telas. <strong>Ex.:</strong> `chamarApi('/cestas')` busca os dados e abre a `TelaSeparacao`.</div><div class="review-cell" role="cell">Interface funcional</div></div>
+          <div class="review-row" role="row"><div class="review-cell" role="cell"><strong>Rotas + Pydantic</strong></div><div class="review-cell" role="cell">Recebem e validam requisições. <strong>Ex.:</strong> `POST /cestas` confere o esquema `NovaCesta` antes do serviço.</div><div class="review-cell" role="cell">API previsível</div></div>
+          <div class="review-row" role="row"><div class="review-cell" role="cell"><strong>Serviços</strong></div><div class="review-cell" role="cell">Aplicam as regras. <strong>Ex.:</strong> `criar_cesta()` limita 5, 8 ou 12 itens; `separar_produto()` atualiza a situação.</div><div class="review-cell" role="cell">Regras centralizadas</div></div>
+          <div class="review-row" role="row"><div class="review-cell" role="cell"><strong>Repositórios + modelos</strong></div><div class="review-cell" role="cell">Persistem os dados. <strong>Ex.:</strong> `adicionar_cesta()` salva `Cesta` e `ItemCesta`; a busca respeita `usuario_id`.</div><div class="review-cell" role="cell">Dados organizados</div></div>
+          <div class="review-row" role="row"><div class="review-cell" role="cell"><strong>Banco + Alembic</strong></div><div class="review-cell" role="cell">Mantêm a estrutura do banco. <strong>Ex.:</strong> SQLite é local, MySQL é opcional e a migração `20261019_0003` vincula cestas antigas.</div><div class="review-cell" role="cell">Persistência segura</div></div>
+        </div>
+        <div class="review-note">Fluxo real: React chama a rota, a rota chama o serviço e o serviço usa o repositório. <strong>O acesso ao banco fica concentrado no repositório.</strong></div>
+      </section>
+
+      <section class="slide" data-number="04">
+        <div class="eyebrow">O que foi feito</div>
+        <h2>O caminho percorrido até aqui.</h2>
+        <div class="timeline">
+          <article class="milestone"><div class="number">1</div><div><h3>Diagnóstico</h3><p>Pendências do projeto e da aula de autenticação identificadas.</p><span class="tag">Concluído</span></div></article>
+          <article class="milestone"><div class="number">2</div><div><h3>Senhas</h3><p>Argon2 implementado para criação e conferência de hashes.</p><span class="tag">Concluído</span></div></article>
+          <article class="milestone"><div class="number">3</div><div><h3>JWT</h3><p>Login com expiração e sessão em cookie HttpOnly.</p><span class="tag">Concluído</span></div></article>
+          <article class="milestone"><div class="number">4</div><div><h3>Permissões</h3><p>Perfis e propriedade das cestas aplicados nas rotas.</p><span class="tag">Concluído</span></div></article>
+          <article class="milestone"><div class="number">5</div><div><h3>Qualidade</h3><p>Suíte automatizada para senha, login, JWT e autorização.</p><span class="tag">Concluído</span></div></article>
+        </div>
+      </section>
+
+      <section class="slide" data-number="05">
+        <div class="eyebrow">Pendências imediatas</div>
+        <h2>Validar a solução integrada e preparar a entrega.</h2>
+        <div class="grid grid-2 cards">
+          <article class="card"><div class="status"><span class="dot amber"></span><div><h3>Validação manual do fluxo</h3><p>Executar no navegador: login do assinante, criação e finalização da cesta, login do produtor e separação dos produtos.</p></div></div></article>
+          <article class="card"><div class="status"><span class="dot amber"></span><div><h3>Documentação e entrega</h3><p>Consolidar variáveis de ambiente, migrações, inicialização, roteiro de validação e instruções no README.</p></div></div></article>
+        </div>
+      </section>
+
+      <section class="slide" data-number="06">
+        <div class="eyebrow">Plano de execução</div>
+        <h2>O que precisa ser feito, na ordem.</h2>
+        <div class="grid grid-2 cards">
+          <article class="card"><div class="status"><span class="dot amber"></span><div><h3>1. Preparar o ambiente</h3><p>Configurar o `.env`, preparar o banco, executar migrações e iniciar backend e frontend.</p></div></div></article>
+          <article class="card"><div class="status"><span class="dot amber"></span><div><h3>2. Validar o fluxo real</h3><p>Testar login, criação da cesta, histórico, acesso do produtor e registro da separação.</p></div></div></article>
+          <article class="card"><div class="status"><span class="dot amber"></span><div><h3>3. Fechar segurança de produção</h3><p>Ativar HTTPS, definir `JWT_COOKIE_SECURE=true`, restringir CORS e adicionar CSRF e CSP.</p></div></div></article>
+          <article class="card"><div class="status"><span class="dot amber"></span><div><h3>4. Consolidar a qualidade</h3><p>Executar a suíte automatizada quando solicitado e depois criar testes frontend e E2E.</p></div></div></article>
+          <article class="card"><div class="status"><span class="dot amber"></span><div><h3>5. Atualizar a documentação</h3><p>Revisar README, ambiente, migrações, roteiro de uso e critérios de entrega.</p></div></div></article>
+          <article class="card"><div class="status"><span class="dot amber"></span><div><h3>6. Publicar com controle</h3><p>Configurar banco de produção, backup, logs, monitoramento e pipeline de build/deploy.</p></div></div></article>
+        </div>
+      </section>
+
+      <section class="slide" data-number="07">
+        <div class="eyebrow">Evolução futura</div>
+        <h2>Depois da primeira entrega segura.</h2>
+        <div class="grid grid-3 cards">
+          <article class="card"><h3>Refresh token</h3><p>Renovação de sessão sem exigir login constante.</p></article>
+          <article class="card"><h3>Revogação de sessão</h3><p>Invalidar sessões ativas quando necessário.</p></article>
+          <article class="card"><h3>Administração</h3><p>Gerenciar usuários, perfis e redefinição de senha.</p></article>
+          <article class="card"><h3>Testes E2E</h3><p>Validar telas e o fluxo completo em navegador.</p></article>
+          <article class="card"><h3>Observabilidade</h3><p>Adicionar logs, métricas e auditoria de ações.</p></article>
+          <article class="card"><h3>Publicação</h3><p>HTTPS, banco de produção, CORS restrito e backup.</p></article>
+        </div>
+        <div class="architecture">
+          <div><strong>Frontend React</strong><span>Interface e jornada do usuário.</span></div>
+          <div><strong>API FastAPI</strong><span>Rotas e regras de negócio.</span></div>
+          <div><strong>Serviços</strong><span>Argon2, JWT e autorização.</span></div>
+          <div><strong>Banco SQL</strong><span>Usuários, cestas e produtos.</span></div>
+        </div>
+      </section>
+
+    </main>
+
+    <script>
+      const slides = [...document.querySelectorAll('.slide')]
+      let current = 0
+
+      function showSlide(index) {
+        current = Math.max(0, Math.min(index, slides.length - 1))
+        slides.forEach((slide, position) => slide.classList.toggle('active', position === current))
+      }
+
+      document.addEventListener('keydown', (event) => {
+        if (['ArrowRight', 'PageDown', ' '].includes(event.key)) showSlide(current + 1)
+        if (['ArrowLeft', 'PageUp'].includes(event.key)) showSlide(current - 1)
+        if (event.key === 'Home') showSlide(0)
+        if (event.key === 'End') showSlide(slides.length - 1)
+      })
+
+      showSlide(0)
+    </script>
+  </body>
+</html>

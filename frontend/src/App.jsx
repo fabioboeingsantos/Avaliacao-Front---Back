@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TelaLogin from './componentes/TelaLogin'
 import TelaPedirCesta from './componentes/TelaPedirCesta'
 import TelaFinalizarPedido from './componentes/TelaFinalizarPedido'
 import TelaHistoricoPedidos from './componentes/TelaHistoricoPedidos'
+import TelaDetalhesCesta from './componentes/TelaDetalhesCesta'
 import TelaSeparacao from './componentes/TelaSeparacao'
 import TelaFechamento from './componentes/TelaFechamento'
 import './App.css'
 
 const URL_API = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
+// Mantém o fluxo visual disponível quando a API ainda não estiver ligada.
 // Converte o formato snake_case da API no formato usado pelas telas React.
 function adaptarCestaDaApi(cesta) {
   return {
@@ -38,14 +40,24 @@ function adaptarCestaDaApi(cesta) {
 
 // Centraliza a chamada HTTP para que todas as operações tratem a mesma falha.
 async function chamarApi(caminho, opcoes = {}) {
+  const cabecalhos = {
+    'Content-Type': 'application/json',
+    ...(opcoes.headers ?? {}),
+  }
+
   const resposta = await fetch(`${URL_API}${caminho}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...opcoes,
+    headers: cabecalhos,
+    credentials: 'include',
   })
 
   if (!resposta.ok) {
     const corpo = await resposta.json().catch(() => ({}))
     throw new Error(corpo.detail ?? 'Não foi possível concluir a operação.')
+  }
+
+  if (resposta.status === 204) {
+    return null
   }
 
   return resposta.json()
@@ -61,8 +73,14 @@ function App() {
   const [pedidoEmRevisao, setPedidoEmRevisao] = useState(null)
   const [pedidos, setPedidos] = useState([])
   const [cestaEmFechamento, setCestaEmFechamento] = useState(null)
+  const [cestaEmDetalhes, setCestaEmDetalhes] = useState(null)
   // O aviso fica preparado para uma futura área visual de status da conexão.
   const [, setMensagemApi] = useState('')
+
+  useEffect(() => {
+    // Remove tokens antigos da versao anterior, que usava localStorage.
+    localStorage.removeItem('token_acesso')
+  }, [])
 
   // Busca as cestas compartilhadas pelo backend quando uma pessoa entra.
   async function carregarCestasDoServidor(assinante) {
@@ -77,15 +95,55 @@ function App() {
       ])
       setMensagemApi('')
     } catch {
-      // O fallback local mantém a demonstração visual utilizável sem o servidor.
-      setMensagemApi('API offline: a demonstração está usando os dados locais deste acesso.')
+      setMensagemApi('Não foi possível carregar as cestas. Verifique se a API está ligada.')
     }
   }
 
-  // Abre o fluxo correspondente ao usuário informado na demonstração sem criar uma regra de autenticação.
-  function entrarNoSistema(dados) {
+  // Inicia a sessão com o perfil validado pelo backend.
+  async function entrarNoSistema(dados) {
     const usuario = dados.usuario.trim()
-    const perfil = dados.perfil
+    const senha = dados.senha
+
+    try {
+      const sessao = await chamarApi('/autenticacao/login', {
+        method: 'POST',
+        body: JSON.stringify({ usuario, senha }),
+      })
+      iniciarSessao(sessao)
+      return { sucesso: true, origem: 'backend' }
+    } catch (erro) {
+      // Sem resposta do backend, o frontend nao autentica localmente.
+      return {
+        sucesso: false,
+        erro:
+          erro instanceof TypeError
+            ? 'Não foi possível conectar ao servidor de acesso.'
+            : erro.message,
+      }
+    }
+  }
+
+  async function cadastrarUsuario(dados) {
+    try {
+      await chamarApi('/usuarios', {
+        method: 'POST',
+        body: JSON.stringify(dados),
+      })
+      return { sucesso: true }
+    } catch (erro) {
+      return {
+        sucesso: false,
+        erro:
+          erro instanceof TypeError
+            ? 'Não foi possível conectar ao servidor de cadastro.'
+            : erro.message,
+      }
+    }
+  }
+
+  function iniciarSessao(sessao) {
+    const usuario = sessao.usuario
+    const perfil = sessao.perfil
 
     setUsuarioAutenticado(usuario)
     setPerfilAtual(perfil)
@@ -94,11 +152,18 @@ function App() {
   }
 
   // Encerra o teste atual e retorna para a página de login.
-  function sairDoSistema() {
+  async function sairDoSistema() {
+    try {
+      await chamarApi('/autenticacao/logout', { method: 'POST' })
+    } catch {
+      // Mesmo sem API, limpa a sessao visual atual.
+    }
+    localStorage.removeItem('token_acesso')
     setUsuarioAutenticado('')
     setPerfilAtual('')
     setAbaAtual('pedido')
     setCestaEmFechamento(null)
+    setCestaEmDetalhes(null)
     setMensagemApi('')
   }
 
@@ -160,6 +225,12 @@ function App() {
     setAbaAtual('fechamento')
   }
 
+  // Abre uma cesta do historico para a assinante consultar a separacao do produtor.
+  function abrirDetalhes(cesta) {
+    setCestaEmDetalhes(cesta.id)
+    setAbaAtual('detalhes')
+  }
+
   // Registra uma separação e muda a situação da cesta no primeiro produto informado.
   async function registrarSeparacao({ pedidoId, produtoId, quantidade }) {
     // Cestas criadas na API têm identificador numérico e usam a regra do serviço.
@@ -174,14 +245,26 @@ function App() {
           pedidosAtuais.map((pedido) => (pedido.id === pedidoId ? cestaAdaptada : pedido)),
         )
         setMensagemApi('Separação registrada no backend.')
-        return
+        return { sucesso: true }
       } catch (erro) {
         setMensagemApi(erro.message)
-        return
+        return { sucesso: false, erro: erro.message }
       }
     }
 
     // Mantém o fluxo local funcionando caso a pessoa esteja testando sem a API ligada.
+    const cestaLocal = pedidos.find((pedido) => pedido.id === pedidoId)
+    const produtoLocal = cestaLocal?.produtos.find((produto) => produto.id === produtoId)
+    const separacaoLocal = cestaLocal?.separacoes?.find((item) => item.produtoId === produtoId)
+    const quantidadeLocal = separacaoLocal?.quantidade ?? 0
+
+    if (!produtoLocal || quantidadeLocal + quantidade > produtoLocal.quantidade) {
+      return {
+        sucesso: false,
+        erro: `O produto comporta mais ${Math.max((produtoLocal?.quantidade ?? 0) - quantidadeLocal, 0)} item(ns).`,
+      }
+    }
+
     setPedidos((pedidosAtuais) =>
       pedidosAtuais.map((pedido) => {
         if (pedido.id !== pedidoId) {
@@ -192,8 +275,9 @@ function App() {
         const quantidadeAtual = separacoesAtuais.find((item) => item.produtoId === produtoId)?.quantidade ?? 0
         const totalAtual = separacoesAtuais.reduce((total, item) => total + item.quantidade, 0)
         const limite = pedido.limite ?? pedido.produtos.reduce((total, item) => total + item.quantidade, 0)
+        const produto = pedido.produtos.find((item) => item.id === produtoId)
 
-        if (totalAtual + quantidade > limite) {
+        if (!produto || quantidadeAtual + quantidade > produto.quantidade || totalAtual + quantidade > limite) {
           return pedido
         }
 
@@ -201,7 +285,16 @@ function App() {
 
         return {
           ...pedido,
-          situacao: 'Em separação',
+          situacao:
+            pedido.produtos.every((produtoAtual) => {
+              const quantidadeSeparada =
+                produtoAtual.id === produtoId
+                  ? quantidadeAtual + quantidade
+                  : separacoesAtuais.find((item) => item.produtoId === produtoAtual.id)?.quantidade ?? 0
+              return quantidadeSeparada >= produtoAtual.quantidade
+            })
+              ? 'Separação concluída'
+              : 'Em separação',
           separacoes: [
             ...separacoesAtualizadas,
             { produtoId, quantidade: quantidadeAtual + quantidade },
@@ -209,10 +302,12 @@ function App() {
         }
       }),
     )
+
+    return { sucesso: true }
   }
 
   if (!usuarioAutenticado) {
-    return <TelaLogin aoEntrar={entrarNoSistema} />
+    return <TelaLogin aoEntrar={entrarNoSistema} aoCadastrar={cadastrarUsuario} />
   }
 
   // Entrega ao produtor as duas telas previstas para acompanhar e fechar as cestas.
@@ -259,6 +354,20 @@ function App() {
       <TelaHistoricoPedidos
         pedidos={pedidos}
         aoAbrirPedido={() => setAbaAtual('pedido')}
+        aoAbrirDetalhes={abrirDetalhes}
+        aoSair={sairDoSistema}
+      />
+    )
+  }
+
+  if (abaAtual === 'detalhes') {
+    const cestaSelecionada = pedidos.find((pedido) => pedido.id === cestaEmDetalhes)
+
+    return (
+      <TelaDetalhesCesta
+        cesta={cestaSelecionada}
+        aoAbrirPedido={() => setAbaAtual('pedido')}
+        aoAbrirHistorico={() => setAbaAtual('historico')}
         aoSair={sairDoSistema}
       />
     )

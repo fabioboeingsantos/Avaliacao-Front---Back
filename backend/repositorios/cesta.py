@@ -3,7 +3,10 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from modelos.cesta import Cesta, ItemCesta, Produto, Separacao
+from modelos.cesta import Cesta
+from modelos.item_cesta import ItemCesta
+from modelos.produto import Produto
+from modelos.separacao import Separacao
 
 
 def _serializar_cesta(cesta: Cesta) -> dict:
@@ -33,21 +36,27 @@ def _serializar_cesta(cesta: Cesta) -> dict:
     }
 
 
-def listar_cestas(sessao: Session) -> list[dict]:
-    """Retorna as cestas cadastradas em ordem de criacao."""
+def listar_cestas(sessao: Session, usuario_id: int | None = None) -> list[dict]:
+    """Retorna todas as cestas ou somente as vinculadas a um usuario."""
 
-    cestas = sessao.scalars(select(Cesta).order_by(Cesta.id)).all()
+    consulta = select(Cesta).order_by(Cesta.id)
+    if usuario_id is not None:
+        consulta = consulta.where(Cesta.usuario_id == usuario_id)
+    cestas = sessao.scalars(consulta).all()
     return [_serializar_cesta(cesta) for cesta in cestas]
 
 
-def buscar_cesta_por_id(sessao: Session, id_cesta: int) -> dict | None:
-    """Localiza uma cesta pelo identificador e devolve seus dados."""
+def buscar_cesta_por_id(sessao: Session, id_cesta: int, usuario_id: int | None = None) -> dict | None:
+    """Localiza uma cesta, respeitando o usuario quando ele for informado."""
 
-    cesta = sessao.get(Cesta, id_cesta)
+    consulta = select(Cesta).where(Cesta.id == id_cesta)
+    if usuario_id is not None:
+        consulta = consulta.where(Cesta.usuario_id == usuario_id)
+    cesta = sessao.scalars(consulta).first()
     return _serializar_cesta(cesta) if cesta is not None else None
 
 
-def adicionar_cesta(sessao: Session, dados: dict) -> dict:
+def adicionar_cesta(sessao: Session, dados: dict, usuario_id: int) -> dict:
     """Cria a cesta e seus itens a partir de dados simples do servico."""
 
     itens = [
@@ -56,6 +65,7 @@ def adicionar_cesta(sessao: Session, dados: dict) -> dict:
     ]
     cesta = Cesta(
         assinante=dados["assinante"],
+        usuario_id=usuario_id,
         semana=dados["semana"],
         tamanho=dados["tamanho"],
         tamanho_nome=dados["tamanho_nome"],

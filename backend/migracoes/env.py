@@ -7,7 +7,7 @@ from sqlalchemy.engine import Connection
 
 from banco import Base, engine
 from configuracao import obter_url_banco
-from modelos import cesta, usuarios  # noqa: F401 - registra os modelos no metadata
+from modelos import cesta, item_cesta, produto, separacao, usuario  # noqa: F401 - registra os modelos no metadata
 
 
 config = context.config

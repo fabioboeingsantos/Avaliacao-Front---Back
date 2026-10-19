@@ -12,7 +12,8 @@ function TelaSeparacao({ cestas, aoAbrirFechamento, aoSair }) {
 
   // Converte a situação da cesta em uma classe CSS segura para o indicador visual.
   function obterClasseSituacao(situacao) {
-    return `status-${situacao.toLowerCase().replace(' ', '-')}`
+    const semAcentos = situacao.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    return `status-${semAcentos.toLowerCase().replace(/\s+/g, '-')}`
   }
 
   // Aplica os dois filtros opcionais sem alterar a lista original de cestas.
@@ -70,6 +71,7 @@ function TelaSeparacao({ cestas, aoAbrirFechamento, aoSair }) {
               <option value="todas">Todas as situações</option>
               <option value="Pedida">Pedida</option>
               <option value="Em separação">Em separação</option>
+              <option value="Separação concluída">Separação concluída</option>
             </select>
           </label>
         </div>
@@ -85,6 +87,9 @@ function TelaSeparacao({ cestas, aoAbrirFechamento, aoSair }) {
           {cestasFiltradas.map((cesta) => {
             const totalSeparado = obterTotalSeparado(cesta)
             const limite = cesta.limite ?? cesta.produtos.reduce((total, produto) => total + produto.quantidade, 0)
+            const totalPedido = cesta.produtos.reduce((total, produto) => total + produto.quantidade, 0)
+            const restantePedido = totalPedido - totalSeparado
+            const espacoLivre = limite - totalSeparado
 
             return (
               <article className="cartao-cesta-produtor" key={cesta.id}>
@@ -99,8 +104,8 @@ function TelaSeparacao({ cestas, aoAbrirFechamento, aoSair }) {
                 </div>
 
                 <div className="resumo-separacao">
-                  <strong>{totalSeparado} de {limite} itens separados</strong>
-                  <span>Ainda cabem {limite - totalSeparado} itens</span>
+                  <strong>{totalSeparado} de {totalPedido} itens pedidos separados</strong>
+                  <span>Faltam separar {restantePedido} item(ns) · Espaço livre: {espacoLivre}</span>
                 </div>
 
                 <ul className="produtos-cesta">

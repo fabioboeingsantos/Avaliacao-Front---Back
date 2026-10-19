@@ -1,14 +1,12 @@
-"""Consultas de usuários persistidos no banco de dados."""
+"""Compatibilidade para o repositório de usuários antigo."""
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-
-from modelos.usuarios import Usuario
+from repositorios.usuario import buscar_por_usuario, salvar
 
 
-def buscar_usuario(sessao: Session, usuario: str) -> Usuario | None:
-    """Localiza uma conta pelo nome normalizado dentro da sessão atual."""
+def buscar_usuario(sessao, usuario):
+    """Mantém o nome antigo apontando para a busca por usuário."""
 
-    usuario_normalizado = usuario.strip().lower()
-    consulta = select(Usuario).where(Usuario.usuario == usuario_normalizado)
-    return sessao.scalars(consulta).first()
+    return buscar_por_usuario(sessao, usuario)
+
+
+__all__ = ["buscar_por_usuario", "buscar_usuario", "salvar"]

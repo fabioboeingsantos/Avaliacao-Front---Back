@@ -1,8 +1,10 @@
 """Cria as tabelas e carrega os dados mínimos para a demonstração."""
 
 from banco import Base, Sessao, engine
-from modelos.cesta import Produto
-from modelos.usuarios import Usuario
+from modelos.cesta import Cesta
+from modelos.produto import Produto
+from modelos.usuario import Usuario
+from seguranca import criar_hash_de_senha, senha_ja_esta_protegida
 
 
 PRODUTOS_INICIAIS = [
@@ -21,8 +23,8 @@ PRODUTOS_INICIAIS = [
 ]
 
 USUARIOS_INICIAIS = [
-    ("aline", "aline123", "assinante"),
-    ("vanderlei", "vanderlei123", "produtor"),
+    ("aline", "aline@cestadovale.com", "aline123", "assinante"),
+    ("vanderlei", "vanderlei@cestadovale.com", "vanderlei123", "produtor"),
 ]
 
 
@@ -36,10 +38,30 @@ def criar_tabelas() -> None:
             if sessao.get(Produto, produto_id) is None:
                 sessao.add(Produto(id=produto_id, nome=nome))
 
-        for nome, senha, perfil in USUARIOS_INICIAIS:
+        for nome, email, senha, perfil in USUARIOS_INICIAIS:
             usuario_existente = sessao.query(Usuario).filter_by(usuario=nome).first()
             if usuario_existente is None:
-                sessao.add(Usuario(usuario=nome, senha=senha, perfil=perfil))
+                # Novas contas entram no banco somente depois de receber o hash Argon2.
+                sessao.add(
+                    Usuario(
+                        usuario=nome,
+                        email=email,
+                        senha_hash=criar_hash_de_senha(senha),
+                        perfil=perfil,
+                    )
+                )
+            else:
+                if not usuario_existente.email:
+                    usuario_existente.email = email
+                if not senha_ja_esta_protegida(usuario_existente.senha_hash):
+                    # Atualiza contas antigas que foram criadas antes da protecao das senhas.
+                    usuario_existente.senha_hash = criar_hash_de_senha(usuario_existente.senha_hash)
+
+        # Vincula registros antigos pelo assinante para nao perder seu historico.
+        usuarios = {usuario.usuario: usuario.id for usuario in sessao.query(Usuario).all()}
+        for cesta in sessao.query(Cesta).filter(Cesta.usuario_id.is_(None)).all():
+            if cesta.assinante in usuarios:
+                cesta.usuario_id = usuarios[cesta.assinante]
 
         sessao.commit()
     finally:
