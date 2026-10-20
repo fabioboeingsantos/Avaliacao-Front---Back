@@ -193,7 +193,6 @@ function App() {
         const cestaCriada = await chamarApi('/cestas', {
           method: 'POST',
           body: JSON.stringify({
-            assinante: usuarioAutenticado,
             tamanho: pedidoEmRevisao.tamanhoNome,
             modo: pedidoEmRevisao.modoNome === 'Cesta pronta' ? 'pronta' : 'selecionavel',
             semana: new Date().toISOString().slice(0, 10),

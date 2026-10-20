@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from banco import obter_sessao
-from rotas.autenticacao import obter_conta_atual
+from rotas.autenticacao import obter_usuario_atual
 from esquemas.cesta import NovaCesta, NovaSeparacao
 from servicos import cesta as servico
 from servicos.excecoes import AcessoNegado, CestaNaoEncontrada, ErroDeAplicacao
@@ -32,12 +32,12 @@ def listar_cestas(
     assinante: str | None = Query(default=None),
     tamanho: str | None = Query(default=None),
     sessao: Session = Depends(obter_sessao),
-    conta: Usuario = Depends(obter_conta_atual),
+    usuario: Usuario = Depends(obter_usuario_atual),
 ):
     """Lista as cestas e aceita filtro por assinante e tamanho."""
 
-    usuario_id = conta.id if conta.perfil == "assinante" else None
-    filtro_assinante = conta.usuario if conta.perfil == "assinante" else assinante
+    usuario_id = usuario.id if usuario.perfil == "assinante" else None
+    filtro_assinante = usuario.usuario if usuario.perfil == "assinante" else assinante
     return servico.listar_cestas(
         sessao,
         assinante=filtro_assinante,
@@ -50,12 +50,12 @@ def listar_cestas(
 def mostrar_cesta(
     id_cesta: int,
     sessao: Session = Depends(obter_sessao),
-    conta: Usuario = Depends(obter_conta_atual),
+    usuario: Usuario = Depends(obter_usuario_atual),
 ):
     """Mostra uma cesta completa, incluindo sua composição e situação."""
 
     try:
-        usuario_id = conta.id if conta.perfil == "assinante" else None
+        usuario_id = usuario.id if usuario.perfil == "assinante" else None
         return servico.serializar_cesta(servico.buscar_cesta(sessao, id_cesta, usuario_id=usuario_id))
     except ErroDeAplicacao as erro:
         raise traduzir_erro(erro) from erro
@@ -65,17 +65,18 @@ def mostrar_cesta(
 def pedir_cesta(
     dados: NovaCesta,
     sessao: Session = Depends(obter_sessao),
-    conta: Usuario = Depends(obter_conta_atual),
+    usuario: Usuario = Depends(obter_usuario_atual),
 ):
     """Cria uma cesta com situação inicial pedida."""
 
     try:
-        if conta.perfil != "assinante":
+        if usuario.perfil != "assinante":
             raise AcessoNegado("Somente assinantes podem criar cestas.")
-        dados_cesta = dados.model_dump()
-        # O dono vem do token; o campo enviado pelo cliente nao define a propriedade.
-        dados_cesta["assinante"] = conta.usuario
-        return servico.criar_cesta(sessao, dados_cesta, usuario_id=conta.id)
+        return servico.criar_cesta(
+            sessao,
+            dados.model_dump(),
+            usuario=usuario,
+        )
     except ErroDeAplicacao as erro:
         raise traduzir_erro(erro) from erro
 
@@ -84,12 +85,12 @@ def pedir_cesta(
 def listar_separacoes(
     id_cesta: int,
     sessao: Session = Depends(obter_sessao),
-    conta: Usuario = Depends(obter_conta_atual),
+    usuario: Usuario = Depends(obter_usuario_atual),
 ):
     """Lista os produtos já separados de uma cesta."""
 
     try:
-        usuario_id = conta.id if conta.perfil == "assinante" else None
+        usuario_id = usuario.id if usuario.perfil == "assinante" else None
         return servico.listar_separacoes(sessao, id_cesta, usuario_id=usuario_id)
     except ErroDeAplicacao as erro:
         raise traduzir_erro(erro) from erro
@@ -100,12 +101,12 @@ def registrar_separacao(
     id_cesta: int,
     dados: NovaSeparacao,
     sessao: Session = Depends(obter_sessao),
-    conta: Usuario = Depends(obter_conta_atual),
+    usuario: Usuario = Depends(obter_usuario_atual),
 ):
     """Registra um produto separado aplicando as regras de balanço da cesta."""
 
     try:
-        if conta.perfil != "produtor":
+        if usuario.perfil != "produtor":
             raise AcessoNegado("Somente produtores podem registrar separacoes.")
         return servico.separar_produto(sessao, id_cesta, dados.produto_id, dados.quantidade)
     except ErroDeAplicacao as erro:

@@ -18,7 +18,6 @@ class ProdutoDaCesta(BaseModel):
 class NovaCesta(BaseModel):
     """Dados necessários para registrar uma cesta pedida."""
 
-    assinante: str = Field(min_length=1)
     tamanho: str = Field(min_length=1)
     modo: str = Field(min_length=1)
     produtos: list[ProdutoDaCesta] = Field(min_length=1)

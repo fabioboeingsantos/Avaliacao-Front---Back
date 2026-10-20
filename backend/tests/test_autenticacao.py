@@ -82,3 +82,23 @@ def test_rota_exige_token(cliente):
     resposta = cliente.get("/cestas")
 
     assert resposta.status_code == 401
+
+
+def test_usuario_eu_exige_token(cliente):
+    """A rota de identidade recusa chamadas sem autenticacao."""
+
+    resposta = cliente.get("/usuarios/eu")
+
+    assert resposta.status_code == 401
+    assert resposta.json()["detail"] == "Not authenticated"
+
+
+def test_usuario_eu_retorna_usuario_autenticado(cliente):
+    """A rota de identidade devolve a conta associada ao token."""
+
+    token = fazer_login(cliente, "aline", "aline123")
+    resposta = cliente.get("/usuarios/eu", headers={"Authorization": f"Bearer {token}"})
+
+    assert resposta.status_code == 200
+    assert resposta.json()["usuario"] == "aline"
+    assert resposta.json()["perfil"] == "assinante"

@@ -19,7 +19,8 @@ esquema_bearer = HTTPBearer(auto_error=False)
 def obter_usuario_atual(
     requisicao: Request,
     credenciais: HTTPAuthorizationCredentials | None = Depends(esquema_bearer),
-) -> dict:
+    sessao: Session = Depends(obter_sessao),
+) -> Usuario:
     """Aceita Bearer legado ou o cookie HttpOnly emitido pelo login."""
 
     token = None
@@ -31,15 +32,23 @@ def obter_usuario_atual(
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token de acesso ausente.",
+            detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    usuario = ler_token_de_acesso(token)
-    if usuario is None:
+    dados_token = ler_token_de_acesso(token)
+    if dados_token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token de acesso invalido ou expirado.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    usuario = repositorio_de_usuarios.buscar_por_usuario(sessao, dados_token["sub"])
+    if usuario is None or not usuario.ativo:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="A conta autenticada nao esta disponivel.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -47,19 +56,11 @@ def obter_usuario_atual(
 
 
 def obter_conta_atual(
-    usuario_token: dict = Depends(obter_usuario_atual),
-    sessao=Depends(obter_sessao),
+    usuario: Usuario = Depends(obter_usuario_atual),
 ) -> Usuario:
-    """Confirma que a conta do token ainda existe e esta ativa no banco."""
+    """Mantem compatibilidade para dependencias antigas de conta autenticada."""
 
-    conta = repositorio_de_usuarios.buscar_por_usuario(sessao, usuario_token["sub"])
-    if conta is None or not conta.ativo:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="A conta autenticada nao esta disponivel.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return conta
+    return usuario
 
 
 router = APIRouter(prefix="/autenticacao", tags=["Autenticação"])

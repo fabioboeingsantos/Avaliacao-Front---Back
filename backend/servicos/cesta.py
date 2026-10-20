@@ -4,6 +4,7 @@ from datetime import date
 
 from sqlalchemy.orm import Session
 
+from modelos.usuario import Usuario
 from repositorios import cesta as repositorio
 from servicos.excecoes import (
     CestaNaoEncontrada,
@@ -103,7 +104,7 @@ def buscar_cesta(sessao: Session, id_cesta: int, usuario_id: int | None = None) 
     return cesta
 
 
-def criar_cesta(sessao: Session, dados: dict, usuario_id: int) -> dict:
+def criar_cesta(sessao: Session, dados: dict, usuario: Usuario) -> dict:
     """Valida e registra uma nova cesta com situacao inicial pedida."""
 
     limite = obter_limite(dados["tamanho"])
@@ -122,7 +123,7 @@ def criar_cesta(sessao: Session, dados: dict, usuario_id: int) -> dict:
         raise SemanaInvalida("A semana deve estar no formato AAAA-MM-DD.")
 
     dados_cesta = {
-        "assinante": dados["assinante"].strip().lower(),
+        "assinante": usuario.usuario.strip().lower(),
         "semana": semana_convertida,
         "tamanho": normalizar_tamanho(dados["tamanho"]),
         "tamanho_nome": nome_tamanho(dados["tamanho"]),
@@ -135,7 +136,7 @@ def criar_cesta(sessao: Session, dados: dict, usuario_id: int) -> dict:
         ],
     }
 
-    return serializar_cesta(repositorio.adicionar_cesta(sessao, dados_cesta, usuario_id=usuario_id))
+    return serializar_cesta(repositorio.adicionar_cesta(sessao, dados_cesta, usuario_id=usuario.id))
 
 
 def listar_separacoes(sessao: Session, id_cesta: int, usuario_id: int | None = None) -> list[dict]:

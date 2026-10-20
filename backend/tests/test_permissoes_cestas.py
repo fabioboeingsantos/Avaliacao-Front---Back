@@ -69,6 +69,7 @@ def test_criacao_usa_o_usuario_do_token(cliente):
         headers={"Authorization": f"Bearer {token}"},
         json={
             "assinante": "vanderlei",
+            "usuario_id": 2,
             "tamanho": "pequena",
             "modo": "pronta",
             "produtos": [{"id": "alface", "nome": "Alface", "quantidade": 1}],
