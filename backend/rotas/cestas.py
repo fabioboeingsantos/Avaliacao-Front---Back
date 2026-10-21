@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from banco import obter_sessao
-from rotas.autenticacao import obter_usuario_atual
+from rotas.autenticacao import exigir_permissao
 from esquemas.cesta import NovaCesta, NovaSeparacao
 from servicos import cesta as servico
 from servicos.excecoes import AcessoNegado, CestaNaoEncontrada, ErroDeAplicacao
@@ -32,7 +32,7 @@ def listar_cestas(
     assinante: str | None = Query(default=None),
     tamanho: str | None = Query(default=None),
     sessao: Session = Depends(obter_sessao),
-    usuario: Usuario = Depends(obter_usuario_atual),
+    usuario: Usuario = Depends(exigir_permissao("cestas.listar")),
 ):
     """Lista as cestas e aceita filtro por assinante e tamanho."""
 
@@ -50,7 +50,7 @@ def listar_cestas(
 def mostrar_cesta(
     id_cesta: int,
     sessao: Session = Depends(obter_sessao),
-    usuario: Usuario = Depends(obter_usuario_atual),
+    usuario: Usuario = Depends(exigir_permissao("cestas.consultar")),
 ):
     """Mostra uma cesta completa, incluindo sua composição e situação."""
 
@@ -65,7 +65,7 @@ def mostrar_cesta(
 def pedir_cesta(
     dados: NovaCesta,
     sessao: Session = Depends(obter_sessao),
-    usuario: Usuario = Depends(obter_usuario_atual),
+    usuario: Usuario = Depends(exigir_permissao("cestas.criar")),
 ):
     """Cria uma cesta com situação inicial pedida."""
 
@@ -85,7 +85,7 @@ def pedir_cesta(
 def listar_separacoes(
     id_cesta: int,
     sessao: Session = Depends(obter_sessao),
-    usuario: Usuario = Depends(obter_usuario_atual),
+    usuario: Usuario = Depends(exigir_permissao("cestas.listar_separacoes")),
 ):
     """Lista os produtos já separados de uma cesta."""
 
@@ -101,13 +101,11 @@ def registrar_separacao(
     id_cesta: int,
     dados: NovaSeparacao,
     sessao: Session = Depends(obter_sessao),
-    usuario: Usuario = Depends(obter_usuario_atual),
+    usuario: Usuario = Depends(exigir_permissao("cestas.registrar_separacao")),
 ):
     """Registra um produto separado aplicando as regras de balanço da cesta."""
 
     try:
-        if usuario.perfil != "produtor":
-            raise AcessoNegado("Somente produtores podem registrar separacoes.")
         return servico.separar_produto(sessao, id_cesta, dados.produto_id, dados.quantidade)
     except ErroDeAplicacao as erro:
         raise traduzir_erro(erro) from erro

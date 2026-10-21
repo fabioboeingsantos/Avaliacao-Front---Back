@@ -78,3 +78,20 @@ def test_criacao_usa_o_usuario_do_token(cliente):
 
     assert resposta.status_code == 201
     assert resposta.json()["assinante"] == "aline"
+
+
+def test_produtor_nao_pode_criar_cesta(cliente):
+    """O grupo produtor nao possui a permissao de criar cestas."""
+
+    token = fazer_login(cliente, "vanderlei", "vanderlei123")
+    resposta = cliente.post(
+        "/cestas",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "tamanho": "pequena",
+            "modo": "pronta",
+            "produtos": [{"id": "alface", "nome": "Alface", "quantidade": 1}],
+        },
+    )
+
+    assert resposta.status_code == 403

@@ -26,6 +26,7 @@ class UsuarioPublico(BaseModel):
     usuario: str
     email: str
     perfil: str
+    grupo: str
     ativo: bool
 
 
@@ -35,3 +36,6 @@ class SessaoUsuario(BaseModel):
     usuario: str
     email: str
     perfil: str
+    grupo: str
+    access_token: str
+    token_type: str = "bearer"

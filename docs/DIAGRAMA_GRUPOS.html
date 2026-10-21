@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Diagrama de grupos e permissões | Cesta do Vale</title>
+
+    <style>
+      /* Tokens visuais alinhados à identidade da Cesta do Vale. */
+      :root {
+        --verde: #2f6b3b;
+        --verde-escuro: #1f4d2e;
+        --verde-claro: #dcebd2;
+        --terracota: #a84f35;
+        --amarelo: #e6a23c;
+        --creme: #f7f5ef;
+        --branco: #ffffff;
+        --texto: #24302a;
+        --texto-suave: #637267;
+        --borda: #cbd5cc;
+        --azul: #2f6b8a;
+        --erro: #b42318;
+        --sombra: 0 18px 45px rgba(31, 77, 46, 0.12);
+      }
+
+      /* Mantém o cálculo dos componentes previsível em todas as telas. */
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        min-width: 320px;
+        margin: 0;
+        color: var(--texto);
+        background:
+          radial-gradient(circle at 100% 0%, rgba(220, 235, 210, 0.8), transparent 28rem),
+          radial-gradient(circle at 0% 100%, rgba(247, 228, 218, 0.65), transparent 28rem),
+          var(--creme);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+
+      /* Centraliza o conteúdo e evita que o diagrama fique largo demais. */
+      .pagina {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0 72px;
+      }
+
+      .cabecalho {
+        max-width: 820px;
+        margin-bottom: 34px;
+      }
+
+      .rotulo {
+        margin: 0 0 10px;
+        color: var(--terracota);
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1,
+      h2,
+      h3 {
+        color: var(--verde-escuro);
+        line-height: 1.1;
+      }
+
+      h1 {
+        margin-bottom: 16px;
+        font-size: clamp(2.2rem, 6vw, 4.6rem);
+        letter-spacing: -0.06em;
+      }
+
+      h2 {
+        margin-bottom: 10px;
+        font-size: clamp(1.5rem, 3vw, 2.3rem);
+        letter-spacing: -0.04em;
+      }
+
+      h3 {
+        margin-bottom: 6px;
+        font-size: 1.12rem;
+      }
+
+      .introducao {
+        max-width: 760px;
+        color: var(--texto-suave);
+        font-size: 1.08rem;
+      }
+
+      /* Cada diagrama fica em um cartão para facilitar a leitura durante a apresentação. */
+      .secao {
+        margin-top: 28px;
+        padding: clamp(20px, 4vw, 34px);
+        border: 1px solid var(--borda);
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.84);
+        box-shadow: var(--sombra);
+      }
+
+      .secao > p {
+        color: var(--texto-suave);
+      }
+
+      /* Diagrama principal: autenticação, identificação do grupo e rotas. */
+      .diagrama-acesso {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 18px;
+        margin-top: 26px;
+      }
+
+      .coluna-diagrama {
+        display: grid;
+        gap: 14px;
+      }
+
+      .no {
+        position: relative;
+        padding: 20px;
+        border: 1px solid var(--borda);
+        border-radius: 18px;
+        background: var(--branco);
+        box-shadow: 0 8px 22px rgba(31, 77, 46, 0.07);
+      }
+
+      .no strong {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--verde-escuro);
+      }
+
+      .no small {
+        display: block;
+        color: var(--texto-suave);
+      }
+
+      .no-login {
+        border-top: 5px solid var(--azul);
+      }
+
+      .no-jwt {
+        border-top: 5px solid var(--verde);
+      }
+
+      .no-bloqueio {
+        border-top: 5px solid var(--erro);
+      }
+
+      .seta {
+        display: grid;
+        min-width: 110px;
+        gap: 4px;
+        color: var(--verde);
+        font-size: 1.65rem;
+        font-weight: 800;
+        text-align: center;
+      }
+
+      .seta small {
+        color: var(--texto-suave);
+        font-size: 0.72rem;
+        font-weight: 700;
+        line-height: 1.25;
+      }
+
+      /* Cards dos grupos e das personas do domínio. */
+      .grupos {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        margin-top: 26px;
+      }
+
+      .grupo {
+        overflow: hidden;
+        border: 1px solid var(--borda);
+        border-radius: 20px;
+        background: var(--branco);
+      }
+
+      .grupo-cabecalho {
+        padding: 20px;
+        color: var(--branco);
+      }
+
+      .grupo-cabecalho h3,
+      .grupo-cabecalho p {
+        color: var(--branco);
+      }
+
+      .grupo-cabecalho p {
+        margin-bottom: 0;
+        opacity: 0.9;
+      }
+
+      .grupo-assinante .grupo-cabecalho {
+        background: linear-gradient(135deg, var(--verde), #4f8c50);
+      }
+
+      .grupo-produtor .grupo-cabecalho {
+        background: linear-gradient(135deg, var(--terracota), #c87850);
+      }
+
+      .grupo-conteudo {
+        padding: 20px;
+      }
+
+      .grupo-conteudo ul,
+      .permissoes {
+        margin: 12px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .grupo-conteudo li,
+      .permissoes li {
+        position: relative;
+        padding: 8px 0 8px 25px;
+        border-bottom: 1px solid #edf1ec;
+        color: var(--texto-suave);
+        font-size: 0.92rem;
+      }
+
+      .grupo-conteudo li:last-child,
+      .permissoes li:last-child {
+        border-bottom: 0;
+      }
+
+      .grupo-conteudo li::before,
+      .permissoes li::before {
+        position: absolute;
+        left: 0;
+        color: var(--verde);
+        content: "✓";
+        font-weight: 900;
+      }
+
+      /* Matriz de permissões: o texto torna o diagrama acessível sem depender de cores. */
+      .tabela-wrapper {
+        overflow-x: auto;
+        margin-top: 24px;
+        border: 1px solid var(--borda);
+        border-radius: 16px;
+      }
+
+      table {
+        width: 100%;
+        min-width: 680px;
+        border-collapse: collapse;
+        background: var(--branco);
+      }
+
+      th,
+      td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #e9eee8;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--verde-escuro);
+        background: var(--verde-claro);
+        font-size: 0.82rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      td {
+        color: var(--texto-suave);
+        font-size: 0.92rem;
+      }
+
+      code {
+        padding: 3px 6px;
+        border-radius: 6px;
+        color: var(--verde-escuro);
+        background: #eff6ec;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 0.88em;
+      }
+
+      .acesso {
+        display: inline-block;
+        padding: 4px 9px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+      }
+
+      .acesso-todos {
+        color: var(--azul);
+        background: #e8f1f5;
+      }
+
+      .acesso-assinante {
+        color: var(--verde-escuro);
+        background: var(--verde-claro);
+      }
+
+      .acesso-produtor {
+        color: #7a4b00;
+        background: #fff1d6;
+      }
+
+      /* Fluxo de uma requisição, útil para explicar a arquitetura no trabalho. */
+      .fluxo {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .etapa {
+        display: grid;
+        align-content: center;
+        min-height: 120px;
+        padding: 16px;
+        border: 1px solid var(--borda);
+        border-radius: 16px;
+        background: var(--branco);
+        text-align: center;
+      }
+
+      .etapa strong {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--verde-escuro);
+      }
+
+      .etapa span {
+        color: var(--texto-suave);
+        font-size: 0.83rem;
+      }
+
+      .etapa:not(:last-child)::after {
+        position: absolute;
+        color: var(--terracota);
+        content: "→";
+        font-size: 1.5rem;
+        font-weight: 800;
+        transform: translateX(calc(100% + 4px));
+      }
+
+      .etapa {
+        position: relative;
+      }
+
+      .nota {
+        margin-top: 22px;
+        padding: 15px 18px;
+        border-left: 5px solid var(--amarelo);
+        border-radius: 0 12px 12px 0;
+        color: #654100;
+        background: #fff8e7;
+      }
+
+      /* Área do modelo entidade-relacionamento do banco de dados. */
+      .erd {
+        position: relative;
+        display: grid;
+        grid-template-areas:
+          "usuarios cestas produtos"
+          "itens . separacoes";
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 86px 58px;
+        margin-top: 28px;
+      }
+
+      /* As linhas ficam atrás das tabelas e representam as chaves estrangeiras. */
+      .erd-linhas {
+        position: absolute;
+        z-index: 0;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .tabela-banco {
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+        border: 1px solid var(--borda);
+        border-radius: 14px;
+        background: var(--branco);
+        box-shadow: 0 10px 26px rgba(31, 77, 46, 0.09);
+      }
+
+      .tabela-usuarios { grid-area: usuarios; }
+      .tabela-cestas { grid-area: cestas; }
+      .tabela-produtos { grid-area: produtos; }
+      .tabela-itens { grid-area: itens; }
+      .tabela-separacoes { grid-area: separacoes; }
+
+      .tabela-titulo {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 13px 15px;
+        color: var(--branco);
+        background: var(--verde-escuro);
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 0.95rem;
+        font-weight: 800;
+      }
+
+      .tabela-titulo span {
+        padding: 3px 6px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 5px;
+        font-family: system-ui, sans-serif;
+        font-size: 0.66rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .campo-banco {
+        display: grid;
+        grid-template-columns: 22px 1fr auto;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 13px;
+        border-bottom: 1px solid #edf1ec;
+        color: var(--texto-suave);
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 0.78rem;
+      }
+
+      .campo-banco:last-child {
+        border-bottom: 0;
+      }
+
+      .campo-banco strong {
+        color: var(--texto);
+        font-weight: 700;
+      }
+
+      .chave {
+        color: var(--amarelo);
+        font-size: 0.78rem;
+        font-weight: 900;
+        text-align: center;
+      }
+
+      .tipo {
+        color: var(--azul);
+        font-size: 0.68rem;
+      }
+
+      .relacoes-banco {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .relacao-banco {
+        padding: 13px 15px;
+        border: 1px solid var(--borda);
+        border-radius: 12px;
+        color: var(--texto-suave);
+        background: #fbfdf9;
+        font-size: 0.86rem;
+      }
+
+      .relacao-banco strong {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--verde-escuro);
+      }
+
+      .rodape {
+        margin-top: 28px;
+        color: var(--texto-suave);
+        font-size: 0.86rem;
+        text-align: center;
+      }
+
+      /* Ajusta os diagramas para telas menores sem perder a ordem da leitura. */
+      @media (max-width: 820px) {
+        .diagrama-acesso {
+          grid-template-columns: 1fr;
+        }
+
+        .seta {
+          min-width: 0;
+          transform: rotate(90deg);
+        }
+
+        .grupos,
+        .fluxo {
+          grid-template-columns: 1fr;
+        }
+
+        .erd {
+          grid-template-areas:
+            "usuarios"
+            "cestas"
+            "produtos"
+            "itens"
+            "separacoes";
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        .erd-linhas {
+          display: none;
+        }
+
+        .relacoes-banco {
+          grid-template-columns: 1fr;
+        }
+
+        .etapa:not(:last-child)::after {
+          right: 50%;
+          bottom: -29px;
+          transform: rotate(90deg);
+        }
+
+        .etapa:not(:last-child) {
+          margin-bottom: 18px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="pagina">
+      <header class="cabecalho">
+        <p class="rotulo">Cesta do Vale · Controle de acesso</p>
+        <h1>Grupos de usuários e permissões</h1>
+        <p class="introducao">
+          O sistema possui duas personas. Cada conta pertence a um grupo e recebe somente as
+          permissões necessárias para realizar seu trabalho.
+        </p>
+      </header>
+
+      <section class="secao" aria-labelledby="titulo-visao-geral">
+        <h2 id="titulo-visao-geral">1. Visão geral do acesso</h2>
+        <p>
+          O login identifica a conta. O backend consulta o grupo atual do usuário e verifica a
+          permissão antes de executar uma rota protegida.
+        </p>
+
+        <!-- Este fluxo mostra a decisão de autorização desde o login até a rota. -->
+        <div class="diagrama-acesso">
+          <div class="coluna-diagrama">
+            <article class="no no-login">
+              <strong>Login</strong>
+              <small><code>POST /autenticacao/login</code></small>
+              <small>Usuário ou e-mail + senha</small>
+            </article>
+            <article class="no no-jwt">
+              <strong>Sessão autenticada</strong>
+              <small>JWT Bearer + cookie HttpOnly</small>
+              <small>Identidade e grupo da conta</small>
+            </article>
+          </div>
+
+          <div class="seta" aria-hidden="true">
+            →
+            <small>identifica<br />o grupo</small>
+          </div>
+
+          <div class="coluna-diagrama">
+            <article class="no no-jwt">
+              <strong>Grupo de acesso</strong>
+              <small><code>assinante</code> ou <code>produtor</code></small>
+              <small>Permissões carregadas da matriz central</small>
+            </article>
+            <article class="no no-bloqueio">
+              <strong>Rota protegida</strong>
+              <small>Permissão concedida → operação continua</small>
+              <small>Permissão ausente → <code>403 Forbidden</code></small>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="secao" aria-labelledby="titulo-grupos">
+        <h2 id="titulo-grupos">2. Grupos do sistema</h2>
+        <p>
+          O grupo é armazenado atualmente no campo <code>perfil</code> da conta e também aparece
+          como <code>grupo</code> nas respostas públicas da API.
+        </p>
+
+        <!-- Os cards relacionam cada grupo à persona e às operações permitidas. -->
+        <div class="grupos">
+          <article class="grupo grupo-assinante">
+            <div class="grupo-cabecalho">
+              <h3>Grupo assinante</h3>
+              <p>Aline · usa principalmente o celular</p>
+            </div>
+            <div class="grupo-conteudo">
+              <strong>Responsabilidade</strong>
+              <p>Realizar e acompanhar seus próprios pedidos.</p>
+              <strong>Permissões</strong>
+              <ul>
+                <li>Consultar a própria conta</li>
+                <li>Listar as próprias cestas</li>
+                <li>Consultar detalhes da cesta</li>
+                <li>Visualizar separações</li>
+                <li>Criar uma nova cesta</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="grupo grupo-produtor">
+            <div class="grupo-cabecalho">
+              <h3>Grupo produtor</h3>
+              <p>Vanderlei · usa principalmente o computador</p>
+            </div>
+            <div class="grupo-conteudo">
+              <strong>Responsabilidade</strong>
+              <p>Visualizar pedidos e registrar a separação dos produtos.</p>
+              <strong>Permissões</strong>
+              <ul>
+                <li>Consultar a própria conta</li>
+                <li>Listar as cestas disponíveis</li>
+                <li>Consultar detalhes da cesta</li>
+                <li>Visualizar separações</li>
+                <li>Registrar produtos separados</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="secao" aria-labelledby="titulo-banco">
+        <h2 id="titulo-banco">3. Diagrama do banco de dados</h2>
+        <p>
+          O modelo relacional representa a conta da pessoa usuária, o pedido da cesta, os produtos
+          escolhidos e o andamento da separação. <strong>PK</strong> identifica a chave primária e
+          <strong>FK</strong> identifica uma chave estrangeira.
+        </p>
+
+        <!-- O SVG conecta visualmente as tabelas sem substituir a leitura dos campos. -->
+        <div class="erd" aria-label="Diagrama entidade-relacionamento do banco de dados">
+          <svg class="erd-linhas" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
+            <!-- usuarios.id -> cestas.usuario_id -->
+            <path d="M 285 90 C 350 90, 385 90, 430 90" fill="none" stroke="#2f6b3b" stroke-width="3" stroke-dasharray="8 7" />
+            <!-- cestas.id -> itens_cesta.cesta_id -->
+            <path d="M 500 190 C 465 270, 310 300, 250 385" fill="none" stroke="#2f6b3b" stroke-width="3" stroke-dasharray="8 7" />
+            <!-- produtos.id -> itens_cesta.produto_id -->
+            <path d="M 770 190 C 710 280, 480 330, 330 405" fill="none" stroke="#2f6b3b" stroke-width="3" stroke-dasharray="8 7" />
+            <!-- cestas.id -> separacoes.cesta_id -->
+            <path d="M 590 190 C 625 275, 710 305, 755 385" fill="none" stroke="#a84f35" stroke-width="3" stroke-dasharray="8 7" />
+            <!-- produtos.id -> separacoes.produto_id -->
+            <path d="M 840 190 C 840 280, 835 320, 825 385" fill="none" stroke="#a84f35" stroke-width="3" stroke-dasharray="8 7" />
+          </svg>
+
+          <article class="tabela-banco tabela-usuarios">
+            <div class="tabela-titulo">usuarios <span>conta</span></div>
+            <div class="campo-banco"><span class="chave">PK</span><strong>id</strong><span class="tipo">integer</span></div>
+            <div class="campo-banco"><span></span><strong>usuario</strong><span class="tipo">varchar(80)</span></div>
+            <div class="campo-banco"><span></span><strong>email</strong><span class="tipo">varchar(255)</span></div>
+            <div class="campo-banco"><span></span><strong>senha_hash</strong><span class="tipo">varchar(255)</span></div>
+            <div class="campo-banco"><span></span><strong>perfil</strong><span class="tipo">grupo</span></div>
+            <div class="campo-banco"><span></span><strong>ativo</strong><span class="tipo">boolean</span></div>
+          </article>
+
+          <article class="tabela-banco tabela-cestas">
+            <div class="tabela-titulo">cestas <span>pedido</span></div>
+            <div class="campo-banco"><span class="chave">PK</span><strong>id</strong><span class="tipo">integer</span></div>
+            <div class="campo-banco"><span class="chave">FK</span><strong>usuario_id</strong><span class="tipo">integer?</span></div>
+            <div class="campo-banco"><span></span><strong>assinante</strong><span class="tipo">varchar(80)</span></div>
+            <div class="campo-banco"><span></span><strong>semana</strong><span class="tipo">date</span></div>
+            <div class="campo-banco"><span></span><strong>tamanho / modo</strong><span class="tipo">varchar</span></div>
+            <div class="campo-banco"><span></span><strong>limite / situacao</strong><span class="tipo">int / varchar</span></div>
+          </article>
+
+          <article class="tabela-banco tabela-produtos">
+            <div class="tabela-titulo">produtos <span>catálogo</span></div>
+            <div class="campo-banco"><span class="chave">PK</span><strong>id</strong><span class="tipo">varchar(40)</span></div>
+            <div class="campo-banco"><span></span><strong>nome</strong><span class="tipo">varchar(120)</span></div>
+          </article>
+
+          <article class="tabela-banco tabela-itens">
+            <div class="tabela-titulo">itens_cesta <span>composição</span></div>
+            <div class="campo-banco"><span class="chave">PK</span><strong>id</strong><span class="tipo">integer</span></div>
+            <div class="campo-banco"><span class="chave">FK</span><strong>cesta_id</strong><span class="tipo">integer</span></div>
+            <div class="campo-banco"><span class="chave">FK</span><strong>produto_id</strong><span class="tipo">varchar</span></div>
+            <div class="campo-banco"><span></span><strong>quantidade</strong><span class="tipo">integer</span></div>
+          </article>
+
+          <article class="tabela-banco tabela-separacoes">
+            <div class="tabela-titulo">separacoes <span>andamento</span></div>
+            <div class="campo-banco"><span class="chave">PK</span><strong>id</strong><span class="tipo">integer</span></div>
+            <div class="campo-banco"><span class="chave">FK</span><strong>cesta_id</strong><span class="tipo">integer</span></div>
+            <div class="campo-banco"><span class="chave">FK</span><strong>produto_id</strong><span class="tipo">varchar</span></div>
+            <div class="campo-banco"><span></span><strong>quantidade</strong><span class="tipo">integer</span></div>
+          </article>
+        </div>
+
+        <!-- A lista de relacionamentos mantém o diagrama compreensível em dispositivos menores. -->
+        <div class="relacoes-banco">
+          <div class="relacao-banco"><strong>Usuário 1:N Cestas</strong><code>usuarios.id → cestas.usuario_id</code>. A FK é opcional para preservar dados antigos.</div>
+          <div class="relacao-banco"><strong>Cesta 1:N Itens</strong><code>cestas.id → itens_cesta.cesta_id</code>. A exclusão da cesta remove seus itens.</div>
+          <div class="relacao-banco"><strong>Produto 1:N Itens</strong><code>produtos.id → itens_cesta.produto_id</code>. A combinação cesta + produto é única.</div>
+          <div class="relacao-banco"><strong>Cesta 1:N Separações</strong><code>cestas.id → separacoes.cesta_id</code>. A separação registra o avanço do pedido.</div>
+          <div class="relacao-banco"><strong>Produto 1:N Separações</strong><code>produtos.id → separacoes.produto_id</code>. A combinação cesta + produto é única.</div>
+        </div>
+
+        <p class="nota">
+          <strong>Observação do modelo:</strong> <code>cestas.assinante</code> mantém o nome textual
+          usado no domínio e <code>cestas.usuario_id</code> faz o vínculo relacional com a conta. A
+          aplicação usa o usuário autenticado para impedir que uma pessoa crie uma cesta em nome de
+          outra conta.
+        </p>
+      </section>
+
+      <section class="secao" aria-labelledby="titulo-rotas">
+        <h2 id="titulo-rotas">4. Matriz de acesso às rotas</h2>
+        <p>
+          As permissões são verificadas antes da regra de negócio. Além do grupo, a API aplica o
+          escopo correto: Aline vê suas cestas; Vanderlei vê as cestas da produção.
+        </p>
+
+        <!-- A tabela complementa o diagrama para deixar o contrato técnico verificável. -->
+        <div class="tabela-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Método</th>
+                <th>Rota</th>
+                <th>Grupo autorizado</th>
+                <th>Regra de negócio</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>GET</code></td>
+                <td><code>/usuarios/me</code><br /><code>/usuarios/eu</code></td>
+                <td><span class="acesso acesso-todos">Ambos</span></td>
+                <td>Retorna a conta autenticada.</td>
+              </tr>
+              <tr>
+                <td><code>GET</code></td>
+                <td><code>/cestas</code></td>
+                <td><span class="acesso acesso-todos">Ambos</span></td>
+                <td>Assinante vê as próprias; produtor vê as disponíveis.</td>
+              </tr>
+              <tr>
+                <td><code>GET</code></td>
+                <td><code>/cestas/{id}</code></td>
+                <td><span class="acesso acesso-todos">Ambos</span></td>
+                <td>Consulta os detalhes dentro do escopo do grupo.</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/cestas</code></td>
+                <td><span class="acesso acesso-assinante">Assinante</span></td>
+                <td>Cria uma cesta vinculada à conta autenticada.</td>
+              </tr>
+              <tr>
+                <td><code>GET</code></td>
+                <td><code>/cestas/{id}/separacoes</code></td>
+                <td><span class="acesso acesso-todos">Ambos</span></td>
+                <td>Lista os produtos já separados.</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/cestas/{id}/separacoes</code></td>
+                <td><span class="acesso acesso-produtor">Produtor</span></td>
+                <td>Registra quantidade sem ultrapassar o pedido.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="secao" aria-labelledby="titulo-fluxo">
+        <h2 id="titulo-fluxo">5. Fluxo de uma requisição protegida</h2>
+        <p>
+          A autorização fica concentrada na dependência <code>exigir_permissao()</code>, enquanto
+          os serviços continuam responsáveis pelas regras específicas das cestas.
+        </p>
+
+        <!-- Este segundo diagrama mostra a separação de responsabilidades do backend. -->
+        <div class="fluxo">
+          <article class="etapa">
+            <strong>1. Requisição</strong>
+            <span>Frontend envia JWT ou cookie.</span>
+          </article>
+          <article class="etapa">
+            <strong>2. Identidade</strong>
+            <span>Backend valida o token e busca a conta.</span>
+          </article>
+          <article class="etapa">
+            <strong>3. Grupo</strong>
+            <span>Conta pertence a assinante ou produtor.</span>
+          </article>
+          <article class="etapa">
+            <strong>4. Permissão</strong>
+            <span>Matriz decide se a operação é permitida.</span>
+          </article>
+          <article class="etapa">
+            <strong>5. Serviço</strong>
+            <span>Regra da cesta é executada ou retorna erro.</span>
+          </article>
+        </div>
+
+        <p class="nota">
+          <strong>Regra de segurança:</strong> um grupo desconhecido não recebe permissão por
+          padrão. A API retorna <code>403 Forbidden</code> quando a conta está autenticada, mas não
+          possui autorização para a operação.
+        </p>
+      </section>
+
+      <p class="rodape">
+        Cesta do Vale · Diagrama baseado em <code>backend/servicos/permissoes.py</code>
+      </p>
+    </main>
+  </body>
+</html>

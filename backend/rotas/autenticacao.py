@@ -10,10 +10,27 @@ from esquemas.usuario import DadosLogin, SessaoUsuario
 from modelos.usuario import Usuario
 from repositorios import usuario as repositorio_de_usuarios
 from servicos import usuario as servico
+from servicos.permissoes import grupo_tem_permissao
 from seguranca import criar_token_de_acesso, ler_token_de_acesso
 
 
 esquema_bearer = HTTPBearer(auto_error=False)
+
+
+def exigir_permissao(permissao: str):
+    """Cria uma dependência que exige uma permissão do grupo autenticado."""
+
+    def dependencia(usuario: Usuario = Depends(obter_usuario_atual)) -> Usuario:
+        # A conta é carregada do banco antes da verificação para que a
+        # permissão represente o grupo atualmente cadastrado do usuário.
+        if not grupo_tem_permissao(usuario.perfil, permissao):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Seu grupo não possui permissão para esta operação.",
+            )
+        return usuario
+
+    return dependencia
 
 
 def obter_usuario_atual(
@@ -98,7 +115,11 @@ def fazer_login(
         secure=obter_cookie_seguro(),
         samesite="lax",
     )
-    return usuario
+    return {
+        **usuario,
+        "access_token": token,
+        "token_type": "bearer",
+    }
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)

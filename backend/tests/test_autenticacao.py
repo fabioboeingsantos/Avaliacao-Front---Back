@@ -33,7 +33,9 @@ def test_login_devolve_jwt_com_identidade_e_perfil(cliente):
 
     assert resposta.status_code == 200
     assert token
-    assert "access_token" not in corpo
+    assert corpo["access_token"] == token
+    assert corpo["token_type"] == "bearer"
+    assert corpo["grupo"] == "assinante"
     assert dados_token["sub"] == "aline"
     assert dados_token["perfil"] == "assinante"
     assert "senha" not in corpo

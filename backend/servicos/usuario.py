@@ -16,6 +16,7 @@ def serializar_usuario(conta: Usuario) -> dict:
         "usuario": conta.usuario,
         "email": conta.email,
         "perfil": conta.perfil,
+        "grupo": conta.perfil,
         "ativo": conta.ativo,
     }
 
@@ -51,4 +52,9 @@ def autenticar(sessao: Session, identificador: str, senha: str) -> dict | None:
     if conta is None or not conta.ativo or not senha_confere(senha, conta.senha_hash):
         return None
 
-    return {"usuario": conta.usuario, "email": conta.email, "perfil": conta.perfil}
+    return {
+        "usuario": conta.usuario,
+        "email": conta.email,
+        "perfil": conta.perfil,
+        "grupo": conta.perfil,
+    }

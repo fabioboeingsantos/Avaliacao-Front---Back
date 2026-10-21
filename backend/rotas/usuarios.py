@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from banco import obter_sessao
-from rotas.autenticacao import obter_usuario_atual
+from rotas.autenticacao import exigir_permissao
 from esquemas.usuario import DadosCadastroUsuario, UsuarioPublico
 from servicos import usuario as servico
 from servicos.excecoes import UsuarioJaExiste
@@ -28,7 +28,7 @@ def cadastrar_usuario(
 
 @router.get("/me", response_model=UsuarioPublico)
 def mostrar_usuario_atual(
-    usuario=Depends(obter_usuario_atual),
+    usuario=Depends(exigir_permissao("usuarios.consultar_propria_conta")),
 ):
     """Retorna os dados públicos da conta autenticada."""
 
@@ -36,7 +36,7 @@ def mostrar_usuario_atual(
 
 
 @router.get("/eu", response_model=UsuarioPublico)
-def mostrar_usuario_do_token(usuario=Depends(obter_usuario_atual)):
+def mostrar_usuario_do_token(usuario=Depends(exigir_permissao("usuarios.consultar_propria_conta"))):
     """Retorna os dados presentes no token do usuario autenticado."""
 
     return servico.serializar_usuario(usuario)
