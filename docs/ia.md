@@ -2,31 +2,43 @@
 
 > Registro da ideia definida para a próxima etapa do projeto. Esta funcionalidade está planejada e ainda não foi implementada.
 
-**Status:** planejada  
-**Persona principal:** Aline, assinante  
-**Tela relacionada:** Pedir a cesta  
-**Tipo de integração:** API de modelo de IA, provedor ainda não definido  
+**Status:** planejada
+
+**Persona principal:** Aline, assinante
+
+**Tela relacionada:** Pedir a cesta
+
+**Tipo de integração planejada:** API da OpenAI, sem integração implementada
+
 **Responsável pela decisão final:** pessoa usuária, com validação do backend
 
 ---
 
 ## 1. Decisão registrada
 
-Foi escolhida a opção de criar um **assistente de pedido para Aline**.
+Foi escolhida a opção de criar um **assistente de pedido para Aline**. A proposta inicial de um
+único agente e provedor indefinido foi revisada: para este rascunho, ficam definidos dois agentes
+em sequência e a OpenAI como provedor proposto.
 
-A pessoa poderá escrever o pedido em linguagem natural. A IA interpretará a mensagem e produzirá uma proposta estruturada de cesta para revisão. A proposta não será gravada automaticamente.
+A pessoa poderá escrever o pedido em linguagem natural. O primeiro agente produzirá uma proposta
+estruturada de cesta e o segundo revisará essa proposta comparando-a com o texto original. A
+proposta não será gravada automaticamente; Aline deverá revisar e confirmar.
 
 Exemplo fictício:
 
-> Quero uma cesta média para esta semana, sem cebola, e gostaria de repetir os produtos da última vez.
+> Quero uma cesta média, duas unidades de tomate e sem cebola.
 
 A IA poderá identificar, quando estiverem claramente presentes:
 
 - tamanho da cesta;
 - produtos desejados;
 - produtos que devem ser evitados;
-- intenção de repetir uma composição anterior;
+- intenção de repetir uma composição anterior, somente se essa função voltar a fazer parte do escopo;
 - informações ausentes ou ambíguas.
+
+**Escopo atual:** repetir uma composição anterior não faz parte desta proposta. O exemplo anterior
+que mencionava repetição fica preservado aqui como registro da ideia inicial, não como requisito
+atual.
 
 ---
 
@@ -78,7 +90,6 @@ O contexto enviado à IA deverá ser limitado ao necessário:
 - catálogo de produtos disponíveis;
 - tamanhos válidos;
 - limites pequena, média e grande;
-- composição anterior, somente se a função de repetição estiver confirmada;
 - regras de linguagem necessárias para reconhecer produtos.
 
 Não enviar para o provedor:
@@ -92,16 +103,17 @@ Não enviar para o provedor:
 
 ### 4.3 Trabalho da IA
 
-A IA deverá interpretar a mensagem e devolver uma proposta estruturada contendo, no mínimo:
+O Agente 1 deverá interpretar a mensagem e devolver uma proposta estruturada contendo:
 
 - tamanho identificado;
 - produtos incluídos;
 - produtos excluídos;
-- quantidade sugerida para cada produto, quando informada ou claramente aplicável;
-- dúvidas ou campos não compreendidos;
-- indicação de confiança ou necessidade de confirmação.
+- quantidades informadas e sugestão de 1 unidade quando a mensagem não especificar a quantidade;
+- dúvidas ou indicação de que é necessário esclarecer antes de propor uma composição.
 
-A resposta da IA será tratada como sugestão, nunca como regra definitiva.
+O Agente 2 receberá a mensagem original, a proposta do Agente 1, o catálogo e os limites. Devolverá
+uma revisão aprovada ou perguntas objetivas quando identificar divergência ou lacuna. As respostas
+dos dois agentes serão tratadas como sugestões, nunca como regra definitiva.
 
 ### 4.4 Resultado na tela
 
@@ -110,14 +122,15 @@ A interface deverá apresentar uma prévia editável, por exemplo:
 - **Tamanho:** Média;
 - **Produtos identificados:** tomate, cenoura e batata;
 - **Produtos removidos:** cebola;
-- **Dúvida:** a composição da última cesta não está disponível;
+- **Dúvida:** qual variedade de tomate Aline prefere?;
 - **Ações:** editar, voltar ao formulário manual ou confirmar proposta.
 
 Depois da revisão, a composição seguirá o fluxo atual de finalização da cesta.
 
 ### 4.5 Continuidade em caso de erro
 
-Se a IA não responder, interpretar incorretamente ou devolver uma proposta incompleta:
+Se qualquer agente não responder, interpretar incorretamente ou devolver uma resposta inválida ou
+incompleta:
 
 1. a aplicação deve informar que a sugestão não pôde ser concluída;
 2. a composição recebida não deve ser gravada automaticamente;
@@ -147,7 +160,9 @@ Se a IA não responder, interpretar incorretamente ou devolver uma proposta inco
 - substituir a confirmação da Aline;
 - substituir as validações do serviço de cestas.
 
-A regra da cartilha continua no backend, especialmente os limites de 5, 8 e 12 itens.
+O backend mantém as regras vigentes da cesta: o tamanho limita os produtos distintos (Pequena: 5,
+Média: 8, Grande: 12) e cada produto pode ter até 10 unidades. O limite de produtos distintos não
+limita a soma das unidades.
 
 ---
 
@@ -156,7 +171,9 @@ A regra da cartilha continua no backend, especialmente os limites de 5, 8 e 12 i
 ### Dentro do escopo
 
 - entrada de uma mensagem escrita pela Aline;
-- interpretação de tamanho e produtos;
+- interpretação de tamanho, produtos, exclusões e quantidades pelo Agente 1;
+- revisão da proposta pelo Agente 2;
+- encaminhamento de divergências para esclarecimento, sem aprovação automática;
 - apresentação de proposta antes da gravação;
 - edição ou rejeição da proposta;
 - fallback para o formulário manual;
@@ -172,7 +189,7 @@ A regra da cartilha continua no backend, especialmente os limites de 5, 8 e 12 i
 - recomendação baseada em dados nutricionais;
 - gravação sem confirmação humana;
 - alteração da regra de negócio por decisão do modelo;
-- sistema multiagente;
+- acesso direto dos agentes ao banco de dados, rotas ou ferramentas de gravação;
 - troca automática entre provedores sem uma decisão técnica posterior.
 
 ---
@@ -184,22 +201,26 @@ O fluxo planejado é:
 ```text
 Aline escreve a mensagem
         ↓
-Frontend envia o texto e o contexto mínimo
+Backend envia mensagem, catálogo e limites ao Agente 1
         ↓
-Backend chama o provedor de IA
+Agente 1 devolve proposta ou pede esclarecimento
         ↓
-Backend valida e normaliza a resposta estruturada
+Backend envia texto original e proposta ao Agente 2
         ↓
-Frontend mostra uma proposta editável
+Agente 2 aprova a revisão ou aponta divergências
         ↓
-Aline confirma
+Backend valida resposta e regras; dúvidas voltam para Aline
         ↓
-Serviço de cestas aplica as regras oficiais
+Aline revisa, edita, confirma ou rejeita
         ↓
-Pedido é gravado
+Serviço de cestas aplica as regras oficiais e grava após confirmação
 ```
 
-Neste momento, a proposta é usar uma única chamada ao modelo para interpretação. Não há justificativa atual para dividir o trabalho entre vários agentes, pois o problema é uma transformação de texto em uma proposta estruturada e revisável.
+O backend é o orquestrador: chama os agentes em sequência, valida seus formatos e os limites da
+cesta. O Agente 1 entrega ao backend a proposta; o backend fornece essa proposta, junto com a
+mensagem original e o catálogo, ao Agente 2. Se houver divergências, o backend pede esclarecimento
+a Aline. Aline encerra o fluxo confirmando ou rejeitando a proposta. A confirmação humana e a
+validação do backend continuam obrigatórias.
 
 ---
 
@@ -218,24 +239,17 @@ O backend já possui:
 
 A integração futura deverá respeitar essa separação. A chamada ao provedor não deve ficar diretamente dentro do componente visual, e a resposta do modelo não deve gravar dados sem passar pelo serviço de cestas.
 
-O endpoint, o formato final da resposta e o local exato da chamada ainda estão pendentes: **?**
+O endpoint, o modelo específico, o formato final das respostas e o local exato das chamadas ainda
+estão pendentes: **?**
 
 ---
 
 ## 9. Provedor de IA
 
-O provedor ainda não foi escolhido: **?**
-
-Podem ser avaliados Claude, Gemini, OpenAI ou outro provedor compatível, desde que a escolha seja feita com base em:
-
-- qualidade na interpretação das mensagens;
-- capacidade de devolver dados estruturados;
-- proteção dos dados enviados;
-- facilidade de integração com o backend atual;
-- tratamento de falhas e limites de uso;
-- custo e disponibilidade no ambiente do projeto, que ainda precisam ser confirmados: **?**
-
-Nenhuma disponibilidade, preço ou recurso específico de provedor foi assumido neste documento.
+**Provedor escolhido para a proposta: OpenAI.** O modelo, endpoint, custo, disponibilidade e
+configuração segura da chave precisam ser definidos antes de qualquer integração: **?** Nenhuma
+disponibilidade, preço ou recurso específico foi assumido neste documento. A integração com a
+OpenAI não foi implementada.
 
 ---
 
@@ -244,9 +258,11 @@ Nenhuma disponibilidade, preço ou recurso específico de provedor foi assumido 
 - Aline consegue escrever um pedido fictício em linguagem natural.
 - A IA identifica corretamente o tamanho quando ele é informado de forma clara.
 - A IA reconhece os produtos existentes no catálogo.
+- A proposta respeita o limite de produtos distintos do tamanho e o máximo de 10 unidades por produto.
 - A proposta aparece antes da gravação.
+- Divergências identificadas pelo Agente 2 geram esclarecimento, sem correção ou aprovação silenciosa.
 - Aline consegue editar ou rejeitar a proposta.
-- O backend recusa propostas que ultrapassem o limite.
+- O backend valida e recusa propostas que ultrapassem os limites.
 - Produtos desconhecidos ou pedidos ambíguos aparecem como dúvida, sem serem inventados.
 - Aline consegue continuar manualmente quando a IA falha.
 - Nenhuma senha, chave, token ou dado pessoal desnecessário é enviado ao provedor.
@@ -257,16 +273,10 @@ Os números mínimos de acerto ainda precisam ser definidos por teste: **?**
 
 ## 11. Decisões pendentes
 
-- [ ] Confirmar se a entrada será somente texto.
-- [ ] Confirmar se a opção de repetir a última composição entrará nesta funcionalidade.
-- [ ] Definir se o assistente será exibido como campo de texto, botão ou etapa separada.
-- [ ] Definir o formato estruturado retornado pelo modelo.
-- [ ] Definir como produtos desconhecidos serão apresentados.
-- [ ] Definir o endpoint responsável pela interpretação.
-- [ ] Definir o provedor de IA.
-- [ ] Definir como a chave do provedor será configurada no ambiente.
-- [ ] Definir os critérios de avaliação da interpretação.
-- [ ] Confirmar se a IA poderá consultar a composição anterior da própria Aline.
+- [ ] Definir como o assistente será apresentado na tela.
+- [ ] Definir modelo, endpoint, configuração segura da chave, custo e disponibilidade da OpenAI.
+- [ ] Definir os critérios quantitativos de qualidade após avaliar os testes manuais.
+- [ ] Planejar separadamente a validação da integração real, da execução de ferramentas e da coordenação dos agentes.
 
 ---
 
@@ -275,3 +285,110 @@ Os números mínimos de acerto ainda precisam ser definidos por teste: **?**
 Esta funcionalidade está **planejada**.
 
 Nenhum código, endpoint, chamada externa ou alteração no fluxo atual foi implementado como parte deste registro.
+
+---
+
+## 13. Decisões reconciliadas e instruções para revisão
+
+Esta seção registra a versão atual aprovada para preparação do prompt. Ela não apaga o histórico
+das decisões iniciais: a proposta anterior de agente único e provedor indefinido foi substituída
+pela proposta de dois agentes em sequência e OpenAI. A ideia inicial de repetir a composição
+anterior não integra o escopo atual. Os limites vigentes são 5, 8 e 12 produtos distintos para
+cestas Pequena, Média e Grande, respectivamente, e até 10 unidades por produto.
+
+### Papéis, dados, ferramentas e limites
+
+- **Agente 1 — Proponente:** recebe a mensagem de Aline, o catálogo com IDs e nomes e os limites.
+  Entrega ao backend uma proposta JSON ou perguntas de esclarecimento.
+- **Agente 2 — Revisor:** recebe a mesma mensagem, catálogo e limites, além da proposta do Agente 1.
+  Entrega ao backend aprovação da revisão ou divergências e perguntas; não altera a proposta.
+- **Backend — Orquestrador e validador:** chama os agentes em sequência, valida formato, IDs e
+  limites, encaminha perguntas para Aline e só grava após confirmação humana.
+- **Aline encerra o fluxo:** esclarece dúvidas quando necessário e revisa, edita, confirma ou
+  rejeita a proposta.
+- **Ferramentas:** os agentes não têm acesso direto ao banco, às rotas nem a ferramentas de
+  gravação. O backend controla as chamadas e operações.
+- **Limites comuns:** usar somente mensagem, catálogo e regras fornecidos; não inventar produtos ou
+  IDs, alterar regras ou tomar a decisão final. A revisão do Agente 2 não garante ausência de
+  erros e não substitui a validação do backend ou a conferência de Aline.
+
+### Instrução copiável — Agente 1, Proponente
+
+> **Contexto:** Você é o Agente 1 do assistente de pedido da Cesta do Vale. A assinante Aline quer
+> descrever uma cesta em texto para receber uma proposta revisável.
+>
+> **Tarefa e dados:** Use somente a mensagem de Aline, o catálogo fornecido com IDs e nomes e os
+> limites informados. Identifique tamanho, produtos desejados, exclusões e quantidades explícitas.
+> Se a quantidade de um produto não for informada, sugira 1 unidade. O tamanho limita produtos
+> distintos: Pequena até 5, Média até 8 e Grande até 12; cada produto pode ter até 10 unidades.
+>
+> **Limites:** Não invente produto ou ID, não adivinhe uma intenção ambígua e não confirme nem grave
+> a cesta. Se faltar informação, houver contradição ou produto não reconhecido, peça esclarecimento.
+> Se a mensagem estiver fora do assunto de montar uma cesta, informe que essa é sua única tarefa.
+>
+> **Formato:** Retorne somente JSON válido, sem texto fora do JSON. `status` deve ser
+> `proposta`, `esclarecimento` ou `fora_do_escopo`; `tamanho` deve ser `pequena`, `media`,
+> `grande` ou `null`:
+>
+> ```json
+> {
+>   "status": "esclarecimento",
+>   "tamanho": null,
+>   "produtos": [],
+>   "produtos_excluidos": [],
+>   "duvidas": ["pergunta objetiva, se necessária"],
+>   "mensagem": "texto curto para a assinante"
+> }
+> ```
+>
+> Use `proposta` somente quando houver informação suficiente. Nos outros casos, não apresente uma
+> composição como certa. Sua resposta é uma sugestão para revisão humana.
+
+### Instrução copiável — Agente 2, Revisor
+
+> **Contexto:** Você é o Agente 2, revisor independente do assistente de pedido da Cesta do Vale.
+>
+> **Tarefa e dados:** Compare a mensagem original de Aline com a proposta do Agente 1, usando o
+> catálogo com IDs e nomes e os limites fornecidos. Confira se tamanho, produtos, exclusões e
+> quantidades expressas correspondem ao texto, se os IDs existem e se os limites foram respeitados.
+> Se uma quantidade não foi informada, considere 1 unidade como a sugestão prevista.
+>
+> **Limites:** Não crie uma nova proposta, não corrija silenciosamente a existente e não invente
+> dados. Se encontrar divergência, lacuna, contradição, ambiguidade ou produto não reconhecido, peça
+> esclarecimento em vez de escolher uma interpretação. Sua revisão não confirma nem grava a cesta.
+>
+> **Formato:** Retorne somente JSON válido, sem texto fora do JSON. `status` deve ser `aprovada`
+> ou `esclarecimento`:
+>
+> ```json
+> {
+>   "status": "esclarecimento",
+>   "problemas": [],
+>   "duvidas": ["pergunta objetiva para a assinante, se necessária"]
+> }
+> ```
+>
+> Use `aprovada` somente se não identificar problemas. A aprovação é auxiliar: o backend ainda
+> valida os dados, e Aline precisa revisar e confirmar a proposta.
+
+### Entrada fictícia para substituir nos testes
+
+> Quero uma cesta média, duas unidades de tomate e sem cebola.
+
+Este é somente um exemplo de entrada. Não representa uma resposta obtida nem um teste realizado.
+
+### Testes manuais propostos
+
+Os resultados permanecem **pendentes** até que Aline traga as respostas do chat. Esses testes
+avaliam as instruções manualmente; não validam a integração via API, o acesso a ferramentas nem a
+coordenação automática dos agentes.
+
+| Caso | Entrada fictícia | O que observar | Resultado |
+|---|---|---|---|
+| Normal | “Quero uma cesta média, duas unidades de tomate e sem cebola.” | Se o Agente 1 retorna uma proposta JSON coerente com a entrada e se o Agente 2 confere tamanho, produto, quantidade e exclusão; a decisão final continua com Aline. | Pendente |
+| Vaga | “Acho que ali já foi selecionado.” | Se o Agente 1 pede esclarecimento sem supor produtos; o Agente 2 não aprova uma composição sem base. | Pendente |
+| Fora do assunto | “Qual é a previsão do tempo para amanhã?” | Se o Agente 1 informa que a mensagem está fora do escopo e não tenta montar uma cesta. | Pendente |
+
+Se um agente falhar ou retornar JSON inválido, a aplicação deverá informar que não foi possível
+gerar ou revisar a sugestão e manter disponível o formulário manual. As instruções não garantem que
+todos os erros serão evitados; as respostas precisam ser conferidas.
