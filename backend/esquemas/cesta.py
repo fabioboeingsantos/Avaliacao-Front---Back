@@ -12,7 +12,7 @@ class ProdutoDaCesta(BaseModel):
 
     id: str
     nome: str
-    quantidade: int = Field(gt=0)
+    quantidade: int = Field(gt=0, le=10)
 
 
 class NovaCesta(BaseModel):
@@ -29,3 +29,29 @@ class NovaSeparacao(BaseModel):
 
     produto_id: str = Field(min_length=1)
     quantidade: int = Field(gt=0)
+
+
+class ProdutoParaSeparar(BaseModel):
+    """Quantidade de um produto que será registrada no lote."""
+
+    produto_id: str = Field(min_length=1)
+    quantidade: int = Field(gt=0)
+
+
+class NovasSeparacoes(BaseModel):
+    """Lote de produtos para registrar em uma única cesta."""
+
+    produtos: list[ProdutoParaSeparar] = Field(min_length=1)
+
+
+class SeparacaoParaDesfazer(BaseModel):
+    """Quantidade registrada que deve ser removida de um produto."""
+
+    produto_id: str = Field(min_length=1)
+    quantidade: int = Field(gt=0)
+
+
+class DesfazerSeparacoes(BaseModel):
+    """Lote de quantidades a desfazer de uma cesta."""
+
+    produtos: list[SeparacaoParaDesfazer] = Field(min_length=1)

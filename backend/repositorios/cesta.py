@@ -1,5 +1,7 @@
 """Persistencia das cestas e do catalogo de produtos."""
 
+from datetime import datetime, timedelta
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -21,6 +23,11 @@ def _serializar_cesta(cesta: Cesta) -> dict:
         "modo": cesta.modo,
         "limite": cesta.limite,
         "situacao": cesta.situacao,
+        "separacao_concluida_em": (
+            cesta.separacao_concluida_em.isoformat()
+            if cesta.separacao_concluida_em is not None
+            else None
+        ),
         "produtos": [
             {"id": item.produto_id, "nome": item.produto.nome, "quantidade": item.quantidade}
             for item in cesta.itens
@@ -72,6 +79,7 @@ def adicionar_cesta(sessao: Session, dados: dict, usuario_id: int) -> dict:
         modo=dados["modo"],
         limite=dados["limite"],
         situacao=dados["situacao"],
+        separacao_concluida_em=dados.get("separacao_concluida_em"),
         itens=itens,
     )
     sessao.add(cesta)
@@ -93,18 +101,46 @@ def atualizar_cesta(sessao: Session, dados: dict) -> dict | None:
     }
     separacoes_existentes = {item.produto_id: item for item in cesta.separacoes}
 
-    for produto_id, item in separacoes_existentes.items():
+    for produto_id, item in list(separacoes_existentes.items()):
         if produto_id in separacoes:
             item.quantidade = separacoes[produto_id]
+        else:
+            cesta.separacoes.remove(item)
 
     for produto_id, quantidade in separacoes.items():
         if produto_id not in separacoes_existentes:
             cesta.separacoes.append(Separacao(produto_id=produto_id, quantidade=quantidade))
 
     cesta.situacao = dados["situacao"]
+    concluida_em = dados.get("separacao_concluida_em")
+    cesta.separacao_concluida_em = (
+        datetime.fromisoformat(concluida_em) if isinstance(concluida_em, str) else concluida_em
+    )
     sessao.commit()
     sessao.refresh(cesta)
     return _serializar_cesta(cesta)
+
+
+def marcar_entregues_expiradas(sessao: Session, agora) -> None:
+    """Marca como entregues as cestas concluídas há pelo menos sete dias."""
+
+    cestas = sessao.scalars(
+        select(Cesta).where(
+            Cesta.separacao_concluida_em.is_not(None),
+            Cesta.situacao != "Entregue",
+        )
+    ).all()
+    alteradas = False
+    for cesta in cestas:
+        concluida_em = cesta.separacao_concluida_em
+        if concluida_em.tzinfo is None:
+            concluida_em = concluida_em.replace(tzinfo=agora.tzinfo)
+        if agora - concluida_em >= timedelta(days=7):
+            cesta.situacao = "Entregue"
+            alteradas = True
+
+    if alteradas:
+        sessao.commit()
 
 
 def listar_produtos_disponiveis(sessao: Session) -> list[dict]:

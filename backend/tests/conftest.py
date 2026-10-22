@@ -65,7 +65,23 @@ def cliente() -> Generator[TestClient, None, None]:
                 perfil="produtor",
                 ativo=True,
             ),
-            Produto(id="alface", nome="Alface"),
+            *[
+                Produto(id=produto_id, nome=produto_id.title())
+                for produto_id in (
+                    "alface",
+                    "tomate",
+                    "cenoura",
+                    "batata",
+                    "cebola",
+                    "couve",
+                    "beterraba",
+                    "abobrinha",
+                    "chuchu",
+                    "pimentao",
+                    "pepino",
+                    "mandioca",
+                )
+            ],
         ]
     )
     sessao.flush()
@@ -81,7 +97,7 @@ def cliente() -> Generator[TestClient, None, None]:
                 tamanho_nome="Pequena",
                 modo="pronta",
                 limite=5,
-                situacao="Pedida",
+                situacao="Pendente",
                 itens=[ItemCesta(produto_id="alface", quantidade=2)],
             ),
             Cesta(
@@ -92,7 +108,7 @@ def cliente() -> Generator[TestClient, None, None]:
                 tamanho_nome="Media",
                 modo="selecionavel",
                 limite=8,
-                situacao="Pedida",
+                situacao="Pendente",
                 itens=[ItemCesta(produto_id="alface", quantidade=1)],
             ),
         ]

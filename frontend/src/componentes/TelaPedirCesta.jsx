@@ -6,6 +6,7 @@ const tamanhos = [
   { id: 'media', nome: 'Média', limite: 8 },
   { id: 'grande', nome: 'Grande', limite: 12 },
 ]
+const limitePorProduto = 10
 
 // Este é o catálogo inicial de 12 produtos usados na demonstração.
 // As imagens ficam em public/produtos para serem servidas pelo Vite.
@@ -72,39 +73,62 @@ function obterItensCestaPronta(tamanho) {
 function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, aoSair }) {
   const [modoSelecionado, setModoSelecionado] = useState('')
   const [tamanhoSelecionado, setTamanhoSelecionado] = useState('')
-  const [produtosSelecionados, setProdutosSelecionados] = useState([])
+  const [quantidadesSelecionadas, setQuantidadesSelecionadas] = useState({})
   const [erro, setErro] = useState('')
 
   // Quando o tipo muda, o tamanho e os produtos escolhidos começam novamente.
   function escolherModo(modo) {
     setModoSelecionado(modo)
     setTamanhoSelecionado('')
-    setProdutosSelecionados([])
+    setQuantidadesSelecionadas({})
     setErro('')
   }
 
   // Trocar o tamanho reinicia a seleção personalizada para respeitar o novo limite.
   function escolherTamanho(tamanho) {
     setTamanhoSelecionado(tamanho)
-    setProdutosSelecionados([])
+    setQuantidadesSelecionadas({})
     setErro('')
   }
 
-  // Adiciona ou remove um produto da cesta selecionável sem ultrapassar o limite.
+  const quantidadeProdutosSelecionados = Object.keys(quantidadesSelecionadas).length
+
+  // Adiciona ou remove produtos sem ultrapassar a quantidade de produtos do tamanho.
   function alternarProduto(idProduto) {
     const tamanho = tamanhos.find((item) => item.id === tamanhoSelecionado)
-    const jaSelecionado = produtosSelecionados.includes(idProduto)
+    const quantidadeAtual = quantidadesSelecionadas[idProduto] ?? 0
 
-    if (!jaSelecionado && produtosSelecionados.length >= tamanho.limite) {
-      setErro(`A cesta ${tamanho.nome.toLowerCase()} comporta até ${tamanho.limite} itens.`)
+    if (quantidadeAtual === 0 && quantidadeProdutosSelecionados >= tamanho.limite) {
+      setErro(`A cesta ${tamanho.nome.toLowerCase()} comporta até ${tamanho.limite} produtos diferentes.`)
       return
     }
 
-    setProdutosSelecionados((produtosAtuais) =>
-      jaSelecionado
-        ? produtosAtuais.filter((id) => id !== idProduto)
-        : [...produtosAtuais, idProduto],
-    )
+    setQuantidadesSelecionadas((quantidadesAtuais) => {
+      const atualizadas = { ...quantidadesAtuais }
+      if (quantidadeAtual > 0) {
+        delete atualizadas[idProduto]
+      } else {
+        atualizadas[idProduto] = 1
+      }
+      return atualizadas
+    })
+    setErro('')
+  }
+
+  function alterarQuantidadeProduto(idProduto, quantidade) {
+    if (quantidade > limitePorProduto) {
+      return
+    }
+
+    setQuantidadesSelecionadas((quantidadesAtuais) => {
+      const atualizadas = { ...quantidadesAtuais }
+      if (quantidade === 0) {
+        delete atualizadas[idProduto]
+      } else {
+        atualizadas[idProduto] = quantidade
+      }
+      return atualizadas
+    })
     setErro('')
   }
 
@@ -115,8 +139,11 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, aoSair }) {
       modoSelecionado === 'pronta'
         ? obterItensCestaPronta(tamanhoSelecionado)
         : catalogoProdutos
-            .filter((produto) => produtosSelecionados.includes(produto.id))
-            .map((produto) => ({ ...produto, quantidade: 1 }))
+            .filter((produto) => quantidadesSelecionadas[produto.id] > 0)
+            .map((produto) => ({
+              ...produto,
+              quantidade: quantidadesSelecionadas[produto.id],
+            }))
 
     if (!modoSelecionado || !tamanhoSelecionado) {
       setErro('Escolha o tipo e o tamanho da cesta antes de continuar.')
@@ -270,38 +297,68 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, aoSair }) {
               <p className="rotulo-cartao">Monte sua cesta</p>
               <h2 id="titulo-selecao-produtos">Escolha os produtos</h2>
               <p className="ajuda-formulario">
-                Selecione até o limite do tamanho escolhido. Produtos selecionados:{' '}
-                <strong>{produtosSelecionados.length}</strong> de{' '}
+                Escolha até{' '}
+                <strong>{tamanhos.find((item) => item.id === tamanhoSelecionado).limite}</strong>{' '}
+                produtos diferentes. Produtos selecionados:{' '}
+                <strong>{quantidadeProdutosSelecionados}</strong> de{' '}
                 <strong>{tamanhos.find((item) => item.id === tamanhoSelecionado).limite}</strong>.
+                {' '}Cada produto pode ter até {limitePorProduto} unidades.
               </p>
             </div>
 
             <div className="opcoes-produtos">
               {catalogoProdutos.map((produto) => {
-                const selecionado = produtosSelecionados.includes(produto.id)
+                const quantidade = quantidadesSelecionadas[produto.id] ?? 0
+                const selecionado = quantidade > 0
                 const tamanho = tamanhos.find((item) => item.id === tamanhoSelecionado)
-                const desabilitado = !selecionado && produtosSelecionados.length >= tamanho.limite
+                const desabilitado =
+                  !selecionado && quantidadeProdutosSelecionados >= tamanho.limite
 
                 return (
-                  <label
-                    className={`botao-produto-pronto produto-selecionavel ${
+                  <article
+                    className={`cartao-produto-selecionavel ${
                       selecionado ? 'produto-em-foco' : ''
                     }`}
                     key={produto.id}
                   >
-                    <input
-                      className="campo-produto"
-                      type="checkbox"
-                      checked={selecionado}
-                      disabled={desabilitado}
-                      onChange={() => alternarProduto(produto.id)}
-                    />
-                    <img className="imagem-produto" src={produto.imagem} alt="" />
-                    <span className="nome-produto">{produto.nome}</span>
-                    <strong className="indicador-selecao">
-                      {selecionado ? '✓ Selecionado' : 'Selecionar'}
-                    </strong>
-                  </label>
+                    <label className="botao-produto-pronto produto-selecionavel">
+                      <input
+                        className="campo-produto"
+                        type="checkbox"
+                        checked={selecionado}
+                        disabled={desabilitado}
+                        onChange={() => alternarProduto(produto.id)}
+                      />
+                      <img className="imagem-produto" src={produto.imagem} alt="" />
+                      <span className="nome-produto">{produto.nome}</span>
+                      <strong className="indicador-selecao">
+                        {selecionado ? '✓ Selecionado' : 'Selecionar'}
+                      </strong>
+                    </label>
+                    {selecionado && (
+                      <div className="controle-quantidade-selecionavel">
+                        <button
+                          className="botao-quantidade-fechamento"
+                          type="button"
+                          aria-label={`Diminuir quantidade de ${produto.nome}`}
+                          onClick={() => alterarQuantidadeProduto(produto.id, quantidade - 1)}
+                        >
+                          −
+                        </button>
+                        <output aria-live="polite">{quantidade}</output>
+                        <button
+                          className="botao-quantidade-fechamento"
+                          type="button"
+                          aria-label={`Aumentar quantidade de ${produto.nome}`}
+                          disabled={quantidade >= limitePorProduto}
+                          onClick={() => alterarQuantidadeProduto(produto.id, quantidade + 1)}
+                        >
+                          +
+                        </button>
+                        <span>de {limitePorProduto} un.</span>
+                      </div>
+                    )}
+                  </article>
                 )
               })}
             </div>

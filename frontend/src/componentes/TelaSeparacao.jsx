@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
 // Esta é a tela principal do produtor, com as cestas filtradas para a separação da semana.
-function TelaSeparacao({ cestas, aoAbrirFechamento, aoSair }) {
+function TelaSeparacao({ cestas, aoAbrirFechamento }) {
   const [filtroTamanho, setFiltroTamanho] = useState('todos')
-  const [filtroSituacao, setFiltroSituacao] = useState('todas')
+  const [filtroSituacao, setFiltroSituacao] = useState('Em separação')
 
   // Soma o que já foi separado para mostrar o espaço restante da cesta.
   function obterTotalSeparado(cesta) {
@@ -19,7 +19,7 @@ function TelaSeparacao({ cestas, aoAbrirFechamento, aoSair }) {
   // Aplica os dois filtros opcionais sem alterar a lista original de cestas.
   const cestasFiltradas = cestas.filter((cesta) => {
     const correspondeAoTamanho = filtroTamanho === 'todos' || cesta.tamanhoNome === filtroTamanho
-    const correspondeASituacao = filtroSituacao === 'todas' || cesta.situacao === filtroSituacao
+    const correspondeASituacao = cesta.situacao === filtroSituacao
 
     return correspondeAoTamanho && correspondeASituacao
   })
@@ -38,9 +38,6 @@ function TelaSeparacao({ cestas, aoAbrirFechamento, aoSair }) {
               A separação
             </button>
           </nav>
-          <button className="botao-navegacao" type="button" onClick={aoSair}>
-            Voltar à landing page
-          </button>
         </div>
       </header>
 
@@ -68,10 +65,9 @@ function TelaSeparacao({ cestas, aoAbrirFechamento, aoSair }) {
           <label className="campo-login">
             <span>Situação</span>
             <select value={filtroSituacao} onChange={(evento) => setFiltroSituacao(evento.target.value)}>
-              <option value="todas">Todas as situações</option>
-              <option value="Pedida">Pedida</option>
+              <option value="Pendente">Pendente</option>
               <option value="Em separação">Em separação</option>
-              <option value="Separação concluída">Separação concluída</option>
+              <option value="Entregue">Entregue</option>
             </select>
           </label>
         </div>
@@ -80,16 +76,17 @@ function TelaSeparacao({ cestas, aoAbrirFechamento, aoSair }) {
       {cestasFiltradas.length === 0 ? (
         <section className="estado-vazio estado-vazio-historico">
           <h2>Nenhuma cesta encontrada</h2>
-          <p>Quando uma assinante finalizar um pedido, ele aparecerá nesta lista.</p>
+          <p>
+            {`Não há cestas com situação “${filtroSituacao}”.`}
+          </p>
         </section>
       ) : (
         <section className="lista-cestas-produtor" aria-label="Cestas para separação">
           {cestasFiltradas.map((cesta) => {
             const totalSeparado = obterTotalSeparado(cesta)
-            const limite = cesta.limite ?? cesta.produtos.reduce((total, produto) => total + produto.quantidade, 0)
             const totalPedido = cesta.produtos.reduce((total, produto) => total + produto.quantidade, 0)
             const restantePedido = totalPedido - totalSeparado
-            const espacoLivre = limite - totalSeparado
+            const espacoLivre = totalPedido - totalSeparado
 
             return (
               <article className="cartao-cesta-produtor" key={cesta.id}>
@@ -109,17 +106,40 @@ function TelaSeparacao({ cestas, aoAbrirFechamento, aoSair }) {
                 </div>
 
                 <ul className="produtos-cesta">
-                  {cesta.produtos.map((produto) => (
-                    <li className="produto-cesta" key={produto.id}>
-                      <span>{produto.nome}</span>
-                      <strong>{produto.quantidade} item</strong>
-                    </li>
-                  ))}
+                  {cesta.produtos.map((produto) => {
+                    const quantidadeSeparada =
+                      cesta.separacoes?.find((item) => item.produtoId === produto.id)?.quantidade ?? 0
+
+                    return (
+                      <li className="produto-cesta" key={produto.id}>
+                        <img
+                          className="imagem-produto-cesta"
+                          src={produto.imagem ?? `/produtos/${produto.id}.jpg`}
+                          alt=""
+                        />
+                        <span className="nome-produto-cesta">{produto.nome}</span>
+                        <strong>
+                          {quantidadeSeparada} de {produto.quantidade}
+                        </strong>
+                      </li>
+                    )
+                  })}
                 </ul>
 
-                <button className="botao botao-primario" type="button" onClick={() => aoAbrirFechamento(cesta)}>
-                  Abrir fechamento
-                </button>
+                {cesta.situacao !== 'Entregue' && (
+                  <div className="acoes-cesta-produtor">
+                    <button
+                      className="botao botao-primario"
+                      type="button"
+                      onClick={() => aoAbrirFechamento(cesta)}
+                    >
+                      {cesta.separacaoConcluidaEm ? 'Em andamento' : 'Separar produtos'}
+                    </button>
+                    {cesta.separacaoConcluidaEm && (
+                      <span>Aguardando confirmação de recebimento do cliente</span>
+                    )}
+                  </div>
+                )}
               </article>
             )
           })}

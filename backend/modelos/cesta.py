@@ -1,8 +1,8 @@
 """Modelo SQLAlchemy da cesta."""
 
-from datetime import date
+from datetime import date, datetime
 
-from sqlalchemy import Date, ForeignKey, Integer, String
+from sqlalchemy import Date, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from banco import Base
@@ -28,6 +28,9 @@ class Cesta(Base):
     modo: Mapped[str] = mapped_column(String(20), nullable=False)
     limite: Mapped[int] = mapped_column(Integer, nullable=False)
     situacao: Mapped[str] = mapped_column(String(40), nullable=False)
+    separacao_concluida_em: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     usuario: Mapped[Usuario | None] = relationship()
     itens: Mapped[list[ItemCesta]] = relationship(

@@ -1,5 +1,16 @@
+import { useState } from 'react'
+
 // Mostra para a assinante o que foi pedido e o que o produtor ja separou.
-function TelaDetalhesCesta({ cesta, aoAbrirPedido, aoAbrirHistorico, aoSair }) {
+function TelaDetalhesCesta({
+  cesta,
+  aoAbrirPedido,
+  aoAbrirHistorico,
+  aoConfirmarEntrega,
+  aoSair,
+}) {
+  const [confirmando, setConfirmando] = useState(false)
+  const [erro, setErro] = useState('')
+
   if (!cesta) {
     return (
       <main className="pagina-pedido">
@@ -20,6 +31,25 @@ function TelaDetalhesCesta({ cesta, aoAbrirPedido, aoAbrirHistorico, aoSair }) {
   )
   const totalPedido = cesta.produtos.reduce((total, produto) => total + produto.quantidade, 0)
   const totalSeparado = separacoes.reduce((total, separacao) => total + separacao.quantidade, 0)
+
+  async function confirmarRecebimento() {
+    setConfirmando(true)
+    setErro('')
+    try {
+      const resultado = await aoConfirmarEntrega(cesta.id)
+      if (!resultado?.sucesso) {
+        setErro(resultado?.erro ?? 'Não foi possível confirmar o recebimento.')
+      }
+    } catch (erroAoConfirmar) {
+      setErro(
+        erroAoConfirmar instanceof Error
+          ? erroAoConfirmar.message
+          : 'Não foi possível confirmar o recebimento.',
+      )
+    } finally {
+      setConfirmando(false)
+    }
+  }
 
   return (
     <main className="pagina-pedido">
@@ -62,6 +92,29 @@ function TelaDetalhesCesta({ cesta, aoAbrirPedido, aoAbrirHistorico, aoSair }) {
         </div>
         <span className="etiqueta-perfil">{cesta.modoNome}</span>
       </section>
+
+      {erro && (
+        <p className="mensagem mensagem-erro" role="alert">
+          {erro}
+        </p>
+      )}
+
+      {cesta.separacaoConcluidaEm && cesta.situacao !== 'Entregue' && (
+        <section className="composicao-cesta">
+          <p>Recebeu sua cesta? Confirme para atualizar a situação para “Entregue”.</p>
+          <button
+            className="botao botao-primario"
+            type="button"
+            disabled={confirmando}
+            onClick={confirmarRecebimento}
+          >
+            {confirmando ? 'Confirmando...' : 'Concluído: recebi a cesta'}
+          </button>
+        </section>
+      )}
+      {cesta.separacaoConcluidaEm && cesta.situacao !== 'Entregue' && (
+        <p>Se não confirmar o recebimento, a situação mudará para “Entregue” após sete dias.</p>
+      )}
 
       <div className="detalhes-cesta-assinante">
         <section className="composicao-cesta" aria-labelledby="titulo-pedido-cesta">

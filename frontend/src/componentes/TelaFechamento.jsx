@@ -1,11 +1,35 @@
 import { useState } from 'react'
 
-// Esta tela permite ao produtor registrar cada produto separado em uma cesta específica.
-function TelaFechamento({ cesta, aoAbrirSeparacao, aoRegistrarSeparacao, aoSair }) {
-  const [produtoSelecionado, setProdutoSelecionado] = useState('')
-  const [quantidade, setQuantidade] = useState('1')
+function criarQuantidadesAtuais(cesta) {
+  if (!cesta) {
+    return {}
+  }
+
+  return Object.fromEntries(
+    cesta.produtos.map((produto) => [
+      produto.id,
+      String(cesta.separacoes?.find((item) => item.produtoId === produto.id)?.quantidade ?? 0),
+    ]),
+  )
+}
+
+// Esta tela permite ao produtor ajustar e registrar todos os produtos de uma vez.
+function TelaFechamento({
+  cesta,
+  aoAbrirSeparacao,
+  aoRegistrarSeparacoes,
+  aoDesfazerSeparacoes,
+  aoConcluirSeparacao,
+}) {
+  const [rascunho, setRascunho] = useState(() => ({
+    cestaId: cesta?.id ?? null,
+    quantidades: criarQuantidadesAtuais(cesta),
+  }))
   const [erro, setErro] = useState('')
   const [mensagem, setMensagem] = useState('')
+  const [salvando, setSalvando] = useState(false)
+  const [ultimoLote, setUltimoLote] = useState(null)
+  const [desfazendo, setDesfazendo] = useState(false)
 
   if (!cesta) {
     return (
@@ -21,64 +45,154 @@ function TelaFechamento({ cesta, aoAbrirSeparacao, aoRegistrarSeparacao, aoSair 
     )
   }
 
-  // Calcula o total separado e o limite antes de aceitar um novo lançamento.
-  const totalSeparado = (cesta.separacoes ?? []).reduce((total, item) => total + item.quantidade, 0)
-  const limite = cesta.limite ?? cesta.produtos.reduce((total, produto) => total + produto.quantidade, 0)
-  const totalPedido = cesta.produtos.reduce((total, produto) => total + produto.quantidade, 0)
-  const restantePedido = totalPedido - totalSeparado
-  const espacoLivre = limite - totalSeparado
+  const separacaoJaConcluida = Boolean(cesta.separacaoConcluidaEm)
+  const permiteEditarQuantidades =
+    cesta.modoNome === 'Cesta selecionável' && !separacaoJaConcluida
+  const quantidades = permiteEditarQuantidades
+    ? cesta.id === rascunho.cestaId
+      ? rascunho.quantidades
+      : criarQuantidadesAtuais(cesta)
+    : Object.fromEntries(cesta.produtos.map((produto) => [produto.id, String(produto.quantidade)]))
 
-  // Busca a quantidade já registrada de um produto para exibir o andamento da cesta.
   function obterQuantidadeSeparada(produtoId) {
     return cesta.separacoes?.find((item) => item.produtoId === produtoId)?.quantidade ?? 0
   }
 
-  const produtoAtual = cesta.produtos.find((produto) => produto.id === produtoSelecionado)
-  const restanteProduto = produtoAtual
-    ? produtoAtual.quantidade - obterQuantidadeSeparada(produtoAtual.id)
-    : 0
+  const totalSeparado = (cesta.separacoes ?? []).reduce((total, item) => total + item.quantidade, 0)
+  const totalPedido = cesta.produtos.reduce((total, produto) => total + produto.quantidade, 0)
+  const totalPlanejado = cesta.produtos.reduce(
+    (total, produto) => total + (Number(quantidades[produto.id]) || 0),
+    0,
+  )
+  const itensPendentes = cesta.produtos.filter(
+    (produto) => Number(quantidades[produto.id]) > obterQuantidadeSeparada(produto.id),
+  )
+  const separacaoCompleta = cesta.produtos.every(
+    (produto) => obterQuantidadeSeparada(produto.id) >= produto.quantidade,
+  )
 
-  // Valida o lançamento e envia somente uma quantidade que ainda cabe na cesta.
-  async function registrarProduto(evento) {
-    evento.preventDefault()
-    const quantidadeInformada = Number(quantidade)
-
-    if (!produtoSelecionado) {
-      setErro('Escolha um produto para registrar.')
-      return
-    }
-
-    if (!Number.isInteger(quantidadeInformada) || quantidadeInformada <= 0) {
-      setErro('Informe uma quantidade inteira maior que zero.')
-      return
-    }
-
-    if (quantidadeInformada > restanteProduto) {
-      setErro(`O produto comporta mais ${restanteProduto} item(ns).`)
-      return
-    }
-
-    if (quantidadeInformada > espacoLivre) {
-      setErro(`A cesta comporta mais ${espacoLivre} item(ns).`)
-      return
-    }
-
-    const resultado = await aoRegistrarSeparacao({
-      pedidoId: cesta.id,
-      produtoId: produtoSelecionado,
-      quantidade: quantidadeInformada,
+  function alterarQuantidade(produtoId, quantidade) {
+    setRascunho({
+      cestaId: cesta.id,
+      quantidades: { ...quantidades, [produtoId]: String(quantidade) },
     })
+    setErro('')
+    setMensagem('')
+  }
 
-    if (!resultado?.sucesso) {
-      setMensagem('')
-      setErro(resultado?.erro ?? 'Não foi possível registrar a separação.')
+  function selecionarTodosProdutos() {
+    setRascunho({
+      cestaId: cesta.id,
+      quantidades: Object.fromEntries(
+        cesta.produtos.map((produto) => [
+          produto.id,
+          String(Math.max(produto.quantidade, obterQuantidadeSeparada(produto.id))),
+        ]),
+      ),
+    })
+    setErro('')
+    setMensagem('')
+  }
+
+  async function registrarSeparacoes(evento) {
+    evento.preventDefault()
+    setErro('')
+    setMensagem('')
+
+    const quantidadesPlanejadas = cesta.produtos.map((produto) => ({
+      produto,
+      atual: obterQuantidadeSeparada(produto.id),
+      planejada: Number(quantidades[produto.id]),
+    }))
+
+    const quantidadeInvalida = quantidadesPlanejadas.find(
+      ({ produto, atual, planejada }) =>
+        !Number.isInteger(planejada) || planejada < atual || planejada > produto.quantidade,
+    )
+
+    if (quantidadeInvalida) {
+      setErro('Confira as quantidades: elas devem ser inteiras e não podem ultrapassar o pedido.')
       return
     }
 
-    setMensagem('Produto separado com sucesso.')
+    const pendentes = quantidadesPlanejadas.filter(({ atual, planejada }) => planejada > atual)
+
+    if (pendentes.length === 0) {
+      setMensagem('Todas as quantidades já estão registradas.')
+      return
+    }
+
+    const produtosRegistrados = pendentes.map(({ produto, atual, planejada }) => ({
+      produtoId: produto.id,
+      quantidade: planejada - atual,
+    }))
+    setSalvando(true)
+    try {
+      const resultado = await aoRegistrarSeparacoes({
+        pedidoId: cesta.id,
+        produtos: produtosRegistrados,
+      })
+
+      if (!resultado?.sucesso) {
+        setErro(resultado?.erro ?? 'Não foi possível registrar a separação.')
+        return
+      }
+
+      setUltimoLote({ cestaId: cesta.id, produtos: produtosRegistrados })
+      setMensagem(
+        produtosRegistrados.length === 1
+          ? 'Separação registrada com sucesso.'
+          : `${produtosRegistrados.length} produtos registrados com sucesso.`,
+      )
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  async function desfazerUltimoLote() {
+    if (!ultimoLote || ultimoLote.cestaId !== cesta.id) {
+      return
+    }
+
+    setDesfazendo(true)
     setErro('')
-    setProdutoSelecionado('')
-    setQuantidade('1')
+    setMensagem('')
+
+    try {
+      const resultado = await aoDesfazerSeparacoes({
+        pedidoId: cesta.id,
+        produtos: ultimoLote.produtos,
+      })
+
+      if (!resultado?.sucesso) {
+        setErro(resultado?.erro ?? 'Não foi possível desfazer a última separação.')
+        return
+      }
+
+      setUltimoLote(null)
+      setRascunho({ cestaId: null, quantidades: {} })
+      setMensagem('Última separação desfeita.')
+    } finally {
+      setDesfazendo(false)
+    }
+  }
+
+  async function concluirSeparacao() {
+    setErro('')
+    setMensagem('')
+    setSalvando(true)
+
+    try {
+      const resultado = await aoConcluirSeparacao(cesta.id)
+      if (!resultado?.sucesso) {
+        setErro(resultado?.erro ?? 'Não foi possível concluir a separação.')
+        return
+      }
+
+      setMensagem('Separação concluída com sucesso.')
+    } finally {
+      setSalvando(false)
+    }
   }
 
   return (
@@ -98,30 +212,27 @@ function TelaFechamento({ cesta, aoAbrirSeparacao, aoRegistrarSeparacao, aoSair 
               O fechamento
             </button>
           </nav>
-          <button className="botao-navegacao" type="button" onClick={aoSair}>
-            Voltar à landing page
-          </button>
         </div>
       </header>
 
       <section className="introducao-pedido" aria-labelledby="titulo-fechamento">
         <p className="texto-saudacao">Pedido de {cesta.data}</p>
         <h1 id="titulo-fechamento">O fechamento</h1>
-        <p>Registre o que já foi separado para a cesta {cesta.tamanhoNome}.</p>
+        <p>Ajuste as quantidades separadas e registre todos os produtos de uma vez.</p>
       </section>
 
       <section className="resumo-fechamento" aria-label="Resumo da separação">
         <div>
           <span>Já separado</span>
-          <strong>{totalSeparado} itens</strong>
+          <strong>{totalSeparado} de {totalPedido}</strong>
+        </div>
+        <div>
+          <span>Planejado</span>
+          <strong>{totalPlanejado} de {totalPedido}</strong>
         </div>
         <div>
           <span>Falta separar</span>
-          <strong>{restantePedido} itens</strong>
-        </div>
-        <div>
-          <span>Espaço livre</span>
-          <strong>{espacoLivre} itens</strong>
+          <strong>{Math.max(totalPedido - totalSeparado, 0)}</strong>
         </div>
         <span
           className={`status-cesta status-${cesta.situacao
@@ -146,56 +257,129 @@ function TelaFechamento({ cesta, aoAbrirSeparacao, aoRegistrarSeparacao, aoSair 
         </p>
       )}
 
-      <section className="detalhes-fechamento" aria-labelledby="titulo-produtos-separados">
+      <form className="formulario-fechamento" onSubmit={registrarSeparacoes}>
         <div>
           <p className="rotulo-cartao">Composição da cesta</p>
-          <h2 id="titulo-produtos-separados">Produtos separados</h2>
+          <h2>Produtos e quantidades</h2>
+          <p className="instrucao-fechamento">
+            Use os botões para ajustar cada produto. Depois, registre tudo junto.
+          </p>
+          {permiteEditarQuantidades && (
+            <button
+              className="botao botao-secundario botao-selecionar-todos"
+              type="button"
+              disabled={
+                salvando ||
+                cesta.produtos.every(
+                  (produto) => Number(quantidades[produto.id]) >= produto.quantidade,
+                )
+              }
+              onClick={selecionarTodosProdutos}
+            >
+              Selecionar todos os produtos
+            </button>
+          )}
         </div>
 
-        <ul className="lista-produtos-fechamento">
-          {cesta.produtos.map((produto) => (
-            <li key={produto.id}>
-              <span>{produto.nome}</span>
-              <strong>{obterQuantidadeSeparada(produto.id)} de {produto.quantidade}</strong>
-            </li>
-          ))}
-        </ul>
-      </section>
+        <ul className="lista-produtos-fechamento lista-produtos-editavel">
+          {cesta.produtos.map((produto) => {
+            const atual = obterQuantidadeSeparada(produto.id)
+            const quantidadePlanejada = Number(quantidades[produto.id]) || 0
+            const quantidadeDosOutros = totalPlanejado - quantidadePlanejada
+            const maximoPermitido = Math.max(
+              atual,
+              Math.min(produto.quantidade, limite - quantidadeDosOutros),
+            )
 
-      <form className="formulario-fechamento" onSubmit={registrarProduto}>
-        <h2>Registrar produto</h2>
-        <label className="campo-login">
-          <span>Produto</span>
-          <select value={produtoSelecionado} onChange={(evento) => setProdutoSelecionado(evento.target.value)}>
-            <option value="">Selecione um produto</option>
-            {cesta.produtos.map((produto) => (
-              <option
-                value={produto.id}
+            return (
+              <li
+                className={`cartao-produto-fechamento ${
+                  quantidadePlanejada >= produto.quantidade ? 'produto-fechamento-completo' : ''
+                }`}
                 key={produto.id}
-                disabled={obterQuantidadeSeparada(produto.id) >= produto.quantidade}
               >
-                {produto.nome} ({obterQuantidadeSeparada(produto.id)} de {produto.quantidade})
-              </option>
-            ))}
-          </select>
-        </label>
+                <img
+                  className="imagem-produto-fechamento"
+                  src={`/produtos/${produto.id}.jpg`}
+                  alt=""
+                />
+                <strong className="nome-produto-fechamento">{produto.nome}</strong>
+                <span className="progresso-produto-fechamento">
+                  Separado: {atual} de {produto.quantidade}
+                </span>
+                {permiteEditarQuantidades ? (
+                  <div className="controle-quantidade-fechamento" aria-label={`Quantidade de ${produto.nome}`}>
+                    <button
+                      className="botao-quantidade-fechamento"
+                      type="button"
+                      aria-label={`Diminuir quantidade de ${produto.nome}`}
+                      disabled={
+                        salvando ||
+                        desfazendo ||
+                        separacaoJaConcluida ||
+                        quantidadePlanejada <= atual
+                      }
+                      onClick={() => alterarQuantidade(produto.id, quantidadePlanejada - 1)}
+                    >
+                      −
+                    </button>
+                    <output className="valor-quantidade-fechamento" aria-live="polite">
+                      {quantidades[produto.id]}
+                    </output>
+                    <button
+                      className="botao-quantidade-fechamento"
+                      type="button"
+                      aria-label={`Aumentar quantidade de ${produto.nome}`}
+                      disabled={
+                        salvando ||
+                        desfazendo ||
+                        separacaoJaConcluida ||
+                        quantidadePlanejada >= maximoPermitido
+                      }
+                      onClick={() => alterarQuantidade(produto.id, quantidadePlanejada + 1)}
+                    >
+                      +
+                    </button>
+                  </div>
+                ) : (
+                  <span className="quantidade-fixa-produto">
+                    Quantidade: {produto.quantidade}
+                  </span>
+                )}
+              </li>
+            )
+          })}
+        </ul>
 
-        <label className="campo-login">
-          <span>Quantidade</span>
-          <input
-            type="number"
-            min="1"
-            step="1"
-            value={quantidade}
-            onChange={(evento) => setQuantidade(evento.target.value)}
-            max={produtoAtual ? Math.min(espacoLivre, restanteProduto) : espacoLivre}
-            disabled={restantePedido === 0}
-          />
-        </label>
-
-        <button className="botao botao-primario" type="submit" disabled={restantePedido === 0}>
-          {restantePedido === 0 ? 'Separação concluída' : 'Registrar separação'}
+        <button
+          className="botao botao-primario"
+          type="submit"
+          disabled={salvando || desfazendo || itensPendentes.length === 0}
+        >
+          {salvando
+            ? 'Registrando separação...'
+            : itensPendentes.length === 0
+              ? 'Separação atualizada'
+              : `Registrar ${itensPendentes.length} produto(s)`}
         </button>
+        <button
+          className="botao botao-secundario"
+          type="button"
+          disabled={salvando || desfazendo || !separacaoCompleta || separacaoJaConcluida}
+          onClick={concluirSeparacao}
+        >
+          {separacaoJaConcluida ? 'Separação concluída' : 'Concluir separação'}
+        </button>
+        {ultimoLote?.cestaId === cesta.id && (
+          <button
+            className="botao botao-secundario botao-desfazer-separacao"
+            type="button"
+            disabled={salvando || desfazendo}
+            onClick={desfazerUltimoLote}
+          >
+            {desfazendo ? 'Desfazendo...' : 'Desfazer última separação'}
+          </button>
+        )}
       </form>
     </main>
   )

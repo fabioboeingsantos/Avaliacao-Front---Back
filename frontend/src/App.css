@@ -517,7 +517,7 @@
   white-space: nowrap;
 }
 
-.status-pedida {
+.status-pendente {
   color: var(--cor-pedida);
   background: var(--cor-fundo-etiqueta-pedida);
 }
@@ -527,7 +527,7 @@
   background: var(--cor-fundo-etiqueta-separacao);
 }
 
-.status-separacao-concluida {
+.status-entregue {
   color: var(--cor-sucesso);
   background: var(--cor-fundo-sucesso);
 }
@@ -544,24 +544,46 @@
 
 .produtos-cesta {
   display: grid;
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 10px;
   padding: 0;
   list-style: none;
 }
 
 .produto-cesta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px;
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  align-content: start;
+  gap: 5px;
+  padding: 8px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+  background: var(--cor-branco);
+}
+
+.imagem-produto-cesta {
+  width: 64px;
+  height: 64px;
   border-radius: 8px;
-  background: var(--cor-verde-claro);
+  background: var(--cor-creme-natural);
+  object-fit: cover;
+}
+
+.nome-produto-cesta {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--cor-verde-escuro);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-semi);
+  line-height: 1.2;
+  text-align: center;
 }
 
 .produto-cesta strong {
-  color: var(--cor-verde-escuro);
-  font-size: var(--texto-rotulo);
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-pequeno);
+  font-weight: var(--peso-regular);
 }
 
 .estado-vazio {
@@ -625,8 +647,28 @@
   gap: 12px;
 }
 
+.cartao-produto-selecionavel {
+  min-width: 0;
+  padding: 8px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: var(--cor-verde-claro);
+}
+
+.cartao-produto-selecionavel.produto-em-foco {
+  border-color: var(--cor-verde-horta);
+  background: var(--cor-creme-natural);
+  box-shadow: 0 0 0 3px var(--cor-verde-claro);
+}
+
 .produto-selecionavel {
   position: relative;
+}
+
+.produto-selecionavel.botao-produto-pronto {
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .campo-produto {
@@ -679,6 +721,26 @@
 
 .indicador-selecao {
   color: var(--cor-verde-escuro);
+}
+
+.controle-quantidade-selecionavel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.controle-quantidade-selecionavel output {
+  min-width: 2ch;
+  color: var(--cor-verde-escuro);
+  font-weight: 700;
+  text-align: center;
+}
+
+.controle-quantidade-selecionavel > span {
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
 }
 
 .estado-vazio-composicao {
@@ -1033,6 +1095,12 @@
   background: var(--cor-branco);
 }
 
+.acoes-cesta-produtor {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .cabecalho-cartao-produtor {
   display: flex;
   align-items: flex-start;
@@ -1126,15 +1194,113 @@
   font-size: var(--texto-rotulo);
 }
 
-/* Mantém o lançamento de um produto separado simples e visível. */
+/* Agrupa a lista editável de produtos e a confirmação da separação em lote. */
 .formulario-fechamento {
   display: grid;
   gap: 16px;
-  max-width: 520px;
+  max-width: none;
   padding: 20px;
   border: 1px solid var(--cor-borda);
   border-radius: 12px;
   background: var(--cor-branco);
+}
+
+.instrucao-fechamento {
+  margin: 6px 0 0;
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+.lista-produtos-editavel li {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  align-content: start;
+  gap: 6px;
+  padding: 10px 6px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+  background: var(--cor-branco);
+}
+
+.lista-produtos-editavel {
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 10px;
+}
+
+.imagem-produto-fechamento {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  background: var(--cor-creme-natural);
+  object-fit: cover;
+}
+
+.nome-produto-fechamento {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--cor-verde-escuro);
+  font-size: var(--texto-rotulo);
+  line-height: 1.2;
+  text-align: center;
+}
+
+.progresso-produto-fechamento {
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-pequeno);
+  text-align: center;
+}
+
+.controle-quantidade-fechamento {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.botao-quantidade-fechamento {
+  display: grid;
+  width: 36px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 2px solid var(--cor-verde-horta);
+  border-radius: 8px;
+  color: var(--cor-verde-escuro);
+  background: var(--cor-branco);
+  font-size: var(--titulo-2);
+  font-weight: var(--peso-semi);
+}
+
+.botao-quantidade-fechamento:disabled {
+  border-color: var(--cor-borda);
+  color: var(--cor-texto-escuro);
+  opacity: 0.55;
+}
+
+.valor-quantidade-fechamento {
+  display: grid;
+  width: 48px;
+  min-height: 40px;
+  place-items: center;
+  padding: 6px;
+  border: 2px solid var(--cor-borda);
+  border-radius: 8px;
+  color: var(--cor-verde-escuro);
+  background: var(--cor-branco);
+  font-size: var(--texto-grande);
+  font-weight: var(--peso-semi);
+  text-align: center;
+}
+
+.quantidade-fixa-produto {
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--cor-texto-escuro);
+  background: var(--cor-verde-claro);
+  font-size: var(--texto-pequeno);
 }
 
 @media (max-width: 640px) {
@@ -1167,9 +1333,12 @@
 
   .cabecalho-cartao-produtor,
   .resumo-separacao,
-  .resumo-fechamento,
-  .lista-produtos-fechamento li {
+  .resumo-fechamento {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .lista-produtos-editavel {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }
 }

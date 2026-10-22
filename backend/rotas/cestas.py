@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from banco import obter_sessao
 from rotas.autenticacao import exigir_permissao
-from esquemas.cesta import NovaCesta, NovaSeparacao
+from esquemas.cesta import DesfazerSeparacoes, NovaCesta, NovasSeparacoes, NovaSeparacao
 from servicos import cesta as servico
 from servicos.excecoes import AcessoNegado, CestaNaoEncontrada, ErroDeAplicacao
 from modelos.usuario import Usuario
@@ -67,7 +67,7 @@ def pedir_cesta(
     sessao: Session = Depends(obter_sessao),
     usuario: Usuario = Depends(exigir_permissao("cestas.criar")),
 ):
-    """Cria uma cesta com situação inicial pedida."""
+    """Cria uma cesta com situação inicial pendente."""
 
     try:
         if usuario.perfil != "assinante":
@@ -107,5 +107,71 @@ def registrar_separacao(
 
     try:
         return servico.separar_produto(sessao, id_cesta, dados.produto_id, dados.quantidade)
+    except ErroDeAplicacao as erro:
+        raise traduzir_erro(erro) from erro
+
+
+@router.post("/{id_cesta}/separacoes/lote")
+def registrar_separacoes_em_lote(
+    id_cesta: int,
+    dados: NovasSeparacoes,
+    sessao: Session = Depends(obter_sessao),
+    usuario: Usuario = Depends(exigir_permissao("cestas.registrar_separacao")),
+):
+    """Registra vários produtos em uma única operação atômica."""
+
+    try:
+        return servico.separar_produtos(
+            sessao,
+            id_cesta,
+            [produto.model_dump() for produto in dados.produtos],
+        )
+    except ErroDeAplicacao as erro:
+        raise traduzir_erro(erro) from erro
+
+
+@router.post("/{id_cesta}/separacoes/desfazer")
+def desfazer_separacoes(
+    id_cesta: int,
+    dados: DesfazerSeparacoes,
+    sessao: Session = Depends(obter_sessao),
+    usuario: Usuario = Depends(exigir_permissao("cestas.desfazer_separacao")),
+):
+    """Desfaz um lote de quantidades registradas pelo produtor."""
+
+    try:
+        return servico.desfazer_separacoes(
+            sessao,
+            id_cesta,
+            [produto.model_dump() for produto in dados.produtos],
+        )
+    except ErroDeAplicacao as erro:
+        raise traduzir_erro(erro) from erro
+
+
+@router.post("/{id_cesta}/separacoes/concluir")
+def concluir_separacao(
+    id_cesta: int,
+    sessao: Session = Depends(obter_sessao),
+    usuario: Usuario = Depends(exigir_permissao("cestas.concluir_separacao")),
+):
+    """Marca a separação como concluída após conferir todos os itens pedidos."""
+
+    try:
+        return servico.concluir_separacao(sessao, id_cesta)
+    except ErroDeAplicacao as erro:
+        raise traduzir_erro(erro) from erro
+
+
+@router.post("/{id_cesta}/entrega/confirmar")
+def confirmar_entrega(
+    id_cesta: int,
+    sessao: Session = Depends(obter_sessao),
+    usuario: Usuario = Depends(exigir_permissao("cestas.confirmar_entrega")),
+):
+    """Registra que a assinante recebeu a cesta."""
+
+    try:
+        return servico.confirmar_entrega(sessao, id_cesta, usuario.id)
     except ErroDeAplicacao as erro:
         raise traduzir_erro(erro) from erro

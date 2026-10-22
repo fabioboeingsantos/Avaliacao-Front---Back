@@ -30,10 +30,10 @@ def obter_url_banco() -> URL:
 
 
 def obter_origens_frontend() -> list[str]:
-    """Le a origem permitida, mantendo o Vite local como padrao."""
+    """Le as origens permitidas, mantendo o Vite local como padrao."""
 
-    origem = os.getenv("FRONTEND_URL", "http://localhost:5173")
-    return [origem]
+    origens = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    return [origem.strip() for origem in origens.split(",") if origem.strip()]
 
 
 def obter_chave_jwt() -> str:

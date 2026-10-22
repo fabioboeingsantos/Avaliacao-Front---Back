@@ -1,6 +1,6 @@
 """Regras de negocio do fluxo de cestas."""
 
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
 
@@ -21,6 +21,7 @@ LIMITES_POR_TAMANHO = {
     "media": 8,
     "grande": 12,
 }
+LIMITE_UNIDADES_POR_PRODUTO = 10
 
 
 def normalizar_tamanho(tamanho: str) -> str:
@@ -43,12 +44,6 @@ def nome_tamanho(tamanho: str) -> str:
 
     nomes = {"pequena": "Pequena", "media": "Média", "grande": "Grande"}
     return nomes[normalizar_tamanho(tamanho)]
-
-
-def total_de_produtos(produtos: list[dict]) -> int:
-    """Soma quantidades de uma lista de dados serializados."""
-
-    return sum(produto["quantidade"] for produto in produtos)
 
 
 def serializar_cesta(cesta: dict) -> dict:
@@ -81,6 +76,7 @@ def listar_cestas(
 ) -> list[dict]:
     """Lista cestas aplicando os filtros opcionais da tela do produtor."""
 
+    _marcar_entregues_expiradas(sessao)
     resultado = repositorio.listar_cestas(sessao, usuario_id=usuario_id)
 
     if assinante:
@@ -98,24 +94,38 @@ def listar_cestas(
 def buscar_cesta(sessao: Session, id_cesta: int, usuario_id: int | None = None) -> dict:
     """Localiza uma cesta pelo identificador informado na URL."""
 
+    _marcar_entregues_expiradas(sessao)
     cesta = repositorio.buscar_cesta_por_id(sessao, id_cesta, usuario_id=usuario_id)
     if cesta is None:
         raise CestaNaoEncontrada("Cesta não encontrada.")
     return cesta
 
 
+def _marcar_entregues_expiradas(sessao: Session) -> None:
+    repositorio.marcar_entregues_expiradas(sessao, datetime.now(timezone.utc))
+
+
 def criar_cesta(sessao: Session, dados: dict, usuario: Usuario) -> dict:
-    """Valida e registra uma nova cesta com situacao inicial pedida."""
+    """Valida e registra uma nova cesta com situação inicial pendente."""
 
     limite = obter_limite(dados["tamanho"])
     if limite is None:
         raise TamanhoInvalido("Tamanho inválido. Use pequena, media ou grande.")
 
     produtos = preparar_produtos(sessao, dados["produtos"])
-    produtos_para_soma = [{"quantidade": quantidade} for _, quantidade in produtos]
-    if total_de_produtos(produtos_para_soma) > limite:
-        raise QuantidadeExcedida(f"A cesta {nome_tamanho(dados['tamanho'])} comporta até {limite} itens.")
-
+    ids_produtos = [produto["id"] for produto, _ in produtos]
+    if len(ids_produtos) != len(set(ids_produtos)):
+        raise QuantidadeExcedida("Cada produto pode ser incluído apenas uma vez na cesta.")
+    if len(produtos) > limite:
+        raise QuantidadeExcedida(
+            f"A cesta {nome_tamanho(dados['tamanho'])} comporta até {limite} produtos diferentes."
+        )
+    for produto, quantidade in produtos:
+        if quantidade > LIMITE_UNIDADES_POR_PRODUTO:
+            raise QuantidadeExcedida(
+                f"O produto {produto['nome']} permite até "
+                f"{LIMITE_UNIDADES_POR_PRODUTO} unidades por cesta."
+            )
     semana = dados.get("semana") or date.today().isoformat()
     try:
         semana_convertida = date.fromisoformat(semana)
@@ -129,7 +139,7 @@ def criar_cesta(sessao: Session, dados: dict, usuario: Usuario) -> dict:
         "tamanho_nome": nome_tamanho(dados["tamanho"]),
         "modo": dados["modo"],
         "limite": limite,
-        "situacao": "Pedida",
+        "situacao": "Pendente",
         "produtos": [
             {"id": produto["id"], "nome": produto["nome"], "quantidade": quantidade}
             for produto, quantidade in produtos
@@ -156,6 +166,8 @@ def separar_produto(
     """Registra a separacao respeitando o pedido e o limite da cesta."""
 
     cesta = buscar_cesta(sessao, id_cesta, usuario_id=usuario_id)
+    if cesta["separacao_concluida_em"] is not None or cesta["situacao"] == "Entregue":
+        raise QuantidadeExcedida("A cesta já está concluída e não pode ser alterada.")
     item_pedido = next((item for item in cesta["produtos"] if item["id"] == produto_id), None)
     if item_pedido is None:
         raise ProdutoNaoPertenceCesta("O produto não pertence a esta cesta.")
@@ -171,10 +183,6 @@ def separar_produto(
             f"O produto {item_pedido['nome']} comporta mais {restante_produto} item(ns)."
         )
 
-    total_atual = sum(item["quantidade"] for item in cesta["separacoes"])
-    if total_atual + quantidade > cesta["limite"]:
-        raise QuantidadeExcedida(f"A cesta comporta mais {cesta['limite'] - total_atual} item(ns).")
-
     if separacao_existente:
         separacao_existente["quantidade"] += quantidade
     else:
@@ -182,18 +190,130 @@ def separar_produto(
             {"produto_id": produto_id, "nome": item_pedido["nome"], "quantidade": quantidade}
         )
 
-    todos_os_produtos_separados = all(
-        next(
-            (
-                item["quantidade"]
-                for item in cesta["separacoes"]
-                if item["produto_id"] == item_pedido_atual["id"]
-            ),
-            0,
-        )
-        >= item_pedido_atual["quantidade"]
-        for item_pedido_atual in cesta["produtos"]
-    )
-    cesta["situacao"] = "Separação concluída" if todos_os_produtos_separados else "Em separação"
+    cesta["situacao"] = "Em separação"
 
+    return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
+
+
+def separar_produtos(
+    sessao: Session,
+    id_cesta: int,
+    produtos: list[dict],
+) -> dict:
+    """Registra um lote completo após validar todas as quantidades."""
+
+    cesta = buscar_cesta(sessao, id_cesta)
+    if cesta["separacao_concluida_em"] is not None or cesta["situacao"] == "Entregue":
+        raise QuantidadeExcedida("A cesta já está concluída e não pode ser alterada.")
+    itens_pedido = {item["id"]: item for item in cesta["produtos"]}
+    separacoes = {item["produto_id"]: item for item in cesta["separacoes"]}
+    quantidades = {}
+
+    for produto in produtos:
+        produto_id = produto["produto_id"]
+        if produto_id in quantidades:
+            raise QuantidadeExcedida("O lote contém o mesmo produto mais de uma vez.")
+
+        item_pedido = itens_pedido.get(produto_id)
+        if item_pedido is None:
+            raise ProdutoNaoPertenceCesta(f"O produto {produto_id} não pertence a esta cesta.")
+
+        quantidade_atual = separacoes.get(produto_id, {}).get("quantidade", 0)
+        if quantidade_atual + produto["quantidade"] > item_pedido["quantidade"]:
+            restante = item_pedido["quantidade"] - quantidade_atual
+            raise QuantidadeExcedida(
+                f"O produto {item_pedido['nome']} comporta mais {restante} item(ns)."
+            )
+
+        quantidades[produto_id] = produto["quantidade"]
+
+    for produto_id, quantidade in quantidades.items():
+        if produto_id in separacoes:
+            separacoes[produto_id]["quantidade"] += quantidade
+        else:
+            separacao = {
+                "produto_id": produto_id,
+                "nome": itens_pedido[produto_id]["nome"],
+                "quantidade": quantidade,
+            }
+            cesta["separacoes"].append(separacao)
+            separacoes[produto_id] = separacao
+
+    cesta["situacao"] = "Em separação"
+
+    return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
+
+
+def desfazer_separacoes(sessao: Session, id_cesta: int, produtos: list[dict]) -> dict:
+    """Remove quantidades registradas, validando o lote antes de salvar."""
+
+    cesta = buscar_cesta(sessao, id_cesta)
+    if cesta["separacao_concluida_em"] is not None or cesta["situacao"] == "Entregue":
+        raise QuantidadeExcedida("A cesta já está concluída e não pode ser alterada.")
+    quantidades = {}
+
+    for produto in produtos:
+        produto_id = produto["produto_id"]
+        if produto_id in quantidades:
+            raise QuantidadeExcedida("O lote contém o mesmo produto mais de uma vez.")
+        quantidades[produto_id] = produto["quantidade"]
+
+    existentes = {item["produto_id"]: item for item in cesta["separacoes"]}
+    for produto_id, quantidade in quantidades.items():
+        separacao = existentes.get(produto_id)
+        if separacao is None or quantidade > separacao["quantidade"]:
+            raise QuantidadeExcedida(
+                f"Não é possível desfazer {quantidade} item(ns) de {produto_id}."
+            )
+
+    cesta["separacoes"] = [
+        {
+            **separacao,
+            "quantidade": separacao["quantidade"] - quantidades.get(separacao["produto_id"], 0),
+        }
+        for separacao in cesta["separacoes"]
+        if separacao["quantidade"] - quantidades.get(separacao["produto_id"], 0) > 0
+    ]
+
+    cesta["situacao"] = "Em separação" if cesta["separacoes"] else "Pendente"
+
+    return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
+
+
+def concluir_separacao(sessao: Session, id_cesta: int) -> dict:
+    """Conclui a cesta somente quando todas as quantidades pedidas foram separadas."""
+
+    cesta = buscar_cesta(sessao, id_cesta)
+    separacoes = {item["produto_id"]: item["quantidade"] for item in cesta["separacoes"]}
+    pendentes = [
+        f"{produto['nome']} ({separacoes.get(produto['id'], 0)} de {produto['quantidade']})"
+        for produto in cesta["produtos"]
+        if separacoes.get(produto["id"], 0) < produto["quantidade"]
+    ]
+
+    if pendentes:
+        raise QuantidadeExcedida(
+            f"Não é possível concluir. Ainda falta separar: {', '.join(pendentes)}."
+        )
+
+    if cesta["separacao_concluida_em"] is not None:
+        raise QuantidadeExcedida("A separação desta cesta já foi concluída.")
+
+    cesta["situacao"] = "Em separação"
+    cesta["separacao_concluida_em"] = datetime.now(timezone.utc)
+    return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
+
+
+def confirmar_entrega(sessao: Session, id_cesta: int, usuario_id: int) -> dict:
+    """Confirma que a assinante recebeu uma cesta com separação concluída."""
+
+    cesta = buscar_cesta(sessao, id_cesta, usuario_id=usuario_id)
+    if cesta["situacao"] == "Entregue":
+        return cesta
+    if cesta["separacao_concluida_em"] is None:
+        raise QuantidadeExcedida(
+            "A entrega só pode ser confirmada após a conclusão da separação."
+        )
+
+    cesta["situacao"] = "Entregue"
     return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
