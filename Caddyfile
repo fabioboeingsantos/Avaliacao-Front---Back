@@ -1,0 +1,17 @@
+# O domínio e o endereço interno da API são definidos no ambiente do servidor.
+{$DOMINIO} {
+    # Publica os arquivos já gerados do frontend.
+    root * ./frontend/dist
+    encode zstd gzip
+
+    # Retira /api do caminho antes de encaminhar à API existente.
+    handle_path /api/* {
+        reverse_proxy {$API_INTERNA}
+    }
+
+    # Devolve a aplicação React para rotas de navegação do frontend.
+    handle {
+        try_files {path} /index.html
+        file_server
+    }
+}

@@ -6,10 +6,17 @@ import TelaHistoricoPedidos from './componentes/TelaHistoricoPedidos'
 import TelaDetalhesCesta from './componentes/TelaDetalhesCesta'
 import TelaSeparacao from './componentes/TelaSeparacao'
 import TelaFechamento from './componentes/TelaFechamento'
+import { chamarApi } from './api.js'
 import './App.css'
 
-const URL_API =
-  import.meta.env.VITE_API_URL ?? `${window.location.protocol}//${window.location.hostname}:8000`
+// Formata o nome para exibição sem mudar o identificador usado na autenticação.
+function formatarNomeUsuario(nome) {
+  if (!nome) {
+    return nome
+  }
+
+  return nome[0].toLocaleUpperCase('pt-BR') + nome.slice(1)
+}
 
 // Mantém o fluxo visual disponível quando a API ainda não estiver ligada.
 // Converte o formato snake_case da API no formato usado pelas telas React.
@@ -39,40 +46,14 @@ function adaptarCestaDaApi(cesta) {
   }
 }
 
-// Centraliza a chamada HTTP para que todas as operações tratem a mesma falha.
-async function chamarApi(caminho, opcoes = {}) {
-  const cabecalhos = {
-    'Content-Type': 'application/json',
-    ...(opcoes.headers ?? {}),
-  }
-
-  const resposta = await fetch(`${URL_API}${caminho}`, {
-    ...opcoes,
-    headers: cabecalhos,
-    credentials: 'include',
-  })
-
-  if (!resposta.ok) {
-    const corpo = await resposta.json().catch(() => ({}))
-    const erro = new Error(corpo.detail ?? 'Não foi possível concluir a operação.')
-    // Mantém o status HTTP disponível para reconhecer sessões ausentes ou expiradas.
-    erro.status = resposta.status
-    throw erro
-  }
-
-  if (resposta.status === 204) {
-    return null
-  }
-
-  return resposta.json()
-}
-
 // O login é a porta de entrada comum para as duas personas do sistema.
 function App() {
   const [usuarioAutenticado, setUsuarioAutenticado] = useState('')
   // Aguarda a validação do cookie antes de decidir se mostra o login ou a área autenticada.
   const [sessaoVerificada, setSessaoVerificada] = useState(false)
   const [erroRestauracao, setErroRestauracao] = useState('')
+  const [erroLogout, setErroLogout] = useState('')
+  const [saindo, setSaindo] = useState(false)
   // Identifica qual fluxo deve ser apresentado depois do acesso de demonstração.
   const [perfilAtual, setPerfilAtual] = useState('')
   // Controla a aba atual e mantém o pedido em revisão enquanto a pessoa confirma os dados.
@@ -147,8 +128,34 @@ function App() {
     setUsuarioAutenticado(usuario)
     setPerfilAtual(perfil)
     setErroRestauracao('')
+    setErroLogout('')
     setAbaAtual(perfil === 'produtor' ? 'separacao' : 'pedido')
     carregarCestasDoServidor(perfil === 'assinante' ? usuario : null)
+  }
+
+  // Encerra a sessão no servidor antes de limpar o estado autenticado da tela.
+  async function sairDoSistema() {
+    setSaindo(true)
+    setErroLogout('')
+
+    try {
+      await chamarApi('/autenticacao/logout', { method: 'POST' })
+      setUsuarioAutenticado('')
+      setPerfilAtual('')
+      setPedidos([])
+      setPedidoEmRevisao(null)
+      setCestaEmFechamento(null)
+      setCestaEmDetalhes(null)
+      setAbaAtual('pedido')
+    } catch (erro) {
+      setErroLogout(
+        erro instanceof TypeError
+          ? 'Não foi possível conectar ao servidor para encerrar a sessão.'
+          : erro.message,
+      )
+    } finally {
+      setSaindo(false)
+    }
   }
 
   // Restaura a sessão HttpOnly ao abrir ou atualizar a aplicação, sem pedir novo login.
@@ -506,72 +513,99 @@ function App() {
     )
   }
 
+  // Mantém a ação de saída disponível em todas as telas autenticadas.
+  function envolverAreaAutenticada(conteudo) {
+    return (
+      <>
+        <header className="barra-sessao">
+          <span>
+            Conectado como <strong>{formatarNomeUsuario(usuarioAutenticado)}</strong>
+          </span>
+          <button
+            className="botao-sair-sessao"
+            type="button"
+            onClick={sairDoSistema}
+            disabled={saindo}
+          >
+            {saindo ? 'Saindo...' : 'Sair'}
+          </button>
+          {erroLogout && (
+            <p className="erro-sair-sessao" role="alert">
+              {erroLogout}
+            </p>
+          )}
+        </header>
+        {conteudo}
+      </>
+    )
+  }
+
   // Entrega ao produtor as duas telas previstas para acompanhar e fechar as cestas.
   if (perfilAtual === 'produtor') {
     const cestasDaSemana = pedidos
     const cestaSelecionada = cestasDaSemana.find((pedido) => pedido.id === cestaEmFechamento)
 
     if (abaAtual === 'fechamento') {
-      return (
+      return envolverAreaAutenticada(
         <TelaFechamento
           cesta={cestaSelecionada}
           aoAbrirSeparacao={() => setAbaAtual('separacao')}
           aoRegistrarSeparacoes={registrarSeparacoesEmLote}
           aoDesfazerSeparacoes={desfazerSeparacoes}
           aoConcluirSeparacao={concluirSeparacao}
-        />
+        />,
       )
     }
 
-    return (
+    return envolverAreaAutenticada(
       <TelaSeparacao
         cestas={cestasDaSemana}
         aoAbrirFechamento={abrirFechamento}
-      />
+      />,
     )
   }
 
   // Alterna entre a montagem da cesta, a conferência final e o histórico da assinante.
   if (abaAtual === 'finalizacao') {
-    return (
+    return envolverAreaAutenticada(
       <TelaFinalizarPedido
         pedido={pedidoEmRevisao}
         aoFinalizar={registrarPedido}
         aoAbrirPedido={() => setAbaAtual('pedido')}
         aoAbrirHistorico={() => setAbaAtual('historico')}
-      />
+      />,
     )
   }
 
   if (abaAtual === 'historico') {
-    return (
+    return envolverAreaAutenticada(
       <TelaHistoricoPedidos
         pedidos={pedidos}
         aoAbrirPedido={() => setAbaAtual('pedido')}
         aoAbrirDetalhes={abrirDetalhes}
         aoCancelarPedido={cancelarPedido}
-      />
+      />,
     )
   }
 
   if (abaAtual === 'detalhes') {
     const cestaSelecionada = pedidos.find((pedido) => pedido.id === cestaEmDetalhes)
 
-    return (
+    return envolverAreaAutenticada(
       <TelaDetalhesCesta
         cesta={cestaSelecionada}
         aoAbrirPedido={() => setAbaAtual('pedido')}
         aoAbrirHistorico={() => setAbaAtual('historico')}
         aoConfirmarEntrega={confirmarEntrega}
-      />
+      />,
     )
   }
 
-  return (
+  return envolverAreaAutenticada(
     <TelaPedirCesta
       aoFinalizar={abrirFinalizacao}
       aoAbrirHistorico={() => setAbaAtual('historico')}
-    />
+    />,
   )
 }
 

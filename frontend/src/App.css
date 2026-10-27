@@ -236,6 +236,53 @@
   }
 }
 
+/* Mantém a saída da conta acessível em todas as telas autenticadas. */
+.barra-sessao {
+  display: flex;
+  width: min(100%, 1060px);
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 auto;
+  padding: 12px 16px 0;
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+}
+
+.botao-sair-sessao {
+  padding: 8px 12px;
+  border: 2px solid var(--cor-terracota);
+  border-radius: 8px;
+  color: var(--cor-terracota);
+  background: var(--cor-branco);
+  font: inherit;
+  font-weight: var(--peso-semi);
+  cursor: pointer;
+}
+
+.botao-sair-sessao:hover {
+  color: var(--cor-branco);
+  background: var(--cor-terracota);
+}
+
+.botao-sair-sessao:focus-visible {
+  outline: 2px solid var(--cor-verde-escuro);
+  outline-offset: 2px;
+}
+
+.botao-sair-sessao:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.erro-sair-sessao {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--cor-erro);
+  text-align: right;
+}
+
 /* Estrutura o cabeçalho e a introdução do pedido da assinante. */
 .cabecalho-pagina {
   display: flex;

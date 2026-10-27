@@ -21,9 +21,9 @@ flowchart LR
 | Camada | Desenvolvimento (hoje no projeto) | Produção (proposta) |
 |---|---|---|
 | API | FastAPI local, executada com `fastapi dev main.py` na porta 8000; o backend usa SQLAlchemy e pode apontar para SQLite local ou MySQL local; veja [backend/main.py](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/backend/main.py) e [backend/configuracao.py](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/backend/configuracao.py). | API em máquina interna, sem exposição direta ao público, ouvindo na 8000 e acessível somente pelo servidor web. |
-| Tela | React/Vite em ambiente local na porta 5173; a UI usa a API em host local e porta 8000 em [frontend/src/App.jsx](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/frontend/src/App.jsx). | Tela servida em HTTPS na 443 e entregue ao navegador como origem pública; a mesma origem pode receber `/api` encaminhado para a API interna. |
+| Tela | React/Vite em ambiente local na porta 5173; [frontend/.env.development](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/frontend/.env.development) define a API local e [frontend/src/api.js](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/frontend/src/api.js) centraliza as chamadas. | Tela servida em HTTPS na 443; [frontend/.env.production](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/frontend/.env.production) usa `/api` na mesma origem pública, encaminhado pelo servidor web para a API interna. |
 | Banco | SQLite local ou MySQL local conforme [backend/.env.exemplo](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/backend/.env.exemplo); o exemplo usa `BANCO_HOST=localhost`. | MySQL interno, em rede privada, na 3306, acessível apenas pela API; sem acesso direto do navegador ou da internet. |
-| `.env` | Arquivo local de ambiente com banco, JWT e CORS; exemplo em [backend/.env.exemplo](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/backend/.env.exemplo). | Variáveis injetadas no ambiente de execução, fora do repositório; sem uso de `.env` versionado; `JWT_COOKIE_SECURE=true` e `FRONTEND_URL` ajustados ao ambiente real. |
+| `.env` | Backend usa o arquivo local exemplificado em [backend/.env.exemplo](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/backend/.env.exemplo); o frontend usa [frontend/.env.development](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/frontend/.env.development) e [frontend/.env.production](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/frontend/.env.production) para a URL da API. | Variáveis de ambiente injetadas fora do repositório. O frontend usa `/api` pela mesma origem; as variáveis do backend, inclusive `JWT_COOKIE_SECURE` e `FRONTEND_URL`, devem ser ajustadas ao ambiente real. |
 | CORS | O backend habilita CORS em [backend/main.py](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/backend/main.py) e usa `FRONTEND_URL` em [backend/configuracao.py](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/backend/configuracao.py), com padrão de `http://localhost:5173`. | ? Se a tela e a API ficarem na mesma origem pública, não há necessidade de CORS entre elas; a proposta mantém a mesma origem e usa o servidor web para encaminhar `/api`. |
 
 ## 3. O caminho do login
@@ -47,7 +47,7 @@ flowchart LR
 9. Ao abrir ou recarregar a aplicação, o frontend chama `/usuarios/me` para restaurar a sessão.
    - Roda na máquina do usuário; a verificação final acontece na API e no banco.
 
-Observação: o código atual já usa cookie `HttpOnly` no backend em [backend/rotas/autenticacao.py](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/backend/rotas/autenticacao.py) e `credentials: "include"` no frontend em [frontend/src/App.jsx](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/frontend/src/App.jsx), o que combina com a arquitetura proposta.
+Observação: o código atual já usa cookie `HttpOnly` no backend em [backend/rotas/autenticacao.py](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/backend/rotas/autenticacao.py) e `credentials: "include"` nas chamadas centralizadas em [frontend/src/api.js](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/frontend/src/api.js), o que combina com a arquitetura proposta.
 
 ## 4. O que está chumbado
 
@@ -68,10 +68,10 @@ Os pontos abaixo mostram onde o código ainda usa `localhost` ou `127.0.0.1`. Is
   - Uso: servidor; origem autorizada para CORS em desenvolvimento.
   - Observação: é configuração local de dev; não representa a produção.
 
-- [frontend/src/App.jsx](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/frontend/src/App.jsx): linha 12
-  - Valor: `${window.location.protocol}//${window.location.hostname}:8000`
-  - Uso: navegador; monta a URL da API usando o host atual quando a variável de ambiente não está definida.
-  - Observação: isso funciona no desenvolvimento local, mas não deve ser tratado como endpoint de produção.
+- [frontend/.env.development](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/frontend/.env.development): linha 1
+  - Valor: `VITE_URL_DA_API=http://localhost:8000`
+  - Uso: navegador; o Vite injeta a URL local da API no frontend durante o desenvolvimento.
+  - Observação: em produção, o frontend usa `/api` definido em [frontend/.env.production](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/frontend/.env.production), na mesma origem da tela.
 
 - [README.md](C:/Users/fabio/Desktop/Avaliacao%20Front%20-%20Back/README.md): linha 73
   - Valor: `http://127.0.0.1:8000/docs`

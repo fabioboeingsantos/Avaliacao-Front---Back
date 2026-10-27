@@ -350,7 +350,7 @@ flowchart LR
           </tr>
           <tr>
             <td data-label="Camada">Tela</td>
-            <td data-label="Desenvolvimento">React/Vite em ambiente local na porta 5173; a UI usa a API em host local e porta 8000.</td>
+            <td data-label="Desenvolvimento">React/Vite em ambiente local na porta 5173; <span class="inline-code">frontend/.env.development</span> define a API local e <span class="inline-code">frontend/src/api.js</span> centraliza as chamadas.</td>
             <td data-label="Produção">Tela servida em HTTPS na 443 e entregue ao navegador como origem pública; a mesma origem pode receber <span class="inline-code">/api</span> encaminhado para a API interna.</td>
           </tr>
           <tr>
@@ -360,8 +360,8 @@ flowchart LR
           </tr>
           <tr>
             <td data-label="Camada">.env</td>
-            <td data-label="Desenvolvimento">Arquivo local de ambiente com banco, JWT e CORS.</td>
-            <td data-label="Produção">Variáveis injetadas no ambiente de execução, fora do repositório; sem uso de <span class="inline-code">.env</span> versionado; <span class="inline-code">JWT_COOKIE_SECURE=true</span> e <span class="inline-code">FRONTEND_URL</span> ajustados ao ambiente real.</td>
+            <td data-label="Desenvolvimento">Backend usa arquivo local de ambiente com banco, JWT e CORS; frontend usa <span class="inline-code">frontend/.env.development</span> e <span class="inline-code">frontend/.env.production</span> para definir a URL da API.</td>
+            <td data-label="Produção">Variáveis do backend injetadas fora do repositório; frontend usa <span class="inline-code">/api</span> na mesma origem da tela. Ajustar <span class="inline-code">JWT_COOKIE_SECURE</span> e <span class="inline-code">FRONTEND_URL</span> ao ambiente real.</td>
           </tr>
           <tr>
             <td data-label="Camada">CORS</td>
@@ -396,7 +396,7 @@ flowchart LR
         <li><strong>backend/configuracao.py</strong>: linha 35 — valor <span class="inline-code">http://localhost:5173</span>. Uso: servidor; padrão de origem permitida para CORS em desenvolvimento. Observação: é um valor de desenvolvimento e não representa a produção.</li>
         <li><strong>backend/.env.exemplo</strong>: linha 5 — valor <span class="inline-code">BANCO_HOST=localhost</span>. Uso: servidor; aponta o banco para a máquina local em desenvolvimento. Observação: em produção, o MySQL teria um host interno específico.</li>
         <li><strong>backend/.env.exemplo</strong>: linha 8 — valor <span class="inline-code">FRONTEND_URL=http://localhost:5173</span>. Uso: servidor; origem autorizada para CORS em desenvolvimento. Observação: não representa a produção.</li>
-        <li><strong>frontend/src/App.jsx</strong>: linha 12 — valor <span class="inline-code">${window.location.protocol}//${window.location.hostname}:8000</span>. Uso: navegador; monta a URL da API usando o host atual. Observação: isso funciona no desenvolvimento local, mas não deve ser tratado como endpoint de produção.</li>
+        <li><strong>frontend/.env.development</strong>: linha 1 — valor <span class="inline-code">VITE_URL_DA_API=http://localhost:8000</span>. Uso: navegador; o Vite injeta a URL local da API no frontend durante o desenvolvimento. Observação: em produção, o frontend usa <span class="inline-code">/api</span> na mesma origem, definido em <strong>frontend/.env.production</strong>.</li>
         <li><strong>README.md</strong>: linha 73 — valor <span class="inline-code">http://127.0.0.1:8000/docs</span>. Uso: documentação do ambiente local de desenvolvimento. Observação: é referência de execução local, não de produção.</li>
         <li><strong>PASSO_A_PASSO_PROJETO.md</strong>: linha 325 — valor <span class="inline-code">http://127.0.0.1:8000/docs</span>. Uso: documentação local de desenvolvimento. Observação: aponta o ambiente do dev, não a arquitetura final.</li>
         <li><strong>PASSO_A_PASSO_PROJETO.md</strong>: linha 424 — valor <span class="inline-code">http://localhost:5173</span>. Uso: navegador; endereço do Vite em desenvolvimento. Observação: é uma origem local de dev; não deve ser usada como URL pública de produção.</li>
