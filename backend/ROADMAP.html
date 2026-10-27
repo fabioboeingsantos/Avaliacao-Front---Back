@@ -144,7 +144,7 @@
         <div class="intro">
           <p>Este documento registra onde o sistema está hoje, quais entregas já foram concluídas e o caminho recomendado para as próximas versões.</p>
           <div class="meta">
-            <span class="pill">Atualizado em 19/10/2026</span>
+            <span class="pill">Atualizado em 27/10/2026</span>
             <span class="pill">Backend FastAPI</span>
             <span class="pill">Frontend React + Vite</span>
             <span class="pill">Banco SQLAlchemy</span>
@@ -156,53 +156,53 @@
     <main class="container">
       <section>
         <div class="summary-grid">
-          <article class="card metric green"><span>Testes automatizados</span><strong>11</strong><span>Todos passando</span></article>
-          <article class="card metric green"><span>Segurança de senha</span><strong>100%</strong><span>Argon2 implementado</span></article>
-          <article class="card metric blue"><span>Autenticação</span><strong>JWT</strong><span>Token com validade</span></article>
-          <article class="card metric amber"><span>Próxima frente</span><strong>E2E</strong><span>Validação integrada</span></article>
+          <article class="card metric green"><span>Testes automatizados</span><strong>38</strong><span>Funções de teste no código; execução local pendente</span></article>
+          <article class="card metric green"><span>Segurança de senha</span><strong>Argon2</strong><span>Hash implementado no backend</span></article>
+          <article class="card metric blue"><span>Autenticação</span><strong>24 h</strong><span>Sessão JWT em cookie HttpOnly</span></article>
+          <article class="card metric amber"><span>Publicação</span><strong>Pendente</strong><span>Infraestrutura documentada, sem deploy confirmado</span></article>
         </div>
       </section>
 
       <section>
         <div class="section-heading">
           <div><div class="eyebrow">Status atual</div><h2>O que já está funcionando</h2></div>
-          <p>A base de segurança e controle de acesso prevista na aula de autenticação já foi implementada no backend.</p>
+          <p>O produto já tem autenticação, persistência e o ciclo principal de pedido e separação. A validação desta cópia e a publicação ainda precisam ser concluídas.</p>
         </div>
         <div class="cards">
           <article class="card status-card">
-            <div class="status-top"><span class="dot"></span><h3>Autenticação segura</h3></div>
-            <p>O login valida credenciais, protege senhas e entrega uma sessão autenticada.</p>
+            <div class="status-top"><span class="dot"></span><h3>Autenticação e permissões</h3></div>
+            <p>O backend valida contas e aplica permissões por perfil nas operações protegidas.</p>
             <ul>
-              <li>Senhas armazenadas com Argon2.</li>
-              <li>JWT assinado com HS256 e expiração de 30 minutos.</li>
-              <li>JWT armazenado em cookie HttpOnly.</li>
+              <li>Senhas com hash Argon2; sessão JWT em cookie HttpOnly por padrão por 24 horas.</li>
+              <li>Login, logout e restauração de sessão pela rota do usuário atual.</li>
+              <li>Perfis assinante e produtor, com isolamento das cestas por proprietário.</li>
             </ul>
           </article>
           <article class="card status-card">
-            <div class="status-top"><span class="dot"></span><h3>Rotas protegidas</h3></div>
-            <p>As operações de cestas exigem um token válido e uma conta ativa no banco.</p>
+            <div class="status-top"><span class="dot"></span><h3>Pedido, separação e entrega</h3></div>
+            <p>O fluxo de negócio principal está implementado na API e conectado às telas.</p>
             <ul>
-              <li>Token ausente, inválido ou expirado retorna 401.</li>
-              <li>Assinante vê apenas suas próprias cestas.</li>
-              <li>Produtor pode visualizar e separar cestas.</li>
+              <li>Criar e consultar pedidos; cancelar enquanto pendentes.</li>
+              <li>Separação em lote, desfazer lote e concluir após conferir os itens.</li>
+              <li>Confirmar recebimento ou marcar como entregue após sete dias.</li>
             </ul>
           </article>
           <article class="card status-card">
-            <div class="status-top"><span class="dot"></span><h3>Banco e migrações</h3></div>
-            <p>O relacionamento entre usuário e cesta está registrado e a base local foi atualizada.</p>
+            <div class="status-top"><span class="dot"></span><h3>Dados e regras da cesta</h3></div>
+            <p>Persistência SQLAlchemy com migrações Alembic e configuração para SQLite ou MySQL.</p>
             <ul>
-              <li>Migração de vínculo entre cestas e usuários.</li>
-              <li>Script de carga atualiza senhas antigas.</li>
-              <li>Dados de teste isolados em SQLite.</li>
+              <li>Limite de produtos diferentes: 5, 8 ou 12 por tamanho.</li>
+              <li>Até 10 unidades por produto; validação de quantidades na API.</li>
+              <li>38 funções de teste estão no código; não foram executadas nesta cópia.</li>
             </ul>
           </article>
           <article class="card status-card">
-            <div class="status-top"><span class="dot blue"></span><h3>Qualidade automatizada</h3></div>
-            <p>A suíte cobre os comportamentos críticos da autenticação e das permissões.</p>
+            <div class="status-top"><span class="dot blue"></span><h3>Frontend e configuração</h3></div>
+            <p>React e Vite apresentam os fluxos de assinante e produtor e chamam a API centralizada.</p>
             <ul>
-              <li>11 testes automatizados passando.</li>
-              <li>Testes de acesso indevido entre usuários.</li>
-              <li>Dependências de desenvolvimento separadas.</li>
+              <li>URL da API configurável por ambiente; produção usa o caminho relativo /api.</li>
+              <li>Caddyfile e proposta de infraestrutura estão no repositório, ainda sem deploy confirmado.</li>
+              <li>Com a API indisponível, há fallback demonstrativo em memória; pedidos locais não são persistidos.</li>
             </ul>
           </article>
         </div>
@@ -211,62 +211,68 @@
       <section>
         <div class="section-heading">
           <div><div class="eyebrow">Caminho percorrido</div><h2>Entregas concluídas</h2></div>
-          <p>Uma sequência de incrementos que transformou o login básico em uma autenticação com regras de acesso.</p>
+          <p>O repositório evoluiu do login inicial para um fluxo persistido de pedidos, separação e confirmação de entrega.</p>
         </div>
         <div class="timeline">
-          <div class="milestone"><div class="milestone-number">1</div><article class="card"><h3>Diagnóstico do projeto e do PDF</h3><p>Identificação das pendências: hash seguro, JWT, rotas protegidas, perfis e propriedade das cestas.</p><span class="tag">Concluído</span></article></div>
-          <div class="milestone"><div class="milestone-number">2</div><article class="card"><h3>Proteção de senhas</h3><p>Criação do serviço de hash Argon2, validação segura e atualização de contas antigas.</p><span class="tag">Concluído</span></article></div>
-          <div class="milestone"><div class="milestone-number">3</div><article class="card"><h3>JWT no login</h3><p>Token com identidade, perfil, data de emissão e expiração; frontend integrado por cookie HttpOnly.</p><span class="tag">Concluído</span></article></div>
-          <div class="milestone"><div class="milestone-number">4</div><article class="card"><h3>Propriedade e perfis</h3><p>Assinantes e produtores possuem regras diferentes, com bloqueio de acesso entre contas.</p><span class="tag">Concluído</span></article></div>
-          <div class="milestone"><div class="milestone-number">5</div><article class="card"><h3>Testes automatizados</h3><p>Suíte com 11 casos para senha, login, JWT, autorização, propriedade e separação.</p><span class="tag">Concluído</span></article></div>
+          <div class="milestone"><div class="milestone-number">1</div><article class="card"><h3>Persistência e migrações</h3><p>Modelos e repositórios SQLAlchemy, banco SQLite para desenvolvimento e suporte configurável a MySQL.</p><span class="tag">Implementado</span></article></div>
+          <div class="milestone"><div class="milestone-number">2</div><article class="card"><h3>Autenticação e controle de acesso</h3><p>Argon2, JWT em cookie HttpOnly, sessão de 24 horas, perfis e autorização por proprietário.</p><span class="tag">Implementado</span></article></div>
+          <div class="milestone"><div class="milestone-number">3</div><article class="card"><h3>Ciclo completo da cesta</h3><p>Pedido, cancelamento, separação em lote, conclusão, confirmação de recebimento e expiração em sete dias.</p><span class="tag">Implementado</span></article></div>
+          <div class="milestone"><div class="milestone-number">4</div><article class="card"><h3>Frontend conectado por ambiente</h3><p>Chamadas centralizadas com cookie de sessão; endereço da API configurado para desenvolvimento e caminho /api de produção.</p><span class="tag">Implementado</span></article></div>
+          <div class="milestone pending"><div class="milestone-number">5</div><article class="card"><h3>Verificação nesta cópia</h3><p>O código contém 38 funções de teste backend. Esta máquina ainda não tem o ambiente Python nem as dependências npm instaladas, portanto os testes, lint e build precisam ser executados.</p><span class="tag">Validação pendente</span></article></div>
         </div>
       </section>
 
       <section>
         <div class="section-heading">
-          <div><div class="eyebrow">Próxima etapa</div><h2>Validação integrada</h2></div>
-          <p>O próximo marco é validar o comportamento real com backend, frontend e banco funcionando juntos.</p>
+          <div><div class="eyebrow">Próximas etapas prioritárias</div><h2>Validar antes de publicar</h2></div>
+          <p>Primeiro confirmar a qualidade do código nesta máquina; depois percorrer o fluxo real e preparar o ambiente de produção.</p>
         </div>
         <div class="cards">
           <article class="card status-card">
-            <div class="status-top"><span class="dot amber"></span><h3>Teste manual do fluxo completo</h3></div>
-            <p>Confirmar a jornada no navegador, do login à separação.</p>
+            <div class="status-top"><span class="dot amber"></span><h3>1. Rodar verificações automatizadas</h3></div>
+            <p>Instalar as dependências conforme os arquivos do projeto e registrar os resultados reais.</p>
             <ul>
-              <li>Entrar como Aline.</li>
-              <li>Criar e finalizar uma cesta.</li>
-              <li>Entrar como Vanderlei.</li>
-              <li>Separar os produtos da cesta.</li>
+              <li>Backend: pytest -q dentro de backend.</li>
+              <li>Frontend: npm run lint e npm run build dentro de frontend.</li>
+              <li>Conferir e atualizar a documentação de testes, hoje ainda marcada com 11 casos.</li>
             </ul>
-            <span class="tag" style="color: var(--amber); background: var(--amber-soft)">Próximo</span>
+            <span class="tag" style="color: var(--amber); background: var(--amber-soft)">Prioridade imediata</span>
           </article>
           <article class="card status-card">
-            <div class="status-top"><span class="dot amber"></span><h3>Documentação e entrega</h3></div>
-            <p>Consolidar instruções para instalação, migrações, testes e uso da API.</p>
+            <div class="status-top"><span class="dot amber"></span><h3>2. Validar o fluxo integrado</h3></div>
+            <p>Conferir frontend, API e banco usando sessões reais dos dois perfis.</p>
             <ul>
-              <li>Documentar variáveis JWT.</li>
-              <li>Revisar instruções do README.</li>
-              <li>Registrar o roteiro de validação.</li>
+              <li>Aplicar migrações e confirmar login, cadastro e restauração da sessão.</li>
+              <li>Assinante cria e cancela um pedido; produtor separa e conclui outro.</li>
+              <li>Assinante confirma a entrega; conferir isolamento e mensagens de erro.</li>
             </ul>
-            <span class="tag" style="color: var(--amber); background: var(--amber-soft)">Próximo</span>
+            <span class="tag" style="color: var(--amber); background: var(--amber-soft)">Próxima validação</span>
+          </article>
+          <article class="card status-card">
+            <div class="status-top"><span class="dot amber"></span><h3>3. Preparar publicação</h3></div>
+            <p>Os arquivos atuais descrevem e esboçam a arquitetura, mas não comprovam que exista um ambiente publicado.</p>
+            <ul>
+              <li>Provisionar domínio, HTTPS, servidor da API e banco MySQL protegido.</li>
+              <li>Configurar segredos e variáveis externas; ativar cookie Secure e restringir CORS.</li>
+              <li>Validar Caddy, proxy /api, migrações, backup, logs e smoke tests em ambiente real.</li>
+            </ul>
+            <span class="tag" style="color: var(--amber); background: var(--amber-soft)">Após validação</span>
           </article>
         </div>
       </section>
 
       <section>
         <div class="section-heading">
-          <div><div class="eyebrow">Funcionalidades futuras</div><h2>Depois da primeira entrega segura</h2></div>
-          <p>Itens que aumentam maturidade, segurança, manutenção e capacidade de operação.</p>
+          <div><div class="eyebrow">Escopo ainda não entregue</div><h2>Evoluções futuras</h2></div>
+          <p>Itens documentados ou recomendados que não fazem parte do fluxo implementado e validado atualmente.</p>
         </div>
         <div class="future-grid">
-          <article class="card future-card"><h3>Refresh token</h3><p>Renovar sessões sem exigir login constante, mantendo o token de acesso com validade curta.</p><small>Segurança avançada</small></article>
-          <article class="card future-card"><h3>Rotação e revogação de sessão</h3><p>Registrar sessões ativas e invalidar tokens no servidor quando necessário.</p><small>Hardening de produção</small></article>
-          <article class="card future-card"><h3>Administração de usuários</h3><p>Criar, desativar, alterar perfis e redefinir senhas sem editar diretamente o banco.</p><small>Gestão operacional</small></article>
-          <article class="card future-card"><h3>Filtros por status e período</h3><p>Facilitar a operação com busca por situação, semana, assinante e tamanho da cesta.</p><small>Produtividade</small></article>
-          <article class="card future-card"><h3>Testes frontend e E2E</h3><p>Validar telas, armazenamento da sessão e o fluxo completo em um navegador automatizado.</p><small>Qualidade</small></article>
-          <article class="card future-card"><h3>Pipeline de CI/CD</h3><p>Executar testes, build e verificações automaticamente a cada alteração no repositório.</p><small>Entrega contínua</small></article>
-          <article class="card future-card"><h3>Observabilidade</h3><p>Adicionar logs estruturados, métricas, rastreamento de erros e auditoria de ações críticas.</p><small>Operação</small></article>
-          <article class="card future-card"><h3>Recuperação de senha</h3><p>Fluxo seguro de redefinição com token temporário e confirmação por e-mail.</p><small>Experiência do usuário</small></article>
-          <article class="card future-card"><h3>Publicação em ambiente real</h3><p>Configurar segredo externo, banco de produção, HTTPS, CORS restrito e backup.</p><small>Go-live</small></article>
+          <article class="card future-card"><h3>Recuperação de senha real</h3><p>A tela atual apenas demonstra visualmente a recuperação; faltam endpoint, token temporário e envio seguro de e-mail.</p><small>Experiência e segurança</small></article>
+          <article class="card future-card"><h3>Assistente de pedido com IA</h3><p>Existe uma proposta documentada, mas não há integração com provedor, endpoint ou chamada a modelo implementada.</p><small>Proposta, não implementada</small></article>
+          <article class="card future-card"><h3>Testes de interface e E2E</h3><p>Adicionar testes automatizados do frontend e da jornada completa em navegador, além da suíte backend existente.</p><small>Qualidade</small></article>
+          <article class="card future-card"><h3>Pipeline de CI</h3><p>Executar testes, lint e build automaticamente a cada alteração no repositório.</p><small>Entrega contínua</small></article>
+          <article class="card future-card"><h3>Gestão operacional de usuários</h3><p>Administrar contas, perfis e redefinições sem editar diretamente o banco.</p><small>Operação</small></article>
+          <article class="card future-card"><h3>Sessões e operação em produção</h3><p>Avaliar refresh/revogação de sessão, logs, monitoramento e rotinas de backup conforme o ambiente real.</p><small>Após definir o deploy</small></article>
         </div>
       </section>
 
