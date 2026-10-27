@@ -81,6 +81,20 @@ def pedir_cesta(
         raise traduzir_erro(erro) from erro
 
 
+@router.post("/{id_cesta}/cancelar")
+def cancelar_cesta(
+    id_cesta: int,
+    sessao: Session = Depends(obter_sessao),
+    usuario: Usuario = Depends(exigir_permissao("cestas.cancelar")),
+):
+    """Permite à assinante cancelar uma cesta que ainda está pendente."""
+
+    try:
+        return servico.cancelar_cesta(sessao, id_cesta, usuario.id)
+    except ErroDeAplicacao as erro:
+        raise traduzir_erro(erro) from erro
+
+
 @router.get("/{id_cesta}/separacoes")
 def listar_separacoes(
     id_cesta: int,

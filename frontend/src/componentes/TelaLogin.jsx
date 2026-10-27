@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 // A mesma tela representa o acesso inicial de Aline e Vanderlei.
-function TelaLogin({ aoEntrar, aoCadastrar }) {
+function TelaLogin({ aoEntrar, aoCadastrar, mensagemSistema }) {
   // Mantém o modo atual e os valores preenchidos para controlar cada fluxo de acesso.
   const [modo, setModo] = useState('entrar')
   const [usuario, setUsuario] = useState('')
@@ -144,6 +144,13 @@ function TelaLogin({ aoEntrar, aoCadastrar }) {
               do produtor.
             </p>
           </div>
+
+          {/* Informa falhas ao restaurar a sessão antes de apresentar o formulário de acesso. */}
+          {mensagemSistema && (
+            <p className="mensagem mensagem-erro" role="alert">
+              {mensagemSistema}
+            </p>
+          )}
 
           <form className="formulario-login" onSubmit={enviarFormulario}>
             <label className="campo-login">

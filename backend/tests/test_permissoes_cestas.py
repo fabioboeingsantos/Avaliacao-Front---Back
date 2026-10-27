@@ -50,6 +50,67 @@ def test_assinante_nao_pode_registrar_separacao(cliente):
     assert resposta.status_code == 403
 
 
+def test_assinante_pode_cancelar_proprio_pedido_pendente(cliente):
+    """A assinante cancela uma cesta antes de o produtor iniciar a separação."""
+
+    fazer_login(cliente, "aline", "aline123")
+    resposta = cliente.post("/cestas/1/cancelar")
+
+    assert resposta.status_code == 200
+    assert resposta.json()["situacao"] == "Cancelado"
+    assert cliente.get("/cestas/1").json()["situacao"] == "Cancelado"
+
+
+def test_assinante_nao_pode_cancelar_pedido_de_outra_conta(cliente):
+    """O cancelamento respeita o vínculo da cesta com a conta autenticada."""
+
+    fazer_login(cliente, "aline", "aline123")
+    resposta = cliente.post("/cestas/2/cancelar")
+
+    assert resposta.status_code == 404
+
+
+def test_assinante_nao_pode_cancelar_pedido_em_separacao(cliente):
+    """A cesta não pode ser cancelada depois que o produtor começar a separação."""
+
+    fazer_login(cliente, "vanderlei", "vanderlei123")
+    cliente.post(
+        "/cestas/1/separacoes",
+        json={"produto_id": "alface", "quantidade": 1},
+    )
+
+    fazer_login(cliente, "aline", "aline123")
+    resposta = cliente.post("/cestas/1/cancelar")
+
+    assert resposta.status_code == 422
+    assert cliente.get("/cestas/1").json()["situacao"] == "Em separação"
+
+
+def test_produtor_nao_pode_cancelar_pedido(cliente):
+    """O cancelamento é uma ação exclusiva da assinante."""
+
+    fazer_login(cliente, "vanderlei", "vanderlei123")
+    resposta = cliente.post("/cestas/1/cancelar")
+
+    assert resposta.status_code == 403
+
+
+def test_produtor_nao_pode_separar_pedido_cancelado(cliente):
+    """Pedidos cancelados não podem voltar para o fluxo de separação."""
+
+    fazer_login(cliente, "aline", "aline123")
+    cliente.post("/cestas/1/cancelar")
+
+    fazer_login(cliente, "vanderlei", "vanderlei123")
+    resposta = cliente.post(
+        "/cestas/1/separacoes",
+        json={"produto_id": "alface", "quantidade": 1},
+    )
+
+    assert resposta.status_code == 422
+    assert cliente.get("/cestas/1").json()["situacao"] == "Cancelado"
+
+
 def test_produtor_pode_registrar_separacao(cliente):
     """O produtor autenticado pode atualizar uma cesta existente."""
 

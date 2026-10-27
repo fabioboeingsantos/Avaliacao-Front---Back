@@ -6,7 +6,6 @@ function TelaDetalhesCesta({
   aoAbrirPedido,
   aoAbrirHistorico,
   aoConfirmarEntrega,
-  aoSair,
 }) {
   const [confirmando, setConfirmando] = useState(false)
   const [erro, setErro] = useState('')
@@ -68,9 +67,6 @@ function TelaDetalhesCesta({
               Historico
             </button>
           </nav>
-          <button className="botao-navegacao" type="button" onClick={aoSair}>
-            Voltar a landing page
-          </button>
         </div>
       </header>
 

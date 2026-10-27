@@ -1,14 +1,43 @@
 import { useState } from 'react'
 
-// Esta tela reúne pedidos finalizados e rascunhos salvos para consulta da assinante.
-function TelaHistoricoPedidos({ pedidos, aoAbrirPedido, aoAbrirDetalhes, aoSair }) {
-  // Controla qual grupo de pedidos aparece na lista do histórico.
-  const [filtro, setFiltro] = useState('todos')
+function obterClasseSituacao(situacao) {
+  return situacao
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '-')
+}
 
-  // Mantém apenas os pedidos correspondentes ao filtro escolhido no histórico.
-  const pedidosFiltrados = pedidos.filter((pedido) => {
-    return filtro === 'todos' || pedido.statusHistorico === filtro
-  })
+// Esta tela reúne os pedidos registrados para consulta da assinante.
+function TelaHistoricoPedidos({
+  pedidos,
+  aoAbrirPedido,
+  aoAbrirDetalhes,
+  aoCancelarPedido,
+}) {
+  const [pedidoCancelando, setPedidoCancelando] = useState(null)
+  const [erroCancelamento, setErroCancelamento] = useState('')
+
+  async function cancelarPedido(pedido) {
+    if (!window.confirm('Deseja cancelar este pedido? Essa ação não poderá ser desfeita.')) {
+      return
+    }
+
+    setPedidoCancelando(pedido.id)
+    setErroCancelamento('')
+    try {
+      const resultado = await aoCancelarPedido(pedido.id)
+      if (!resultado?.sucesso) {
+        setErroCancelamento(resultado?.erro ?? 'Não foi possível cancelar o pedido.')
+      }
+    } catch (erro) {
+      setErroCancelamento(
+        erro instanceof Error ? erro.message : 'Não foi possível cancelar o pedido.',
+      )
+    } finally {
+      setPedidoCancelando(null)
+    }
+  }
 
   return (
     <main className="pagina-pedido">
@@ -27,85 +56,36 @@ function TelaHistoricoPedidos({ pedidos, aoAbrirPedido, aoAbrirDetalhes, aoSair 
               Histórico
             </button>
           </nav>
-          <button className="botao-navegacao" type="button" onClick={aoSair}>
-            Voltar à landing page
-          </button>
         </div>
       </header>
 
       <section className="introducao-pedido" aria-labelledby="titulo-historico">
         <p className="texto-saudacao">Acompanhe seus pedidos</p>
         <h1 id="titulo-historico">Histórico de pedidos</h1>
-        <p>Consulte o que já foi finalizado e o que ainda precisa ser concluído.</p>
+        <p>Consulte seus pedidos e acompanhe a situação de cada cesta.</p>
       </section>
 
-      <section className="resumo-historico" aria-label="Resumo do histórico">
-        <div className="cartao-resumo-historico">
-          <strong>{pedidos.length}</strong>
-          <span>Total de pedidos</span>
-        </div>
-        <div className="cartao-resumo-historico">
-          <strong>{pedidos.filter((pedido) => pedido.statusHistorico === 'concluido').length}</strong>
-          <span>Finalizados</span>
-        </div>
-        <div className="cartao-resumo-historico">
-          <strong>{pedidos.filter((pedido) => pedido.statusHistorico === 'nao-concluido').length}</strong>
-          <span>Não concluídos</span>
-        </div>
-      </section>
-
-      <nav className="filtros-historico" aria-label="Filtrar histórico">
-        <button
-          className={`botao botao-secundario ${filtro === 'todos' ? 'filtro-ativo' : ''}`}
-          type="button"
-          aria-pressed={filtro === 'todos'}
-          onClick={() => setFiltro('todos')}
-        >
-          Todos
-        </button>
-        <button
-          className={`botao botao-secundario ${filtro === 'concluido' ? 'filtro-ativo' : ''}`}
-          type="button"
-          aria-pressed={filtro === 'concluido'}
-          onClick={() => setFiltro('concluido')}
-        >
-          Finalizados
-        </button>
-        <button
-          className={`botao botao-secundario ${filtro === 'nao-concluido' ? 'filtro-ativo' : ''}`}
-          type="button"
-          aria-pressed={filtro === 'nao-concluido'}
-          onClick={() => setFiltro('nao-concluido')}
-        >
-          Não concluídos
-        </button>
-      </nav>
-
-      {pedidosFiltrados.length === 0 ? (
+      {pedidos.length === 0 ? (
         <section className="estado-vazio estado-vazio-historico">
-          <h2>{pedidos.length === 0 ? 'Você ainda não tem pedidos' : 'Nenhum pedido neste filtro'}</h2>
-          <p>
-            {pedidos.length === 0
-              ? 'Quando você finalizar ou salvar uma cesta, ela aparecerá aqui.'
-              : 'Escolha outro filtro para consultar seus pedidos.'}
-          </p>
-          {pedidos.length === 0 && (
-            <button className="botao botao-primario" type="button" onClick={aoAbrirPedido}>
-              Fazer novo pedido
-            </button>
-          )}
+          <h2>Você ainda não tem pedidos</h2>
+          <p>Quando você finalizar um pedido, ele aparecerá aqui.</p>
+          <button className="botao botao-primario" type="button" onClick={aoAbrirPedido}>
+            Fazer novo pedido
+          </button>
         </section>
       ) : (
         <section className="lista-historico" aria-label="Pedidos registrados">
-          {pedidosFiltrados.map((pedido) => (
+          {pedidos.map((pedido) => (
             <article className="cartao-historico" key={pedido.id}>
               <div className="cabecalho-historico">
                 <div>
                   <p className="rotulo-cartao">Pedido realizado em {pedido.data}</p>
                   <h2>Cesta {pedido.tamanhoNome}</h2>
                 </div>
-                <span className={`status-historico status-${pedido.statusHistorico}`}>
-                  {pedido.statusHistorico === 'concluido' ? 'Finalizado' : 'Não concluído'}
+                <span
+                  className={`status-historico status-${obterClasseSituacao(pedido.situacao)}`}
+                >
+                  {pedido.situacao}
                 </span>
               </div>
               <p className="resumo-produtos">
@@ -133,9 +113,24 @@ function TelaHistoricoPedidos({ pedidos, aoAbrirPedido, aoAbrirDetalhes, aoSair 
               >
                 Ver detalhes e separacao
               </button>
+              {pedido.situacao === 'Pendente' && (
+                <button
+                  className="botao botao-cancelar-pedido"
+                  type="button"
+                  disabled={pedidoCancelando === pedido.id}
+                  onClick={() => cancelarPedido(pedido)}
+                >
+                  {pedidoCancelando === pedido.id ? 'Cancelando...' : 'Cancelar pedido'}
+                </button>
+              )}
             </article>
           ))}
         </section>
+      )}
+      {erroCancelamento && (
+        <p className="mensagem mensagem-erro" role="alert">
+          {erroCancelamento}
+        </p>
       )}
     </main>
   )

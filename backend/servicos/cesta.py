@@ -166,7 +166,10 @@ def separar_produto(
     """Registra a separacao respeitando o pedido e o limite da cesta."""
 
     cesta = buscar_cesta(sessao, id_cesta, usuario_id=usuario_id)
-    if cesta["separacao_concluida_em"] is not None or cesta["situacao"] == "Entregue":
+    if (
+        cesta["separacao_concluida_em"] is not None
+        or cesta["situacao"] in {"Entregue", "Cancelado"}
+    ):
         raise QuantidadeExcedida("A cesta já está concluída e não pode ser alterada.")
     item_pedido = next((item for item in cesta["produtos"] if item["id"] == produto_id), None)
     if item_pedido is None:
@@ -203,7 +206,10 @@ def separar_produtos(
     """Registra um lote completo após validar todas as quantidades."""
 
     cesta = buscar_cesta(sessao, id_cesta)
-    if cesta["separacao_concluida_em"] is not None or cesta["situacao"] == "Entregue":
+    if (
+        cesta["separacao_concluida_em"] is not None
+        or cesta["situacao"] in {"Entregue", "Cancelado"}
+    ):
         raise QuantidadeExcedida("A cesta já está concluída e não pode ser alterada.")
     itens_pedido = {item["id"]: item for item in cesta["produtos"]}
     separacoes = {item["produto_id"]: item for item in cesta["separacoes"]}
@@ -248,7 +254,10 @@ def desfazer_separacoes(sessao: Session, id_cesta: int, produtos: list[dict]) ->
     """Remove quantidades registradas, validando o lote antes de salvar."""
 
     cesta = buscar_cesta(sessao, id_cesta)
-    if cesta["separacao_concluida_em"] is not None or cesta["situacao"] == "Entregue":
+    if (
+        cesta["separacao_concluida_em"] is not None
+        or cesta["situacao"] in {"Entregue", "Cancelado"}
+    ):
         raise QuantidadeExcedida("A cesta já está concluída e não pode ser alterada.")
     quantidades = {}
 
@@ -284,6 +293,8 @@ def concluir_separacao(sessao: Session, id_cesta: int) -> dict:
     """Conclui a cesta somente quando todas as quantidades pedidas foram separadas."""
 
     cesta = buscar_cesta(sessao, id_cesta)
+    if cesta["situacao"] == "Cancelado":
+        raise QuantidadeExcedida("Uma cesta cancelada não pode ser concluída.")
     separacoes = {item["produto_id"]: item["quantidade"] for item in cesta["separacoes"]}
     pendentes = [
         f"{produto['nome']} ({separacoes.get(produto['id'], 0)} de {produto['quantidade']})"
@@ -301,6 +312,21 @@ def concluir_separacao(sessao: Session, id_cesta: int) -> dict:
 
     cesta["situacao"] = "Em separação"
     cesta["separacao_concluida_em"] = datetime.now(timezone.utc)
+    return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
+
+
+def cancelar_cesta(sessao: Session, id_cesta: int, usuario_id: int) -> dict:
+    """Cancela a cesta da assinante somente antes do início da separação."""
+
+    cesta = buscar_cesta(sessao, id_cesta, usuario_id=usuario_id)
+    if cesta["situacao"] == "Cancelado":
+        return cesta
+    if cesta["situacao"] != "Pendente" or cesta["separacoes"]:
+        raise QuantidadeExcedida(
+            "Só é possível cancelar o pedido enquanto ele estiver pendente."
+        )
+
+    cesta["situacao"] = "Cancelado"
     return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
 
 

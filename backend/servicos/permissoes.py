@@ -15,6 +15,7 @@ PERMISSOES_POR_GRUPO = {
         "cestas.consultar",
         "cestas.listar_separacoes",
         "cestas.criar",
+        "cestas.cancelar",
         "cestas.confirmar_entrega",
     },
     GRUPO_PRODUTOR: {

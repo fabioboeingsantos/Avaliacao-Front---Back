@@ -620,6 +620,8 @@
                 <li>Consultar detalhes da cesta</li>
                 <li>Visualizar separações</li>
                 <li>Criar uma nova cesta</li>
+                <li>Cancelar o próprio pedido enquanto estiver pendente</li>
+                <li>Confirmar o recebimento da cesta</li>
               </ul>
             </div>
           </article>
@@ -635,10 +637,12 @@
               <strong>Permissões</strong>
               <ul>
                 <li>Consultar a própria conta</li>
-                <li>Listar as cestas disponíveis</li>
+                <li>Listar e consultar as cestas da produção</li>
                 <li>Consultar detalhes da cesta</li>
                 <li>Visualizar separações</li>
-                <li>Registrar produtos separados</li>
+                <li>Registrar produtos separados individualmente ou em lote</li>
+                <li>Desfazer separações antes de concluir</li>
+                <li>Concluir a separação após conferir todos os itens</li>
               </ul>
             </div>
           </article>
@@ -732,7 +736,10 @@
         <h2 id="titulo-rotas">4. Matriz de acesso às rotas</h2>
         <p>
           As permissões são verificadas antes da regra de negócio. Além do grupo, a API aplica o
-          escopo correto: Aline vê suas cestas; Vanderlei vê as cestas da produção.
+          escopo correto: Aline vê apenas as próprias cestas; Vanderlei acompanha as cestas da
+          produção. O cancelamento só é permitido à assinante enquanto o pedido estiver pendente.
+          Rotas de cadastro, autenticação e saúde são públicas; o logout remove o cookie da sessão
+          quando presente.
         </p>
 
         <!-- A tabela complementa o diagrama para deixar o contrato técnico verificável. -->
@@ -747,6 +754,30 @@
               </tr>
             </thead>
             <tbody>
+              <tr>
+                <td><code>GET</code></td>
+                <td><code>/saude</code></td>
+                <td><span class="acesso acesso-todos">Público</span></td>
+                <td>Verifica se a API está online.</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/usuarios</code></td>
+                <td><span class="acesso acesso-todos">Público</span></td>
+                <td>Cadastra uma conta com perfil inicial de assinante.</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/autenticacao/login</code></td>
+                <td><span class="acesso acesso-todos">Público</span></td>
+                <td>Valida as credenciais e inicia a sessão.</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/autenticacao/logout</code></td>
+                <td><span class="acesso acesso-todos">Público</span></td>
+                <td>Remove o cookie de sessão, quando presente.</td>
+              </tr>
               <tr>
                 <td><code>GET</code></td>
                 <td><code>/usuarios/me</code><br /><code>/usuarios/eu</code></td>
@@ -779,9 +810,39 @@
               </tr>
               <tr>
                 <td><code>POST</code></td>
+                <td><code>/cestas/{id}/cancelar</code></td>
+                <td><span class="acesso acesso-assinante">Assinante</span></td>
+                <td>Cancela a própria cesta somente enquanto estiver pendente e sem separações.</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
                 <td><code>/cestas/{id}/separacoes</code></td>
                 <td><span class="acesso acesso-produtor">Produtor</span></td>
-                <td>Registra quantidade sem ultrapassar o pedido.</td>
+                <td>Registra um produto sem ultrapassar a quantidade pedida.</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/cestas/{id}/separacoes/lote</code></td>
+                <td><span class="acesso acesso-produtor">Produtor</span></td>
+                <td>Registra vários produtos atomicamente, respeitando o pedido.</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/cestas/{id}/separacoes/desfazer</code></td>
+                <td><span class="acesso acesso-produtor">Produtor</span></td>
+                <td>Desfaz quantidades separadas antes da conclusão.</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/cestas/{id}/separacoes/concluir</code></td>
+                <td><span class="acesso acesso-produtor">Produtor</span></td>
+                <td>Conclui após separar todos os itens e inicia o prazo de confirmação.</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/cestas/{id}/entrega/confirmar</code></td>
+                <td><span class="acesso acesso-assinante">Assinante</span></td>
+                <td>Confirma o recebimento da própria cesta após a separação.</td>
               </tr>
             </tbody>
           </table>

@@ -70,7 +70,7 @@ function obterItensCestaPronta(tamanho) {
 
 // Esta é a tela principal da assinante. Os campos seguintes aparecem de acordo
 // com a escolha feita no primeiro passo, evitando mostrar decisões desnecessárias.
-function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, aoSair }) {
+function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico }) {
   const [modoSelecionado, setModoSelecionado] = useState('')
   const [tamanhoSelecionado, setTamanhoSelecionado] = useState('')
   const [quantidadesSelecionadas, setQuantidadesSelecionadas] = useState({})
@@ -180,9 +180,6 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, aoSair }) {
               Histórico
             </button>
           </nav>
-          <button className="botao-navegacao" type="button" onClick={aoSair}>
-            Voltar à landing page
-          </button>
         </div>
       </header>
 

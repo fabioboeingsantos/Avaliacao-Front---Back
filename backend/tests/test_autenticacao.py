@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 
-from configuracao import obter_chave_jwt
+from configuracao import obter_chave_jwt, obter_duracao_token_minutos
 from servicos.senhas import criar_hash_de_senha, senha_confere
 
 from .conftest import fazer_login
@@ -39,6 +39,23 @@ def test_login_devolve_jwt_com_identidade_e_perfil(cliente):
     assert dados_token["sub"] == "aline"
     assert dados_token["perfil"] == "assinante"
     assert "senha" not in corpo
+    # O JWT e o cookie do navegador precisam compartilhar a validade mínima de 24 horas.
+    assert int(dados_token["exp"] - dados_token["iat"]) >= 24 * 60 * 60
+    assert "max-age=86400" in resposta.headers["set-cookie"].lower()
+
+    # A identidade pode ser recuperada usando apenas o cookie HttpOnly da sessão.
+    sessao_restaurada = cliente.get("/usuarios/me")
+
+    assert sessao_restaurada.status_code == 200
+    assert sessao_restaurada.json()["usuario"] == "aline"
+
+
+def test_duracao_padrao_da_sessao_e_de_24_horas(monkeypatch):
+    """A configuração padrão mantém o login válido por pelo menos um dia."""
+
+    monkeypatch.delenv("JWT_EXPIRATION_MINUTES", raising=False)
+
+    assert obter_duracao_token_minutos() >= 24 * 60
 
 
 def test_login_rejeita_senha_incorreta(cliente):

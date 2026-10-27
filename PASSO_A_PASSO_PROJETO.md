@@ -13,10 +13,11 @@ O fluxo principal é:
 
 1. Aline acessa o sistema.
 2. Escolhe o tamanho e a composição da cesta.
-3. Confirma o pedido.
-4. Vanderlei visualiza as cestas da semana.
-5. Registra os produtos separados.
-6. O sistema controla os limites da cesta.
+3. Confirma o pedido, que fica pendente.
+4. Enquanto o pedido estiver pendente, Aline pode cancelá-lo.
+5. Vanderlei visualiza as cestas e registra os produtos separados.
+6. Depois de separar todos os itens, Vanderlei conclui a separação.
+7. Aline confirma o recebimento; se não confirmar, a cesta passa para entregue sete dias após a conclusão.
 
 ## 2. Tecnologias utilizadas
 
@@ -136,11 +137,13 @@ Campos principais:
 
 - identificador;
 - nome de usuário;
-- senha;
+- e-mail;
+- hash da senha;
 - perfil;
 - situação ativa ou inativa.
 
-Os perfis atuais são `assinante` e `produtor`.
+Os perfis atuais são `assinante` e `produtor`. As senhas são armazenadas com hash Argon2,
+nunca em texto puro.
 
 ### Produto
 
@@ -160,11 +163,12 @@ Representa o pedido feito pela assinante.
 
 Campos principais:
 
-- usuário ou assinante;
+- usuário vinculado à conta (opcional para preservar registros antigos);
+- nome textual da assinante;
 - semana;
 - tamanho;
 - modo da cesta;
-- limite de itens;
+- limite de produtos diferentes;
 - situação atual.
 
 ### Item da cesta
@@ -177,22 +181,26 @@ Registra a quantidade de cada produto que já foi separado pelo produtor.
 
 ## 6. Regras de negócio
 
-Os tamanhos disponíveis são:
+Os tamanhos disponíveis limitam a quantidade de produtos diferentes:
 
-| Tamanho | Limite |
+| Tamanho | Limite de produtos diferentes |
 |---|---:|
-| Pequena | 5 itens |
-| Média | 8 itens |
-| Grande | 12 itens |
+| Pequena | 5 |
+| Média | 8 |
+| Grande | 12 |
 
 Regras principais:
 
-1. Uma cesta nova começa com a situação **Pedida**.
-2. A quantidade total dos produtos não pode ultrapassar o limite do tamanho.
-3. Um produto separado precisa pertencer à cesta.
-4. A quantidade separada não pode ultrapassar a quantidade pedida.
+1. Uma cesta nova começa com a situação **Pendente**.
+2. O limite do tamanho se aplica à quantidade de produtos diferentes, não à soma das unidades.
+3. Cada produto pode ter até 10 unidades por cesta.
+4. Um produto separado precisa pertencer à cesta, e a quantidade separada não pode exceder a quantidade pedida.
 5. O primeiro produto separado altera a situação para **Em separação**.
-6. Quando todos os produtos forem separados, a situação passa para **Separação concluída**.
+6. A situação permanece **Em separação** após a conclusão; a data de conclusão inicia o prazo de sete dias para confirmação do recebimento.
+7. A cesta passa para **Entregue** quando a assinante confirma o recebimento ou quando esse prazo termina. A expiração é atualizada quando a cesta é consultada pela API.
+8. A assinante pode cancelar a própria cesta somente enquanto ela estiver **Pendente** e sem separações. A situação passa para **Cancelado**, e o produtor não pode iniciar ou continuar a separação.
+
+As situações possíveis são **Pendente**, **Em separação**, **Cancelado** e **Entregue**.
 
 ## 7. Passo a passo para construir do zero
 
@@ -206,7 +214,8 @@ Antes de escrever código, documentar:
 - quais regras precisam ser respeitadas;
 - o que ficará fora do escopo.
 
-Neste projeto, o escopo inicial não inclui pagamento, entrega, estoque em quilos, troca de produtos ou notificações.
+O sistema permite confirmar o recebimento da cesta, mas não inclui pagamento, estoque em quilos,
+troca de produtos ou notificações automáticas.
 
 ### Etapa 2 — Criar o frontend
 
@@ -254,7 +263,7 @@ Em seguida, criar as tabelas e inserir dados iniciais:
 
 ```powershell
 cd backend
-.\.venv\Scripts\Activate.ps1
+& .\.venv\Scripts\Activate.ps1
 python criar_tabelas.py
 ```
 
@@ -272,25 +281,41 @@ Exemplo de fluxo para registrar uma separação:
 6. Atualiza a separação e a situação da cesta.
 7. O repositório salva os dados no banco.
 
+Regras relacionadas ao ciclo do pedido:
+
+- Permitir que a assinante cancele somente a própria cesta pendente, antes de qualquer separação.
+- Recusar separações e conclusão em cestas canceladas.
+- Permitir concluir apenas quando todas as quantidades pedidas estiverem separadas.
+- Permitir confirmar o recebimento somente para a assinante dona da cesta após a conclusão.
+- Marcar a cesta como entregue após a confirmação ou após sete dias da conclusão, na consulta à API.
+
 ### Etapa 6 — Criar a API REST
 
-Rotas principais:
+Rotas atuais:
 
 | Método | Caminho | Finalidade |
 |---|---|---|
 | `GET` | `/saude` | Verificar se a API está funcionando |
-| `POST` | `/autenticacao/login` | Validar o acesso do usuário |
-| `GET` | `/cestas` | Listar cestas |
-| `GET` | `/cestas/{id}` | Consultar uma cesta |
-| `POST` | `/cestas` | Criar uma cesta |
+| `POST` | `/usuarios` | Cadastrar conta de assinante |
+| `GET` | `/usuarios/me`, `/usuarios/eu` | Consultar a conta autenticada |
+| `POST` | `/autenticacao/login` | Validar o acesso e iniciar uma sessão |
+| `POST` | `/autenticacao/logout` | Encerrar a sessão removendo o cookie |
+| `GET` | `/cestas` | Listar cestas; assinantes veem somente as próprias |
+| `GET` | `/cestas/{id}` | Consultar uma cesta dentro do escopo do usuário |
+| `POST` | `/cestas` | Criar uma cesta pendente para a conta autenticada |
+| `POST` | `/cestas/{id}/cancelar` | Cancelar a própria cesta enquanto estiver pendente |
 | `GET` | `/cestas/{id}/separacoes` | Listar separações |
-| `POST` | `/cestas/{id}/separacoes` | Registrar separação |
+| `POST` | `/cestas/{id}/separacoes` | Registrar uma separação |
+| `POST` | `/cestas/{id}/separacoes/lote` | Registrar várias separações atomicamente |
+| `POST` | `/cestas/{id}/separacoes/desfazer` | Desfazer quantidades separadas antes de concluir |
+| `POST` | `/cestas/{id}/separacoes/concluir` | Concluir após separar todos os itens |
+| `POST` | `/cestas/{id}/entrega/confirmar` | Confirmar o recebimento da própria cesta |
 
 A API pode ser iniciada com:
 
 ```powershell
 cd backend
-.\.venv\Scripts\Activate.ps1
+& .\.venv\Scripts\Activate.ps1
 fastapi dev main.py
 ```
 
@@ -302,22 +327,24 @@ http://127.0.0.1:8000/docs
 
 ### Etapa 7 — Conectar o frontend à API
 
-O frontend deve centralizar as chamadas HTTP em uma função ou serviço comum.
+O frontend atual centraliza as chamadas HTTP em uma função comum e envia credenciais para
+compartilhar a sessão por cookie `HttpOnly`.
 
 Exemplo de configuração:
 
 ```javascript
-const URL_API = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+const URL_API =
+  import.meta.env.VITE_API_URL ??
+  `${window.location.protocol}//${window.location.hostname}:8000`
 ```
 
-O frontend deve:
+O frontend:
 
-- enviar os dados do login;
-- buscar as cestas;
-- criar pedidos;
-- registrar separações;
-- exibir mensagens de erro;
-- atualizar a interface depois de cada operação.
+- envia login e cadastro à API;
+- busca as cestas permitidas para a conta;
+- persiste pedidos concluídos, separações e confirmação de recebimento;
+- permite cancelar pedidos pendentes, com confirmação da pessoa usuária;
+- exibe erros das operações e atualiza a interface após alterações.
 
 ### Etapa 8 — Implementar autenticação e perfis
 
@@ -328,24 +355,26 @@ Depois do login:
 - o perfil `assinante` acessa o fluxo de pedidos;
 - o perfil `produtor` acessa o fluxo de separação.
 
-Em uma versão de produção, as senhas devem ser armazenadas com hash e o sistema deve utilizar uma sessão segura ou JWT.
+O backend valida a conta ativa e o grupo em cada operação protegida. A sessão é enviada em cookie
+JWT `HttpOnly` com validade mínima de 24 horas; ao reabrir a aplicação, o frontend consulta
+`/usuarios/me` para restaurar a sessão ainda válida. As senhas são armazenadas com hash Argon2. As
+permissões ficam centralizadas na matriz de grupos, e os serviços validam as regras de negócio
+específicas.
 
 ### Etapa 9 — Testar o fluxo completo
 
 Fluxo de teste recomendado:
 
-1. Entrar com `aline`.
-2. Escolher uma cesta pequena, média ou grande.
-3. Confirmar o pedido.
-4. Verificar se a cesta aparece no histórico.
-5. Sair do sistema.
-6. Entrar com `vanderlei`.
-7. Abrir a tela de separação.
-8. Selecionar uma cesta.
-9. Registrar um produto.
-10. Tentar ultrapassar o limite.
-11. Confirmar que a API recusa a quantidade inválida.
-12. Completar a separação e verificar a situação final.
+1. Entrar com `aline` e escolher uma cesta pequena, média ou grande.
+2. Confirmar o pedido e verificar que aparece como **Pendente** no histórico.
+3. Se necessário, cancelar o pedido ainda pendente e verificar a situação **Cancelado**.
+4. Para testar a separação, criar outro pedido e entrar com o perfil produtor em outra sessão.
+5. Entrar com `vanderlei` e abrir a tela de separação.
+6. Registrar um ou mais produtos, sem exceder as quantidades pedidas.
+7. Tentar registrar uma quantidade inválida e confirmar que a API recusa a operação.
+8. Separar todos os itens e concluir a separação.
+9. Voltar a entrar com `aline`, abrir os detalhes do pedido e confirmar o recebimento.
+10. Verificar que a situação aparece como **Entregue**.
 
 ### Etapa 10 — Preparar a publicação
 
@@ -361,13 +390,23 @@ Antes de publicar, revisar:
 - build do frontend;
 - logs do backend.
 
+Para validar as alterações durante o desenvolvimento, o backend possui testes automatizados:
+
+```powershell
+cd backend
+pytest -q
+```
+
+Na pasta `frontend`, execute `npm run lint` e `npm run build` para verificar o código e gerar a
+versão de produção.
+
 ## 8. Como executar o projeto atual
 
 ### Backend
 
 ```powershell
 cd backend
-.\.venv\Scripts\Activate.ps1
+& .\.venv\Scripts\Activate.ps1
 python criar_tabelas.py
 fastapi dev main.py
 ```
@@ -386,18 +425,14 @@ O Vite exibirá o endereço local da aplicação, normalmente `http://localhost:
 
 ## 9. Melhorias futuras
 
-Para evoluir o projeto, os próximos passos recomendados são:
+O fluxo principal já inclui autenticação, permissões por grupo, vínculo das cestas com a conta,
+proteção dos pedidos de outras pessoas, cancelamento antes da separação, testes automatizados e
+persistência por SQLite ou MySQL. Possíveis evoluções:
 
-1. Criptografar as senhas.
-2. Usar autenticação com sessão ou JWT.
-3. Associar cada cesta diretamente ao `usuario_id` autenticado.
-4. Impedir que uma assinante consulte cestas de outra pessoa.
-5. Criar testes unitários para as regras de negócio.
-6. Criar testes de integração para as rotas.
-7. Separar o estado do frontend em hooks ou serviços específicos.
-8. Adicionar estados de carregamento e mensagens de erro mais detalhadas.
-9. Configurar pipeline de build e deploy.
-10. Migrar para MySQL ou PostgreSQL em produção.
+1. Configurar pipeline automatizado de validação, build e deploy.
+2. Planejar a operação de produção com banco gerenciado, backups e variáveis de ambiente seguras.
+3. Avaliar observabilidade e notificações, caso passem a fazer parte dos requisitos.
+4. Separar o estado do frontend em hooks ou serviços específicos se a complexidade crescer.
 
 ## 10. Resumo da decisão técnica
 
@@ -409,4 +444,3 @@ O projeto foi dividido em React no frontend e FastAPI no backend porque essa com
 - separar regras de negócio da persistência;
 - começar com SQLite e evoluir para MySQL;
 - manter o projeto organizado para futuras funcionalidades.
-

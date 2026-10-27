@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Infraestrutura - Cesta do Vale</title>
+  <style>
+    :root {
+      --cor-verde-horta: #2F6B3B;
+      --cor-verde-escuro: #1F4D2E;
+      --cor-verde-claro: #DCEBD2;
+      --cor-terracota: #A84F35;
+      --cor-amarelo-colheita: #E6A23C;
+      --cor-creme-natural: #F7F5EF;
+      --cor-branco: #FFFFFF;
+      --cor-texto-escuro: #24302A;
+      --cor-borda: #CBD5CC;
+      --cor-texto-separacao: #7A4B00;
+      --cor-fundo-etiqueta-separacao: #FFF1D6;
+      --fonte-principal: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+      --bg: var(--cor-creme-natural);
+      --panel: var(--cor-branco);
+      --panel-soft: var(--cor-verde-claro);
+      --text: var(--cor-texto-escuro);
+      --muted: var(--cor-verde-escuro);
+      --border: var(--cor-borda);
+      --primary: var(--cor-verde-horta);
+      --secondary: var(--cor-terracota);
+      --warning: var(--cor-fundo-etiqueta-separacao);
+      --shadow: 0 8px 24px rgba(31, 77, 46, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--fonte-principal);
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 24px 60px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+      color: var(--cor-verde-escuro);
+    }
+
+    .subtitle {
+      margin-top: 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 26px 24px 18px;
+      margin-top: 28px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.4rem;
+      color: var(--text);
+      border-bottom: 2px solid var(--panel-soft);
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+    }
+
+    .diagram-wrap {
+      background: var(--cor-branco);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .mermaid-source {
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--cor-verde-escuro);
+    }
+
+    .mermaid-source-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--cor-verde-escuro);
+      color: var(--cor-branco);
+    }
+
+    .mermaid-source-header p {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .mermaid-source-header code {
+      color: var(--cor-verde-claro);
+      font-weight: 700;
+    }
+
+    .copy-button {
+      border: 0;
+      border-radius: 7px;
+      padding: 8px 12px;
+      background: var(--cor-verde-horta);
+      color: var(--cor-branco);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .copy-button:hover {
+      background: var(--cor-verde-escuro);
+      color: var(--cor-branco);
+    }
+
+    .mermaid-code {
+      margin: 0;
+      padding: 16px;
+      overflow-x: auto;
+      color: var(--cor-branco);
+      font: 0.9rem/1.6 Consolas, monospace;
+    }
+
+    .mermaid-code .start-line {
+      display: inline-block;
+      margin: 0 0 6px -8px;
+      padding: 2px 8px;
+      border-left: 3px solid var(--cor-amarelo-colheita);
+      border-radius: 0 5px 5px 0;
+      background: var(--cor-verde-horta);
+      color: var(--cor-branco);
+      font-weight: 700;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .legend span {
+      background: var(--panel-soft);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 7px 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--cor-branco);
+    }
+
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+
+    th {
+      background: var(--cor-verde-escuro);
+      color: var(--cor-branco);
+      font-weight: 700;
+    }
+
+    th:first-child, td:first-child {
+      width: 18%;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    li { margin-bottom: 6px; }
+
+    .note {
+      background: var(--warning);
+      border-left: 4px solid var(--cor-amarelo-colheita);
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-top: 12px;
+      color: var(--cor-texto-separacao);
+    }
+
+    .step-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      counter-reset: step;
+    }
+
+    .step-list li {
+      counter-increment: step;
+      position: relative;
+      margin-bottom: 18px;
+      padding: 14px 14px 14px 52px;
+      background: var(--cor-verde-claro);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      line-height: 1.6;
+    }
+
+    .step-list li::before {
+      content: counter(step);
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--cor-branco);
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .step-list .machine {
+      font-weight: 600;
+      color: var(--cor-verde-escuro);
+    }
+
+    .inline-code {
+      font-family: Consolas, monospace;
+      background: var(--cor-verde-claro);
+      border: 1px solid var(--cor-borda);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 0.9em;
+    }
+
+    .question-list {
+      margin: 0;
+      padding-left: 18px;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 800px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead { display: none; }
+
+      tr {
+        border-bottom: 1px solid var(--border);
+        padding: 10px 0;
+      }
+
+      td {
+        border: none;
+        padding: 8px 0;
+      }
+
+      td::before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 700;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Infraestrutura</h1>
+    <p class="subtitle">Proposta de arquitetura de produção do projeto.</p>
+
+    <section class="section">
+      <h2>1. Arquitetura de produção</h2>
+      <div class="diagram-wrap">
+        <pre class="mermaid">
+flowchart LR
+    U[Browser / Usuário\ncliente] -->|HTTPS 443| W[Servidor web\nHTTPS 443\nrecebe tráfego público]
+    W -->|HTTP 8000 /api| A[API FastAPI\nporta interna 8000\nrecebe /api]
+    A -->|TCP 3306| M[(MySQL\nporta interna 3306\nrecebe acesso interno)]
+        </pre>
+      </div>
+      <div class="legend">
+        <span>Browser: cliente</span>
+        <span>Servidor web: HTTPS 443</span>
+        <span>API: porta interna 8000</span>
+        <span>MySQL: porta interna 3306</span>
+      </div>
+      <div class="note">
+        Para usar no Mermaid Live, copie o código abaixo começando pela linha destacada <span class="inline-code">flowchart LR</span>.
+      </div>
+      <div class="mermaid-source">
+        <div class="mermaid-source-header">
+          <p>Código Mermaid — comece por <code>flowchart LR</code></p>
+          <button class="copy-button" id="copy-mermaid" type="button">Copiar código</button>
+        </div>
+        <pre class="mermaid-code" id="mermaid-code"><code><span class="start-line">flowchart LR</span>
+    U[Browser / Usuário\ncliente] --&gt;|HTTPS 443| W[Servidor web\nHTTPS 443\nrecebe tráfego público]
+    W --&gt;|HTTP 8000 /api| A[API FastAPI\nporta interna 8000\nrecebe /api]
+    A --&gt;|TCP 3306| M[(MySQL\nporta interna 3306\nrecebe acesso interno)]</code></pre>
+      </div>
+      <ul style="margin-top:18px;">
+        <li><strong>Navegador:</strong> roda na máquina do usuário; é cliente; não precisa de porta de servidor pública.</li>
+        <li><strong>Servidor web:</strong> roda em uma máquina de aplicação; atende em HTTPS na 443; recebe tráfego público e encaminha <span class="inline-code">/api</span> para a API interna na 8000.</li>
+        <li><strong>API:</strong> roda em máquina interna do backend; atende na 8000; recebe tráfego do servidor web e não expõe acesso público direto.</li>
+        <li><strong>MySQL:</strong> roda em máquina interna de dados; atende na 3306; recebe somente conexões da API; não recebe tráfego público.</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>2. Desenvolvimento e produção</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Camada</th>
+            <th>Desenvolvimento</th>
+            <th>Produção</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-label="Camada">API</td>
+            <td data-label="Desenvolvimento">FastAPI local, executada com <span class="inline-code">fastapi dev main.py</span> na porta 8000; pode apontar para SQLite local ou MySQL local.</td>
+            <td data-label="Produção">API em máquina interna, sem exposição direta ao público, ouvindo na 8000 e acessível somente pelo servidor web.</td>
+          </tr>
+          <tr>
+            <td data-label="Camada">Tela</td>
+            <td data-label="Desenvolvimento">React/Vite em ambiente local na porta 5173; a UI usa a API em host local e porta 8000.</td>
+            <td data-label="Produção">Tela servida em HTTPS na 443 e entregue ao navegador como origem pública; a mesma origem pode receber <span class="inline-code">/api</span> encaminhado para a API interna.</td>
+          </tr>
+          <tr>
+            <td data-label="Camada">Banco</td>
+            <td data-label="Desenvolvimento">SQLite local ou MySQL local conforme o arquivo de ambiente; o exemplo usa <span class="inline-code">BANCO_HOST=localhost</span>.</td>
+            <td data-label="Produção">MySQL interno, em rede privada, na 3306, acessível apenas pela API; sem acesso direto do navegador ou da internet.</td>
+          </tr>
+          <tr>
+            <td data-label="Camada">.env</td>
+            <td data-label="Desenvolvimento">Arquivo local de ambiente com banco, JWT e CORS.</td>
+            <td data-label="Produção">Variáveis injetadas no ambiente de execução, fora do repositório; sem uso de <span class="inline-code">.env</span> versionado; <span class="inline-code">JWT_COOKIE_SECURE=true</span> e <span class="inline-code">FRONTEND_URL</span> ajustados ao ambiente real.</td>
+          </tr>
+          <tr>
+            <td data-label="Camada">CORS</td>
+            <td data-label="Desenvolvimento">O backend habilita CORS e usa origem local da tela, com padrão em <span class="inline-code">http://localhost:5173</span>.</td>
+            <td data-label="Produção">? Se a tela e a API ficarem na mesma origem pública, não há necessidade de CORS entre elas; a proposta mantém a mesma origem e usa o servidor web para encaminhar <span class="inline-code">/api</span>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>3. O caminho do login</h2>
+      <ol class="step-list">
+        <li><span class="machine">Máquina do usuário:</span> o usuário clica em “Entrar” na tela do frontend.</li>
+        <li><span class="machine">Servidor web:</span> o navegador envia a requisição via HTTPS na 443.</li>
+        <li><span class="machine">Servidor web → API:</span> o servidor encaminha a chamada para a API interna em <span class="inline-code">/api/autenticacao/login</span>, na porta 8000.</li>
+        <li><span class="machine">API:</span> a API valida o usuário e a senha.</li>
+        <li><span class="machine">API → MySQL:</span> a API consulta o banco para confirmar a identidade e os dados da conta.</li>
+        <li><span class="machine">API:</span> se a autenticação for bem-sucedida, a API gera um JWT e define o cookie <span class="inline-code">HttpOnly</span> na resposta.</li>
+        <li><span class="machine">Máquina do usuário:</span> o navegador recebe a resposta e guarda o cookie do login.</li>
+        <li><span class="machine">Máquina do usuário:</span> nas próximas telas, o navegador manda esse cookie automaticamente junto com as requisições.</li>
+        <li><span class="machine">Máquina do usuário + API:</span> ao abrir ou recarregar a aplicação, o frontend chama <span class="inline-code">/usuarios/me</span> para restaurar a sessão; a validação final acontece na API e no banco.</li>
+      </ol>
+      <div class="note">
+        O projeto atual já usa cookie <span class="inline-code">HttpOnly</span> e credenciais incluídas nas requisições do navegador, o que combina com a arquitetura proposta.
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>4. O que está chumbado</h2>
+      <ul>
+        <li><strong>backend/configuracao.py</strong>: linha 35 — valor <span class="inline-code">http://localhost:5173</span>. Uso: servidor; padrão de origem permitida para CORS em desenvolvimento. Observação: é um valor de desenvolvimento e não representa a produção.</li>
+        <li><strong>backend/.env.exemplo</strong>: linha 5 — valor <span class="inline-code">BANCO_HOST=localhost</span>. Uso: servidor; aponta o banco para a máquina local em desenvolvimento. Observação: em produção, o MySQL teria um host interno específico.</li>
+        <li><strong>backend/.env.exemplo</strong>: linha 8 — valor <span class="inline-code">FRONTEND_URL=http://localhost:5173</span>. Uso: servidor; origem autorizada para CORS em desenvolvimento. Observação: não representa a produção.</li>
+        <li><strong>frontend/src/App.jsx</strong>: linha 12 — valor <span class="inline-code">${window.location.protocol}//${window.location.hostname}:8000</span>. Uso: navegador; monta a URL da API usando o host atual. Observação: isso funciona no desenvolvimento local, mas não deve ser tratado como endpoint de produção.</li>
+        <li><strong>README.md</strong>: linha 73 — valor <span class="inline-code">http://127.0.0.1:8000/docs</span>. Uso: documentação do ambiente local de desenvolvimento. Observação: é referência de execução local, não de produção.</li>
+        <li><strong>PASSO_A_PASSO_PROJETO.md</strong>: linha 325 — valor <span class="inline-code">http://127.0.0.1:8000/docs</span>. Uso: documentação local de desenvolvimento. Observação: aponta o ambiente do dev, não a arquitetura final.</li>
+        <li><strong>PASSO_A_PASSO_PROJETO.md</strong>: linha 424 — valor <span class="inline-code">http://localhost:5173</span>. Uso: navegador; endereço do Vite em desenvolvimento. Observação: é uma origem local de dev; não deve ser usada como URL pública de produção.</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Perguntas para apresentação</h2>
+      <ol class="question-list">
+        <li>No desenho final, a tela e a API ficam na mesma origem pública ou você prefere deixar a API em subcaminho e a tela em um domínio separado? Como isso altera o CORS?</li>
+        <li>O projeto atual ainda está preparado para desenvolvimento local, mas a produção exige segurança de sessão e cookies. Qual ponto você considera mais crítico para reforçar: HTTPS, cookie <span class="inline-code">Secure</span> ou a política de origem?</li>
+        <li>Você acredita que a arquitetura proposta é suficiente para “sair da máquina” como entrega de aula, ou ainda faltam decisões de operação real, como quem domina o ambiente, acesso ao banco e quem expõe a porta 443?</li>
+      </ol>
+    </section>
+  </div>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    const estilos = getComputedStyle(document.documentElement);
+    const cor = (token) => estilos.getPropertyValue(token).trim();
+
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      securityLevel: 'loose',
+      themeVariables: {
+        background: cor('--cor-branco'),
+        primaryColor: cor('--cor-verde-claro'),
+        primaryTextColor: cor('--cor-verde-escuro'),
+        primaryBorderColor: cor('--cor-verde-horta'),
+        lineColor: cor('--cor-verde-horta'),
+        secondaryColor: cor('--cor-creme-natural'),
+        tertiaryColor: cor('--cor-branco'),
+        edgeLabelBackground: cor('--cor-branco'),
+        fontFamily: cor('--fonte-principal'),
+      },
+    });
+
+    const botaoCopiar = document.querySelector('#copy-mermaid');
+    const codigoMermaid = document.querySelector('#mermaid-code');
+
+    botaoCopiar.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(codigoMermaid.innerText);
+        botaoCopiar.textContent = 'Código copiado';
+      } catch {
+        botaoCopiar.textContent = 'Selecione e copie o código';
+      }
+      window.setTimeout(() => {
+        botaoCopiar.textContent = 'Copiar código';
+      }, 1800);
+    });
+  </script>
+</body>
+</html>

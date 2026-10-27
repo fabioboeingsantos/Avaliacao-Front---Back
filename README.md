@@ -17,10 +17,13 @@ Depois, execute:
 
 ```powershell
 cd backend
-.\.venv\Scripts\Activate.ps1
+& .\.venv\Scripts\Activate.ps1
 python criar_tabelas.py
 fastapi dev main.py
 ```
+
+O comando de ativação deve ser executado dentro da pasta `backend`. O ambiente se chama `.venv`
+(com ponto no início); `.\venv\Scripts\activate` aponta para outro caminho.
 
 Para instalar as dependencias de desenvolvimento e executar os testes:
 
@@ -46,11 +49,12 @@ Rotas disponíveis:
 
 - `GET /saude`: verifica se a API está online.
 - `POST /usuarios`: cadastra uma conta de assinante com e-mail e senha protegida.
-- `POST /autenticacao/login`: valida e-mail ou usuário e cria a sessão JWT em cookie `HttpOnly`.
+- `POST /autenticacao/login`: valida e-mail ou usuário e cria a sessão JWT em cookie `HttpOnly`, válida por pelo menos 24 horas.
 - `POST /autenticacao/logout`: remove o cookie da sessão atual.
 - `GET /cestas?assinante=aline&tamanho=pequena`: lista e filtra cestas.
 - `GET /cestas/{id}`: mostra uma cesta.
 - `POST /cestas`: cria uma cesta pendente.
+- `POST /cestas/{id}/cancelar`: permite à assinante cancelar um pedido que ainda esteja pendente.
 - `GET /cestas/{id}/separacoes`: lista os produtos separados.
 - `POST /cestas/{id}/separacoes`: registra uma separação e aplica o limite.
 - `POST /cestas/{id}/separacoes/lote`: registra o lote de produtos atomicamente.
@@ -58,7 +62,11 @@ Rotas disponíveis:
 - `POST /cestas/{id}/separacoes/desfazer`: desfaz atomicamente o último lote de separações.
 - `POST /cestas/{id}/entrega/confirmar`: permite à assinante confirmar o recebimento da cesta.
 
-As cestas usam somente as situações `Pendente`, `Em separação` e `Entregue`. O sistema considera a cesta entregue quando a assinante confirma o recebimento ou, se não houver confirmação, ao completar sete dias da conclusão da separação. A expiração é aplicada quando a cesta é consultada pela API.
+As cestas usam as situações `Pendente`, `Em separação`, `Cancelado` e `Entregue`. A assinante pode cancelar o pedido enquanto ele estiver pendente; depois que o produtor inicia a separação, o cancelamento não fica disponível. O sistema considera a cesta entregue quando a assinante confirma o recebimento ou, se não houver confirmação, ao completar sete dias da conclusão da separação. A expiração é aplicada quando a cesta é consultada pela API.
+
+A sessão de login é mantida em cookie JWT `HttpOnly` por pelo menos 24 horas. Ao reabrir ou atualizar
+a aplicação nesse período, o frontend valida o cookie em `/usuarios/me` e restaura o perfil. Navegar
+entre as telas não encerra a sessão.
 
 Na cesta selecionável, o tamanho limita a quantidade de produtos diferentes (Pequena: 5, Média: 8, Grande: 12). Cada produto pode ter até 10 unidades; esse limite de unidades não reduz o número de produtos que cabem na cesta.
 

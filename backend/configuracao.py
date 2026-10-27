@@ -54,7 +54,8 @@ def obter_algoritmo_jwt() -> str:
 def obter_duracao_token_minutos() -> int:
     """Define por quantos minutos um token de acesso permanece valido."""
 
-    valor = os.getenv("JWT_EXPIRATION_MINUTES", "30")
+    # A sessão padrão dura 24 horas; ambientes podem sobrescrever esse valor.
+    valor = os.getenv("JWT_EXPIRATION_MINUTES", "1440")
     try:
         duracao = int(valor)
     except ValueError as erro:

@@ -14,7 +14,8 @@ from sqlalchemy.pool import StaticPool
 # Os testes nunca devem depender da chave ou do banco configurados no .env local.
 os.environ["JWT_SECRET_KEY"] = "chave-exclusiva-dos-testes-com-mais-de-32"
 os.environ["JWT_ALGORITHM"] = "HS256"
-os.environ["JWT_EXPIRATION_MINUTES"] = "30"
+# Mantém os testes alinhados à validade padrão da sessão.
+os.environ["JWT_EXPIRATION_MINUTES"] = "1440"
 
 from banco import Base, obter_sessao  # noqa: E402
 from main import app  # noqa: E402

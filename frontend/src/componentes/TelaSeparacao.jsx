@@ -68,6 +68,7 @@ function TelaSeparacao({ cestas, aoAbrirFechamento }) {
               <option value="Pendente">Pendente</option>
               <option value="Em separação">Em separação</option>
               <option value="Entregue">Entregue</option>
+              <option value="Cancelado">Cancelado</option>
             </select>
           </label>
         </div>
@@ -126,7 +127,7 @@ function TelaSeparacao({ cestas, aoAbrirFechamento }) {
                   })}
                 </ul>
 
-                {cesta.situacao !== 'Entregue' && (
+                {!['Entregue', 'Cancelado'].includes(cesta.situacao) && (
                   <div className="acoes-cesta-produtor">
                     <button
                       className="botao botao-primario"

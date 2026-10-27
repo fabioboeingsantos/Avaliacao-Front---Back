@@ -2,10 +2,8 @@
 function TelaFinalizarPedido({
   pedido,
   aoFinalizar,
-  aoSalvarNaoConcluido,
   aoAbrirPedido,
   aoAbrirHistorico,
-  aoSair,
 }) {
   if (!pedido) {
     return (
@@ -42,19 +40,13 @@ function TelaFinalizarPedido({
               Histórico
             </button>
           </nav>
-          <button className="botao-navegacao" type="button" onClick={aoSair}>
-            Voltar à landing page
-          </button>
         </div>
       </header>
 
       <section className="introducao-pedido" aria-labelledby="titulo-finalizacao">
         <p className="texto-saudacao">Última conferência</p>
         <h1 id="titulo-finalizacao">Finalize seu pedido</h1>
-        <p>
-          Confira o tamanho e os produtos. Ao finalizar, o pedido será registrado como pedida e
-          aparecerá no seu histórico.
-        </p>
+        <p>Confira o tamanho e os produtos. Ao finalizar, o pedido aparecerá no seu histórico.</p>
       </section>
 
       <section className="resumo-finalizacao" aria-labelledby="titulo-resumo-pedido">
@@ -88,9 +80,6 @@ function TelaFinalizarPedido({
       <div className="acoes-finalizacao">
         <button className="botao botao-primario" type="button" onClick={aoFinalizar}>
           Finalizar pedido
-        </button>
-        <button className="botao botao-secundario" type="button" onClick={aoSalvarNaoConcluido}>
-          Salvar como não concluído
         </button>
         <button className="botao-link" type="button" onClick={aoAbrirPedido}>
           Voltar e editar

@@ -869,45 +869,6 @@
   text-decoration: underline;
 }
 
-/* Mostra o total do histórico e a quantidade em cada situação. */
-.resumo-historico {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.cartao-resumo-historico {
-  display: grid;
-  gap: 4px;
-  padding: 16px;
-  border-radius: 8px;
-  background: var(--cor-branco);
-}
-
-.cartao-resumo-historico strong {
-  color: var(--cor-verde-escuro);
-  font-size: var(--titulo-2);
-}
-
-.cartao-resumo-historico span {
-  color: var(--cor-texto-escuro);
-  font-size: var(--texto-rotulo);
-}
-
-/* Permite consultar o histórico completo ou apenas uma situação. */
-.filtros-historico {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.filtros-historico .filtro-ativo {
-  color: var(--cor-verde-escuro);
-  background: var(--cor-verde-claro);
-}
-
 /* Empilha os pedidos em cartões para facilitar a leitura no celular. */
 .lista-historico {
   display: grid;
@@ -932,7 +893,7 @@
   margin-bottom: 0;
 }
 
-/* Diferencia rapidamente pedidos finalizados de rascunhos salvos. */
+/* Identifica a situação atual do pedido no histórico. */
 .status-historico {
   display: inline-flex;
   min-height: 28px;
@@ -944,14 +905,14 @@
   white-space: nowrap;
 }
 
-.status-concluido {
-  color: var(--cor-sucesso);
-  background: var(--cor-fundo-sucesso);
+.status-cancelado {
+  color: var(--cor-terracota);
+  background: var(--cor-creme-natural);
 }
 
-.status-nao-concluido {
-  color: var(--cor-texto-separacao);
-  background: var(--cor-fundo-etiqueta-separacao);
+.botao-cancelar-pedido {
+  margin-top: 12px;
+  color: var(--cor-terracota);
 }
 
 .produtos-resumo-historico {
@@ -1313,10 +1274,6 @@
 
   .cabecalho-acoes {
     justify-content: flex-start;
-  }
-
-  .resumo-historico {
-    grid-template-columns: 1fr;
   }
 
   .acoes-finalizacao .botao {

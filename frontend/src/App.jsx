@@ -26,7 +26,6 @@ function adaptarCestaDaApi(cesta) {
     limite: cesta.limite,
     situacao: cesta.situacao,
     separacaoConcluidaEm: cesta.separacao_concluida_em,
-    statusHistorico: 'concluido',
     produtos: cesta.produtos.map((produto) => ({
       id: produto.id,
       nome: produto.nome,
@@ -55,7 +54,10 @@ async function chamarApi(caminho, opcoes = {}) {
 
   if (!resposta.ok) {
     const corpo = await resposta.json().catch(() => ({}))
-    throw new Error(corpo.detail ?? 'Não foi possível concluir a operação.')
+    const erro = new Error(corpo.detail ?? 'Não foi possível concluir a operação.')
+    // Mantém o status HTTP disponível para reconhecer sessões ausentes ou expiradas.
+    erro.status = resposta.status
+    throw erro
   }
 
   if (resposta.status === 204) {
@@ -68,6 +70,9 @@ async function chamarApi(caminho, opcoes = {}) {
 // O login é a porta de entrada comum para as duas personas do sistema.
 function App() {
   const [usuarioAutenticado, setUsuarioAutenticado] = useState('')
+  // Aguarda a validação do cookie antes de decidir se mostra o login ou a área autenticada.
+  const [sessaoVerificada, setSessaoVerificada] = useState(false)
+  const [erroRestauracao, setErroRestauracao] = useState('')
   // Identifica qual fluxo deve ser apresentado depois do acesso de demonstração.
   const [perfilAtual, setPerfilAtual] = useState('')
   // Controla a aba atual e mantém o pedido em revisão enquanto a pessoa confirma os dados.
@@ -79,11 +84,6 @@ function App() {
   // O aviso fica preparado para uma futura área visual de status da conexão.
   const [, setMensagemApi] = useState('')
 
-  useEffect(() => {
-    // Remove tokens antigos da versao anterior, que usava localStorage.
-    localStorage.removeItem('token_acesso')
-  }, [])
-
   // Busca as cestas compartilhadas pelo backend quando uma pessoa entra.
   async function carregarCestasDoServidor(assinante) {
     try {
@@ -91,10 +91,7 @@ function App() {
       const cestasDaApi = await chamarApi(`/cestas${filtro}`)
       const cestasAdaptadas = cestasDaApi.map(adaptarCestaDaApi)
 
-      setPedidos((pedidosAtuais) => [
-        ...cestasAdaptadas,
-        ...pedidosAtuais.filter((pedido) => pedido.statusHistorico !== 'concluido'),
-      ])
+      setPedidos(cestasAdaptadas)
       setMensagemApi('')
     } catch {
       setMensagemApi('Não foi possível carregar as cestas. Verifique se a API está ligada.')
@@ -149,25 +146,42 @@ function App() {
 
     setUsuarioAutenticado(usuario)
     setPerfilAtual(perfil)
+    setErroRestauracao('')
     setAbaAtual(perfil === 'produtor' ? 'separacao' : 'pedido')
     carregarCestasDoServidor(perfil === 'assinante' ? usuario : null)
   }
 
-  // Encerra o teste atual e retorna para a página de login.
-  async function sairDoSistema() {
-    try {
-      await chamarApi('/autenticacao/logout', { method: 'POST' })
-    } catch {
-      // Mesmo sem API, limpa a sessao visual atual.
+  // Restaura a sessão HttpOnly ao abrir ou atualizar a aplicação, sem pedir novo login.
+  useEffect(() => {
+    let componenteAtivo = true
+
+    async function restaurarSessao() {
+      try {
+        const sessao = await chamarApi('/usuarios/me')
+        if (componenteAtivo) {
+          iniciarSessao(sessao)
+        }
+      } catch (erro) {
+        // A falta de sessão é normal no primeiro acesso; outros erros precisam ser informados.
+        if (componenteAtivo && erro.status !== 401) {
+          setErroRestauracao(
+            erro instanceof TypeError
+              ? 'Não foi possível verificar a sessão. Tente entrar novamente.'
+              : erro.message,
+          )
+        }
+      } finally {
+        if (componenteAtivo) {
+          setSessaoVerificada(true)
+        }
+      }
     }
-    localStorage.removeItem('token_acesso')
-    setUsuarioAutenticado('')
-    setPerfilAtual('')
-    setAbaAtual('pedido')
-    setCestaEmFechamento(null)
-    setCestaEmDetalhes(null)
-    setMensagemApi('')
-  }
+
+    restaurarSessao()
+    return () => {
+      componenteAtivo = false
+    }
+  }, [])
 
   // Guarda os dados escolhidos e abre a aba separada para a conferência final.
   function abrirFinalizacao(dadosDoPedido) {
@@ -175,8 +189,8 @@ function App() {
     setAbaAtual('finalizacao')
   }
 
-  // Registra o pedido no histórico com a situação correspondente à escolha da pessoa.
-  async function registrarPedido(statusHistorico) {
+  // Registra o pedido no backend assim que a pessoa confirma a cesta.
+  async function registrarPedido() {
     if (!pedidoEmRevisao) {
       return
     }
@@ -185,36 +199,30 @@ function App() {
       ...pedidoEmRevisao,
       id: `pedido-${Date.now()}`,
       data: new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date()),
-      statusHistorico,
-      situacao: statusHistorico === 'concluido' ? 'Pendente' : 'Rascunho',
+      situacao: 'Pendente',
       separacaoConcluidaEm: null,
       separacoes: [],
     }
 
-    if (statusHistorico === 'concluido') {
-      try {
-        const cestaCriada = await chamarApi('/cestas', {
-          method: 'POST',
-          body: JSON.stringify({
-            tamanho: pedidoEmRevisao.tamanhoNome,
-            modo: pedidoEmRevisao.modoNome === 'Cesta pronta' ? 'pronta' : 'selecionavel',
-            semana: new Date().toISOString().slice(0, 10),
-            produtos: pedidoEmRevisao.produtos.map((produto) => ({
-              id: produto.id,
-              nome: produto.nome,
-              quantidade: produto.quantidade,
-            })),
-          }),
-        })
-        setPedidos((pedidosAtuais) => [adaptarCestaDaApi(cestaCriada), ...pedidosAtuais])
-        setMensagemApi('Pedido registrado no backend.')
-      } catch {
-        setPedidos((pedidosAtuais) => [novoPedidoLocal, ...pedidosAtuais])
-        setMensagemApi('API offline: pedido salvo somente nesta demonstração.')
-      }
-    } else {
-      // Rascunhos continuam locais porque a cartilha define a cesta nova quando o pedido é concluído.
+    try {
+      const cestaCriada = await chamarApi('/cestas', {
+        method: 'POST',
+        body: JSON.stringify({
+          tamanho: pedidoEmRevisao.tamanhoNome,
+          modo: pedidoEmRevisao.modoNome === 'Cesta pronta' ? 'pronta' : 'selecionavel',
+          semana: new Date().toISOString().slice(0, 10),
+          produtos: pedidoEmRevisao.produtos.map((produto) => ({
+            id: produto.id,
+            nome: produto.nome,
+            quantidade: produto.quantidade,
+          })),
+        }),
+      })
+      setPedidos((pedidosAtuais) => [adaptarCestaDaApi(cestaCriada), ...pedidosAtuais])
+      setMensagemApi('Pedido registrado no backend.')
+    } catch {
       setPedidos((pedidosAtuais) => [novoPedidoLocal, ...pedidosAtuais])
+      setMensagemApi('API offline: pedido salvo somente nesta demonstração.')
     }
 
     setPedidoEmRevisao(null)
@@ -382,6 +390,35 @@ function App() {
     return { sucesso: true }
   }
 
+  async function cancelarPedido(pedidoId) {
+    const pedido = pedidos.find((item) => item.id === pedidoId)
+    if (!pedido || pedido.situacao !== 'Pendente') {
+      return { sucesso: false, erro: 'Só é possível cancelar um pedido pendente.' }
+    }
+
+    if (typeof pedidoId === 'number') {
+      try {
+        const cestaCancelada = await chamarApi(`/cestas/${pedidoId}/cancelar`, {
+          method: 'POST',
+        })
+        const cestaAdaptada = adaptarCestaDaApi(cestaCancelada)
+        setPedidos((pedidosAtuais) =>
+          pedidosAtuais.map((item) => (item.id === pedidoId ? cestaAdaptada : item)),
+        )
+        return { sucesso: true }
+      } catch (erro) {
+        return { sucesso: false, erro: erro.message }
+      }
+    }
+
+    setPedidos((pedidosAtuais) =>
+      pedidosAtuais.map((item) =>
+        item.id === pedidoId ? { ...item, situacao: 'Cancelado' } : item,
+      ),
+    )
+    return { sucesso: true }
+  }
+
   async function desfazerSeparacoes({ pedidoId, produtos }) {
     if (typeof pedidoId === 'number') {
       try {
@@ -452,12 +489,26 @@ function App() {
   }
 
   if (!usuarioAutenticado) {
-    return <TelaLogin aoEntrar={entrarNoSistema} aoCadastrar={cadastrarUsuario} />
+    if (!sessaoVerificada) {
+      return (
+        <main className="pagina-login" role="status">
+          Verificando sua sessão...
+        </main>
+      )
+    }
+
+    return (
+      <TelaLogin
+        aoEntrar={entrarNoSistema}
+        aoCadastrar={cadastrarUsuario}
+        mensagemSistema={erroRestauracao}
+      />
+    )
   }
 
   // Entrega ao produtor as duas telas previstas para acompanhar e fechar as cestas.
   if (perfilAtual === 'produtor') {
-    const cestasDaSemana = pedidos.filter((pedido) => pedido.statusHistorico === 'concluido')
+    const cestasDaSemana = pedidos
     const cestaSelecionada = cestasDaSemana.find((pedido) => pedido.id === cestaEmFechamento)
 
     if (abaAtual === 'fechamento') {
@@ -485,11 +536,9 @@ function App() {
     return (
       <TelaFinalizarPedido
         pedido={pedidoEmRevisao}
-        aoFinalizar={() => registrarPedido('concluido')}
-        aoSalvarNaoConcluido={() => registrarPedido('nao-concluido')}
+        aoFinalizar={registrarPedido}
         aoAbrirPedido={() => setAbaAtual('pedido')}
         aoAbrirHistorico={() => setAbaAtual('historico')}
-        aoSair={sairDoSistema}
       />
     )
   }
@@ -500,7 +549,7 @@ function App() {
         pedidos={pedidos}
         aoAbrirPedido={() => setAbaAtual('pedido')}
         aoAbrirDetalhes={abrirDetalhes}
-        aoSair={sairDoSistema}
+        aoCancelarPedido={cancelarPedido}
       />
     )
   }
@@ -514,7 +563,6 @@ function App() {
         aoAbrirPedido={() => setAbaAtual('pedido')}
         aoAbrirHistorico={() => setAbaAtual('historico')}
         aoConfirmarEntrega={confirmarEntrega}
-        aoSair={sairDoSistema}
       />
     )
   }
@@ -523,7 +571,6 @@ function App() {
     <TelaPedirCesta
       aoFinalizar={abrirFinalizacao}
       aoAbrirHistorico={() => setAbaAtual('historico')}
-      aoSair={sairDoSistema}
     />
   )
 }

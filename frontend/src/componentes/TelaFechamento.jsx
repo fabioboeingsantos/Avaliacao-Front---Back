@@ -21,7 +21,7 @@ function TelaFechamento({
   aoDesfazerSeparacoes,
   aoConcluirSeparacao,
 }) {
-  const [rascunho, setRascunho] = useState(() => ({
+  const [edicaoQuantidades, setEdicaoQuantidades] = useState(() => ({
     cestaId: cesta?.id ?? null,
     quantidades: criarQuantidadesAtuais(cesta),
   }))
@@ -49,8 +49,8 @@ function TelaFechamento({
   const permiteEditarQuantidades =
     cesta.modoNome === 'Cesta selecionável' && !separacaoJaConcluida
   const quantidades = permiteEditarQuantidades
-    ? cesta.id === rascunho.cestaId
-      ? rascunho.quantidades
+    ? cesta.id === edicaoQuantidades.cestaId
+      ? edicaoQuantidades.quantidades
       : criarQuantidadesAtuais(cesta)
     : Object.fromEntries(cesta.produtos.map((produto) => [produto.id, String(produto.quantidade)]))
 
@@ -72,7 +72,7 @@ function TelaFechamento({
   )
 
   function alterarQuantidade(produtoId, quantidade) {
-    setRascunho({
+    setEdicaoQuantidades({
       cestaId: cesta.id,
       quantidades: { ...quantidades, [produtoId]: String(quantidade) },
     })
@@ -81,7 +81,7 @@ function TelaFechamento({
   }
 
   function selecionarTodosProdutos() {
-    setRascunho({
+    setEdicaoQuantidades({
       cestaId: cesta.id,
       quantidades: Object.fromEntries(
         cesta.produtos.map((produto) => [
@@ -170,7 +170,7 @@ function TelaFechamento({
       }
 
       setUltimoLote(null)
-      setRascunho({ cestaId: null, quantidades: {} })
+      setEdicaoQuantidades({ cestaId: null, quantidades: {} })
       setMensagem('Última separação desfeita.')
     } finally {
       setDesfazendo(false)
