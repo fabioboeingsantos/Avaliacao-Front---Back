@@ -138,6 +138,13 @@ Estado validado em 28/10/2026: o Supabase está em `20261021_0007 (head)`, com a
 `usuarios`, `produtos`, `cestas`, `itens_cesta`, `separacoes` e `alembic_version`. As cestas
 são criadas durante o fluxo de demonstração; o carregamento inicial não cria pedidos.
 
+### Segurança do Supabase
+
+O Row Level Security (RLS) está ativado nas seis tabelas públicas do projeto. Não foram criadas
+políticas de acesso público: a API usa a conexão administrativa do banco e mantém a autorização
+por perfil nas rotas FastAPI. A API de dados do Supabase continua bloqueada para papéis comuns
+sem políticas explícitas.
+
 ## Como rodar o frontend
 
 Na primeira vez, entre na pasta `frontend` e instale as dependências:

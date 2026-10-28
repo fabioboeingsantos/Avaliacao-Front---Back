@@ -12,6 +12,8 @@
 - API: `/saude` retornou `ok` e `/docs` retornou HTTP 200.
 - Login: Aline autenticou como `assinante`; Vanderlei autenticou como `produtor`.
 - Senha incorreta: a API retornou HTTP 401.
+- Segurança: RLS ativado em todas as seis tabelas públicas, sem políticas públicas.
+- Após ativar o RLS, os dois logins continuaram funcionando e `/docs` retornou HTTP 200.
 
 ## Ainda necessário antes da publicação
 

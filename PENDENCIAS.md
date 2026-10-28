@@ -9,6 +9,7 @@ Este documento reúne as atividades que devem ser feitas depois. A IA está regi
 - [ ] Executar o roteiro completo no ambiente publicado.
 - [x] Confirmar as contas de demonstração de Aline e Vanderlei no Supabase.
 - [x] Confirmar os 12 produtos iniciais no Supabase; as cestas são criadas durante a demonstração.
+- [x] Ativar RLS nas seis tabelas públicas do Supabase sem políticas públicas.
 - [x] Registrar uma evidência da validação local em `docs/VALIDACAO_LOCAL.md`.
 - [ ] Separar a apresentação, o roteiro e o sistema em abas ou janelas diferentes.
 
