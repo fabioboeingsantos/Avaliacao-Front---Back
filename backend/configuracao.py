@@ -1,16 +1,33 @@
 """Configurações da API e da conexão persistente."""
 
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
-from sqlalchemy import URL
+from sqlalchemy import URL, make_url
 
 
-load_dotenv()
+# O arquivo de ambiente fica na raiz do projeto, um nível acima de
+# ``backend``. Usar um caminho explícito evita que a configuração dependa do
+# diretório a partir do qual a API ou o Alembic são iniciados.
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 
 def obter_url_banco() -> URL:
     """Monta a URL do banco a partir das chaves do ambiente."""
+
+    # O Supabase fornece uma URL PostgreSQL completa. Mantemos a montagem
+    # por partes abaixo para preservar o modo local com SQLite e MySQL.
+    url_externa = os.getenv("SUPABASE_DB_URL") or os.getenv("DATABASE_URL")
+    if url_externa:
+        url = make_url(url_externa)
+        senha_separada = os.getenv("SUPABASE_DB_PASSWORD")
+        if senha_separada:
+            url = url.set(password=senha_separada)
+        # A URL PostgreSQL sem o driver explícito usa psycopg nesta aplicação.
+        if url.drivername == "postgresql":
+            url = url.set(drivername="postgresql+psycopg")
+        return url
 
     driver = os.getenv("BANCO_DRIVER", "sqlite")
     database = os.getenv("BANCO_NOME", "./cesta_do_vale.db")

@@ -60,9 +60,35 @@ cd backend
 pytest -q
 ```
 
-O arquivo `backend/.env` deve ter as chaves `BANCO_DRIVER`, `BANCO_USUARIO`, `BANCO_SENHA`,
-`BANCO_HOST`, `BANCO_PORTA` e `BANCO_NOME`. Para desenvolvimento sem MySQL, o projeto usa
-SQLite local; para usar MySQL, preencha essas chaves com os dados do servidor.
+O arquivo `.env` pode apontar para o Supabase usando `SUPABASE_DB_URL`, com uma URL
+`postgresql+psycopg://...`. A aplicação carrega esse arquivo a partir da raiz do projeto,
+mesmo quando é iniciada dentro de `backend`. O Supabase é usado somente como banco PostgreSQL;
+a autenticação continua sendo feita pela API com JWT em cookie `HttpOnly`. Para desenvolvimento
+sem Supabase, o projeto ainda aceita SQLite local. O Docker Compose continua disponível para um
+ambiente local com MySQL.
+
+Exemplo de configuração do Supabase:
+
+```env
+SUPABASE_DB_URL=postgresql+psycopg://postgres.<project-ref>@<host-do-pooler>:6543/postgres
+SUPABASE_DB_PASSWORD=sua-senha-do-banco
+JWT_SECRET_KEY=uma-chave-com-ao-menos-32-caracteres
+```
+
+Use a conexão do pooler quando a aplicação estiver em um ambiente com muitas conexões. Nunca
+versione a senha do banco ou a chave JWT.
+
+Para preparar um banco Supabase vazio com o esquema atual e os dados mínimos de demonstração:
+
+```powershell
+cd backend
+python criar_tabelas.py
+python -m alembic stamp head
+```
+
+O primeiro comando cria as tabelas e inclui os dois perfis de demonstração (`aline` e
+`vanderlei`) e os 12 produtos iniciais. O segundo registra a revisão atual somente depois
+que o esquema foi criado. Em um banco que já usa migrações, prefira `python -m alembic upgrade head`.
 
 Com a API ligada, o frontend envia os pedidos concluídos e as separações para o banco configurado.
 O fluxo de demonstração é:
@@ -108,6 +134,10 @@ python -m alembic upgrade head
 
 As migrações atualizam as contas e os estados das cestas, preservando os hashes Argon2 e registrando a data de conclusão da separação.
 
+Estado validado em 28/10/2026: o Supabase está em `20261021_0007 (head)`, com as tabelas
+`usuarios`, `produtos`, `cestas`, `itens_cesta`, `separacoes` e `alembic_version`. As cestas
+são criadas durante o fluxo de demonstração; o carregamento inicial não cria pedidos.
+
 ## Como rodar o frontend
 
 Na primeira vez, entre na pasta `frontend` e instale as dependências:
@@ -130,3 +160,10 @@ O Vite exibirá no terminal o endereço local da aplicação.
 - `docs/`: cartilha, briefing, marca e styleguide.
 - `frontend/`: aplicação React com o fluxo de pedido da assinante.
 - `backend/`: API organizada em rotas, serviços, repositórios e esquemas.
+
+## Materiais para apresentação
+
+- `docs/APRESENTACAO_ENTREGA.html`: apresentação alinhada aos critérios da entrega.
+- `docs/ROTEIRO_APRESENTACAO.md`: roteiro de fala e demonstração do sistema.
+- `docs/BACKLOG_APRESENTACAO.md`: backlog separado entre concluído, validação e evolução.
+- `PENDENCIAS.md`: lista central de atividades para depois da entrega.

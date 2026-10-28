@@ -39,12 +39,14 @@ O fluxo principal é:
 - **SQLAlchemy 2:** comunicação com o banco de dados por meio de ORM.
 - **Alembic:** controle das migrações do banco.
 - **python-dotenv:** leitura das configurações do arquivo `.env`.
-- **PyMySQL:** conexão com banco MySQL.
+- **psycopg:** conexão com PostgreSQL/Supabase.
+- **PyMySQL:** conexão opcional com banco MySQL local.
 
 ### Banco de dados
 
-- **SQLite:** utilizado por padrão durante o desenvolvimento.
-- **MySQL:** opção para ambientes compartilhados ou produção.
+- **SQLite:** fallback local quando nenhuma URL PostgreSQL/MySQL é configurada.
+- **PostgreSQL/Supabase:** banco compartilhado atualmente configurado no `.env`.
+- **MySQL:** opção para ambientes locais via Docker Compose.
 
 ## 3. Estrutura do projeto
 
@@ -265,7 +267,12 @@ Em seguida, criar as tabelas e inserir dados iniciais:
 cd backend
 & .\.venv\Scripts\Activate.ps1
 python criar_tabelas.py
+python -m alembic stamp head
 ```
+
+Quando o banco já tiver sido criado e estiver sendo atualizado por novas migrações, use
+`python -m alembic upgrade head` no lugar de `stamp head`. O `stamp` apenas registra uma
+revisão e não executa alterações de esquema.
 
 ### Etapa 5 — Criar as regras no backend
 
@@ -427,7 +434,7 @@ O Vite exibirá o endereço local da aplicação, normalmente `http://localhost:
 
 O fluxo principal já inclui autenticação, permissões por grupo, vínculo das cestas com a conta,
 proteção dos pedidos de outras pessoas, cancelamento antes da separação, testes automatizados e
-persistência por SQLite ou MySQL. Possíveis evoluções:
+persistência por SQLite, PostgreSQL/Supabase ou MySQL. Possíveis evoluções:
 
 1. Configurar pipeline automatizado de validação, build e deploy.
 2. Planejar a operação de produção com banco gerenciado, backups e variáveis de ambiente seguras.
