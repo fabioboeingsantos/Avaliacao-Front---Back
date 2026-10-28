@@ -2,6 +2,33 @@
 
 Projeto estruturado para desenvolver o sistema da cartilha da aula 5.
 
+## Como rodar com Docker Compose
+
+Na raiz do projeto, crie o arquivo local de ambiente a partir do exemplo e preencha as senhas:
+
+```powershell
+Copy-Item .env.exemplo .env
+```
+
+Defina valores para `BANCO_SENHA`, `MYSQL_ROOT_PASSWORD` e `JWT_SECRET_KEY` no `.env`.
+Use uma chave JWT aleatória com pelo menos 32 caracteres. Esse arquivo é ignorado pelo Git.
+
+Suba o banco, a API e o frontend:
+
+```powershell
+docker compose up --build
+```
+
+A aplicação fica disponível em `http://localhost:8080`; o Caddy encaminha `/api/...` para a API
+e as migrações do banco são aplicadas quando o serviço da API inicia. Para encerrar:
+
+```powershell
+docker compose down
+```
+
+Os dados do MySQL permanecem no volume `dados-mysql`. Para removê-los também, use
+`docker compose down --volumes`.
+
 ## Como rodar o backend
 
 O backend usa FastAPI em um ambiente virtual Python. Se o ambiente ainda não existir, na raiz do
