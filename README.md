@@ -162,6 +162,23 @@ npm run dev
 
 O Vite exibirá no terminal o endereço local da aplicação.
 
+## Publicação na Vercel
+
+A publicação usa dois projetos Vercel no mesmo repositório:
+
+| Projeto | Root Directory | Resultado |
+| --- | --- | --- |
+| API | `backend` | FastAPI detectado como uma Vercel Function |
+| Tela | `frontend` | Build Vite publicado como site estático |
+
+Na API, configure `SUPABASE_DB_URL`, `SUPABASE_DB_PASSWORD`, `JWT_SECRET_KEY`,
+`JWT_COOKIE_SECURE=true` e `FRONTEND_URL` com o domínio final da tela. O Vercel detecta o
+`app` FastAPI em `backend/main.py` e instala as dependências de `backend/requirements.txt`.
+
+Na tela, configure `VITE_URL_DA_API=/api`. O arquivo `frontend/vercel.json` encaminha `/api/*`
+para `https://cesta-do-vale-api.vercel.app` e direciona as demais rotas para `index.html`.
+Se a API receber outro subdomínio, atualize o `destination` desse arquivo antes do deploy.
+
 ## Pastas
 
 - `docs/`: cartilha, briefing, marca e styleguide.

@@ -4,6 +4,8 @@ Este documento reúne as atividades que devem ser feitas depois. A IA está regi
 
 ## Antes da apresentação
 
+- [x] Preparar a configuração de dois projetos Vercel (`backend` e `frontend`).
+- [ ] Criar os projetos Vercel e registrar as URLs geradas.
 - [ ] Confirmar o endereço publicado do sistema.
 - [ ] Substituir `ENDERECO_PUBLICADO_A_CONFIRMAR` no roteiro de apresentação.
 - [ ] Executar o roteiro completo no ambiente publicado.

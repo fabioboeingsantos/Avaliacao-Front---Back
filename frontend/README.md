@@ -1,16 +1,20 @@
-# React + Vite
+# Frontend Cesta do Vale
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Aplicação React/Vite da Cesta do Vale.
 
-Currently, two official plugins are available:
+## Desenvolvimento local
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```powershell
+npm install
+$env:VITE_URL_DA_API = "http://127.0.0.1:8000"
+npm run dev
+```
 
-## React Compiler
+## Publicação na Vercel
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Configure `frontend` como **Root Directory** de um projeto Vercel. O arquivo `vercel.json`
+publica o build do Vite, mantém o fallback da SPA e encaminha `/api/*` para
+`https://cesta-do-vale-api.vercel.app`.
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Se a API receber outro domínio, altere o `destination` em `vercel.json` antes do deploy.
+Na Vercel, configure a variável de build `VITE_URL_DA_API=/api`.
