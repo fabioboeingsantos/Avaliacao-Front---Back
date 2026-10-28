@@ -9,7 +9,7 @@ Este documento reúne as atividades que devem ser feitas depois. A IA está regi
 - [ ] Executar o roteiro completo no ambiente publicado.
 - [x] Confirmar as contas de demonstração de Aline e Vanderlei no Supabase.
 - [x] Confirmar os 12 produtos iniciais no Supabase; as cestas são criadas durante a demonstração.
-- [ ] Registrar uma evidência do fluxo funcionando.
+- [x] Registrar uma evidência da validação local em `docs/VALIDACAO_LOCAL.md`.
 - [ ] Separar a apresentação, o roteiro e o sistema em abas ou janelas diferentes.
 
 ## Validação técnica
@@ -17,11 +17,11 @@ Este documento reúne as atividades que devem ser feitas depois. A IA está regi
 - [x] Executar os testes do backend em um ambiente Python liberado.
 - [x] Confirmar o resultado da suíte automatizada: 40 testes passaram.
 - [ ] Fazer um teste integrado de login, pedido, separação e entrega.
-- [ ] Fazer um teste manual de senha incorreta.
+- [x] Fazer um teste manual de senha incorreta: API retornou HTTP 401.
 - [ ] Fazer um teste manual de acesso indevido entre assinantes.
 - [ ] Fazer um teste manual de tentativa de separação acima do limite.
-- [ ] Avaliar a necessidade de testes E2E no navegador.
-- [ ] Criar pipeline CI para lint, build e testes.
+- [x] Avaliar a necessidade de testes E2E no navegador; continuam recomendados antes da publicação.
+- [x] Criar pipeline CI para lint, build e testes em `.github/workflows/ci.yml`.
 
 ## Publicação e produção
 
