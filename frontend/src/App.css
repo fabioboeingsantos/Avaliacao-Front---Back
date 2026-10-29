@@ -921,6 +921,19 @@
   background: #fff7df;
 }
 
+.botao-estrela.estrela-em-foco,
+.botao-zero-estrelas.estrela-em-foco {
+  border-color: var(--cor-terracota);
+  color: var(--cor-terracota);
+  background: #fff0e6;
+  transform: translateY(-2px) scale(1.04);
+}
+
+.botao-estrela,
+.botao-zero-estrelas {
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
 .botao-salvar-avaliacao {
   justify-self: start;
 }
