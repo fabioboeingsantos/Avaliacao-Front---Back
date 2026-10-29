@@ -344,6 +344,19 @@ function TelaFechamento({
                     >
                       +
                     </button>
+                    <button
+                      className="botao-completar-produto"
+                      type="button"
+                      disabled={
+                        salvando ||
+                        desfazendo ||
+                        separacaoJaConcluida ||
+                        quantidadePlanejada >= maximoPermitido
+                      }
+                      onClick={() => alterarQuantidade(produto.id, maximoPermitido)}
+                    >
+                      Completar
+                    </button>
                   </div>
                 ) : (
                   <span className="quantidade-fixa-produto">

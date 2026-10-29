@@ -1234,6 +1234,12 @@
   font-weight: 700;
 }
 
+.total-produto-selecionado {
+  color: var(--cor-verde-escuro);
+  font-size: var(--texto-rotulo);
+  font-weight: 700;
+}
+
 /* Reserva visualmente o valor final da cesta em cada etapa do pedido. */
 .total-pedido {
   display: flex;
@@ -1333,11 +1339,21 @@
   padding-top: 8px;
 }
 
-.controle-quantidade-selecionavel output {
-  min-width: 2ch;
+.campo-quantidade-selecionavel {
+  width: 54px;
+  min-height: 38px;
+  padding: 6px 4px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
   color: var(--cor-verde-escuro);
+  background: var(--cor-branco);
   font-weight: 700;
   text-align: center;
+}
+
+.campo-quantidade-selecionavel:focus {
+  border-color: var(--cor-verde-horta);
+  outline: 3px solid var(--cor-verde-claro);
 }
 
 .controle-quantidade-selecionavel > span {
@@ -2049,6 +2065,7 @@
   justify-content: center;
   gap: 4px;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .botao-quantidade-fechamento {
@@ -2068,6 +2085,26 @@
 .botao-quantidade-fechamento:disabled {
   border-color: var(--cor-borda);
   color: var(--cor-texto-escuro);
+  opacity: 0.55;
+}
+
+.botao-completar-produto {
+  flex: 1 0 100%;
+  min-height: 40px;
+  padding: 6px 8px;
+  border: 1px solid var(--cor-verde-horta);
+  border-radius: 8px;
+  color: var(--cor-verde-escuro);
+  background: var(--cor-verde-claro);
+  font-size: var(--texto-pequeno);
+  font-weight: var(--peso-semi);
+  white-space: nowrap;
+}
+
+.botao-completar-produto:disabled {
+  border-color: var(--cor-borda);
+  color: var(--cor-texto-escuro);
+  background: var(--cor-branco);
   opacity: 0.55;
 }
 

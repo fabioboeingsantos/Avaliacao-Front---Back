@@ -42,6 +42,25 @@ function obterNomeAssinante(cesta) {
   return formatarNomeUsuario(cesta.assinante) || 'A pessoa assinante'
 }
 
+function atualizarNotificacoesComNomes(notificacoes, cestas) {
+  const cestasPorId = new Map(cestas.map((cesta) => [String(cesta.id), cesta]))
+
+  return notificacoes.map((notificacao) => {
+    const cesta = cestasPorId.get(String(notificacao.cestaId))
+    if (!cesta || !/assinante/i.test(notificacao.mensagem)) {
+      return notificacao
+    }
+
+    const nome = obterNomeAssinante(cesta)
+    return {
+      ...notificacao,
+      mensagem: notificacao.mensagem
+        .replace(/um assinante/gi, nome)
+        .replace(/o assinante/gi, nome),
+    }
+  })
+}
+
 // Formata todos os valores monetários em reais, usando sempre duas casas decimais.
 function formatarMoeda(valor) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor ?? 0)
@@ -172,6 +191,7 @@ function App() {
 
       setPedidos(cestasAdaptadas)
       cestasAnterioresRef.current = cestasAdaptadas
+      setNotificacoes((atuais) => atualizarNotificacoesComNomes(atuais, cestasAdaptadas))
       setMensagemApi('')
     } catch {
       setMensagemApi('Não foi possível carregar as cestas. Verifique se a API está ligada.')

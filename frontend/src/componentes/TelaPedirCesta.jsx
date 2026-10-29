@@ -120,6 +120,7 @@ function TelaPedirCesta({
       pedidoInicial.produtos.map((produto) => [produto.id, produto.quantidade]),
     )
   })
+  const [rascunhosQuantidades, setRascunhosQuantidades] = useState({})
   const [erro, setErro] = useState('')
   const produtosCatalogo = catalogoProdutos.map((produto) => ({
     ...produto,
@@ -200,7 +201,7 @@ function TelaPedirCesta({
 
   function alterarQuantidadeProduto(idProduto, quantidade) {
     const produto = produtosCatalogo.find((item) => item.id === idProduto)
-    if (quantidade > Math.min(limitePorProduto, produto.estoque)) {
+    if (!Number.isInteger(quantidade) || quantidade < 0 || quantidade > Math.min(limitePorProduto, produto.estoque)) {
       return
     }
 
@@ -214,6 +215,14 @@ function TelaPedirCesta({
       return atualizadas
     })
     setErro('')
+  }
+
+  function limparRascunhoQuantidade(idProduto) {
+    setRascunhosQuantidades((rascunhosAtuais) => {
+      const atualizados = { ...rascunhosAtuais }
+      delete atualizados[idProduto]
+      return atualizados
+    })
   }
 
   // Prepara os dados escolhidos e encaminha a assinante para a tela de conferência final.
@@ -438,6 +447,11 @@ function TelaPedirCesta({
                       <img className="imagem-produto" src={produto.imagem} alt="" />
                         <span className="nome-produto">{produto.nome}</span>
                         <span className="preco-produto">{formatarMoeda(produto.precoUnitario)} / un.</span>
+                        {selecionado && (
+                          <span className="total-produto-selecionado">
+                            Total: {formatarMoeda(produto.precoUnitario * quantidade)}
+                          </span>
+                        )}
                       <strong className="indicador-selecao">
                         {selecionado ? '✓ Selecionado' : 'Selecionar'}
                       </strong>
@@ -457,17 +471,52 @@ function TelaPedirCesta({
                           className="botao-quantidade-fechamento"
                           type="button"
                           aria-label={`Diminuir quantidade de ${produto.nome}`}
-                          onClick={() => alterarQuantidadeProduto(produto.id, quantidade - 1)}
+                          onClick={() => {
+                            alterarQuantidadeProduto(produto.id, quantidade - 1)
+                            limparRascunhoQuantidade(produto.id)
+                          }}
                         >
                           −
                         </button>
-                        <output aria-live="polite">{quantidade}</output>
+                        <input
+                          className="campo-quantidade-selecionavel"
+                          type="number"
+                          min="1"
+                          max={Math.min(limitePorProduto, produto.estoque)}
+                          step="1"
+                          inputMode="numeric"
+                          aria-label={`Quantidade de ${produto.nome}`}
+                          value={rascunhosQuantidades[produto.id] ?? quantidade}
+                          onChange={(evento) => {
+                            const valor = evento.target.value
+                            setRascunhosQuantidades((rascunhosAtuais) => ({
+                              ...rascunhosAtuais,
+                              [produto.id]: valor,
+                            }))
+                            if (valor !== '' && Number(valor) >= 1) {
+                              alterarQuantidadeProduto(produto.id, Number(valor))
+                            }
+                          }}
+                          onBlur={() => {
+                            const valor = Number(rascunhosQuantidades[produto.id])
+                            if (!Number.isInteger(valor) || valor < 1 || valor > Math.min(limitePorProduto, produto.estoque)) {
+                              setRascunhosQuantidades((rascunhosAtuais) => {
+                                const atualizados = { ...rascunhosAtuais }
+                                delete atualizados[produto.id]
+                                return atualizados
+                              })
+                            }
+                          }}
+                        />
                         <button
                           className="botao-quantidade-fechamento"
                           type="button"
                           aria-label={`Aumentar quantidade de ${produto.nome}`}
                           disabled={quantidade >= Math.min(limitePorProduto, produto.estoque)}
-                          onClick={() => alterarQuantidadeProduto(produto.id, quantidade + 1)}
+                          onClick={() => {
+                            alterarQuantidadeProduto(produto.id, quantidade + 1)
+                            limparRascunhoQuantidade(produto.id)
+                          }}
                         >
                           +
                         </button>
