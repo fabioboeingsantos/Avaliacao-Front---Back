@@ -10,7 +10,14 @@ from configuracao import obter_url_banco
 
 
 URL_DO_BANCO = obter_url_banco()
-argumentos_conexao = {"check_same_thread": False} if URL_DO_BANCO.get_backend_name() == "sqlite" else {}
+if URL_DO_BANCO.get_backend_name() == "sqlite":
+    argumentos_conexao = {"check_same_thread": False}
+elif URL_DO_BANCO.get_backend_name() == "postgresql":
+    # O pooler do Supabase usa PgBouncer em modo transacional. Desativar
+    # prepared statements evita colisões de nomes entre conexões reutilizadas.
+    argumentos_conexao = {"prepare_threshold": None}
+else:
+    argumentos_conexao = {}
 
 engine = create_engine(
     URL_DO_BANCO,
