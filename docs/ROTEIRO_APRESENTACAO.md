@@ -2,8 +2,8 @@
 
 ## Preparação
 
-1. Substituir o endereço abaixo pelo endereço publicado quando o deploy estiver disponível:
-   - `ENDERECO_PUBLICADO_A_CONFIRMAR`
+1. Abrir o endereço publicado:
+   - `https://avaliacao-front-back-frontend.vercel.app`
 2. Conferir que o banco possui as contas de demonstração:
    - Aline: `aline` / `aline123`
    - Vanderlei: `vanderlei` / `vanderlei123`
@@ -25,7 +25,7 @@ Enquanto a publicação não estiver disponível, a API local pode ser acessada 
 
 ### 3. Demonstração
 
-1. Abrir `ENDERECO_PUBLICADO_A_CONFIRMAR`.
+1. Abrir `https://avaliacao-front-back-frontend.vercel.app`.
 2. Entrar como `aline`.
 3. Criar uma cesta pronta pequena.
 4. Abrir o histórico e mostrar os detalhes.

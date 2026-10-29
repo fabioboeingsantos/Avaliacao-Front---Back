@@ -179,6 +179,12 @@ Na tela, configure `VITE_URL_DA_API=/api`. O arquivo `frontend/vercel.json` enca
 para `https://avaliacao-front-back-backend.vercel.app` e direciona as demais rotas para `index.html`.
 Se a API receber outro subdomínio, atualize o `destination` desse arquivo antes do deploy.
 
+URLs publicadas atuais:
+
+- Tela: `https://avaliacao-front-back-frontend.vercel.app`
+- API: `https://avaliacao-front-back-backend.vercel.app`
+- Saúde da API: `https://avaliacao-front-back-backend.vercel.app/health`
+
 ## Pastas
 
 - `docs/`: cartilha, briefing, marca e styleguide.

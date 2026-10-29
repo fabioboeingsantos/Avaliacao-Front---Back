@@ -1,0 +1,10 @@
+.git
+.pytest_cache
+.test-venv
+.supabase-venv
+.imagegen-venv
+.uv-cache
+.uv-python
+frontend/node_modules
+frontend/dist
+tmp
