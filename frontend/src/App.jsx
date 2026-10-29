@@ -38,6 +38,10 @@ function formatarNomeUsuario(nome) {
   return nome[0].toLocaleUpperCase('pt-BR') + nome.slice(1)
 }
 
+function obterNomeAssinante(cesta) {
+  return formatarNomeUsuario(cesta.assinante) || 'A pessoa assinante'
+}
+
 // Formata todos os valores monetários em reais, usando sempre duas casas decimais.
 function formatarMoeda(valor) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor ?? 0)
@@ -277,11 +281,11 @@ function App() {
             const anterior = anterioresPorId.get(String(cesta.id))
             if (perfilAtual === 'produtor') {
               if (!anterior && cesta.situacao === 'Pendente') {
-                criarNotificacao(cesta, 'novo-pedido', 'Novo pedido recebido', 'um assinante enviou um pedido para separar.')
+                criarNotificacao(cesta, 'novo-pedido', 'Novo pedido recebido', `${obterNomeAssinante(cesta)} enviou um pedido para separar.`)
               } else if (anterior && anterior.situacao !== 'Cancelado' && cesta.situacao === 'Cancelado') {
-                criarNotificacao(cesta, 'cancelado', 'Pedido cancelado', 'o assinante cancelou este pedido.')
+                criarNotificacao(cesta, 'cancelado', 'Pedido cancelado', `${obterNomeAssinante(cesta)} cancelou este pedido.`)
               } else if (anterior && anterior.situacao !== 'Entregue' && cesta.situacao === 'Entregue') {
-                criarNotificacao(cesta, 'recebido', 'Recebimento confirmado', 'o assinante confirmou o recebimento da cesta.')
+                criarNotificacao(cesta, 'recebido', 'Recebimento confirmado', `${obterNomeAssinante(cesta)} confirmou o recebimento da cesta.`)
               }
             } else if (anterior) {
               const pendencias = obterPendenciasDaCesta(cesta)
