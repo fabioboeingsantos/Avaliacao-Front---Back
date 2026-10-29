@@ -17,7 +17,7 @@
 
 ## Validação publicada na Vercel
 
-- Tela: `https://avaliacao-front-back-frontend.vercel.app` retornou HTTP 200.
+- Tela: `https://cesta-do-vale.vercel.app` retornou HTTP 200.
 - API: `https://avaliacao-front-back-backend.vercel.app/health` retornou HTTP 200.
 - Rewrite: `/api/health` pela tela retornou `{"status":"ok"}`.
 - Login público de Aline e Vanderlei funcionou através do rewrite `/api`.

@@ -6,7 +6,7 @@ Este documento reúne as atividades que devem ser feitas depois. A IA está regi
 
 - [x] Preparar a configuração de dois projetos Vercel (`backend` e `frontend`).
 - [x] Criar os projetos Vercel e registrar as URLs geradas.
-- [x] Confirmar o endereço publicado do sistema: `https://avaliacao-front-back-frontend.vercel.app`.
+- [x] Confirmar o endereço publicado do sistema: `https://cesta-do-vale.vercel.app`.
 - [x] Substituir `ENDERECO_PUBLICADO_A_CONFIRMAR` no roteiro de apresentação.
 - [ ] Executar o roteiro completo no ambiente publicado.
 - [x] Confirmar as contas de demonstração de Aline e Vanderlei no Supabase.

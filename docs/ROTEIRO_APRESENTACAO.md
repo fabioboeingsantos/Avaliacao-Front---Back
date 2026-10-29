@@ -3,7 +3,7 @@
 ## Preparação
 
 1. Abrir o endereço publicado:
-   - `https://avaliacao-front-back-frontend.vercel.app`
+   - `https://cesta-do-vale.vercel.app`
 2. Conferir que o banco possui as contas de demonstração:
    - Aline: `aline` / `aline123`
    - Vanderlei: `vanderlei` / `vanderlei123`
@@ -54,7 +54,7 @@ pedido na conta correta e aplica as regras de acesso de cada perfil.”
 
 ### 3. Demonstração — fluxo da Aline
 
-1. Abrir `https://avaliacao-front-back-frontend.vercel.app`.
+1. Abrir `https://cesta-do-vale.vercel.app`.
 2. Entrar como `aline`.
 3. Criar uma cesta pronta pequena ou personalizada.
 4. Revisar tamanho, produtos e quantidades antes de enviar.

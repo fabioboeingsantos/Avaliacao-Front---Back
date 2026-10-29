@@ -181,7 +181,7 @@ Se a API receber outro subdomínio, atualize o `destination` desse arquivo antes
 
 URLs publicadas atuais:
 
-- Tela: `https://avaliacao-front-back-frontend.vercel.app`
+- Tela: `https://cesta-do-vale.vercel.app`
 - API: `https://avaliacao-front-back-backend.vercel.app`
 - Saúde da API: `https://avaliacao-front-back-backend.vercel.app/health`
 
