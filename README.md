@@ -176,7 +176,7 @@ Na API, configure `SUPABASE_DB_URL`, `SUPABASE_DB_PASSWORD`, `JWT_SECRET_KEY`,
 `app` FastAPI em `backend/main.py` e instala as dependências de `backend/requirements.txt`.
 
 Na tela, configure `VITE_URL_DA_API=/api`. O arquivo `frontend/vercel.json` encaminha `/api/*`
-para `https://cesta-do-vale-api.vercel.app` e direciona as demais rotas para `index.html`.
+para `https://avaliacao-front-back-backend.vercel.app` e direciona as demais rotas para `index.html`.
 Se a API receber outro subdomínio, atualize o `destination` desse arquivo antes do deploy.
 
 ## Pastas

@@ -14,7 +14,7 @@ npm run dev
 
 Configure `frontend` como **Root Directory** de um projeto Vercel. O arquivo `vercel.json`
 publica o build do Vite, mantém o fallback da SPA e encaminha `/api/*` para
-`https://cesta-do-vale-api.vercel.app`.
+`https://avaliacao-front-back-backend.vercel.app`.
 
 Se a API receber outro domínio, altere o `destination` em `vercel.json` antes do deploy.
 Na Vercel, configure a variável de build `VITE_URL_DA_API=/api`.
