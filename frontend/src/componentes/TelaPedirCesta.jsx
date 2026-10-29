@@ -6,9 +6,9 @@ const formatarMoeda = (valor) =>
 
 // Os tamanhos e limites seguem as regras definidas para as cestas.
 const tamanhos = [
-  { id: 'pequena', nome: 'Pequena', limite: 5, imagem: '/marca/icone-cesta-do-vale.png' },
-  { id: 'media', nome: 'Média', limite: 8, imagem: '/marca/icone-cesta-do-vale.png' },
-  { id: 'grande', nome: 'Grande', limite: 12, imagem: '/marca/icone-cesta-do-vale.png' },
+  { id: 'pequena', nome: 'Pequena', limite: 5, imagem: '/marca/cesta-pequena.png' },
+  { id: 'media', nome: 'Média', limite: 8, imagem: '/marca/cesta-media.png' },
+  { id: 'grande', nome: 'Grande', limite: 12, imagem: '/marca/cesta-grande.png' },
 ]
 const limitePorProduto = 10
 
@@ -24,7 +24,7 @@ const modosCesta = [
     id: 'selecionavel',
     nome: 'Cesta selecionável',
     descricao: 'Escolha os produtos disponíveis dentro do limite.',
-    imagem: '/marca/icone-cesta-do-vale.png',
+    imagem: '/marca/cesta-selecionavel.png',
   },
 ]
 
