@@ -1,4 +1,4 @@
-"""Atualiza os preços fictícios para uma faixa mais acessível por unidade."""
+"""Atualiza os preços do catálogo para uma faixa mais acessível por unidade."""
 
 from typing import Sequence, Union
 
@@ -42,7 +42,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Restaura os preços fictícios anteriores da migração 0009."""
+    """Restaura os preços anteriores da migração 0009."""
 
     precos_anteriores = {
         "alface": 450,

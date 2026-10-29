@@ -379,7 +379,7 @@ def test_assinante_pode_pedir_ate_dez_unidades_de_um_produto(cliente):
 def test_cesta_calcula_preco_unitario_subtotal_e_total(cliente):
     """O pedido calcula o valor por unidade e preserva o total pela quantidade."""
 
-    # O fixture usa o preço fictício padrão de R$ 5,00 para o produto de teste.
+    # O fixture usa o preço padrão de R$ 5,00 para o produto de teste.
     fazer_login(cliente, "aline", "aline123")
     resposta = cliente.post(
         "/cestas",

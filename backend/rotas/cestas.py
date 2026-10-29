@@ -22,7 +22,7 @@ def traduzir_erro(erro: ErroDeAplicacao) -> HTTPException:
         if isinstance(erro, CestaNaoEncontrada)
         else status.HTTP_403_FORBIDDEN
         if isinstance(erro, AcessoNegado)
-        else status.HTTP_422_UNPROCESSABLE_ENTITY
+        else status.HTTP_422_UNPROCESSABLE_CONTENT
     )
     return HTTPException(status_code=codigo, detail=str(erro))
 

@@ -695,6 +695,38 @@
   flex: 0 0 auto;
 }
 
+/* As imagens tornam os modos e tamanhos reconheciveis sem depender somente do texto. */
+.imagem-opcao-cesta {
+  flex: 0 0 auto;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 4px 6px rgb(31 77 46 / 16%));
+}
+
+/* A cesta pronta usa a composicao completa; a selecionavel usa o icone mais simples. */
+.imagem-modo-cesta {
+  width: 58px;
+  height: 58px;
+}
+
+/* O tamanho visual cresce junto com o limite de produtos da cesta. */
+.imagem-tamanho-cesta {
+  width: 54px;
+  height: 54px;
+}
+
+.imagem-tamanho-pequena {
+  transform: scale(.72);
+}
+
+.imagem-tamanho-media {
+  transform: scale(.88);
+}
+
+.imagem-tamanho-grande {
+  transform: scale(1.04);
+}
+
 .conteudo-opcao {
   display: grid;
   gap: 4px;

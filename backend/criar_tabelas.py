@@ -62,7 +62,7 @@ def criar_tabelas() -> None:
             if sessao.get(Produto, produto_id) is None:
                 sessao.add(Produto(id=produto_id, nome=nome, preco_centavos=preco_centavos))
             elif preco_adicionado_agora:
-                # Atualiza bancos antigos com os valores fictícios definidos para a demonstração.
+                # Atualiza bancos antigos com os preços definidos para o catálogo.
                 sessao.get(Produto, produto_id).preco_centavos = preco_centavos
 
         for nome, email, senha, perfil in USUARIOS_INICIAIS:

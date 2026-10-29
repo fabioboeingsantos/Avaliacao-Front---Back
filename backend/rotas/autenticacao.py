@@ -7,6 +7,12 @@ from sqlalchemy.orm import Session
 from banco import obter_sessao
 from configuracao import obter_cookie_seguro, obter_duracao_token_minutos, obter_nome_cookie_jwt
 from esquemas.usuario import DadosLogin, SessaoUsuario
+from limites_autenticacao import (
+    limitador,
+    obter_duracao_janela,
+    obter_endereco_cliente,
+    obter_limite_login,
+)
 from modelos.usuario import Usuario
 from repositorios import usuario as repositorio_de_usuarios
 from servicos import usuario as servico
@@ -87,6 +93,7 @@ router = APIRouter(prefix="/autenticacao", tags=["Autenticação"])
 def fazer_login(
     dados: DadosLogin,
     resposta: Response,
+    requisicao: Request,
     sessao: Session = Depends(obter_sessao),
 ):
     """Valida o login e informa qual área deve ser apresentada."""
@@ -94,8 +101,24 @@ def fazer_login(
     identificador = dados.email or dados.usuario
     if identificador is None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Informe o e-mail ou o usuário.",
+        )
+
+    # O limite por IP e por identificador reduz tentativas automatizadas.
+    endereco = obter_endereco_cliente(requisicao)
+    limite = obter_limite_login()
+    janela = obter_duracao_janela()
+    ip_liberado, espera_ip = limitador.permitir("login-ip", endereco, limite, janela)
+    conta_liberada, espera_conta = limitador.permitir(
+        "login-conta", identificador.strip().lower(), limite, janela
+    )
+    if not ip_liberado or not conta_liberada:
+        espera = max(espera_ip, espera_conta)
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Muitas tentativas. Aguarde antes de tentar novamente.",
+            headers={"Retry-After": str(espera)},
         )
 
     usuario = servico.autenticar(sessao, identificador, dados.senha)
@@ -105,6 +128,8 @@ def fazer_login(
             detail="Usuário ou senha inválidos.",
         )
 
+    # Um login correto limpa o limite da conta, mantendo o controle por IP.
+    limitador.limpar("login-conta", identificador.strip().lower())
     token = criar_token_de_acesso(usuario["usuario"], usuario["perfil"])
     # O navegador guarda o token sem permitir acesso por JavaScript.
     resposta.set_cookie(

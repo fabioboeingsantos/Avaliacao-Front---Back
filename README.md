@@ -107,9 +107,9 @@ O estoque é reservado ao criar o pedido e devolvido quando uma cesta pendente �
 interface também exibe notificações internas no navegador quando identifica atualizações nos pedidos;
 não há envio externo por e-mail, SMS ou mensageria.
 
-### Preços fictícios por unidade
+### Preços por unidade
 
-Os valores abaixo são demonstrativos e não usam peso ou quilograma. O total de cada cesta é calculado
+Os preços são calculados por unidade e não usam peso ou quilograma. O total de cada cesta é calculado
 pela soma de `preço unitário × quantidade`; por isso, aumentar ou diminuir a quantidade atualiza o valor
 antes da conclusão.
 
@@ -182,6 +182,18 @@ políticas de acesso público: a API usa a conexão administrativa do banco e ma
 por perfil nas rotas FastAPI. A API de dados do Supabase continua bloqueada para papéis comuns
 sem políticas explícitas.
 
+### Protecao contra abuso de autenticacao
+
+O cadastro normaliza usuario e e-mail e aplica restricoes `UNIQUE` no banco, evitando identificacoes
+duplicadas. O backend tambem limita tentativas de login por endereco e por identificador e limita novos
+cadastros por endereco; quando o limite e atingido, responde `429 Too Many Requests` e informa o tempo de
+espera pelo cabecalho `Retry-After`. Os limites padrao sao cinco logins e tres cadastros a cada 15 minutos,
+com bloqueio temporario de 15 minutos.
+
+Esse limitador e mantido na memoria do processo para o prototipo. Em uma publicacao com varias instancias,
+ele deve ser migrado para um armazenamento compartilhado, como Redis/Upstash, para que o limite seja unico
+entre todas as instancias. CAPTCHA/Turnstile ainda e uma etapa opcional de integracao externa.
+
 ## Como rodar o frontend
 
 Na primeira vez, entre na pasta `frontend` e instale as dependências:
@@ -230,7 +242,8 @@ URLs publicadas atuais:
 
 ## Materiais para apresentação
 
-- `backend/APRESENTACAO_ENTREGA.html`: apresentação alinhada aos critérios da entrega.
-- `docs/ROTEIRO_APRESENTACAO.md`: roteiro de fala e demonstração do sistema.
-- `docs/BACKLOG_APRESENTACAO.md`: backlog separado entre concluído, validação e evolução.
+- `Apresentacao/APRESENTACAO_ENTREGA.html`: apresentação alinhada aos critérios da entrega.
+- `Apresentacao/ROTEIRO_APRESENTACAO.md`: roteiro completo de fala e demonstração do sistema.
+- `Apresentacao/BACKLOG_APRESENTACAO.md`: backlog separado entre concluído, validação e evolução.
+- `Apresentacao/personas/`: imagens e cenas usadas exclusivamente na apresentação.
 - `PENDENCIAS.md`: lista central de atividades para depois da entrega.

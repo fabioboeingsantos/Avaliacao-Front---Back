@@ -1,4 +1,4 @@
-"""Adiciona preços unitários fictícios ao catálogo e às cestas."""
+"""Adiciona preços unitários ao catálogo e às cestas."""
 
 from typing import Sequence, Union
 

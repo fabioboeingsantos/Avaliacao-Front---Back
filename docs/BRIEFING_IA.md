@@ -53,11 +53,26 @@ confirmação ou ainda não foram definidos.
 **Problema:** montar uma cesta selecionável exige que Aline encontre e selecione os produtos um a
 um, o que pode ser trabalhoso no celular.
 
-**Solução proposta:** Aline descreve em uma mensagem os produtos e as quantidades que deseja. Um
-agente propõe a composição e um segundo agente revisa se ela corresponde ao texto, reduzindo a
-seleção manual e apontando possíveis lacunas antes da revisão humana. O escopo desta proposta é
-somente interpretar a composição da cesta; não inclui repetir pedidos anteriores, recomendações,
-estoque, substituições ou outras tarefas.
+**Solução proposta:** Aline descreve em uma mensagem os produtos, as quantidades e o tamanho que deseja.
+Um agente organiza essa intenção em uma proposta e um segundo agente revisa se ela corresponde ao texto,
+reduzindo a seleção manual e apontando possíveis lacunas antes da revisão humana. O escopo desta proposta
+é somente interpretar a composição da cesta; não inclui repetir pedidos anteriores, recomendações,
+substituições ou outras tarefas. A disponibilidade e as regras continuam sendo verificadas pelo backend,
+não decididas pela IA.
+
+### Explicação não técnica para a apresentação
+
+No slide, a mensagem deve ser simples: a pessoa descreve a cesta usando uma frase; a IA organiza os
+produtos, as quantidades e o tamanho solicitados; a pessoa confere e pode alterar a sugestão; a cesta só
+é criada após a confirmação; e, se houver dúvida, ela pode esclarecer ou usar o formulário manual.
+
+Frase principal:
+
+> “A IA facilita a montagem da cesta, mas a escolha final continua sendo da pessoa.”
+
+Exemplo de intenção escrita pela pessoa, sem representar uma recomendação automática da IA:
+
+> “Quero uma cesta média para preparar saladas, com tomate e cenoura, sem cebola.”
 
 ### Um agente ou vários?
 
@@ -74,7 +89,7 @@ sendo quem encerra o fluxo, confirmando ou rejeitando a composição.
 
 | Exemplo do professor | Como poderia funcionar no pedido de cesta |
 |---|---|
-| **Um agente:** consulta a tarefa e os itens existentes para sugerir um checklist. | Recebe a mensagem de Aline e o catálogo de produtos disponível; sugere tamanho, produtos e quantidades como uma proposta estruturada. |
+| **Um agente:** consulta a tarefa e os itens existentes para sugerir um checklist. | Recebe a mensagem de Aline e o catálogo de produtos disponível; organiza tamanho, produtos e quantidades como uma proposta estruturada. |
 | **Multiagentes:** um propõe as etapas; outro revisa e aponta lacunas para o executor. | O Agente 1 interpreta o pedido e propõe tamanho, produtos e quantidades; o Agente 2 recebe a mensagem original e a proposta, verifica se correspondem e devolve aprovação ou dúvidas. O backend valida as regras e encaminha dúvidas à Aline. |
 | **Integração:** o backend chama a API de Claude, Gemini, OpenAI ou outro provedor. | Provedor proposto: **OpenAI**, conforme escolha para este rascunho. O backend chamaria os dois agentes via API e validaria suas respostas. A integração não está implementada; modelo específico, configuração da chave e demais detalhes técnicos continuam pendentes (`?`). |
 
@@ -101,9 +116,9 @@ Mesmo com dois agentes, as respostas precisam ser conferidas por uma pessoa.
   aparentes, omissões, contradições ou ambiguidades. Não reescreve nem confirma a cesta.
 - **Backend — Orquestrador e validador:** chama os agentes em sequência, valida o formato das
   respostas e as regras de negócio, encaminha dúvidas à interface e só grava após confirmação.
-- **Dados dos agentes:** mensagem, catálogo com IDs e nomes, regras vigentes; o Agente 2 recebe
+- **Dados dos agentes:** mensagem, catálogo com IDs e nomes e regras vigentes; o Agente 2 recebe
   adicionalmente a proposta do Agente 1. Não é necessário enviar histórico de pedidos para o
-  problema escolhido.
+  problema escolhido. A IA não decide disponibilidade nem recebe autorização para gravar.
 - **Ferramentas:** nenhum agente recebe acesso direto a banco, rotas ou ferramentas de gravação.
 - **Encerramento:** Aline encerra o fluxo confirmando ou rejeitando a proposta. Se houver dúvidas,
   ela pode esclarecer ou voltar ao formulário manual.

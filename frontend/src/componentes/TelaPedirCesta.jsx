@@ -6,11 +6,27 @@ const formatarMoeda = (valor) =>
 
 // Os tamanhos e limites seguem as regras definidas para as cestas.
 const tamanhos = [
-  { id: 'pequena', nome: 'Pequena', limite: 5 },
-  { id: 'media', nome: 'Média', limite: 8 },
-  { id: 'grande', nome: 'Grande', limite: 12 },
+  { id: 'pequena', nome: 'Pequena', limite: 5, imagem: '/marca/icone-cesta-do-vale.png' },
+  { id: 'media', nome: 'Média', limite: 8, imagem: '/marca/icone-cesta-do-vale.png' },
+  { id: 'grande', nome: 'Grande', limite: 12, imagem: '/marca/icone-cesta-do-vale.png' },
 ]
 const limitePorProduto = 10
+
+// As imagens tornam a escolha do modo mais intuitiva sem alterar as regras do pedido.
+const modosCesta = [
+  {
+    id: 'pronta',
+    nome: 'Cesta pronta',
+    descricao: 'Produtos e quantidades definidos pela Cesta do Vale.',
+    imagem: '/marca/logo-cesta-do-vale.png',
+  },
+  {
+    id: 'selecionavel',
+    nome: 'Cesta selecionável',
+    descricao: 'Escolha os produtos disponíveis dentro do limite.',
+    imagem: '/marca/icone-cesta-do-vale.png',
+  },
+]
 
 // Este é o catálogo inicial de 12 produtos usados na demonstração.
 // As imagens ficam em public/produtos para serem servidas pelo Vite.
@@ -246,6 +262,7 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [
                 checked={modoSelecionado === 'pronta'}
                 onChange={() => escolherModo('pronta')}
               />
+              <img className="imagem-opcao-cesta imagem-modo-cesta" src={modosCesta[0].imagem} alt="" />
               <span className="conteudo-opcao">
                 <strong>Cesta pronta</strong>
                 <span>Produtos e quantidades definidos pela Cesta do Vale.</span>
@@ -264,6 +281,7 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [
                 checked={modoSelecionado === 'selecionavel'}
                 onChange={() => escolherModo('selecionavel')}
               />
+              <img className="imagem-opcao-cesta imagem-modo-cesta" src={modosCesta[1].imagem} alt="" />
               <span className="conteudo-opcao">
                 <strong>Cesta selecionável</strong>
                 <span>Escolha os produtos disponíveis dentro do limite.</span>
@@ -292,6 +310,11 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [
                     checked={tamanhoSelecionado === tamanho.id}
                     onChange={() => escolherTamanho(tamanho.id)}
                   />
+                <img
+                  className={`imagem-opcao-cesta imagem-tamanho-cesta imagem-tamanho-${tamanho.id}`}
+                  src={tamanho.imagem}
+                  alt=""
+                />
                   <span className="conteudo-opcao">
                     <strong>{tamanho.nome}</strong>
                     <span>Até {tamanho.limite} produtos diferentes</span>

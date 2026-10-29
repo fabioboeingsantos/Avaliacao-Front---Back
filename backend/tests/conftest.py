@@ -18,6 +18,7 @@ os.environ["JWT_ALGORITHM"] = "HS256"
 os.environ["JWT_EXPIRATION_MINUTES"] = "1440"
 
 from banco import Base, obter_sessao  # noqa: E402
+from limites_autenticacao import limitador  # noqa: E402
 from main import app  # noqa: E402
 from modelos.cesta import Cesta  # noqa: E402
 from modelos.item_cesta import ItemCesta  # noqa: E402
@@ -48,6 +49,8 @@ def obter_sessao_de_teste() -> Generator[Session, None, None]:
 def cliente() -> Generator[TestClient, None, None]:
     """Cria um banco limpo e um cliente HTTP para cada teste."""
 
+    # Cada teste começa com as janelas de protecao vazias.
+    limitador.resetar()
     Base.metadata.create_all(bind=BANCO_DE_TESTE)
     sessao = SessaoDeTeste()
     sessao.add_all(

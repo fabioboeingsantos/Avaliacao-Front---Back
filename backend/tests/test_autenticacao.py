@@ -70,6 +70,55 @@ def test_login_rejeita_senha_incorreta(cliente):
     assert "access_token" not in resposta.json()
 
 
+def test_login_bloqueia_excesso_de_tentativas(monkeypatch, cliente):
+    """O backend devolve 429 depois do limite de tentativas na janela."""
+
+    # O limite reduzido deixa o teste rápido sem alterar a configuração padrão.
+    monkeypatch.setenv("AUTH_LOGIN_LIMIT", "2")
+    primeira = cliente.post("/autenticacao/login", json={"usuario": "aline", "senha": "errada"})
+    segunda = cliente.post("/autenticacao/login", json={"usuario": "aline", "senha": "errada"})
+    terceira = cliente.post("/autenticacao/login", json={"usuario": "aline", "senha": "errada"})
+
+    assert primeira.status_code == 401
+    assert segunda.status_code == 401
+    assert terceira.status_code == 429
+    assert "retry-after" in terceira.headers
+
+
+def test_cadastro_rejeita_usuario_ou_email_duplicado(cliente):
+    """O cadastro informa conflito quando a identificação já existe."""
+
+    resposta = cliente.post(
+        "/usuarios",
+        json={"usuario": "aline", "email": "novo@example.com", "senha": "senha-segura"},
+    )
+
+    assert resposta.status_code == 409
+
+
+def test_cadastro_limita_criacoes_por_endereco(monkeypatch, cliente):
+    """O backend limita novas contas iniciadas pelo mesmo endereço."""
+
+    monkeypatch.setenv("AUTH_SIGNUP_LIMIT", "2")
+    for indice in range(2):
+        resposta = cliente.post(
+            "/usuarios",
+            json={
+                "usuario": f"novo{indice}",
+                "email": f"novo{indice}@example.com",
+                "senha": "senha-segura",
+            },
+        )
+        assert resposta.status_code == 201
+
+    bloqueado = cliente.post(
+        "/usuarios",
+        json={"usuario": "novo2", "email": "novo2@example.com", "senha": "senha-segura"},
+    )
+
+    assert bloqueado.status_code == 429
+
+
 def test_rota_rejeita_token_invalido(cliente):
     """Uma assinatura desconhecida nao pode abrir uma rota protegida."""
 

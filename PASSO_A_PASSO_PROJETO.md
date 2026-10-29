@@ -164,7 +164,7 @@ Exemplos:
 Além do nome e do identificador, o produto possui estoque disponível. O produtor pode consultar e
 alterar essa quantidade; a assinante só consegue montar uma cesta dentro do estoque atual.
 
-Cada produto também possui um preço fictício por unidade. A cesta calculável usa a fórmula `preço
+Cada produto também possui um preço por unidade. A cesta calculável usa a fórmula `preço
 unitário × quantidade`, e o preço unitário é salvo no item do pedido para que o histórico não mude caso
 o catálogo seja alterado no futuro. Não são usados valores por quilo.
 
