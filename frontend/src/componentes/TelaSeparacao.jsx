@@ -3,11 +3,14 @@ import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
 
 // Esta é a tela principal do produtor, com as cestas filtradas para a separação da semana.
-function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEstoque, modo = 'separacao', aoAbrirEstoque, aoVoltarSeparacao }) {
+function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEstoque, aoAtualizarPreco, modo = 'separacao', aoAbrirEstoque, aoVoltarSeparacao }) {
   const [filtroTamanho, setFiltroTamanho] = useState('todos')
   const [rascunhosEstoque, setRascunhosEstoque] = useState({})
   const [estoqueSalvando, setEstoqueSalvando] = useState('')
   const [mensagensEstoque, setMensagensEstoque] = useState({})
+  const [rascunhosPrecos, setRascunhosPrecos] = useState({})
+  const [precoSalvando, setPrecoSalvando] = useState('')
+  const [mensagensPrecos, setMensagensPrecos] = useState({})
   // Pedidos recém-criados entram como Pendentes e precisam aparecer primeiro
   // para o produtor iniciar a separação.
   const [filtroSituacao, setFiltroSituacao] = useState('Pendente')
@@ -44,6 +47,30 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
       })
     }
     setEstoqueSalvando('')
+  }
+
+  // Valida e salva o preço em reais, mantendo duas casas decimais na interface.
+  async function salvarPreco(produto) {
+    const valor = Number(rascunhosPrecos[produto.id] ?? produto.precoUnitario)
+    if (!Number.isFinite(valor) || valor <= 0) {
+      setMensagensPrecos((atuais) => ({ ...atuais, [produto.id]: 'Informe um preço maior que zero.' }))
+      return
+    }
+    setPrecoSalvando(produto.id)
+    setMensagensPrecos((atuais) => ({ ...atuais, [produto.id]: '' }))
+    const resultado = await aoAtualizarPreco(produto.id, valor)
+    setMensagensPrecos((atuais) => ({
+      ...atuais,
+      [produto.id]: resultado.sucesso ? 'Preço atualizado.' : resultado.erro,
+    }))
+    if (resultado.sucesso) {
+      setRascunhosPrecos((atuais) => {
+        const novos = { ...atuais }
+        delete novos[produto.id]
+        return novos
+      })
+    }
+    setPrecoSalvando('')
   }
 
   // Aplica os dois filtros opcionais sem alterar a lista original de cestas.
@@ -158,11 +185,32 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
                     onChange={(evento) => setRascunhosEstoque((atuais) => ({ ...atuais, [produto.id]: evento.target.value }))}
                   />
                 </label>
+                <label>
+                  <span>Preço por unidade (R$)</span>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={rascunhosPrecos[produto.id] ?? produto.precoUnitario}
+                    onChange={(evento) => setRascunhosPrecos((atuais) => ({ ...atuais, [produto.id]: evento.target.value }))}
+                  />
+                </label>
+                {mensagensPrecos[produto.id] && (
+                  <small role="status">{mensagensPrecos[produto.id]}</small>
+                )}
                 {mensagensEstoque[produto.id] && (
                   <small role="status">{mensagensEstoque[produto.id]}</small>
                 )}
                 <button className="botao botao-secundario" type="submit" disabled={estoqueSalvando === produto.id}>
                   {estoqueSalvando === produto.id ? 'Salvando...' : 'Atualizar estoque'}
+                </button>
+                <button
+                  className="botao botao-secundario"
+                  type="button"
+                  disabled={precoSalvando === produto.id}
+                  onClick={() => salvarPreco(produto)}
+                >
+                  {precoSalvando === produto.id ? 'Salvando...' : 'Atualizar preço'}
                 </button>
               </div>
             </form>

@@ -320,6 +320,7 @@ Rotas atuais:
 | `POST` | `/autenticacao/logout` | Encerrar a sessão removendo o cookie |
 | `GET` | `/produtos` | Listar o catálogo, o estoque e o preço unitário disponível |
 | `PUT` | `/produtos/{produto_id}/estoque` | Permitir ao produtor atualizar o estoque de um produto |
+| `PUT` | `/produtos/{produto_id}/preco` | Permitir ao produtor atualizar o preço unitário de um produto |
 | `GET` | `/cestas` | Listar cestas; assinantes veem somente as próprias |
 | `GET` | `/cestas/{id}` | Consultar uma cesta dentro do escopo do usuário |
 | `POST` | `/cestas` | Criar uma cesta pendente para a conta autenticada |

@@ -398,6 +398,21 @@ def test_cesta_calcula_preco_unitario_subtotal_e_total(cliente):
     assert resposta.json()["valor_total"] == 10
 
 
+def test_produtor_pode_atualizar_preco_unitario(cliente):
+    """Somente o produtor atualiza o preço, e o catálogo devolve o novo valor."""
+
+    # A alteração é feita pela rota protegida do catálogo de produtos.
+    fazer_login(cliente, "vanderlei", "vanderlei123")
+    resposta = cliente.put("/produtos/alface/preco", json={"preco_unitario": 1.25})
+
+    # O preço retorna em reais, embora o banco armazene centavos.
+    assert resposta.status_code == 200
+    assert resposta.json()["preco_unitario"] == 1.25
+    produtos = cliente.get("/produtos").json()
+    produto = next(item for item in produtos if item["id"] == "alface")
+    assert produto["preco_unitario"] == 1.25
+
+
 def test_assinante_pode_pedir_dez_unidades_de_cinco_produtos_em_cesta_pequena(cliente):
     """Pequena limita cinco produtos distintos, não o total de unidades."""
 

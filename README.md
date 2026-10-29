@@ -115,18 +115,18 @@ antes da conclusão.
 
 | Produto | Valor por unidade |
 |---|---:|
-| Alface | R$ 4,50 |
-| Tomate | R$ 7,00 |
-| Cenoura | R$ 5,00 |
-| Batata | R$ 6,00 |
-| Cebola | R$ 4,00 |
-| Couve | R$ 5,50 |
-| Beterraba | R$ 5,00 |
-| Abobrinha | R$ 6,50 |
-| Chuchu | R$ 4,50 |
-| Pimentão | R$ 8,00 |
-| Pepino | R$ 5,50 |
-| Mandioca | R$ 7,50 |
+| Alface | R$ 1,50 |
+| Tomate | R$ 2,50 |
+| Cenoura | R$ 1,50 |
+| Batata | R$ 2,00 |
+| Cebola | R$ 1,25 |
+| Couve | R$ 1,50 |
+| Beterraba | R$ 1,50 |
+| Abobrinha | R$ 2,00 |
+| Chuchu | R$ 1,25 |
+| Pimentão | R$ 2,50 |
+| Pepino | R$ 1,50 |
+| Mandioca | R$ 2,00 |
 
 Na tela de finalização aparece o valor de cada item, sua quantidade, o subtotal e o valor de conclusão
 do pedido. O histórico preserva o preço unitário praticado no momento da criação da cesta.
@@ -139,6 +139,7 @@ Rotas disponíveis:
 - `POST /autenticacao/logout`: remove o cookie da sessão atual.
 - `GET /produtos`: lista o catálogo e o estoque disponível para o usuário autenticado.
 - `PUT /produtos/{produto_id}/estoque`: permite ao produtor atualizar o estoque de um produto.
+- `PUT /produtos/{produto_id}/preco`: permite ao produtor atualizar o preço unitário de um produto.
 - `GET /cestas?assinante=aline&tamanho=pequena`: lista e filtra cestas.
 - `GET /cestas/{id}`: mostra uma cesta.
 - `POST /cestas`: cria uma cesta pendente.
@@ -170,7 +171,7 @@ python -m alembic upgrade head
 As migrações atualizam as contas, os estados das cestas e o estoque dos produtos, preservando os
 hashes Argon2 e registrando a data de conclusão da separação.
 
-O estado esperado do banco após aplicar as migrações é `20261029_0009 (head)`, com as tabelas
+O estado esperado do banco após aplicar as migrações é `20261029_0010 (head)`, com as tabelas
 `usuarios`, `produtos`, `cestas`, `itens_cesta`, `separacoes` e `alembic_version`. As cestas
 são criadas durante o fluxo de demonstração; o carregamento inicial não cria pedidos.
 

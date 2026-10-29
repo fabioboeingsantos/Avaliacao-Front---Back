@@ -4,6 +4,8 @@ Os modelos descrevem somente os dados que chegam pela requisição. As regras de
 negócio ficam no serviço, para que também possam ser reaproveitadas no futuro.
 """
 
+from decimal import Decimal
+
 from pydantic import BaseModel, Field
 
 
@@ -61,3 +63,10 @@ class AtualizarEstoque(BaseModel):
     """Quantidade disponível definida pelo produtor."""
 
     quantidade: int = Field(ge=0)
+
+
+class AtualizarPreco(BaseModel):
+    """Preço unitário em reais definido pelo produtor."""
+
+    # Decimal evita erros de arredondamento antes da conversão para centavos.
+    preco_unitario: Decimal = Field(gt=0, max_digits=8, decimal_places=2)

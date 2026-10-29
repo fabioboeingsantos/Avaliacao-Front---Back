@@ -200,6 +200,23 @@ def atualizar_estoque(sessao: Session, produto_id: str, quantidade: int) -> dict
     return {"id": produto.id, "nome": produto.nome, "estoque": produto.estoque}
 
 
+def atualizar_preco(sessao: Session, produto_id: str, preco_centavos: int) -> dict | None:
+    """Atualiza o preço unitário do catálogo e devolve o valor em reais."""
+
+    produto = sessao.get(Produto, produto_id)
+    if produto is None:
+        return None
+    produto.preco_centavos = preco_centavos
+    sessao.commit()
+    sessao.refresh(produto)
+    return {
+        "id": produto.id,
+        "nome": produto.nome,
+        "estoque": produto.estoque,
+        "preco_unitario": produto.preco_centavos / 100,
+    }
+
+
 def devolver_estoque(sessao: Session, produtos: list[dict]) -> None:
     """Devolve ao estoque os itens de um pedido cancelado."""
 

@@ -10,18 +10,18 @@ from seguranca import criar_hash_de_senha, senha_ja_esta_protegida
 
 
 PRODUTOS_INICIAIS = [
-    ("alface", "Alface", 450),
-    ("tomate", "Tomate", 700),
-    ("cenoura", "Cenoura", 500),
-    ("batata", "Batata", 600),
-    ("cebola", "Cebola", 400),
-    ("couve", "Couve", 550),
-    ("beterraba", "Beterraba", 500),
-    ("abobrinha", "Abobrinha", 650),
-    ("chuchu", "Chuchu", 450),
-    ("pimentao", "Pimentão", 800),
-    ("pepino", "Pepino", 550),
-    ("mandioca", "Mandioca", 750),
+    ("alface", "Alface", 150),
+    ("tomate", "Tomate", 250),
+    ("cenoura", "Cenoura", 150),
+    ("batata", "Batata", 200),
+    ("cebola", "Cebola", 125),
+    ("couve", "Couve", 150),
+    ("beterraba", "Beterraba", 150),
+    ("abobrinha", "Abobrinha", 200),
+    ("chuchu", "Chuchu", 125),
+    ("pimentao", "Pimentão", 250),
+    ("pepino", "Pepino", 150),
+    ("mandioca", "Mandioca", 200),
 ]
 
 USUARIOS_INICIAIS = [

@@ -29,6 +29,7 @@ PERMISSOES_POR_GRUPO = {
         "cestas.concluir_separacao",
         "produtos.listar",
         "produtos.atualizar_estoque",
+        "produtos.atualizar_preco",
     },
 }
 

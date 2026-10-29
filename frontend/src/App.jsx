@@ -475,6 +475,21 @@ function App() {
     }
   }
 
+  // Envia ao backend o novo preço unitário definido pelo produtor.
+  async function atualizarPreco(produtoId, precoUnitario) {
+    try {
+      const produto = await chamarApi(`/produtos/${encodeURIComponent(produtoId)}/preco`, {
+        method: 'PUT',
+        body: JSON.stringify({ preco_unitario: Number(precoUnitario) }),
+      })
+      const produtoAdaptado = adaptarProdutoDaApi(produto)
+      setProdutosDisponiveis((atuais) => atuais.map((item) => item.id === produtoId ? produtoAdaptado : item))
+      return { sucesso: true }
+    } catch (erro) {
+      return { sucesso: false, erro: erro.message }
+    }
+  }
+
   // Abre uma cesta específica para o produtor registrar os produtos separados.
   function abrirFechamento(cesta) {
     setCestaEmFechamento(cesta.id)
@@ -829,6 +844,7 @@ function App() {
         aoVoltarSeparacao={() => setAbaAtual('separacao')}
         aoAbrirFechamento={abrirFechamento}
         aoAtualizarEstoque={atualizarEstoque}
+        aoAtualizarPreco={atualizarPreco}
       />,
     )
   }
