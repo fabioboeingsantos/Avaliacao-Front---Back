@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function SinoNotificacoes({ notificacoes, aoMarcarComoLidas }) {
+function SinoNotificacoes({ notificacoes, aoMarcarComoLidas, aoSelecionarNotificacao }) {
   const [aberto, setAberto] = useState(false)
   const naoLidas = notificacoes.filter((notificacao) => !notificacao.lida).length
 
@@ -8,6 +8,11 @@ function SinoNotificacoes({ notificacoes, aoMarcarComoLidas }) {
     const vaiAbrir = !aberto
     setAberto(vaiAbrir)
     if (vaiAbrir) aoMarcarComoLidas()
+  }
+
+  function selecionarNotificacao(notificacao) {
+    setAberto(false)
+    aoSelecionarNotificacao(notificacao)
   }
 
   return (
@@ -33,11 +38,17 @@ function SinoNotificacoes({ notificacoes, aoMarcarComoLidas }) {
             <ul>
               {notificacoes.map((notificacao) => (
                 <li className={notificacao.lida ? '' : 'notificacao-nao-lida'} key={notificacao.id}>
-                  <strong>{notificacao.titulo}</strong>
-                  <p>{notificacao.mensagem}</p>
-                  <time dateTime={notificacao.criadaEm}>
-                    {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(notificacao.criadaEm))}
-                  </time>
+                  <button
+                    className="notificacao-link"
+                    type="button"
+                    onClick={() => selecionarNotificacao(notificacao)}
+                  >
+                    <strong>{notificacao.titulo}</strong>
+                    <p>{notificacao.mensagem}</p>
+                    <time dateTime={notificacao.criadaEm}>
+                      {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(notificacao.criadaEm))}
+                    </time>
+                  </button>
                 </li>
               ))}
             </ul>

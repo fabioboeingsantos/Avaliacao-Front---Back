@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
+import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
 
 function criarQuantidadesAtuais(cesta) {
   if (!cesta) {
@@ -217,7 +218,7 @@ function TelaFechamento({
       </header>
 
       <section className="introducao-pedido" aria-labelledby="titulo-fechamento">
-        <p className="texto-saudacao">Pedido de {cesta.data}</p>
+        <p className="texto-saudacao">{formatarIdSolicitacao(cesta.id)} · pedido de {cesta.data}</p>
         <h1 id="titulo-fechamento">O fechamento</h1>
         <p>Ajuste as quantidades separadas e registre todos os produtos de uma vez.</p>
       </section>

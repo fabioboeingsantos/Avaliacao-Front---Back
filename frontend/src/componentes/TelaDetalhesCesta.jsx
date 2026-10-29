@@ -1,5 +1,18 @@
 import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
+import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
+
+function obterPendencias(cesta) {
+  const separacoes = new Map((cesta.separacoes ?? []).map((item) => [item.produtoId, item.quantidade]))
+
+  return cesta.produtos
+    .map((produto) => ({
+      ...produto,
+      separado: separacoes.get(produto.id) ?? 0,
+      faltante: produto.quantidade - (separacoes.get(produto.id) ?? 0),
+    }))
+    .filter((produto) => produto.faltante > 0)
+}
 
 // Mostra para a assinante o que foi pedido e o que o produtor ja separou.
 function TelaDetalhesCesta({
@@ -31,6 +44,7 @@ function TelaDetalhesCesta({
   )
   const totalPedido = cesta.produtos.reduce((total, produto) => total + produto.quantidade, 0)
   const totalSeparado = separacoes.reduce((total, separacao) => total + separacao.quantidade, 0)
+  const produtosPendentes = obterPendencias(cesta)
 
   async function confirmarRecebimento() {
     setConfirmando(true)
@@ -73,7 +87,7 @@ function TelaDetalhesCesta({
 
       <section className="introducao-pedido" aria-labelledby="titulo-detalhes-cesta">
         <p className="texto-saudacao">Acompanhe sua cesta</p>
-        <h1 id="titulo-detalhes-cesta">Cesta {cesta.tamanhoNome}</h1>
+        <h1 id="titulo-detalhes-cesta">{formatarIdSolicitacao(cesta.id)} · Cesta {cesta.tamanhoNome}</h1>
         <p>
           Veja o que foi pedido e o que o produtor ja separou para voce.
         </p>
@@ -81,7 +95,7 @@ function TelaDetalhesCesta({
 
       <section className="resumo-finalizacao resumo-detalhes-cesta" aria-label="Resumo da cesta">
         <div>
-          <p className="rotulo-cartao">Situacao atual</p>
+          <p className="rotulo-cartao">{formatarIdSolicitacao(cesta.id)} · Situação atual</p>
           <h2>{obterRotuloSituacao(cesta.situacao, cesta.separacaoConcluidaEm)}</h2>
           <p className="resumo-pedido-detalhe">
             {totalSeparado} de {totalPedido} itens separados
@@ -94,6 +108,22 @@ function TelaDetalhesCesta({
         <p className="mensagem mensagem-erro" role="alert">
           {erro}
         </p>
+      )}
+
+      {produtosPendentes.length > 0 && cesta.situacao !== 'Cancelado' && (
+        <section className="alerta-separacao-parcial" role="status" aria-label="Alerta de separação parcial">
+          <strong>Atenção: pedido separado parcialmente</strong>
+          <p>
+            O produtor separou {totalSeparado} de {totalPedido} itens. Confira as pendências antes de confirmar o recebimento.
+          </p>
+          <ul>
+            {produtosPendentes.map((produto) => (
+              <li key={produto.id}>
+                {produto.nome}: {produto.separado} separado(s) de {produto.quantidade} pedido(s) — faltam {produto.faltante}.
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {cesta.separacaoConcluidaEm && cesta.situacao !== 'Entregue' && (

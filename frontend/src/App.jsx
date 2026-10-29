@@ -75,6 +75,24 @@ function adaptarProdutoDaApi(produto) {
   }
 }
 
+function obterPendenciasDaCesta(cesta) {
+  const separacoes = new Map((cesta.separacoes ?? []).map((item) => [item.produto_id ?? item.produtoId, item.quantidade]))
+
+  return cesta.produtos
+    .map((produto) => ({
+      ...produto,
+      separado: separacoes.get(produto.id) ?? 0,
+      faltante: produto.quantidade - (separacoes.get(produto.id) ?? 0),
+    }))
+    .filter((produto) => produto.faltante > 0)
+}
+
+function obterAssinaturaSeparacoes(cesta) {
+  return cesta.produtos
+    .map((produto) => `${produto.id}:${(cesta.separacoes ?? []).find((item) => (item.produto_id ?? item.produtoId) === produto.id)?.quantidade ?? 0}`)
+    .join('|')
+}
+
 // O login é a porta de entrada comum para as duas personas do sistema.
 function App() {
   const [tema, setTema] = useState(() => {
@@ -232,6 +250,7 @@ function App() {
           const novasNotificacoes = []
           const criarNotificacao = (cesta, evento, titulo, mensagem) => novasNotificacoes.push({
             id: `${cesta.id}-${evento}`,
+            cestaId: cesta.id,
             titulo,
             mensagem: `Cesta ${cesta.tamanhoNome}: ${mensagem}`,
             criadaEm: new Date().toISOString(),
@@ -249,8 +268,20 @@ function App() {
                 criarNotificacao(cesta, 'recebido', 'Recebimento confirmado', 'o assinante confirmou o recebimento da cesta.')
               }
             } else if (anterior) {
+              const pendencias = obterPendenciasDaCesta(cesta)
+              const separacoesMudaram = obterAssinaturaSeparacoes(anterior) !== obterAssinaturaSeparacoes(cesta)
+
               if (anterior.situacao === 'Pendente' && cesta.situacao === 'Em separação') {
                 criarNotificacao(cesta, 'separacao-iniciada', 'Pedido em separação', 'o produtor começou a preparar sua cesta.')
+              }
+              if (separacoesMudaram && pendencias.length > 0) {
+                const resumo = pendencias.map((produto) => `${produto.nome}: faltam ${produto.faltante}`).join(', ')
+                criarNotificacao(
+                  cesta,
+                  `separacao-parcial-${obterAssinaturaSeparacoes(cesta)}`,
+                  'Atenção: separação parcial',
+                  `foram separados ${cesta.separacoes.reduce((total, item) => total + item.quantidade, 0)} de ${cesta.produtos.reduce((total, item) => total + item.quantidade, 0)} itens. ${resumo}.`,
+                )
               }
               if (!anterior.separacaoConcluidaEm && cesta.separacaoConcluidaEm) {
                 criarNotificacao(cesta, 'pronto-recebimento', 'Cesta pronta para receber', 'a separação terminou; confirme quando receber.')
@@ -299,6 +330,25 @@ function App() {
 
   function marcarNotificacoesComoLidas() {
     setNotificacoes((atuais) => atuais.map((notificacao) => ({ ...notificacao, lida: true })))
+  }
+
+  function abrirDestinoDaNotificacao(notificacao) {
+    const idDaCesta = notificacao.cestaId ?? String(notificacao.id).split('-')[0]
+    const cesta = pedidos.find((pedido) => String(pedido.id) === String(idDaCesta))
+
+    if (!cesta) {
+      setAbaAtual(perfilAtual === 'produtor' ? 'separacao' : 'historico')
+      return
+    }
+
+    if (perfilAtual === 'produtor') {
+      setCestaEmFechamento(cesta.id)
+      setAbaAtual('fechamento')
+      return
+    }
+
+    setCestaEmDetalhes(cesta.id)
+    setAbaAtual('detalhes')
   }
 
   // Encerra a sessão no servidor antes de limpar o estado autenticado da tela.
@@ -724,7 +774,11 @@ function App() {
           >
             {saindo ? 'Saindo...' : 'Sair'}
           </button>
-          <SinoNotificacoes notificacoes={notificacoes} aoMarcarComoLidas={marcarNotificacoesComoLidas} />
+          <SinoNotificacoes
+            notificacoes={notificacoes}
+            aoMarcarComoLidas={marcarNotificacoesComoLidas}
+            aoSelecionarNotificacao={abrirDestinoDaNotificacao}
+          />
           {controleTema}
           {erroLogout && (
             <p className="erro-sair-sessao" role="alert">
@@ -758,6 +812,9 @@ function App() {
       <TelaSeparacao
         cestas={cestasDaSemana}
         produtos={produtosDisponiveis}
+        modo={abaAtual === 'estoque' ? 'estoque' : 'separacao'}
+        aoAbrirEstoque={() => setAbaAtual('estoque')}
+        aoVoltarSeparacao={() => setAbaAtual('separacao')}
         aoAbrirFechamento={abrirFechamento}
         aoAtualizarEstoque={atualizarEstoque}
       />,

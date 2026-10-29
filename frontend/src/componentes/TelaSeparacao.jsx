@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
+import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
 
 // Esta é a tela principal do produtor, com as cestas filtradas para a separação da semana.
-function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEstoque }) {
+function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEstoque, modo = 'separacao', aoAbrirEstoque, aoVoltarSeparacao }) {
   const [filtroTamanho, setFiltroTamanho] = useState('todos')
   const [rascunhosEstoque, setRascunhosEstoque] = useState({})
   const [estoqueSalvando, setEstoqueSalvando] = useState('')
@@ -65,22 +66,37 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
 
         <div className="cabecalho-acoes">
           <nav className="abas-pedido" aria-label="Navegação do produtor">
-            <button className="aba-navegacao aba-ativa" type="button" aria-current="page">
+            <button
+              className={`aba-navegacao ${modo === 'separacao' ? 'aba-ativa' : ''}`}
+              type="button"
+              aria-current={modo === 'separacao' ? 'page' : undefined}
+              onClick={aoVoltarSeparacao}
+            >
               A separação
+            </button>
+            <button
+              className={`aba-navegacao ${modo === 'estoque' ? 'aba-ativa' : ''}`}
+              type="button"
+              aria-current={modo === 'estoque' ? 'page' : undefined}
+              onClick={aoAbrirEstoque}
+            >
+              Gerenciar estoque
             </button>
           </nav>
         </div>
       </header>
 
       <section className="introducao-pedido" aria-labelledby="titulo-separacao">
-        <p className="texto-saudacao">Organize a colheita</p>
-        <h1 id="titulo-separacao">A separação</h1>
+        <p className="texto-saudacao">{modo === 'estoque' ? 'Controle a disponibilidade' : 'Organize a colheita'}</p>
+        <h1 id="titulo-separacao">{modo === 'estoque' ? 'Gerenciar estoque' : 'A separação'}</h1>
         <p>
-          Veja as cestas pedidas e abra uma por vez para registrar os produtos separados.
+          {modo === 'estoque'
+            ? 'Consulte o estoque atual e edite a quantidade disponível de cada produto.'
+            : 'Veja as cestas pedidas e abra uma por vez para registrar os produtos separados.'}
         </p>
       </section>
 
-      <section className="filtros-separacao" aria-labelledby="titulo-filtros-separacao">
+      {modo === 'separacao' && <section className="filtros-separacao" aria-labelledby="titulo-filtros-separacao">
         <h2 id="titulo-filtros-separacao">Filtrar cestas</h2>
         <div className="campos-filtro-separacao">
           <label className="campo-login">
@@ -104,9 +120,9 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
             </select>
           </label>
         </div>
-      </section>
+      </section>}
 
-      <details className="painel-estoque-produtor">
+      <details className="painel-estoque-produtor" open={modo === 'estoque'}>
         <summary>
           <span>
             <strong>Gerenciar estoque</strong>
@@ -154,7 +170,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
         </div>
       </details>
 
-      {cestasFiltradas.length === 0 ? (
+      {modo === 'separacao' && (cestasFiltradas.length === 0 ? (
         <section className="estado-vazio estado-vazio-historico">
           <h2>Nenhuma cesta encontrada</h2>
           <p>
@@ -174,7 +190,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
                 <summary className="resumo-pedido-recolhido">
                 <div className="cabecalho-cartao-produtor">
                   <div>
-                    <p className="rotulo-cartao">Pedido de {cesta.data}</p>
+                    <p className="rotulo-cartao">{formatarIdSolicitacao(cesta.id)} · pedido de {cesta.data}</p>
                     <h2>Cesta {cesta.tamanhoNome}</h2>
                   </div>
                   <span className={`status-cesta ${obterClasseSituacao(cesta.situacao)}`}>
@@ -228,7 +244,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
             )
           })}
         </section>
-      )}
+      ))}
     </main>
   )
 }

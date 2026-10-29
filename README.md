@@ -193,7 +193,7 @@ URLs publicadas atuais:
 
 ## Materiais para apresentação
 
-- `docs/APRESENTACAO_ENTREGA.html`: apresentação alinhada aos critérios da entrega.
+- `backend/APRESENTACAO_ENTREGA.html`: apresentação alinhada aos critérios da entrega.
 - `docs/ROTEIRO_APRESENTACAO.md`: roteiro de fala e demonstração do sistema.
 - `docs/BACKLOG_APRESENTACAO.md`: backlog separado entre concluído, validação e evolução.
 - `PENDENCIAS.md`: lista central de atividades para depois da entrega.

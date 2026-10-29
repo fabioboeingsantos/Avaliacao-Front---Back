@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
+import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
 
 function obterClasseSituacao(situacao) {
   return situacao
@@ -81,7 +82,7 @@ function TelaHistoricoPedidos({
               <summary className="resumo-pedido-recolhido">
               <div className="cabecalho-historico">
                 <div>
-                  <p className="rotulo-cartao">Pedido realizado em {pedido.data}</p>
+                  <p className="rotulo-cartao">{formatarIdSolicitacao(pedido.id)} · realizado em {pedido.data}</p>
                   <h2>Cesta {pedido.tamanhoNome}</h2>
                 </div>
                 <span
