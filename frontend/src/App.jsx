@@ -9,6 +9,24 @@ import TelaFechamento from './componentes/TelaFechamento'
 import { chamarApi } from './api.js'
 import './App.css'
 
+function TemaToggle({ tema, aoAlternar }) {
+  const temaEscuro = tema === 'escuro'
+
+  return (
+    <button
+      className="controle-tema"
+      type="button"
+      onClick={aoAlternar}
+      aria-pressed={temaEscuro}
+      aria-label={`Ativar tema ${temaEscuro ? 'claro' : 'escuro'}`}
+      title={`Ativar tema ${temaEscuro ? 'claro' : 'escuro'}`}
+    >
+      <span aria-hidden="true">{temaEscuro ? '☀' : '☾'}</span>
+      {temaEscuro ? 'Tema claro' : 'Tema escuro'}
+    </button>
+  )
+}
+
 // Formata o nome para exibição sem mudar o identificador usado na autenticação.
 function formatarNomeUsuario(nome) {
   if (!nome) {
@@ -48,6 +66,13 @@ function adaptarCestaDaApi(cesta) {
 
 // O login é a porta de entrada comum para as duas personas do sistema.
 function App() {
+  const [tema, setTema] = useState(() => {
+    try {
+      return window.localStorage.getItem('tema-visualizacao') === 'escuro' ? 'escuro' : 'claro'
+    } catch {
+      return 'claro'
+    }
+  })
   const [usuarioAutenticado, setUsuarioAutenticado] = useState('')
   // Aguarda a validação do cookie antes de decidir se mostra o login ou a área autenticada.
   const [sessaoVerificada, setSessaoVerificada] = useState(false)
@@ -64,6 +89,25 @@ function App() {
   const [cestaEmDetalhes, setCestaEmDetalhes] = useState(null)
   // O aviso fica preparado para uma futura área visual de status da conexão.
   const [, setMensagemApi] = useState('')
+
+  useEffect(() => {
+    document.documentElement.dataset.tema = tema
+    document.querySelector('meta[name="theme-color"]')?.setAttribute(
+      'content',
+      tema === 'escuro' ? '#17211b' : '#1F4D2E',
+    )
+    try {
+      window.localStorage.setItem('tema-visualizacao', tema)
+    } catch {
+      // A preferência visual continua funcionando mesmo quando o storage está indisponível.
+    }
+  }, [tema])
+
+  function alternarTema() {
+    setTema((temaAtual) => (temaAtual === 'escuro' ? 'claro' : 'escuro'))
+  }
+
+  const controleTema = <TemaToggle tema={tema} aoAlternar={alternarTema} />
 
   // Busca as cestas compartilhadas pelo backend quando uma pessoa entra.
   async function carregarCestasDoServidor(assinante) {
@@ -498,18 +542,24 @@ function App() {
   if (!usuarioAutenticado) {
     if (!sessaoVerificada) {
       return (
-        <main className="pagina-login" role="status">
-          Verificando sua sessão...
-        </main>
+        <>
+          {controleTema}
+          <main className="pagina-login" role="status">
+            Verificando sua sessão...
+          </main>
+        </>
       )
     }
 
     return (
-      <TelaLogin
-        aoEntrar={entrarNoSistema}
-        aoCadastrar={cadastrarUsuario}
-        mensagemSistema={erroRestauracao}
-      />
+      <>
+        {controleTema}
+        <TelaLogin
+          aoEntrar={entrarNoSistema}
+          aoCadastrar={cadastrarUsuario}
+          mensagemSistema={erroRestauracao}
+        />
+      </>
     )
   }
 
@@ -529,6 +579,7 @@ function App() {
           >
             {saindo ? 'Saindo...' : 'Sair'}
           </button>
+          {controleTema}
           {erroLogout && (
             <p className="erro-sair-sessao" role="alert">
               {erroLogout}

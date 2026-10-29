@@ -3,6 +3,36 @@
  * styleguide. O layout parte do celular e ganha duas colunas maiores apenas
  * quando existe espaço suficiente para facilitar a leitura.
  */
+.controle-tema {
+  position: fixed;
+  z-index: 10;
+  top: 16px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 2px solid var(--cor-borda);
+  border-radius: 999px;
+  color: var(--cor-texto-escuro);
+  background: var(--cor-branco);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--cor-verde-escuro) 12%, transparent);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-semi);
+}
+
+.controle-tema:hover {
+  border-color: var(--cor-verde-horta);
+  background: var(--cor-verde-claro);
+}
+
+.controle-tema span {
+  color: var(--cor-amarelo-colheita);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
 .pagina-pedido {
   width: min(100%, 960px);
   margin: 0 auto;

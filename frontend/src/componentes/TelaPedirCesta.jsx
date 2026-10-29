@@ -256,7 +256,7 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico }) {
                   />
                   <span className="conteudo-opcao">
                     <strong>{tamanho.nome}</strong>
-                    <span>Até {tamanho.limite} itens</span>
+                    <span>Até {tamanho.limite} produtos diferentes</span>
                   </span>
                 </label>
               ))}
@@ -299,7 +299,7 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico }) {
                 produtos diferentes. Produtos selecionados:{' '}
                 <strong>{quantidadeProdutosSelecionados}</strong> de{' '}
                 <strong>{tamanhos.find((item) => item.id === tamanhoSelecionado).limite}</strong>.
-                {' '}Cada produto pode ter até {limitePorProduto} unidades.
+                {' '}Cada produto pode ter até {limitePorProduto} unidades, independentemente dos demais.
               </p>
             </div>
 

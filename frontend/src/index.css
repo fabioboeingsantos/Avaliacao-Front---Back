@@ -44,6 +44,28 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Mantém a mesma estrutura visual com contraste adequado no tema escuro. */
+:root[data-tema='escuro'] {
+  color-scheme: dark;
+  --cor-verde-horta: #77c486;
+  --cor-verde-escuro: #b4e6b7;
+  --cor-verde-claro: #263d2d;
+  --cor-terracota: #f08a68;
+  --cor-amarelo-colheita: #f3c56d;
+  --cor-creme-natural: #17211b;
+  --cor-branco: #223027;
+  --cor-texto-escuro: #e7f0e8;
+  --cor-pedida: #8ec9e8;
+  --cor-texto-separacao: #ffd27b;
+  --cor-sucesso: #8edc91;
+  --cor-erro: #ff9b91;
+  --cor-fundo-etiqueta-pedida: #203b49;
+  --cor-fundo-etiqueta-separacao: #4b3d1f;
+  --cor-fundo-sucesso: #244328;
+  --cor-fundo-erro: #4d2725;
+  --cor-borda: #496052;
+}
+
 /* Mantém o cálculo de dimensões previsível para todos os elementos. */
 * {
   box-sizing: border-box;
@@ -55,6 +77,7 @@ body {
   min-height: 100vh;
   margin: 0;
   background: var(--cor-creme-natural);
+  transition: background-color 160ms ease, color 160ms ease;
 }
 
 /* Faz os controles de formulário usarem a mesma tipografia do restante da interface. */

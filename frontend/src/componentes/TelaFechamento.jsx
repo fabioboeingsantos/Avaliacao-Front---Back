@@ -285,11 +285,9 @@ function TelaFechamento({
           {cesta.produtos.map((produto) => {
             const atual = obterQuantidadeSeparada(produto.id)
             const quantidadePlanejada = Number(quantidades[produto.id]) || 0
-            const quantidadeDosOutros = totalPlanejado - quantidadePlanejada
-            const maximoPermitido = Math.max(
-              atual,
-              Math.min(produto.quantidade, cesta.limite - quantidadeDosOutros),
-            )
+            // O limite do tamanho controla produtos diferentes na montagem da
+            // cesta. Na separação, cada produto pode chegar à quantidade pedida.
+            const maximoPermitido = produto.quantidade
 
             return (
               <li
