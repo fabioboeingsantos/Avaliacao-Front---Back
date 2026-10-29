@@ -14,12 +14,25 @@ function obterClasseSituacao(situacao) {
     .replace(/\s+/g, '-')
 }
 
+// Mantém a imagem do histórico alinhada às mesmas opções visuais da montagem da cesta.
+const imagensCestaPorTamanho = {
+  Pequena: '/marca/cesta-pequena.png',
+  Média: '/marca/cesta-media.png',
+  Grande: '/marca/cesta-grande.png',
+}
+
+// Usa a cesta média como fallback para registros antigos sem tamanho reconhecido.
+function obterImagemDaCesta(pedido) {
+  return imagensCestaPorTamanho[pedido.tamanhoNome] ?? '/marca/cesta-media.png'
+}
+
 // Esta tela reúne os pedidos registrados para consulta da assinante.
 function TelaHistoricoPedidos({
   pedidos,
   aoAbrirPedido,
   aoAbrirDetalhes,
   aoCancelarPedido,
+  aoRepetirPedido,
 }) {
   const [pedidoCancelando, setPedidoCancelando] = useState(null)
   const [erroCancelamento, setErroCancelamento] = useState('')
@@ -85,9 +98,16 @@ function TelaHistoricoPedidos({
             <details className="cartao-historico" key={pedido.id}>
               <summary className="resumo-pedido-recolhido">
               <div className="cabecalho-historico">
-                <div>
+                <div className="identidade-cesta-historico">
+                  <img
+                    className="imagem-cesta-historico"
+                    src={obterImagemDaCesta(pedido)}
+                    alt={`Imagem da cesta ${pedido.tamanhoNome}`}
+                  />
+                  <div>
                   <p className="rotulo-cartao">{formatarIdSolicitacao(pedido.id)} · realizado em {pedido.data}</p>
                   <h2>Cesta {pedido.tamanhoNome}</h2>
+                  </div>
                 </div>
                 <span
                   className={`status-historico status-${obterClasseSituacao(pedido.situacao)}`}
@@ -127,6 +147,13 @@ function TelaHistoricoPedidos({
                 onClick={() => aoAbrirDetalhes(pedido)}
               >
                 Ver detalhes e separacao
+              </button>
+              <button
+                className="botao botao-secundario botao-repetir-pedido"
+                type="button"
+                onClick={() => aoRepetirPedido(pedido)}
+              >
+                Repetir composição
               </button>
               {pedido.situacao === 'Pendente' && (
                 <button

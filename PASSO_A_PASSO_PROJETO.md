@@ -449,6 +449,18 @@ npm run dev
 
 O Vite exibirá o endereço local da aplicação, normalmente `http://localhost:5173`.
 
+Para verificar o layout em modo celular no computador, abra esse endereço, pressione `F12` e use
+`Ctrl + Shift + M` para ativar a visualização responsiva.
+
+Para acessar pelo celular na mesma rede Wi-Fi, execute o frontend aceitando conexões externas:
+
+```powershell
+npm.cmd run dev -- --host 0.0.0.0
+```
+
+Descubra o IPv4 do computador com `ipconfig` e abra no celular `http://IP_DO_COMPUTADOR:5173`.
+Mantenha o backend em execução e permita a porta no firewall caso o Windows solicite.
+
 ## 9. Melhorias futuras
 
 O fluxo principal já inclui autenticação, permissões por grupo, vínculo das cestas com a conta,

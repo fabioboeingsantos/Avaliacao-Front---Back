@@ -23,6 +23,8 @@ confirmação ou ainda não foram definidos.
 - **Cesta selecionável:** Pequena, Média e Grande limitam a quantidade de produtos diferentes a
   5, 8 e 12, respectivamente. Cada produto pode ter até 10 unidades; esses limites não restringem
   a soma das unidades.
+- **Repetição de composição:** A assinante pode carregar no novo pedido a composição registrada no
+  histórico. O sistema revalida estoque, limites e preços atuais antes da confirmação.
 - **Interface:** o fluxo inclui pedido, histórico e detalhes para a assinante, e separação e
   fechamento para o produtor. A composição da cesta selecionável usa controles de quantidade.
 
@@ -35,13 +37,12 @@ confirmação ou ainda não foram definidos.
 | Separação | O fluxo inicial descrevia separação produto a produto. | O produtor pode registrar produtos em lote e desfazer o último lote, para reduzir ações repetitivas e corrigir erros de operação. |
 | Situação do pedido | A cartilha descrevia `pedida` e `em separação`. | O sistema usa `Pendente`, `Em separação` e `Entregue` para representar espera de início, separação/espera de recebimento e entrega confirmada ou expirada. |
 | Confirmação de recebimento | A cartilha não definia confirmação pelo cliente nem expiração. | A assinante pode confirmar o recebimento; sem confirmação, a cesta passa a `Entregue` após sete dias da conclusão da separação. |
+| Repetição de composição | A ideia aparecia como evolução futura. | O histórico oferece “Repetir composição”, carregando o modo, tamanho e quantidades para uma nova conferência. |
 | Apresentação visual | Não havia regra para exibir produtos em cartões compactos na lista do produtor. | A tela do produtor apresenta os produtos em blocos compactos com imagem, nome e quantidades, para economizar espaço e facilitar a conferência. |
 
 ## Pontos não implementados ou a confirmar
 
 - **Assistente de pedido com IA:** planejado, sem integração, endpoint ou chamada a modelo implementada.
-- **Repetir a última composição:** a ideia aparece no briefing anterior, mas não foi localizada como
-  funcionalidade no sistema atual. Sua inclusão no assistente depende de confirmação do escopo. `?`
 - **Recuperação de senha:** há uma opção visual no fluxo de login, mas não foi localizada uma rota de
   backend que conclua a recuperação. O comportamento completo ainda precisa ser verificado. `?`
 - **Provedor de IA, endpoint, custo e metas de qualidade:** ainda não definidos. `?`

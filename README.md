@@ -211,6 +211,22 @@ npm run dev
 
 O Vite exibirá no terminal o endereço local da aplicação.
 
+### Acesso local em modo celular
+
+Para simular um celular no próprio computador, abra o endereço local no navegador, pressione `F12`
+e ative o modo responsivo com `Ctrl + Shift + M`.
+
+Para abrir a aplicação em um celular conectado à mesma rede Wi-Fi, inicie o Vite aceitando conexões
+da rede local:
+
+```powershell
+npm.cmd run dev -- --host 0.0.0.0
+```
+
+Consulte o IPv4 do computador com `ipconfig` e, no celular, acesse `http://IP_DO_COMPUTADOR:5173`.
+O backend também precisa estar em execução e o firewall do Windows deve permitir a porta usada pelo
+frontend.
+
 ## Publicação na Vercel
 
 A publicação usa dois projetos Vercel no mesmo repositório:

@@ -126,6 +126,8 @@ function App() {
   // Controla a aba atual e mantém o pedido em revisão enquanto a pessoa confirma os dados.
   const [abaAtual, setAbaAtual] = useState('pedido')
   const [pedidoEmRevisao, setPedidoEmRevisao] = useState(null)
+  // Guarda a composição escolhida no histórico até a tela de novo pedido ser montada.
+  const [pedidoParaRepetir, setPedidoParaRepetir] = useState(null)
   const [pedidos, setPedidos] = useState([])
   const [produtosDisponiveis, setProdutosDisponiveis] = useState([])
   const [catalogoCarregado, setCatalogoCarregado] = useState(false)
@@ -502,6 +504,12 @@ function App() {
     setAbaAtual('detalhes')
   }
 
+  // Reaproveita a composição anterior sem ignorar as validações do novo pedido.
+  function repetirPedido(pedido) {
+    setPedidoParaRepetir(pedido)
+    setAbaAtual('pedido')
+  }
+
   async function registrarSeparacoesEmLote({ pedidoId, produtos }) {
     if (typeof pedidoId === 'number') {
       try {
@@ -868,6 +876,7 @@ function App() {
         aoAbrirPedido={() => setAbaAtual('pedido')}
         aoAbrirDetalhes={abrirDetalhes}
         aoCancelarPedido={cancelarPedido}
+        aoRepetirPedido={repetirPedido}
       />,
     )
   }
@@ -888,7 +897,9 @@ function App() {
   return envolverAreaAutenticada(
     <TelaPedirCesta
       produtosDisponiveis={produtosDisponiveis}
-        catalogoCarregado={catalogoCarregado}
+      catalogoCarregado={catalogoCarregado}
+      pedidoInicial={pedidoParaRepetir}
+      aoConsumirPedidoInicial={() => setPedidoParaRepetir(null)}
       aoFinalizar={abrirFinalizacao}
       aoAbrirHistorico={() => setAbaAtual('historico')}
     />,

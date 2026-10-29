@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // Formata os preços unitários e subtotais exibidos durante a montagem da cesta.
 const formatarMoeda = (valor) =>
@@ -95,15 +95,48 @@ function calcularTotal(produtos) {
 
 // Esta é a tela principal da assinante. Os campos seguintes aparecem de acordo
 // com a escolha feita no primeiro passo, evitando mostrar decisões desnecessárias.
-function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [], catalogoCarregado }) {
-  const [modoSelecionado, setModoSelecionado] = useState('')
-  const [tamanhoSelecionado, setTamanhoSelecionado] = useState('')
-  const [quantidadesSelecionadas, setQuantidadesSelecionadas] = useState({})
+function TelaPedirCesta({
+  aoFinalizar,
+  aoAbrirHistorico,
+  produtosDisponiveis = [],
+  catalogoCarregado,
+  pedidoInicial = null,
+  aoConsumirPedidoInicial,
+}) {
+  // Reabre a última composição já com o modo, tamanho e quantidades anteriores.
+  const [modoSelecionado, setModoSelecionado] = useState(() =>
+    pedidoInicial?.modoNome === 'Cesta pronta' ? 'pronta' : pedidoInicial ? 'selecionavel' : '',
+  )
+  const [tamanhoSelecionado, setTamanhoSelecionado] = useState(() => {
+    const tamanho = tamanhos.find((item) => item.nome === pedidoInicial?.tamanhoNome)
+    return tamanho?.id ?? ''
+  })
+  const [quantidadesSelecionadas, setQuantidadesSelecionadas] = useState(() => {
+    if (!pedidoInicial || pedidoInicial.modoNome === 'Cesta pronta') {
+      return {}
+    }
+
+    return Object.fromEntries(
+      pedidoInicial.produtos.map((produto) => [produto.id, produto.quantidade]),
+    )
+  })
   const [erro, setErro] = useState('')
   const produtosCatalogo = catalogoProdutos.map((produto) => ({
     ...produto,
     ...(produtosDisponiveis.find((item) => item.id === produto.id) ?? { estoque: 0 }),
   }))
+
+  // Informa que a repetição usa o catálogo e os preços atuais antes da confirmação.
+  const mensagemRepeticao = pedidoInicial
+    ? 'Última composição carregada. Confira estoque, quantidades e valores antes de confirmar.'
+    : ''
+
+  // Limpa a referência no componente pai sem perder a seleção já carregada nesta tela.
+  useEffect(() => {
+    if (pedidoInicial) {
+      aoConsumirPedidoInicial?.()
+    }
+  }, [pedidoInicial, aoConsumirPedidoInicial])
 
   if (!catalogoCarregado) {
     return (
@@ -244,6 +277,7 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [
           Escolha primeiro como quer receber sua cesta. Depois, o sistema mostra somente as opções
           necessárias para concluir o pedido.
         </p>
+        {mensagemRepeticao && <p className="mensagem mensagem-informacao">{mensagemRepeticao}</p>}
       </section>
 
       <div className="formulario-pedido">
