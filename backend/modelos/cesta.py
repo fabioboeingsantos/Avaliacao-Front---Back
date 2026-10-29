@@ -31,6 +31,9 @@ class Cesta(Base):
     separacao_concluida_em: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    # Cada pedido guarda uma nota independente para a assinante e para o produtor.
+    avaliacao_assinante: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    avaliacao_produtor: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     usuario: Mapped[Usuario | None] = relationship()
     itens: Mapped[list[ItemCesta]] = relationship(

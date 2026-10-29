@@ -58,6 +58,8 @@ function adaptarCestaDaApi(cesta) {
     limite: cesta.limite,
     situacao: cesta.situacao,
     separacaoConcluidaEm: cesta.separacao_concluida_em,
+    avaliacaoAssinante: cesta.avaliacao_assinante,
+    avaliacaoProdutor: cesta.avaliacao_produtor,
     produtos: cesta.produtos.map((produto) => ({
       id: produto.id,
       nome: produto.nome,
@@ -659,6 +661,38 @@ function App() {
     return { sucesso: true }
   }
 
+  // Envia a nota do perfil atual e atualiza o mesmo pedido no histórico local.
+  async function avaliarCesta(pedidoId, estrelas) {
+    if (typeof pedidoId === 'number') {
+      try {
+        const cestaAtualizada = await chamarApi(`/cestas/${pedidoId}/avaliacao`, {
+          method: 'POST',
+          body: JSON.stringify({ estrelas }),
+        })
+        const cestaAdaptada = adaptarCestaDaApi(cestaAtualizada)
+        setPedidos((pedidosAtuais) =>
+          pedidosAtuais.map((pedido) => (pedido.id === pedidoId ? cestaAdaptada : pedido)),
+        )
+        return { sucesso: true }
+      } catch (erro) {
+        return { sucesso: false, erro: erro.message }
+      }
+    }
+
+    // Mantém o fluxo local utilizável quando a API de demonstração não estiver conectada.
+    setPedidos((pedidosAtuais) => pedidosAtuais.map((pedido) => (
+      pedido.id === pedidoId
+        ? {
+            ...pedido,
+            ...(perfilAtual === 'produtor'
+              ? { avaliacaoProdutor: estrelas }
+              : { avaliacaoAssinante: estrelas }),
+          }
+        : pedido
+    )))
+    return { sucesso: true }
+  }
+
   async function cancelarPedido(pedidoId) {
     const pedido = pedidos.find((item) => item.id === pedidoId)
     if (!pedido || pedido.situacao !== 'Pendente') {
@@ -798,17 +832,19 @@ function App() {
     return (
       <>
         <header className="barra-sessao">
-          <span>
-            Conectado como <strong>{formatarNomeUsuario(usuarioAutenticado)}</strong>
-          </span>
-          <button
-            className="botao-sair-sessao"
-            type="button"
-            onClick={sairDoSistema}
-            disabled={saindo}
-          >
-            {saindo ? 'Saindo...' : 'Sair'}
-          </button>
+          <div className="identidade-sessao">
+            <span>
+              Conectado como <strong>{formatarNomeUsuario(usuarioAutenticado)}</strong>
+            </span>
+            <button
+              className="botao-sair-sessao"
+              type="button"
+              onClick={sairDoSistema}
+              disabled={saindo}
+            >
+              {saindo ? 'Saindo...' : 'Sair'}
+            </button>
+          </div>
           <SinoNotificacoes
             notificacoes={notificacoes}
             aoMarcarComoLidas={marcarNotificacoesComoLidas}
@@ -853,6 +889,7 @@ function App() {
         aoAbrirFechamento={abrirFechamento}
         aoAtualizarEstoque={atualizarEstoque}
         aoAtualizarPreco={atualizarPreco}
+        aoAvaliarCesta={avaliarCesta}
       />,
     )
   }
@@ -890,6 +927,7 @@ function App() {
         aoAbrirPedido={() => setAbaAtual('pedido')}
         aoAbrirHistorico={() => setAbaAtual('historico')}
         aoConfirmarEntrega={confirmarEntrega}
+        aoAvaliarCesta={avaliarCesta}
       />,
     )
   }

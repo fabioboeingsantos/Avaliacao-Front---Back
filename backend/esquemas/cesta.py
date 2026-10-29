@@ -70,3 +70,9 @@ class AtualizarPreco(BaseModel):
 
     # Decimal evita erros de arredondamento antes da conversão para centavos.
     preco_unitario: Decimal = Field(gt=0, max_digits=8, decimal_places=2)
+
+
+class AvaliacaoCesta(BaseModel):
+    """Nota de zero a cinco estrelas registrada por uma das personas."""
+
+    estrelas: int = Field(ge=0, le=5)

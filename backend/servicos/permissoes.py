@@ -17,6 +17,7 @@ PERMISSOES_POR_GRUPO = {
         "cestas.criar",
         "cestas.cancelar",
         "cestas.confirmar_entrega",
+        "cestas.avaliar",
         "produtos.listar",
     },
     GRUPO_PRODUTOR: {
@@ -27,6 +28,7 @@ PERMISSOES_POR_GRUPO = {
         "cestas.registrar_separacao",
         "cestas.desfazer_separacao",
         "cestas.concluir_separacao",
+        "cestas.avaliar",
         "produtos.listar",
         "produtos.atualizar_estoque",
         "produtos.atualizar_preco",

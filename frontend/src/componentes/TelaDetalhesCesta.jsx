@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
+import AvaliacaoEstrelas from './AvaliacaoEstrelas'
 
 function obterPendencias(cesta) {
   const separacoes = new Map((cesta.separacoes ?? []).map((item) => [item.produtoId, item.quantidade]))
@@ -20,6 +21,7 @@ function TelaDetalhesCesta({
   aoAbrirPedido,
   aoAbrirHistorico,
   aoConfirmarEntrega,
+  aoAvaliarCesta,
 }) {
   const [confirmando, setConfirmando] = useState(false)
   const [erro, setErro] = useState('')
@@ -141,6 +143,14 @@ function TelaDetalhesCesta({
       )}
       {cesta.separacaoConcluidaEm && cesta.situacao !== 'Entregue' && (
         <p>Se não confirmar o recebimento, a situação mudará para “Entregue” após sete dias.</p>
+      )}
+
+      {cesta.situacao === 'Entregue' && (
+        <AvaliacaoEstrelas
+          titulo="Avalie o atendimento do produtor"
+          valor={cesta.avaliacaoAssinante}
+          aoSalvar={(estrelas) => aoAvaliarCesta(cesta.id, estrelas)}
+        />
       )}
 
       <div className="detalhes-cesta-assinante">

@@ -39,3 +39,7 @@ class QuantidadeExcedida(ErroDeAplicacao):
 
 class SemanaInvalida(ErroDeAplicacao):
     """Indica que a semana nao esta no formato esperado."""
+
+
+class AvaliacaoInvalida(ErroDeAplicacao):
+    """Indica que uma avaliacao nao pode ser registrada naquele momento."""

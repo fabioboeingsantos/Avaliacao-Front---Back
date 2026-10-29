@@ -56,6 +56,21 @@ def criar_tabelas() -> None:
                     "(SELECT preco_centavos FROM produtos WHERE produtos.id = itens_cesta.produto_id)"
                 )
             )
+
+    # Bancos locais antigos recebem as colunas de avaliação sem perder pedidos existentes.
+    colunas_cestas = {coluna["name"] for coluna in inspect(engine).get_columns("cestas")}
+    colunas_avaliacao = {
+        "avaliacao_assinante": "avaliacao_assinante",
+        "avaliacao_produtor": "avaliacao_produtor",
+    }
+    colunas_faltantes = [
+        nome_coluna for nome_coluna in colunas_avaliacao if nome_coluna not in colunas_cestas
+    ]
+    if colunas_faltantes:
+        with engine.begin() as conexao:
+            for nome_coluna in colunas_faltantes:
+                conexao.execute(text(f"ALTER TABLE cestas ADD COLUMN {nome_coluna} INTEGER"))
+
     sessao = Sessao()
     try:
         for produto_id, nome, preco_centavos in PRODUTOS_INICIAIS:

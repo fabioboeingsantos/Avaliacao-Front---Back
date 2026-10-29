@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
+import AvaliacaoEstrelas from './AvaliacaoEstrelas'
 
 // Esta é a tela principal do produtor, com as cestas filtradas para a separação da semana.
-function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEstoque, aoAtualizarPreco, modo = 'separacao', aoAbrirEstoque, aoVoltarSeparacao }) {
+function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEstoque, aoAtualizarPreco, aoAvaliarCesta, modo = 'separacao', aoAbrirEstoque, aoVoltarSeparacao }) {
   const [filtroTamanho, setFiltroTamanho] = useState('todos')
   const [rascunhosEstoque, setRascunhosEstoque] = useState({})
   const [estoqueSalvando, setEstoqueSalvando] = useState('')
@@ -286,6 +287,13 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
                         <span>Aguardando confirmação de recebimento do cliente</span>
                       )}
                     </div>
+                  )}
+                  {cesta.situacao === 'Entregue' && (
+                    <AvaliacaoEstrelas
+                      titulo="Avalie a pessoa assinante"
+                      valor={cesta.avaliacaoProdutor}
+                      aoSalvar={(estrelas) => aoAvaliarCesta(cesta.id, estrelas)}
+                    />
                   )}
                 </div>
               </details>

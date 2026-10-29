@@ -8,6 +8,7 @@ from modelos.usuario import Usuario
 from repositorios import cesta as repositorio
 from servicos.excecoes import (
     CestaNaoEncontrada,
+    AvaliacaoInvalida,
     EstoqueInsuficiente,
     ProdutoNaoEncontrado,
     ProdutoNaoPertenceCesta,
@@ -370,3 +371,23 @@ def confirmar_entrega(sessao: Session, id_cesta: int, usuario_id: int) -> dict:
 
     cesta["situacao"] = "Entregue"
     return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
+
+
+def avaliar_cesta(sessao: Session, id_cesta: int, usuario: Usuario, estrelas: int) -> dict:
+    """Registra a nota do assinante ou do produtor após a entrega."""
+
+    usuario_id = usuario.id if usuario.perfil == "assinante" else None
+    cesta = repositorio.buscar_cesta_por_id(sessao, id_cesta, usuario_id=usuario_id)
+    if cesta is None:
+        raise CestaNaoEncontrada("Cesta não encontrada.")
+    if cesta["situacao"] != "Entregue":
+        raise AvaliacaoInvalida("A avaliação só pode ser registrada após a entrega.")
+
+    campo = "avaliacao_assinante" if usuario.perfil == "assinante" else "avaliacao_produtor"
+    if cesta[campo] is not None:
+        raise AvaliacaoInvalida("Esta pessoa já avaliou este pedido.")
+
+    resultado = repositorio.registrar_avaliacao(sessao, id_cesta, campo, estrelas)
+    if resultado is None:
+        raise CestaNaoEncontrada("Cesta não encontrada.")
+    return serializar_cesta(resultado)

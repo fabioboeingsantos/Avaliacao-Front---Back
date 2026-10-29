@@ -295,6 +295,13 @@
   font-size: var(--texto-rotulo);
 }
 
+/* Mantém a identificação e a saída da conta como uma única unidade visual. */
+.identidade-sessao {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .area-notificacoes {
   position: relative;
 }
@@ -789,6 +796,66 @@
   margin-top: 14px;
   color: var(--cor-verde-escuro);
   background: var(--cor-fundo-sucesso);
+}
+
+/* Bloco compartilhado pelas avaliações da assinante e do produtor. */
+.avaliacao-cesta {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+  color: var(--cor-verde-escuro);
+  background: var(--cor-verde-claro);
+}
+
+.estrelas-avaliacao {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.botao-estrela,
+.botao-zero-estrelas {
+  display: grid;
+  min-width: 38px;
+  min-height: 38px;
+  place-items: center;
+  padding: 4px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  color: #b8a98e;
+  background: var(--cor-branco);
+  cursor: pointer;
+}
+
+.botao-estrela {
+  font-size: 1.35rem;
+}
+
+.botao-zero-estrelas {
+  font-size: var(--texto-pequeno);
+  font-weight: var(--peso-semi);
+}
+
+.botao-estrela.estrela-ativa,
+.botao-zero-estrelas.estrela-ativa {
+  border-color: var(--cor-amarelo-colheita);
+  color: var(--cor-amarelo-colheita);
+  background: #fff7df;
+}
+
+.botao-salvar-avaliacao {
+  justify-self: start;
+}
+
+.avaliacao-registrada {
+  color: var(--cor-amarelo-colheita);
+  font-weight: var(--peso-semi);
+}
+
+.erro-avaliacao {
+  color: var(--cor-erro);
 }
 
 .botao {
@@ -1809,8 +1876,10 @@
     padding: 10px 14px 0;
   }
 
-  .barra-sessao > span {
+  .identidade-sessao {
     flex: 1 0 100%;
+    justify-content: center;
+    flex-wrap: wrap;
     text-align: center;
   }
 

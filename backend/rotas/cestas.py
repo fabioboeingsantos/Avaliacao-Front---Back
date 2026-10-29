@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from banco import obter_sessao
 from rotas.autenticacao import exigir_permissao
-from esquemas.cesta import DesfazerSeparacoes, NovaCesta, NovasSeparacoes, NovaSeparacao
+from esquemas.cesta import AvaliacaoCesta, DesfazerSeparacoes, NovaCesta, NovasSeparacoes, NovaSeparacao
 from servicos import cesta as servico
 from servicos.excecoes import AcessoNegado, CestaNaoEncontrada, ErroDeAplicacao
 from modelos.usuario import Usuario
@@ -187,5 +187,20 @@ def confirmar_entrega(
 
     try:
         return servico.confirmar_entrega(sessao, id_cesta, usuario.id)
+    except ErroDeAplicacao as erro:
+        raise traduzir_erro(erro) from erro
+
+
+@router.post("/{id_cesta}/avaliacao")
+def avaliar_cesta(
+    id_cesta: int,
+    dados: AvaliacaoCesta,
+    sessao: Session = Depends(obter_sessao),
+    usuario: Usuario = Depends(exigir_permissao("cestas.avaliar")),
+):
+    """Registra uma nota de zero a cinco estrelas para o pedido finalizado."""
+
+    try:
+        return servico.avaliar_cesta(sessao, id_cesta, usuario, dados.estrelas)
     except ErroDeAplicacao as erro:
         raise traduzir_erro(erro) from erro

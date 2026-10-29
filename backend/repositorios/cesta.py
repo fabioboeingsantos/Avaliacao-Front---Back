@@ -41,6 +41,8 @@ def _serializar_cesta(cesta: Cesta) -> dict:
             if cesta.separacao_concluida_em is not None
             else None
         ),
+        "avaliacao_assinante": cesta.avaliacao_assinante,
+        "avaliacao_produtor": cesta.avaliacao_produtor,
         "produtos": produtos,
         "valor_total": sum(item["subtotal"] for item in produtos),
         "separacoes": [
@@ -226,3 +228,22 @@ def devolver_estoque(sessao: Session, produtos: list[dict]) -> None:
             .where(Produto.id == produto["id"])
             .values(estoque=Produto.estoque + produto["quantidade"])
         )
+
+
+def registrar_avaliacao(
+    sessao: Session,
+    id_cesta: int,
+    campo: str,
+    estrelas: int,
+) -> dict | None:
+    """Persiste a nota em uma das duas colunas de avaliacao da cesta."""
+
+    cesta = sessao.get(Cesta, id_cesta)
+    if cesta is None:
+        return None
+
+    # O campo e escolhido pelo servico, nunca diretamente pela requisicao.
+    setattr(cesta, campo, estrelas)
+    sessao.commit()
+    sessao.refresh(cesta)
+    return _serializar_cesta(cesta)

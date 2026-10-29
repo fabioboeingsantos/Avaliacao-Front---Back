@@ -221,6 +221,60 @@ def test_assinante_nao_confirma_entrega_de_cesta_de_outra_conta(cliente):
     assert resposta.status_code == 404
 
 
+def test_assinante_e_produtor_avaliam_pedido_entregue(cliente):
+    """Cada perfil registra sua própria nota de zero a cinco estrelas."""
+
+    fazer_login(cliente, "vanderlei", "vanderlei123")
+    cliente.post(
+        "/cestas/1/separacoes/lote",
+        json={"produtos": [{"produto_id": "alface", "quantidade": 2}]},
+    )
+    cliente.post("/cestas/1/separacoes/concluir")
+
+    fazer_login(cliente, "aline", "aline123")
+    cliente.post("/cestas/1/entrega/confirmar")
+    nota_assinante = cliente.post("/cestas/1/avaliacao", json={"estrelas": 5})
+
+    assert nota_assinante.status_code == 200
+    assert nota_assinante.json()["avaliacao_assinante"] == 5
+    assert nota_assinante.json()["avaliacao_produtor"] is None
+
+    fazer_login(cliente, "vanderlei", "vanderlei123")
+    nota_produtor = cliente.post("/cestas/1/avaliacao", json={"estrelas": 0})
+
+    assert nota_produtor.status_code == 200
+    assert nota_produtor.json()["avaliacao_assinante"] == 5
+    assert nota_produtor.json()["avaliacao_produtor"] == 0
+
+
+def test_avaliacao_so_pode_ser_registrada_uma_vez_por_perfil(cliente):
+    """Uma mesma pessoa não substitui a nota já gravada no pedido."""
+
+    fazer_login(cliente, "vanderlei", "vanderlei123")
+    cliente.post(
+        "/cestas/1/separacoes/lote",
+        json={"produtos": [{"produto_id": "alface", "quantidade": 2}]},
+    )
+    cliente.post("/cestas/1/separacoes/concluir")
+    fazer_login(cliente, "aline", "aline123")
+    cliente.post("/cestas/1/entrega/confirmar")
+    cliente.post("/cestas/1/avaliacao", json={"estrelas": 3})
+
+    repetida = cliente.post("/cestas/1/avaliacao", json={"estrelas": 4})
+
+    assert repetida.status_code == 422
+    assert "já avaliou" in repetida.json()["detail"]
+
+
+def test_avaliacao_rejeita_nota_fora_do_intervalo(cliente):
+    """O schema impede valores menores que zero ou maiores que cinco."""
+
+    fazer_login(cliente, "aline", "aline123")
+    resposta = cliente.post("/cestas/1/avaliacao", json={"estrelas": 6})
+
+    assert resposta.status_code == 422
+
+
 def test_produtor_nao_pode_confirmar_entrega(cliente):
     """A confirmação de recebimento é uma ação exclusiva da assinante."""
 
