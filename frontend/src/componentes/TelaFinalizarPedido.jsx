@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 // Esta tela permite conferir a cesta antes de registrar o pedido no histórico.
 function TelaFinalizarPedido({
   pedido,
@@ -5,6 +7,8 @@ function TelaFinalizarPedido({
   aoAbrirPedido,
   aoAbrirHistorico,
 }) {
+  const [finalizando, setFinalizando] = useState(false)
+  const [erro, setErro] = useState('')
   if (!pedido) {
     return (
       <main className="pagina-pedido">
@@ -17,6 +21,19 @@ function TelaFinalizarPedido({
         </section>
       </main>
     )
+  }
+
+  async function finalizarPedido() {
+    setFinalizando(true)
+    setErro('')
+    try {
+      const resultado = await aoFinalizar()
+      if (!resultado?.sucesso) setErro(resultado?.erro ?? 'Não foi possível finalizar o pedido.')
+    } catch (falha) {
+      setErro(falha instanceof Error ? falha.message : 'Não foi possível finalizar o pedido.')
+    } finally {
+      setFinalizando(false)
+    }
   }
 
   // Mostra os dados da cesta em uma etapa final para evitar confirmações acidentais.
@@ -77,9 +94,11 @@ function TelaFinalizarPedido({
         </ul>
       </section>
 
+      {erro && <p className="mensagem mensagem-erro" role="alert">{erro}</p>}
+
       <div className="acoes-finalizacao">
-        <button className="botao botao-primario" type="button" onClick={aoFinalizar}>
-          Finalizar pedido
+        <button className="botao botao-primario" type="button" disabled={finalizando} onClick={finalizarPedido}>
+          {finalizando ? 'Verificando estoque...' : 'Finalizar pedido'}
         </button>
         <button className="botao-link" type="button" onClick={aoAbrirPedido}>
           Voltar e editar

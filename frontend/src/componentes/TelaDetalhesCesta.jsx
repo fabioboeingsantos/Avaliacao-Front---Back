@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 
 // Mostra para a assinante o que foi pedido e o que o produtor ja separou.
 function TelaDetalhesCesta({
@@ -81,7 +82,7 @@ function TelaDetalhesCesta({
       <section className="resumo-finalizacao resumo-detalhes-cesta" aria-label="Resumo da cesta">
         <div>
           <p className="rotulo-cartao">Situacao atual</p>
-          <h2>{cesta.situacao}</h2>
+          <h2>{obterRotuloSituacao(cesta.situacao, cesta.separacaoConcluidaEm)}</h2>
           <p className="resumo-pedido-detalhe">
             {totalSeparado} de {totalPedido} itens separados
           </p>
@@ -119,13 +120,14 @@ function TelaDetalhesCesta({
             <h2 id="titulo-pedido-cesta">Produtos escolhidos</h2>
           </div>
 
-          <ul className="lista-detalhes-cesta">
+          <ul className="lista-detalhes-cesta grade-produtos">
             {cesta.produtos.map((produto) => {
               const separacao = separacoes.find((item) => item.produtoId === produto.id)
               const quantidadeSeparada = separacao?.quantidade ?? 0
 
               return (
-                <li className="item-detalhes-cesta" key={produto.id}>
+                <li className="item-detalhes-cesta cartao-detalhe-produto" key={produto.id}>
+                  <img className="imagem-produto-detalhe" src={produto.imagem ?? `/produtos/${produto.id}-editorial.png`} alt="" />
                   <div>
                     <strong>{produto.nome}</strong>
                     <span>{produto.quantidade} item(ns) pedido(s)</span>
@@ -150,12 +152,13 @@ function TelaDetalhesCesta({
               <p>O produtor ainda nao separou nenhum produto desta cesta.</p>
             </div>
           ) : (
-            <ul className="lista-detalhes-cesta lista-produtos-separados">
+            <ul className="lista-detalhes-cesta lista-produtos-separados grade-produtos">
               {produtosSeparados.map((produto) => {
                 const separacao = separacoes.find((item) => item.produtoId === produto.id)
 
                 return (
-                  <li className="item-detalhes-cesta" key={produto.id}>
+                  <li className="item-detalhes-cesta cartao-detalhe-produto" key={produto.id}>
+                    <img className="imagem-produto-detalhe" src={produto.imagem ?? `/produtos/${produto.id}-editorial.png`} alt="" />
                     <div>
                       <strong>{produto.nome}</strong>
                       <span>Produto separado pelo produtor</span>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 
 function obterClasseSituacao(situacao) {
   return situacao
@@ -76,7 +77,8 @@ function TelaHistoricoPedidos({
       ) : (
         <section className="lista-historico" aria-label="Pedidos registrados">
           {pedidos.map((pedido) => (
-            <article className="cartao-historico" key={pedido.id}>
+            <details className="cartao-historico" key={pedido.id}>
+              <summary className="resumo-pedido-recolhido">
               <div className="cabecalho-historico">
                 <div>
                   <p className="rotulo-cartao">Pedido realizado em {pedido.data}</p>
@@ -85,13 +87,16 @@ function TelaHistoricoPedidos({
                 <span
                   className={`status-historico status-${obterClasseSituacao(pedido.situacao)}`}
                 >
-                  {pedido.situacao}
+                  {obterRotuloSituacao(pedido.situacao, pedido.separacaoConcluidaEm)}
                 </span>
               </div>
+              <span className="rotulo-expandir-pedido">Ver produtos e detalhes</span>
+              </summary>
+              <div className="conteudo-pedido-expandido">
               <p className="resumo-produtos">
-                {pedido.modoNome} · {pedido.produtos.length} itens · Situação: {pedido.situacao}
+                {pedido.modoNome} · {pedido.produtos.length} itens
               </p>
-              <ul className="produtos-resumo-historico">
+              <ul className="produtos-resumo-historico grade-produtos">
                 {pedido.produtos.map((produto) => (
                   <li key={produto.id}>
                     <span className="produto-historico-identificacao">
@@ -123,7 +128,8 @@ function TelaHistoricoPedidos({
                   {pedidoCancelando === pedido.id ? 'Cancelando...' : 'Cancelar pedido'}
                 </button>
               )}
-            </article>
+              </div>
+            </details>
           ))}
         </section>
       )}

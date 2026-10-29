@@ -39,71 +39,85 @@
   padding: 24px 16px 48px;
 }
 
-/* Organiza a tela de login e permite que ela use duas colunas em telas maiores. */
-.pagina-login {
-  min-height: 100vh;
-  padding: 24px 16px;
-}
-
-.layout-login {
+/* Landing page sobre a foto da feira, com foco na mensagem e no cadastro. */
+.pagina-inicial {
+  position: relative;
   display: grid;
-  width: min(100%, 1060px);
-  gap: 24px;
-  margin: auto;
-  align-items: center;
+  min-height: 100svh;
+  place-items: center;
+  overflow: hidden;
+  padding: 96px 20px 40px;
+  background: linear-gradient(110deg, rgb(10 24 14 / 62%), rgb(10 24 14 / 38%)),
+    url('/imagens/feira-comunitaria-capa.webp') center / cover no-repeat;
 }
 
-/* Apresenta a proposta da horta ao lado do formulário de acesso. */
-.painel-marketing {
-  padding: 8px 4px;
+.acoes-iniciais {
+  position: absolute;
+  z-index: 2;
+  top: 20px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.acoes-iniciais .controle-tema { position: static; }
+
+.botao-entrar-inicial,
+.botao-criar-conta-inicial {
+  min-height: 46px;
+  padding: 10px 22px;
+  border: 1px solid #f5a04a;
+  border-radius: 999px;
+  color: #fffdf5;
+  background: rgb(16 49 28 / 88%);
+  font-weight: var(--peso-semi);
+  cursor: pointer;
+}
+
+.botao-entrar-inicial:hover,
+.botao-criar-conta-inicial:hover { background: #28643a; }
+
+.mensagem-inicial {
+  width: min(100%, 700px);
+  padding: clamp(28px, 5vw, 56px);
+  border: 1px solid rgb(255 157 65 / 88%);
+  border-radius: 26px;
+  color: #fffdf5;
+  background: rgb(12 29 18 / 30%);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 30%);
+  backdrop-filter: blur(2px);
+  text-shadow: 0 2px 8px rgb(0 0 0 / 65%);
   text-align: center;
 }
 
-.logo-marca-login {
-  display: block;
-  width: min(100%, 360px);
-  height: auto;
-  margin: 0 auto 32px;
+.mensagem-inicial img {
+  width: min(180px, 46vw);
+  max-height: 140px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 14px rgb(0 0 0 / 38%));
 }
 
-.painel-marketing h1 {
-  max-width: 560px;
-  margin: 8px auto 14px;
-  color: var(--cor-verde-escuro);
-}
+.rotulo-inicial { margin: 18px 0 8px; color: #ffd4b7; font-weight: var(--peso-semi); }
+.mensagem-inicial h1 { margin: 0 auto 14px; color: #fffdf5; font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.08; }
+.descricao-inicial { max-width: 530px; margin: 0 auto 26px; color: #f3f2e9; font-size: var(--texto-grande); }
+.botao-criar-conta-inicial { min-height: 52px; padding-inline: 30px; background: #2d7040; }
 
-.painel-marketing > p:not(.rotulo-cartao) {
-  max-width: 560px;
-  margin: 0 auto 24px;
-}
-
-/* Exibe os benefícios do sistema como cartões curtos e fáceis de escanear. */
-.lista-beneficios {
+.fundo-dialogo-acesso {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
   display: grid;
-  gap: 12px;
-  max-width: 560px;
-  margin: 0 auto;
-  padding: 0;
-  list-style: none;
+  place-items: center;
+  overflow-y: auto;
+  padding: 20px;
+  background: rgb(5 16 9 / 68%);
+  backdrop-filter: blur(5px);
 }
 
-.lista-beneficios li {
-  display: grid;
-  gap: 2px;
-  padding: 14px 16px;
-  border-top: 4px solid var(--cor-terracota);
-  border-radius: 8px;
-  background: var(--cor-branco);
-}
-
-.lista-beneficios strong {
-  color: var(--cor-verde-escuro);
-}
-
-.lista-beneficios span {
-  color: var(--cor-texto-escuro);
-  font-size: var(--texto-rotulo);
-}
+.fechar-dialogo-fundo { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; cursor: default; }
+.janela-acesso { position: relative; z-index: 1; max-height: calc(100svh - 40px); overflow-y: auto; box-shadow: 0 22px 70px rgb(0 0 0 / 38%); }
+.botao-fechar-acesso { position: absolute; top: 9px; right: 12px; width: 36px; height: 36px; border: 0; border-radius: 50%; color: var(--cor-verde-escuro); background: var(--cor-verde-claro); font-size: 26px; line-height: 1; cursor: pointer; }
 
 .cartao-login {
   width: min(100%, 460px);
@@ -268,6 +282,7 @@
 
 /* Mantém a saída da conta acessível em todas as telas autenticadas. */
 .barra-sessao {
+  position: relative;
   display: flex;
   width: min(100%, 1060px);
   align-items: center;
@@ -278,6 +293,211 @@
   padding: 12px 16px 0;
   color: var(--cor-texto-escuro);
   font-size: var(--texto-rotulo);
+}
+
+.area-notificacoes {
+  position: relative;
+}
+
+.botao-sino-notificacoes {
+  position: relative;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 2px solid var(--cor-borda);
+  border-radius: 50%;
+  color: var(--cor-verde-escuro);
+  background: var(--cor-branco);
+  cursor: pointer;
+}
+
+.botao-sino-notificacoes:hover,
+.botao-sino-notificacoes:focus-visible {
+  border-color: var(--cor-verde-horta);
+  outline: 2px solid color-mix(in srgb, var(--cor-verde-horta) 35%, transparent);
+}
+
+.botao-sino-notificacoes svg {
+  width: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.contador-notificacoes {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: grid;
+  min-width: 19px;
+  height: 19px;
+  place-items: center;
+  padding: 0 4px;
+  border: 2px solid var(--cor-fundo, var(--cor-branco));
+  border-radius: 999px;
+  color: var(--cor-branco);
+  background: var(--cor-terracota);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.painel-notificacoes {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(360px, calc(100vw - 28px));
+  max-height: min(70vh, 460px);
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 14px;
+  color: var(--cor-texto-escuro);
+  background: var(--cor-branco);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 18%);
+}
+
+.painel-notificacoes h2 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.painel-notificacoes ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.painel-notificacoes li {
+  padding: 11px;
+  border-radius: 10px;
+  background: var(--cor-fundo, #f6f5f0);
+}
+
+.painel-notificacoes li.notificacao-nao-lida {
+  border-left: 3px solid var(--cor-verde-horta);
+  background: var(--cor-verde-claro);
+}
+
+.painel-notificacoes li p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+.painel-notificacoes time {
+  color: var(--cor-texto-secundario, #59655d);
+  font-size: 0.75rem;
+}
+
+.notificacoes-vazias {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.painel-estoque-produtor {
+  margin: 0 0 20px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 14px;
+  background: var(--cor-branco);
+}
+
+.painel-estoque-produtor > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  color: var(--cor-verde-escuro);
+  cursor: pointer;
+  list-style: none;
+}
+
+.painel-estoque-produtor > summary::-webkit-details-marker {
+  display: none;
+}
+
+.painel-estoque-produtor > summary span:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.painel-estoque-produtor > summary small {
+  color: var(--cor-texto-escuro);
+  font-weight: 400;
+}
+
+.grade-estoque-produtor {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+.cartao-estoque-produtor {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+  background: var(--cor-fundo, #f6f5f0);
+}
+
+.cartao-estoque-produtor > img {
+  width: 76px;
+  aspect-ratio: 1;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+.dados-estoque-produtor {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+
+.dados-estoque-produtor label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.8rem;
+}
+
+.dados-estoque-produtor input {
+  width: 100%;
+  min-height: 40px;
+  padding: 7px 9px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  color: var(--cor-texto-escuro);
+  background: var(--cor-branco);
+  font: inherit;
+}
+
+.dados-estoque-produtor .botao {
+  min-height: 40px;
+  padding: 8px 12px;
+}
+
+.aviso-estoque {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #704400;
+  background: #fff0ce;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.aviso-estoque.esgotado {
+  color: #8d2424;
+  background: #fde3e0;
 }
 
 .botao-sair-sessao {
@@ -621,7 +841,7 @@
 
 .produtos-cesta {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
   gap: 10px;
   padding: 0;
   list-style: none;
@@ -640,8 +860,10 @@
 }
 
 .imagem-produto-cesta {
-  width: 64px;
-  height: 64px;
+  width: 100%;
+  max-width: 180px;
+  aspect-ratio: 1;
+  height: auto;
   border-radius: 8px;
   background: var(--cor-creme-natural);
   object-fit: cover;
@@ -694,7 +916,7 @@
 /* Organiza os produtos em cartões que funcionam tanto para prévia quanto para seleção. */
 .lista-produtos-prontos {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
   gap: 12px;
   padding: 0;
   list-style: none;
@@ -707,8 +929,9 @@
 .botao-produto-pronto {
   display: grid;
   width: 100%;
-  gap: 8px;
-  padding: 8px;
+  height: 100%;
+  gap: 10px;
+  padding: 12px;
   border: 2px solid transparent;
   border-radius: 10px;
   color: var(--cor-texto-escuro);
@@ -725,7 +948,10 @@
 }
 
 .cartao-produto-selecionavel {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+  align-self: start;
   padding: 8px;
   border: 2px solid transparent;
   border-radius: 10px;
@@ -743,6 +969,7 @@
 }
 
 .produto-selecionavel.botao-produto-pronto {
+  height: auto;
   padding: 0;
   border: 0;
   background: transparent;
@@ -779,8 +1006,8 @@
 
 .imagem-produto {
   display: block;
-  width: 75%;
-  max-width: 150px;
+  width: 100%;
+  max-width: 220px;
   aspect-ratio: 1;
   justify-self: center;
   border-radius: 7px;
@@ -953,10 +1180,41 @@
 }
 
 .cartao-historico {
-  padding: 20px;
+  padding: 16px 20px;
   border: 2px solid var(--cor-borda);
   border-radius: 12px;
   background: var(--cor-branco);
+}
+
+.resumo-pedido-recolhido {
+  display: grid;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.resumo-pedido-recolhido::-webkit-details-marker {
+  display: none;
+}
+
+.resumo-pedido-recolhido:focus-visible {
+  border-radius: 8px;
+  outline: 3px solid var(--cor-verde-horta);
+  outline-offset: 4px;
+}
+
+.rotulo-expandir-pedido {
+  justify-self: start;
+  color: var(--cor-verde-escuro);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-semi);
+  text-decoration: underline;
+}
+
+.conteudo-pedido-expandido {
+  display: grid;
+  gap: 14px;
+  padding-top: 16px;
 }
 
 .cabecalho-historico {
@@ -994,35 +1252,75 @@
 
 .produtos-resumo-historico {
   display: grid;
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .produtos-resumo-historico li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 12px;
-  border-radius: 8px;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
   background: var(--cor-verde-claro);
 }
 
 .produto-historico-identificacao {
-  display: inline-flex;
-  align-items: center;
+  display: grid;
+  justify-items: center;
   min-width: 0;
   gap: 8px;
+  text-align: center;
 }
 
 .imagem-produto-historico {
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
-  border-radius: 6px;
+  width: min(100%, 150px);
+  aspect-ratio: 1;
+  height: auto;
+  border-radius: 9px;
+  background: var(--cor-creme-natural);
   object-fit: cover;
+}
+
+.grade-produtos {
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 12px;
+}
+
+.cartao-detalhe-produto {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 9px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+  background: var(--cor-verde-claro);
+  text-align: center;
+}
+
+.imagem-produto-detalhe {
+  width: min(100%, 150px);
+  aspect-ratio: 1;
+  border-radius: 9px;
+  background: var(--cor-creme-natural);
+  object-fit: cover;
+}
+
+.cartao-detalhe-produto > div {
+  justify-items: center;
+  overflow-wrap: anywhere;
+}
+
+.cartao-detalhe-produto .quantidade-separada {
+  text-align: center;
+  white-space: normal;
 }
 
 .produtos-resumo-historico strong {
@@ -1050,6 +1348,39 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.lista-detalhes-cesta.grade-produtos {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 148px), 1fr));
+  align-items: stretch;
+  gap: 12px;
+}
+
+.lista-detalhes-cesta .cartao-detalhe-produto {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  justify-items: center;
+  gap: 9px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.lista-detalhes-cesta .cartao-detalhe-produto > div {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 4px;
+  justify-items: center;
+  overflow-wrap: anywhere;
+}
+
+.lista-detalhes-cesta .imagem-produto-detalhe {
+  display: block;
+  width: min(100%, 150px);
+  aspect-ratio: 1;
+  height: auto;
+  object-fit: cover;
 }
 
 .item-detalhes-cesta {
@@ -1127,10 +1458,14 @@
 .cartao-cesta-produtor {
   display: grid;
   gap: 16px;
-  padding: 20px;
+  padding: 16px 20px;
   border: 2px solid var(--cor-borda);
   border-radius: 12px;
   background: var(--cor-branco);
+}
+
+.cartao-cesta-produtor > .resumo-pedido-recolhido {
+  margin: 0;
 }
 
 .acoes-cesta-produtor {
@@ -1263,14 +1598,15 @@
 }
 
 .lista-produtos-editavel {
-  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 10px;
 }
 
 .imagem-produto-fechamento {
-  width: 72px;
-  height: 72px;
-  border-radius: 8px;
+  width: min(100%, 160px);
+  aspect-ratio: 1;
+  height: auto;
+  border-radius: 10px;
   background: var(--cor-creme-natural);
   object-fit: cover;
 }
@@ -1342,6 +1678,56 @@
 }
 
 @media (max-width: 640px) {
+  .pagina-inicial {
+    min-height: 100svh;
+    padding: 88px 14px 24px;
+    background-position: 56% center;
+  }
+
+  .acoes-iniciais {
+    top: 14px;
+    right: 14px;
+    gap: 8px;
+  }
+
+  .acoes-iniciais .controle-tema,
+  .botao-entrar-inicial {
+    min-height: 42px;
+    padding: 7px 12px;
+    font-size: var(--texto-pequeno);
+  }
+
+  .mensagem-inicial {
+    padding: 26px 20px;
+    border-radius: 20px;
+  }
+
+  .mensagem-inicial img {
+    width: min(138px, 38vw);
+    max-height: 105px;
+  }
+
+  .mensagem-inicial h1 {
+    font-size: clamp(1.9rem, 9vw, 2.7rem);
+  }
+
+  .descricao-inicial {
+    font-size: var(--texto-base);
+  }
+
+  .fundo-dialogo-acesso {
+    place-items: start center;
+    padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+  }
+
+  .janela-acesso {
+    max-height: calc(100svh - 24px);
+  }
+
+  .cartao-login.janela-acesso {
+    padding: 24px 18px;
+  }
+
   .cabecalho-pagina,
   .resumo-finalizacao,
   .cabecalho-historico {
@@ -1372,7 +1758,24 @@
     flex-direction: column;
   }
 
-  .lista-produtos-editavel {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  .lista-produtos-editavel,
+  .grade-produtos,
+  .produtos-cesta,
+  .lista-produtos-prontos,
+  .opcoes-produtos,
+  .produtos-resumo-historico {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+@media (max-width: 380px) {
+  .acoes-iniciais { right: 10px; gap: 6px; }
+  .acoes-iniciais .controle-tema,
+  .botao-entrar-inicial { padding: 6px 9px; }
+  .lista-produtos-editavel,
+  .grade-produtos,
+  .produtos-cesta,
+  .lista-produtos-prontos,
+  .opcoes-produtos,
+  .produtos-resumo-historico { grid-template-columns: 1fr; }
 }

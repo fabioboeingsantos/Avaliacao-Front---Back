@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from modelos.cesta import Cesta
@@ -147,4 +147,45 @@ def listar_produtos_disponiveis(sessao: Session) -> list[dict]:
     """Retorna o catalogo cadastrado no banco."""
 
     produtos = sessao.scalars(select(Produto).order_by(Produto.id)).all()
-    return [{"id": produto.id, "nome": produto.nome} for produto in produtos]
+    return [
+        {"id": produto.id, "nome": produto.nome, "estoque": produto.estoque}
+        for produto in produtos
+    ]
+
+
+def reservar_estoque(sessao: Session, produtos: list[dict]) -> str | None:
+    """Debita todas as quantidades atomicamente ou desfaz a reserva inteira."""
+
+    for produto in produtos:
+        resultado = sessao.execute(
+            update(Produto)
+            .where(Produto.id == produto["id"], Produto.estoque >= produto["quantidade"])
+            .values(estoque=Produto.estoque - produto["quantidade"])
+        )
+        if resultado.rowcount != 1:
+            sessao.rollback()
+            return produto["id"]
+    return None
+
+
+def atualizar_estoque(sessao: Session, produto_id: str, quantidade: int) -> dict | None:
+    """Define a quantidade disponivel de um produto e devolve seus dados."""
+
+    produto = sessao.get(Produto, produto_id)
+    if produto is None:
+        return None
+    produto.estoque = quantidade
+    sessao.commit()
+    sessao.refresh(produto)
+    return {"id": produto.id, "nome": produto.nome, "estoque": produto.estoque}
+
+
+def devolver_estoque(sessao: Session, produtos: list[dict]) -> None:
+    """Devolve ao estoque os itens de um pedido cancelado."""
+
+    for produto in produtos:
+        sessao.execute(
+            update(Produto)
+            .where(Produto.id == produto["id"])
+            .values(estoque=Produto.estoque + produto["quantidade"])
+        )

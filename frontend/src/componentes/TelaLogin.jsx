@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
 // A mesma tela representa o acesso inicial de Aline e Vanderlei.
-function TelaLogin({ aoEntrar, aoCadastrar, mensagemSistema }) {
+function TelaLogin({ aoEntrar, aoCadastrar, mensagemSistema, modoInicial = 'entrar', aoFechar }) {
   // Mantém o modo atual e os valores preenchidos para controlar cada fluxo de acesso.
-  const [modo, setModo] = useState('entrar')
+  const [modo, setModo] = useState(modoInicial)
   const [usuario, setUsuario] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
@@ -98,39 +98,10 @@ function TelaLogin({ aoEntrar, aoCadastrar, mensagemSistema }) {
 
   // Renderiza os campos e as ações correspondentes ao modo de acesso atual.
   return (
-    <main className="pagina-login">
-      <div className="layout-login">
-        <section className="painel-marketing" aria-labelledby="titulo-marketing">
-          <img
-            className="logo-marca-login"
-            src="/marca/logo-cesta-do-vale.png"
-            alt="Logo Cesta do Vale"
-          />
-
-          <p className="rotulo-cartao">Uma horta comunitária mais organizada</p>
-          <h1 id="titulo-marketing">A cesta da semana começa com a colheita.</h1>
-          <p>
-            O assinante escolhe o tamanho da cesta, e o produtor monta o pedido com o que foi
-            colhido naquela semana.
-          </p>
-
-          <ul className="lista-beneficios">
-            <li>
-              <strong>Colheita da semana</strong>
-              <span>O produtor monta cada cesta com os produtos disponíveis daquela colheita.</span>
-            </li>
-            <li>
-              <strong>Mais clareza no pedido</strong>
-              <span>O assinante escolhe o tamanho e sabe o que será separado.</span>
-            </li>
-            <li>
-              <strong>Praticidade para os dois lados</strong>
-              <span>Pedidos organizados para quem assina e para quem monta as cestas.</span>
-            </li>
-          </ul>
-        </section>
-
-        <section className="cartao-login" aria-labelledby="titulo-login">
+    <div className="fundo-dialogo-acesso">
+      <button className="fechar-dialogo-fundo" type="button" onClick={aoFechar} aria-label="Fechar acesso" />
+        <section className="cartao-login janela-acesso" role="dialog" aria-modal="true" aria-labelledby="titulo-login">
+          <button className="botao-fechar-acesso" type="button" onClick={aoFechar} aria-label="Voltar à página inicial">×</button>
           <header className="cabecalho-login">
             <p className="marca-login">Cesta do Vale</p>
             <p className="contexto-login">Acesso da assinante e do produtor</p>
@@ -267,8 +238,7 @@ function TelaLogin({ aoEntrar, aoCadastrar, mensagemSistema }) {
             )}
           </nav>
         </section>
-      </div>
-    </main>
+    </div>
   )
 }
 

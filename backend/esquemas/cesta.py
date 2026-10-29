@@ -55,3 +55,9 @@ class DesfazerSeparacoes(BaseModel):
     """Lote de quantidades a desfazer de uma cesta."""
 
     produtos: list[SeparacaoParaDesfazer] = Field(min_length=1)
+
+
+class AtualizarEstoque(BaseModel):
+    """Quantidade disponível definida pelo produtor."""
+
+    quantidade: int = Field(ge=0)

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cesta do Vale | Apresentação da entrega</title>
+    <style>
+      :root { --verde:#1f4d2e; --verde-claro:#dcebd2; --creme:#f7f5ef; --terracota:#a84f35; --azul:#2f6b8a; --texto:#24302a; --muted:#5d6b62; --linha:#d6dfd5; }
+      * { box-sizing: border-box; }
+      body { margin:0; background:#e8ece7; color:var(--texto); font-family:Arial, sans-serif; }
+      .deck { min-height:100vh; padding:28px; }
+      .slide { display:none; position:relative; width:min(1400px,100%); aspect-ratio:16/9; min-height:620px; margin:0 auto 24px; padding:clamp(42px,5vw,78px); overflow:hidden; border:1px solid var(--linha); border-radius:26px; background:radial-gradient(circle at 96% 0,#e4efdf 0,transparent 28%),radial-gradient(circle at 0 100%,#f4dfd6 0,transparent 28%),var(--creme); box-shadow:0 18px 50px rgba(31,77,46,.12); }
+      .slide.active { display:block; }
+      .slide::after { content:attr(data-number) " / 08"; position:absolute; right:42px; bottom:28px; color:#7a8a7f; font-size:.75rem; font-weight:700; letter-spacing:.14em; }
+      .eyebrow { color:var(--terracota); font-size:.8rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+      h1,h2,h3,p { margin:0; } h1,h2,h3 { line-height:1.08; } h1 { max-width:900px; margin-top:18px; font-size:clamp(2.8rem,6vw,6.5rem); letter-spacing:-.06em; color:var(--verde); } h2 { margin-top:12px; font-size:clamp(2rem,4vw,4.2rem); letter-spacing:-.05em; color:var(--verde); } h3 { color:var(--verde); font-size:1.25rem; }
+      p,li { color:var(--muted); font-size:clamp(.92rem,1.3vw,1.18rem); line-height:1.45; } .lead { max-width:760px; margin-top:24px; font-size:clamp(1.1rem,1.9vw,1.55rem); }
+      .logo { display:block; width:min(180px,24vw); height:145px; object-fit:contain; object-position:left center; margin:0 0 8px -12px; filter:drop-shadow(0 12px 22px rgba(31,20,10,.2)); } .brand-name { color:var(--verde); font-size:clamp(2rem,4.6vw,4.8rem); font-weight:900; letter-spacing:-.07em; line-height:.95; } .meta { display:flex; flex-wrap:wrap; gap:10px; margin-top:32px; } .pill { padding:8px 14px; border:1px solid var(--linha); border-radius:999px; color:var(--verde); background:#fff9; font-size:.85rem; font-weight:700; }
+      .cover-slide { flex-direction:column; justify-content:center; min-height:620px; background:#17251b; color:white; }
+      .cover-slide::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(10,20,13,.63),rgba(10,20,13,.12) 70%),linear-gradient(0deg,rgba(10,20,13,.28),transparent 45%); }
+      .cover-brand { position:relative; z-index:1; width:min(470px,72%); padding:24px 30px 28px; border:1.5px solid rgba(245,145,47,.88); border-radius:28px; background:rgba(15,25,17,.18); box-shadow:0 0 0 1px rgba(255,185,91,.2),0 0 24px rgba(242,139,34,.22),0 18px 50px rgba(0,0,0,.12); backdrop-filter:blur(2px); }
+      .cover-brand .logo { width:150px; height:138px; margin:0 auto 8px; object-position:center; }
+      .cover-brand .brand-name { color:#fffdf5; text-align:center; font-size:clamp(2.2rem,4.4vw,4.2rem); text-shadow:0 3px 16px rgba(0,0,0,.68); }
+      .grid { display:grid; gap:18px; margin-top:34px; } .grid-2 { grid-template-columns:repeat(2,1fr); } .grid-3 { grid-template-columns:repeat(3,1fr); } .grid-4 { grid-template-columns:repeat(4,1fr); }
+      .card { padding:24px; border:1px solid var(--linha); border-radius:18px; background:#fff9; } .card strong { display:block; margin-bottom:8px; color:var(--verde); font-size:1.15rem; } .card p { font-size:1rem; }
+      .persona { display:grid; grid-template-columns:180px 1fr; align-items:center; gap:22px; } .avatar { display:grid; width:150px; height:150px; place-items:center; border-radius:50%; color:#fff; background:var(--verde); font-size:3.8rem; font-weight:800; } .avatar.produtor { background:var(--terracota); }
+      .persona-slide { padding-right:clamp(42px,4vw,68px); }
+      .persona-layout { display:grid; grid-template-columns:minmax(230px,.82fr) 1.18fr; gap:30px; align-items:stretch; margin-top:30px; }
+      .persona-photo { min-height:420px; overflow:hidden; border-radius:22px; background:#d8e5d2; box-shadow:0 14px 30px rgba(31,77,46,.15); }
+      .persona-photo img { width:100%; height:100%; display:block; object-fit:cover; object-position:center; }
+      .persona-info { display:flex; flex-direction:column; gap:14px; }
+      .persona-kicker { color:var(--terracota); font-size:.85rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+      .persona-info h3 { font-size:1.55rem; }
+      .persona-info p { font-size:1rem; }
+      .persona-quote { margin-top:auto; padding:20px 22px; border-left:5px solid var(--terracota); border-radius:0 16px 16px 0; background:#f7e3da; color:#4d3026; font-size:1.1rem; line-height:1.4; }
+      .persona-quote strong { display:block; margin-bottom:7px; color:var(--terracota); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; }
+      .persona-facts { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:4px; }
+      .persona-fact { padding:13px 15px; border:1px solid var(--linha); border-radius:14px; background:#fff9; }
+      .persona-fact strong { display:block; margin-bottom:4px; color:var(--verde); font-size:.82rem; }
+      .persona-fact span { color:var(--muted); font-size:.92rem; line-height:1.35; }
+      .infographic-slide { padding:0; border:0; background:#151918; color:#f5f1e8; }
+      .infographic-scene { position:absolute; inset:0; background-size:cover; background-position:center; }
+      .infographic-scene::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(10,16,14,.98) 0%,rgba(10,16,14,.94) 32%,rgba(10,16,14,.62) 46%,rgba(10,16,14,.08) 72%,rgba(10,16,14,.02) 100%); }
+      .infographic-panel { position:relative; z-index:1; width:46%; height:100%; padding:clamp(34px,4vw,64px); display:flex; flex-direction:column; justify-content:center; }
+      .infographic-panel .eyebrow { color:#d99b68; }
+      .infographic-panel h2 { max-width:520px; margin-top:12px; color:#fffaf0; font-size:clamp(2rem,4vw,4.1rem); letter-spacing:-.06em; }
+      .infographic-panel .subtitle { max-width:520px; margin-top:12px; color:#c4c8c0; font-size:1rem; }
+      .infographic-list { display:grid; gap:12px; margin-top:24px; }
+      .infographic-item { display:grid; grid-template-columns:38px 1px 1fr; gap:10px; align-items:start; }
+      .infographic-item .icon { width:38px; overflow:visible; color:#e8b17b; font-size:1.05rem; line-height:1.2; text-align:center; white-space:nowrap; }
+      .infographic-item .icon.numeric { font-size:.72rem; letter-spacing:-.06em; }
+      .infographic-item .rule { width:1px; min-height:35px; background:#66786b; }
+      .infographic-item p { color:#d9ded4; font-size:1rem; line-height:1.35; }
+      .infographic-item strong { color:#fffaf0; font-weight:800; }
+      .infographic-quote { margin-top:20px; padding:12px 15px; border-left:3px solid #d99b68; border-radius:0 10px 10px 0; background:rgba(197,104,64,.2); color:#fff1dc; font-size:1.05rem; line-height:1.35; }
+      .infographic-quote strong { display:block; margin-bottom:4px; color:#eab27d; font-size:.82rem; letter-spacing:.1em; text-transform:uppercase; }
+      .infographic-slide::after { color:#e6d6c3; }
+      /* A visibilidade dos slides é controlada pela classe active, inclusive na capa. */
+      .deck > .slide { display:none; }
+      .deck > .slide.active { display:flex; }
+      .deck > .slide:not(.cover-slide).active { display:block; }
+      .steps { display:grid; gap:14px; margin-top:30px; } .step { display:grid; grid-template-columns:48px 1fr; align-items:start; gap:16px; } .number { display:grid; width:44px; height:44px; place-items:center; border-radius:50%; color:#fff; background:var(--verde); font-weight:800; } .step p { margin-top:5px; }
+      .flow { display:grid; grid-template-columns:repeat(4,1fr); gap:0; margin-top:36px; border:1px solid var(--linha); border-radius:18px; overflow:hidden; } .flow div { min-height:170px; padding:24px; border-right:1px solid var(--linha); background:#fff9; } .flow div:last-child { border:0; } .flow span { display:block; margin-bottom:12px; color:var(--terracota); font-size:2rem; font-weight:800; } .flow p { font-size:1rem; }
+      .tag { display:inline-block; margin-top:12px; padding:5px 10px; border-radius:999px; color:var(--verde); background:var(--verde-claro); font-size:.75rem; font-weight:800; } .tag.pending { color:#7a4b00; background:#fff1d6; } .tag.future { color:#2f6b8a; background:#e8f1f5; }
+      .backlog { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:30px; } .backlog-column { min-height:300px; padding:18px; border-radius:18px; background:#eef4ec; } .backlog-column.pending { background:#fff5df; } .backlog-column.future { background:#e8f1f5; } .backlog-column h3 { margin-bottom:14px; } .backlog-item { padding:14px; margin-top:10px; border:1px solid #ffffffaa; border-radius:12px; background:#fff9; } .backlog-item strong { display:block; margin-bottom:4px; color:var(--texto); } .backlog-item p { font-size:.88rem; }
+      .backlog-column.uc3 { background:#e7efe4; border:1px solid #bfd2bd; }
+      .backlog-column.uc3 h3 { color:#1f4d2e; }
+      .backlog-item.featured { border-color:#d99b68; background:#fffaf3; }
+      .uc3-date { display:inline-block; margin:0 0 8px; padding:5px 9px; border-radius:999px; color:#713b20; background:#f5d6b6; font-size:.72rem; font-weight:900; letter-spacing:.06em; }
+      .callout { margin-top:28px; padding:18px 22px; border-left:5px solid var(--terracota); border-radius:0 14px 14px 0; background:#f7e3da; color:#4d3026; font-size:1.05rem; } .small { font-size:.88rem; } .site-link { color:var(--verde); font-weight:800; overflow-wrap:anywhere; }
+      .mvp-notes { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:18px; }
+      .mvp-note { padding:16px 18px; border:1px solid var(--linha); border-radius:15px; background:#fff9; }
+      .mvp-note strong { display:block; margin-bottom:6px; color:var(--verde); font-size:.9rem; }
+      .mvp-note p { font-size:.86rem; line-height:1.35; }
+      @media (max-width:900px) { .slide { aspect-ratio:auto; min-height:720px; padding:34px; } .grid-4,.grid-3,.flow { grid-template-columns:repeat(2,1fr); } .flow div:nth-child(2) { border-right:0; } .flow div:nth-child(-n+2) { border-bottom:1px solid var(--linha); } .persona-layout { grid-template-columns:220px 1fr; } .persona-photo { min-height:360px; } .infographic-panel { width:58%; } }
+      @media (max-width:600px) { .deck { padding:10px; } .slide { min-height:850px; padding:28px 22px 54px; border-radius:18px; } .cover-slide { min-height:85vh; padding:28px 22px 54px; } .cover-brand { width:min(420px,100%); padding:20px; } .cover-brand .logo { width:125px; height:112px; } .grid-2,.grid-3,.grid-4,.backlog,.flow,.persona-layout,.persona-facts { grid-template-columns:1fr; } .flow div,.flow div:nth-child(2) { border-right:0; border-bottom:1px solid var(--linha); } .flow div:last-child { border-bottom:0; } .persona { grid-template-columns:1fr; } .avatar { width:100px; height:100px; font-size:2.5rem; } .persona-photo { min-height:280px; max-height:340px; } .persona-quote { margin-top:8px; } .infographic-slide { min-height:850px; } .infographic-scene::after { background:linear-gradient(180deg,rgba(10,16,14,.97) 0%,rgba(10,16,14,.9) 52%,rgba(10,16,14,.22) 100%); } .infographic-panel { width:100%; height:auto; min-height:100%; padding:30px 24px 60px; justify-content:flex-start; } .infographic-panel h2 { font-size:2.5rem; } .infographic-list { margin-top:20px; } }
+      @media print {
+        @page { size:landscape; margin:0; }
+        html, body { width:100%; height:auto; margin:0; background:#fff; }
+        .deck { min-height:0; padding:0; }
+        .deck > .slide, .deck > .slide.active {
+          display:block !important;
+          position:relative;
+          width:100%;
+          height:100vh;
+          min-height:0;
+          aspect-ratio:auto;
+          margin:0;
+          padding:clamp(32px,4vw,64px);
+          overflow:hidden;
+          border:0;
+          border-radius:0;
+          box-shadow:none;
+          break-inside:avoid;
+          page-break-inside:avoid;
+          break-after:page;
+          page-break-after:always;
+        }
+        .slide:last-child { break-after:auto; page-break-after:auto; }
+        .cover-slide { padding:clamp(32px,4vw,64px); }
+        .infographic-slide { padding:0; }
+        .infographic-panel { height:100%; }
+      }
+
+
+      /* Informações sempre visíveis para apresentação em sala. */
+      @media screen { .deck { display:grid; place-items:center; min-height:100svh; } .slide { margin:0; } }
+      .story-slide { padding:0; background:#101b16; color:#fff9ee; }
+      .story-photo { position:absolute; inset:0; background:url('personas/horta-cestas-sem-pessoas.png') center/cover; }
+      .story-04 .story-photo { background-image:url('personas/slide-04-cena.png'); }
+      .story-05 .story-photo { background-image:url('personas/slide-05-cena.png'); }
+      .story-06 .story-photo { background-image:url('personas/slide-06-cena.png'); }
+      .story-07 .story-photo { background-image:url('personas/slide-07-cena.png'); }
+      .story-08 .story-photo { background-image:url('personas/slide-08-cena.png'); }
+      .story-photo::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(10,20,16,.82),rgba(10,20,16,.66) 48%,rgba(10,20,16,.25) 78%,rgba(10,20,16,.05)); }
+      .story-slide { background:#101b16; color:#fff9ee; }
+      .story-left { position:relative; z-index:1; width:96%; margin:auto; padding:clamp(24px,3vw,42px); }
+      .story-left .eyebrow { color:#ffe0b7; font-size:.85rem; text-shadow:0 2px 8px rgba(0,0,0,.8); text-align:center; }
+      .story-left h2 { color:#fffdf6; font-size:clamp(2rem,3.2vw,2.9rem); margin:10px 0; text-shadow:0 3px 14px rgba(0,0,0,.75); text-align:center; }
+      .story-intro { color:#fffdf6; font-size:1.05rem; margin-bottom:0; text-shadow:0 2px 8px rgba(0,0,0,.8); text-align:center; }
+      .story-explanations { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; margin:30px 0 0; padding:0; list-style:none; }
+      .story-explanations li { display:block; min-width:0; }
+      .explanation-number { display:none; }
+      .story-explanations li > div { min-height:100%; padding:18px; border:1px solid rgba(255,255,255,.5); border-radius:14px; background:rgba(15,31,22,.12); backdrop-filter:blur(1px); text-align:center; }
+      .story-explanations h3 { margin:0 0 8px; color:#fff8e9; font-size:1.2rem; line-height:1.15; }
+      .story-explanations p { margin:0; color:#fffdf6; font-size:1.2rem; line-height:1.3; }
+      .story-explanations ul { display:block; width:100%; margin:0; padding-left:20px; color:#fffdf6; font-size:1.08rem; line-height:1.35; text-align:left; }
+      .story-explanations ul li { display:list-item; margin:5px 0; color:#fffdf6; }
+      .story-slide::after { color:#d8e1d5; }
+      .brand-strip { display:flex; align-items:center; gap:14px; margin-top:14px; }
+      .brand-strip img { width:65px; height:50px; object-fit:contain; }
+      .brand-strip span { color:#24302a; font-size:.85rem; }
+      .brand-strip span::before { content:""; display:block; width:26px; height:7px; border-radius:5px; margin-bottom:5px; background:var(--swatch); }
+      .visit-site { margin-top:16px; padding-top:12px; border-top:1px solid rgba(237,181,131,.6); }
+      .visit-site strong { display:block; margin-bottom:4px; color:#edb583; font-size:.9rem; }
+      .visit-site span { display:block; color:#fff8e9; font-size:1.05rem; font-weight:700; overflow-wrap:anywhere; }
+      @media (max-width:900px) { .story-left { width:94%; padding:28px; } .story-explanations { gap:12px; } .story-slide { min-height:820px; } }
+      @media (max-width:600px) { .story-left { width:100%; padding:28px 24px 55px; } .story-photo::after { background:rgba(10,20,16,.82); } .story-explanations { grid-template-columns:1fr; gap:18px; } .story-slide { min-height:0; } }
+      button, input, select, textarea { font-family:Arial, sans-serif; }
+    </style>
+  </head>
+  <body>
+    <main class="deck" aria-label="Apresentação da entrega do sistema Cesta do Vale">
+      <section class="slide active cover-slide" data-number="01" style="background-image:url('personas/horta-cestas-sem-pessoas.png');background-size:cover;background-position:center">
+        <div class="cover-brand">
+          <img class="logo" src="personas/logo-cesta-do-vale-realista.png" alt="Cesta de palha com vegetais frescos" />
+          <div class="brand-name">Cesta do Vale</div>
+        </div>
+      </section>
+      <section class="slide infographic-slide" data-number="02">
+        <div class="infographic-scene" style="background-image:url('personas/aline-infografico.png')"></div>
+        <div class="infographic-panel">
+          <h2>Aline e o pedido da semana</h2>
+          <p class="subtitle">Uma rotina corrida que precisa de clareza, rapidez e confiança no celular.</p>
+          <div class="infographic-list">
+            <div class="infographic-item"><span class="icon">◉</span><span class="rule"></span><p><strong>Quem é:</strong> 37 anos, dois filhos e pouco tempo para resolver tudo.</p></div>
+            <div class="infographic-item"><span class="icon">⌁</span><span class="rule"></span><p><strong>Como pede:</strong> escolhe pequena, média ou grande pelo celular.</p></div>
+            <div class="infographic-item"><span class="icon">✦</span><span class="rule"></span><p><strong>O que escolhe:</strong> cesta pronta, personalizada ou repetida.</p></div>
+            <div class="infographic-item"><span class="icon">✓</span><span class="rule"></span><p><strong>O que acompanha:</strong> situação da cesta e produtos já separados.</p></div>
+            <div class="infographic-item"><span class="icon">!</span><span class="rule"></span><p><strong>O que precisa:</strong> parar de procurar mensagens para lembrar o pedido.</p></div>
+          </div>
+          <div class="infographic-quote"><strong>Ela diria</strong> “Quero fazer a cesta rápido e saber o que já foi separado.”</div>
+        </div>
+      </section>
+      <section class="slide infographic-slide" data-number="03">
+        <div class="infographic-scene" style="background-image:url('personas/vanderlei-infografico.png')"></div>
+        <div class="infographic-panel">
+          <h2>Vanderlei e a separação das cestas</h2>
+          <p class="subtitle">Quem planta e colhe precisa transformar pedidos espalhados em uma rotina conferível.</p>
+          <div class="infographic-list">
+            <div class="infographic-item"><span class="icon">◉</span><span class="rule"></span><p><strong>Quem é:</strong> produtor responsável por montar as cestas da semana.</p></div>
+            <div class="infographic-item"><span class="icon">▦</span><span class="rule"></span><p><strong>Como trabalha:</strong> usa o computador e filtra as cestas por tamanho.</p></div>
+            <div class="infographic-item"><span class="icon">↗</span><span class="rule"></span><p><strong>O que registra:</strong> produto e quantidade separados em cada cesta.</p></div>
+            <div class="infographic-item"><span class="icon numeric">5·8·12</span><span class="rule"></span><p><strong>O que controla:</strong> limite da cesta pequena, média ou grande.</p></div>
+            <div class="infographic-item"><span class="icon">!</span><span class="rule"></span><p><strong>O que precisa:</strong> parar de montar “no chute” com pedidos dispersos.</p></div>
+          </div>
+          <div class="infographic-quote"><strong>Ele diria</strong> “Preciso saber o que cada pessoa pediu e quanto ainda falta.”</div>
+        </div>
+      </section>
+<section class="slide story-slide story-04" data-number="04"><div class="story-photo" aria-hidden="true"></div><div class="story-left"><div class="eyebrow">Solução e MVP</div><h2>Da necessidade<br>à cesta organizada</h2><p class="story-intro">As decisões que deram forma ao sistema.</p><ol class="story-explanations"><li><span class="explanation-number">01</span><div><h3>1 · Problema</h3><ul><li>Pedidos dispersos</li><li>Dificulta conferir o que foi solicitado</li><li>Produtor perde a visão do que falta</li></ul></div></li><li><span class="explanation-number">02</span><div><h3>2 · Identidade</h3><ul><li>Verde: horta e confiança</li><li>Terracota e dourado: terra e colheita</li><li>Cesta: produtos frescos e entrega comunitária</li></ul></div></li><li><span class="explanation-number">03</span><div><h3>3 · MVP</h3><ul><li>Assinante escolhe e revisa a cesta</li><li>Produtor controla estoque e separa pedidos</li><li>Ambos acompanham a situação e recebem atualizações</li></ul></div></li></ol><div class="brand-strip"><img src="personas/logo-cesta-do-vale-realista.png" alt="Logomarca Cesta do Vale"><span style="--swatch:#2f6b3b">Verde</span><span style="--swatch:#a84f35">Terra</span><span style="--swatch:#e6a23c">Colheita</span></div></div></section>
+<section class="slide story-slide story-05" data-number="05"><div class="story-photo" aria-hidden="true"></div><div class="story-left"><div class="eyebrow">MVP em funcionamento</div><h2>O que acontece<br>nos bastidores?</h2><p class="story-intro">As regras que conectam escolha, disponibilidade e acompanhamento.</p><ol class="story-explanations"><li><span class="explanation-number">01</span><div><h3>1 · Acesso</h3><ul><li>Perfis e áreas distintas</li><li>Senhas protegidas; sessão segura</li></ul></div></li><li><span class="explanation-number">02</span><div><h3>2 · Estoque</h3><ul><li>Produtor define as quantidades</li><li>Aviso com 10 unidades ou menos</li><li>Indisponível quando zera</li></ul></div></li><li><span class="explanation-number">03</span><div><h3>3 · Acompanhamento</h3><ul><li>Pedidos respeitam o estoque</li><li>Sino atualiza assinante e produtor</li></ul></div></li></ol></div></section>
+<section class="slide story-slide story-06" data-number="06"><div class="story-photo" aria-hidden="true"></div><div class="story-left"><div class="eyebrow">Próximos passos · UC3 a partir de 04/11</div><h2>Uma ideia vira<br>uma cesta revisável</h2><p class="story-intro">IA planejada: da intenção à revisão, com confirmação da pessoa.</p><ol class="story-explanations"><li><span class="explanation-number">01</span><div><h3>1 · Base atual</h3><ul><li>Pedido, catálogo e estoque no MVP</li><li>Regras existentes orientam a proposta</li></ul></div></li><li><span class="explanation-number">02</span><div><h3>2 · IA planejada</h3><ul><li>Entende o pedido em linguagem natural</li><li>Sugere produtos disponíveis</li><li>Exemplo: cesta para salada</li></ul></div></li><li><span class="explanation-number">03</span><div><h3>3 · UC3 · a partir de 04/11</h3><ul><li>Definir exemplos e experiência</li><li>Prototipar sugestão editável</li><li>Validar; pessoa revisa e confirma</li></ul></div></li></ol></div></section>
+<section class="slide story-slide story-07" data-number="07"><div class="story-photo" aria-hidden="true"></div><div class="story-left"><div class="eyebrow">Impacto na rotina</div><h2>Uma cesta.<br>Duas rotinas conectadas.</h2><p class="story-intro">Os efeitos de um fluxo organizado, do pedido ao recebimento.</p><ol class="story-explanations"><li><span class="explanation-number">01</span><div><h3>1 · Assinante</h3><ul><li>Escolhe com mais clareza</li><li>Confere antes de enviar</li></ul></div></li><li><span class="explanation-number">02</span><div><h3>2 · Produtor</h3><ul><li>Organiza a separação</li><li>Confere produtos e quantidades</li></ul></div></li><li><span class="explanation-number">03</span><div><h3>3 · Evolução</h3><ul><li>Estoque conecta pedido e colheita</li><li>IA apoia; pessoa decide</li></ul></div></li></ol></div></section>
+<section class="slide story-slide story-08" data-number="08"><div class="story-photo" aria-hidden="true"></div><div class="story-left"><div class="eyebrow">Experimente o sistema</div><h2>Sua próxima cesta<br>começa aqui</h2><p class="story-intro">Crie sua conta e conheça o percurso do pedido.</p><ol class="story-explanations"><li><span class="explanation-number">01</span><div><h3>1 · Acesse o sistema</h3><ul><li>avaliacao-front-back-frontend.vercel.app</li><li>Comece pela tela publicada</li></ul></div></li><li><span class="explanation-number">02</span><div><h3>2 · Demonstre os perfis</h3><ul><li>Cadastro e hash no Supabase</li><li>Assinante: pedir e acompanhar</li><li>Produtor: estoque e separação</li></ul></div></li><li><span class="explanation-number">03</span><div><h3>3 · Teste e feche</h3><ul><li>Mostre mensagem de senha incorreta ou cadastro inválido</li><li>Retome o fluxo completo do pedido</li></ul></div></li></ol><div class="visit-site"><strong>ACESSE O SITE</strong><span>avaliacao-front-back-frontend.vercel.app</span></div></div></section>
+    </main>
+    <script>
+      const slides = [...document.querySelectorAll('.slide')]; let current = 0;
+      function showSlide(index) { current = Math.max(0, Math.min(index, slides.length - 1)); slides.forEach((slide, position) => slide.classList.toggle('active', position === current)); }
+      document.addEventListener('keydown', (event) => { if (['INPUT','TEXTAREA','BUTTON','A'].includes(event.target.tagName)) return; if (['ArrowRight','ArrowLeft','PageDown','PageUp',' '].includes(event.key)) event.preventDefault(); if (['ArrowRight','PageDown',' '].includes(event.key)) showSlide(current + 1); if (['ArrowLeft','PageUp'].includes(event.key)) showSlide(current - 1); if (event.key === 'Home') showSlide(0); if (event.key === 'End') showSlide(slides.length - 1); });
+
+      showSlide(0);
+    </script>
+  </body>
+</html>

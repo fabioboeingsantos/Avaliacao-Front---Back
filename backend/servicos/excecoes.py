@@ -25,6 +25,10 @@ class ProdutoNaoEncontrado(ErroDeAplicacao):
     """Indica que o produto nao esta no catalogo."""
 
 
+class EstoqueInsuficiente(ErroDeAplicacao):
+    """Indica que o estoque disponivel nao atende a quantidade pedida."""
+
+
 class ProdutoNaoPertenceCesta(ErroDeAplicacao):
     """Indica que o produto nao faz parte da cesta informada."""
 

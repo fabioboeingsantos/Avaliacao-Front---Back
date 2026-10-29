@@ -8,6 +8,7 @@ from modelos.usuario import Usuario
 from repositorios import cesta as repositorio
 from servicos.excecoes import (
     CestaNaoEncontrada,
+    EstoqueInsuficiente,
     ProdutoNaoEncontrado,
     ProdutoNaoPertenceCesta,
     QuantidadeExcedida,
@@ -126,6 +127,11 @@ def criar_cesta(sessao: Session, dados: dict, usuario: Usuario) -> dict:
                 f"O produto {produto['nome']} permite até "
                 f"{LIMITE_UNIDADES_POR_PRODUTO} unidades por cesta."
             )
+        if quantidade > produto["estoque"]:
+            raise EstoqueInsuficiente(
+                f"Estoque insuficiente para {produto['nome']}. "
+                f"Disponíveis: {produto['estoque']}."
+            )
     semana = dados.get("semana") or date.today().isoformat()
     try:
         semana_convertida = date.fromisoformat(semana)
@@ -146,7 +152,22 @@ def criar_cesta(sessao: Session, dados: dict, usuario: Usuario) -> dict:
         ],
     }
 
-    return serializar_cesta(repositorio.adicionar_cesta(sessao, dados_cesta, usuario_id=usuario.id))
+    produto_esgotado = repositorio.reservar_estoque(
+        sessao,
+        [{"id": produto["id"], "quantidade": quantidade} for produto, quantidade in produtos],
+    )
+    if produto_esgotado is not None:
+        produto = next(item for item, _ in produtos if item["id"] == produto_esgotado)
+        raise EstoqueInsuficiente(
+            f"O estoque de {produto['nome']} mudou. Atualize o catálogo e tente novamente."
+        )
+
+    try:
+        cesta_criada = repositorio.adicionar_cesta(sessao, dados_cesta, usuario_id=usuario.id)
+    except Exception:
+        sessao.rollback()
+        raise
+    return serializar_cesta(cesta_criada)
 
 
 def listar_separacoes(sessao: Session, id_cesta: int, usuario_id: int | None = None) -> list[dict]:
@@ -327,6 +348,7 @@ def cancelar_cesta(sessao: Session, id_cesta: int, usuario_id: int) -> dict:
         )
 
     cesta["situacao"] = "Cancelado"
+    repositorio.devolver_estoque(sessao, cesta["produtos"])
     return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
 
 

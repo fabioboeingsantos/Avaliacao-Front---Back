@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import TelaLogin from './componentes/TelaLogin'
+import TelaInicio from './componentes/TelaInicio'
 import TelaPedirCesta from './componentes/TelaPedirCesta'
 import TelaFinalizarPedido from './componentes/TelaFinalizarPedido'
 import TelaHistoricoPedidos from './componentes/TelaHistoricoPedidos'
 import TelaDetalhesCesta from './componentes/TelaDetalhesCesta'
 import TelaSeparacao from './componentes/TelaSeparacao'
 import TelaFechamento from './componentes/TelaFechamento'
+import SinoNotificacoes from './componentes/SinoNotificacoes'
 import { chamarApi } from './api.js'
 import './App.css'
 
@@ -55,12 +57,21 @@ function adaptarCestaDaApi(cesta) {
       id: produto.id,
       nome: produto.nome,
       quantidade: produto.quantidade,
-      imagem: `/produtos/${produto.id}.jpg`,
+      imagem: `/produtos/${produto.id}-editorial.png`,
     })),
     separacoes: cesta.separacoes.map((separacao) => ({
       produtoId: separacao.produto_id,
       quantidade: separacao.quantidade,
     })),
+  }
+}
+
+function adaptarProdutoDaApi(produto) {
+  return {
+    id: produto.id,
+    nome: produto.nome,
+    estoque: produto.estoque,
+    imagem: `/produtos/${produto.id}-editorial.png`,
   }
 }
 
@@ -74,6 +85,7 @@ function App() {
     }
   })
   const [usuarioAutenticado, setUsuarioAutenticado] = useState('')
+  const [dialogoAcesso, setDialogoAcesso] = useState(null)
   // Aguarda a validação do cookie antes de decidir se mostra o login ou a área autenticada.
   const [sessaoVerificada, setSessaoVerificada] = useState(false)
   const [erroRestauracao, setErroRestauracao] = useState('')
@@ -85,6 +97,10 @@ function App() {
   const [abaAtual, setAbaAtual] = useState('pedido')
   const [pedidoEmRevisao, setPedidoEmRevisao] = useState(null)
   const [pedidos, setPedidos] = useState([])
+  const [produtosDisponiveis, setProdutosDisponiveis] = useState([])
+  const [catalogoCarregado, setCatalogoCarregado] = useState(false)
+  const [notificacoes, setNotificacoes] = useState([])
+  const cestasAnterioresRef = useRef(null)
   const [cestaEmFechamento, setCestaEmFechamento] = useState(null)
   const [cestaEmDetalhes, setCestaEmDetalhes] = useState(null)
   // O aviso fica preparado para uma futura área visual de status da conexão.
@@ -117,9 +133,20 @@ function App() {
       const cestasAdaptadas = cestasDaApi.map(adaptarCestaDaApi)
 
       setPedidos(cestasAdaptadas)
+      cestasAnterioresRef.current = cestasAdaptadas
       setMensagemApi('')
     } catch {
       setMensagemApi('Não foi possível carregar as cestas. Verifique se a API está ligada.')
+    }
+  }
+
+  async function carregarProdutosDoServidor() {
+    try {
+      const produtos = await chamarApi('/produtos')
+      setProdutosDisponiveis(produtos.map(adaptarProdutoDaApi))
+      setCatalogoCarregado(true)
+    } catch {
+      setMensagemApi('Não foi possível carregar o catálogo e o estoque.')
     }
   }
 
@@ -174,7 +201,104 @@ function App() {
     setErroRestauracao('')
     setErroLogout('')
     setAbaAtual(perfil === 'produtor' ? 'separacao' : 'pedido')
+    setCatalogoCarregado(false)
+    cestasAnterioresRef.current = null
+    try {
+      setNotificacoes(JSON.parse(window.localStorage.getItem(`notificacoes-cesta-${usuario}`) || '[]'))
+    } catch {
+      setNotificacoes([])
+    }
     carregarCestasDoServidor(perfil === 'assinante' ? usuario : null)
+    carregarProdutosDoServidor()
+  }
+
+  // Consulta periodicamente a API para que as duas pessoas vejam os avanços feitos pela outra.
+  useEffect(() => {
+    if (!usuarioAutenticado || !perfilAtual) return undefined
+
+    let consultaEmAndamento = false
+    async function atualizarPedidosCompartilhados() {
+      if (consultaEmAndamento) return
+      consultaEmAndamento = true
+      try {
+        const filtro = perfilAtual === 'assinante'
+          ? `?assinante=${encodeURIComponent(usuarioAutenticado)}`
+          : ''
+        const resposta = await chamarApi(`/cestas${filtro}`)
+        const cestasAtuais = resposta.map(adaptarCestaDaApi)
+        const anteriores = cestasAnterioresRef.current
+        if (anteriores) {
+          const anterioresPorId = new Map(anteriores.map((cesta) => [String(cesta.id), cesta]))
+          const novasNotificacoes = []
+          const criarNotificacao = (cesta, evento, titulo, mensagem) => novasNotificacoes.push({
+            id: `${cesta.id}-${evento}`,
+            titulo,
+            mensagem: `Cesta ${cesta.tamanhoNome}: ${mensagem}`,
+            criadaEm: new Date().toISOString(),
+            lida: false,
+          })
+
+          for (const cesta of cestasAtuais) {
+            const anterior = anterioresPorId.get(String(cesta.id))
+            if (perfilAtual === 'produtor') {
+              if (!anterior && cesta.situacao === 'Pendente') {
+                criarNotificacao(cesta, 'novo-pedido', 'Novo pedido recebido', 'um assinante enviou um pedido para separar.')
+              } else if (anterior && anterior.situacao !== 'Cancelado' && cesta.situacao === 'Cancelado') {
+                criarNotificacao(cesta, 'cancelado', 'Pedido cancelado', 'o assinante cancelou este pedido.')
+              } else if (anterior && anterior.situacao !== 'Entregue' && cesta.situacao === 'Entregue') {
+                criarNotificacao(cesta, 'recebido', 'Recebimento confirmado', 'o assinante confirmou o recebimento da cesta.')
+              }
+            } else if (anterior) {
+              if (anterior.situacao === 'Pendente' && cesta.situacao === 'Em separação') {
+                criarNotificacao(cesta, 'separacao-iniciada', 'Pedido em separação', 'o produtor começou a preparar sua cesta.')
+              }
+              if (!anterior.separacaoConcluidaEm && cesta.separacaoConcluidaEm) {
+                criarNotificacao(cesta, 'pronto-recebimento', 'Cesta pronta para receber', 'a separação terminou; confirme quando receber.')
+              }
+              if (anterior.situacao !== 'Entregue' && cesta.situacao === 'Entregue') {
+                criarNotificacao(cesta, 'entregue', 'Pedido atualizado', 'o recebimento da cesta foi confirmado.')
+              }
+              if (anterior.situacao !== 'Cancelado' && cesta.situacao === 'Cancelado') {
+                criarNotificacao(cesta, 'cancelado', 'Pedido cancelado', 'a situação da cesta foi atualizada para cancelado.')
+              }
+            }
+          }
+
+          if (novasNotificacoes.length) {
+            setNotificacoes((atuais) => {
+              const idsExistentes = new Set(atuais.map((item) => item.id))
+              const atualizadas = [...novasNotificacoes.filter((item) => !idsExistentes.has(item.id)), ...atuais].slice(0, 40)
+              try {
+                window.localStorage.setItem(`notificacoes-cesta-${usuarioAutenticado}`, JSON.stringify(atualizadas))
+              } catch { /* As notificações continuam disponíveis enquanto a página estiver aberta. */ }
+              return atualizadas
+            })
+          }
+        }
+        cestasAnterioresRef.current = cestasAtuais
+        setPedidos(cestasAtuais)
+        const produtos = await chamarApi('/produtos')
+        setProdutosDisponiveis(produtos.map(adaptarProdutoDaApi))
+      } catch {
+        // Uma falha temporária de rede não interrompe o uso da tela; a próxima consulta tenta novamente.
+      } finally {
+        consultaEmAndamento = false
+      }
+    }
+
+    const intervalo = window.setInterval(atualizarPedidosCompartilhados, 8000)
+    return () => window.clearInterval(intervalo)
+  }, [usuarioAutenticado, perfilAtual])
+
+  useEffect(() => {
+    if (!usuarioAutenticado) return
+    try {
+      window.localStorage.setItem(`notificacoes-cesta-${usuarioAutenticado}`, JSON.stringify(notificacoes))
+    } catch { /* A lista permanece disponível na sessão mesmo sem armazenamento local. */ }
+  }, [notificacoes, usuarioAutenticado])
+
+  function marcarNotificacoesComoLidas() {
+    setNotificacoes((atuais) => atuais.map((notificacao) => ({ ...notificacao, lida: true })))
   }
 
   // Encerra a sessão no servidor antes de limpar o estado autenticado da tela.
@@ -187,6 +311,9 @@ function App() {
       setUsuarioAutenticado('')
       setPerfilAtual('')
       setPedidos([])
+      setProdutosDisponiveis([])
+      setNotificacoes([])
+      cestasAnterioresRef.current = null
       setPedidoEmRevisao(null)
       setCestaEmFechamento(null)
       setCestaEmDetalhes(null)
@@ -246,15 +373,6 @@ function App() {
       return
     }
 
-    const novoPedidoLocal = {
-      ...pedidoEmRevisao,
-      id: `pedido-${Date.now()}`,
-      data: new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date()),
-      situacao: 'Pendente',
-      separacaoConcluidaEm: null,
-      separacoes: [],
-    }
-
     try {
       const cestaCriada = await chamarApi('/cestas', {
         method: 'POST',
@@ -270,14 +388,29 @@ function App() {
         }),
       })
       setPedidos((pedidosAtuais) => [adaptarCestaDaApi(cestaCriada), ...pedidosAtuais])
+      carregarProdutosDoServidor()
       setMensagemApi('Pedido registrado no backend.')
-    } catch {
-      setPedidos((pedidosAtuais) => [novoPedidoLocal, ...pedidosAtuais])
-      setMensagemApi('API offline: pedido salvo somente nesta demonstração.')
+    } catch (erro) {
+      return { sucesso: false, erro: erro.message }
     }
 
     setPedidoEmRevisao(null)
     setAbaAtual('historico')
+    return { sucesso: true }
+  }
+
+  async function atualizarEstoque(produtoId, quantidade) {
+    try {
+      const produto = await chamarApi(`/produtos/${encodeURIComponent(produtoId)}/estoque`, {
+        method: 'PUT',
+        body: JSON.stringify({ quantidade }),
+      })
+      const produtoAdaptado = adaptarProdutoDaApi(produto)
+      setProdutosDisponiveis((atuais) => atuais.map((item) => item.id === produtoId ? produtoAdaptado : item))
+      return { sucesso: true }
+    } catch (erro) {
+      return { sucesso: false, erro: erro.message }
+    }
   }
 
   // Abre uma cesta específica para o produtor registrar os produtos separados.
@@ -456,6 +589,7 @@ function App() {
         setPedidos((pedidosAtuais) =>
           pedidosAtuais.map((item) => (item.id === pedidoId ? cestaAdaptada : item)),
         )
+        carregarProdutosDoServidor()
         return { sucesso: true }
       } catch (erro) {
         return { sucesso: false, erro: erro.message }
@@ -542,23 +676,34 @@ function App() {
   if (!usuarioAutenticado) {
     if (!sessaoVerificada) {
       return (
-        <>
-          {controleTema}
-          <main className="pagina-login" role="status">
+        <main className="pagina-inicial verificacao-sessao" role="status">
+          <header className="acoes-iniciais" aria-label="Aparência">
+            {controleTema}
+          </header>
+          <p>
             Verificando sua sessão...
-          </main>
-        </>
+          </p>
+        </main>
       )
     }
 
     return (
       <>
-        {controleTema}
-        <TelaLogin
-          aoEntrar={entrarNoSistema}
-          aoCadastrar={cadastrarUsuario}
-          mensagemSistema={erroRestauracao}
+        <TelaInicio
+          controleTema={controleTema}
+          aoEntrar={() => setDialogoAcesso('entrar')}
+          aoCriarConta={() => setDialogoAcesso('cadastro')}
         />
+        {dialogoAcesso && (
+          <TelaLogin
+            key={dialogoAcesso}
+            modoInicial={dialogoAcesso}
+            aoEntrar={entrarNoSistema}
+            aoCadastrar={cadastrarUsuario}
+            mensagemSistema={erroRestauracao}
+            aoFechar={() => setDialogoAcesso(null)}
+          />
+        )}
       </>
     )
   }
@@ -579,6 +724,7 @@ function App() {
           >
             {saindo ? 'Saindo...' : 'Sair'}
           </button>
+          <SinoNotificacoes notificacoes={notificacoes} aoMarcarComoLidas={marcarNotificacoesComoLidas} />
           {controleTema}
           {erroLogout && (
             <p className="erro-sair-sessao" role="alert">
@@ -611,7 +757,9 @@ function App() {
     return envolverAreaAutenticada(
       <TelaSeparacao
         cestas={cestasDaSemana}
+        produtos={produtosDisponiveis}
         aoAbrirFechamento={abrirFechamento}
+        aoAtualizarEstoque={atualizarEstoque}
       />,
     )
   }
@@ -654,6 +802,8 @@ function App() {
 
   return envolverAreaAutenticada(
     <TelaPedirCesta
+      produtosDisponiveis={produtosDisponiveis}
+        catalogoCarregado={catalogoCarregado}
       aoFinalizar={abrirFinalizacao}
       aoAbrirHistorico={() => setAbaAtual('historico')}
     />,

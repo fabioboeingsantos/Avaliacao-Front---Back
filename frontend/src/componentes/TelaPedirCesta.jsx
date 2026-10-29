@@ -11,18 +11,18 @@ const limitePorProduto = 10
 // Este é o catálogo inicial de 12 produtos usados na demonstração.
 // As imagens ficam em public/produtos para serem servidas pelo Vite.
 const catalogoProdutos = [
-  { id: 'alface', nome: 'Alface', imagem: '/produtos/alface.jpg' },
-  { id: 'tomate', nome: 'Tomate', imagem: '/produtos/tomate.jpg' },
-  { id: 'cenoura', nome: 'Cenoura', imagem: '/produtos/cenoura.jpg' },
-  { id: 'batata', nome: 'Batata', imagem: '/produtos/batata.jpg' },
-  { id: 'cebola', nome: 'Cebola', imagem: '/produtos/cebola.jpg' },
-  { id: 'couve', nome: 'Couve', imagem: '/produtos/couve.jpg' },
-  { id: 'beterraba', nome: 'Beterraba', imagem: '/produtos/beterraba.jpg' },
-  { id: 'abobrinha', nome: 'Abobrinha', imagem: '/produtos/abobrinha.jpg' },
-  { id: 'chuchu', nome: 'Chuchu', imagem: '/produtos/chuchu.jpg' },
-  { id: 'pimentao', nome: 'Pimentão', imagem: '/produtos/pimentao.jpg' },
-  { id: 'pepino', nome: 'Pepino', imagem: '/produtos/pepino.jpg' },
-  { id: 'mandioca', nome: 'Mandioca', imagem: '/produtos/mandioca.jpg' },
+  { id: 'alface', nome: 'Alface', imagem: '/produtos/alface-editorial.png' },
+  { id: 'tomate', nome: 'Tomate', imagem: '/produtos/tomate-editorial.png' },
+  { id: 'cenoura', nome: 'Cenoura', imagem: '/produtos/cenoura-editorial.png' },
+  { id: 'batata', nome: 'Batata', imagem: '/produtos/batata-editorial.png' },
+  { id: 'cebola', nome: 'Cebola', imagem: '/produtos/cebola-editorial.png' },
+  { id: 'couve', nome: 'Couve', imagem: '/produtos/couve-editorial.png' },
+  { id: 'beterraba', nome: 'Beterraba', imagem: '/produtos/beterraba-editorial.png' },
+  { id: 'abobrinha', nome: 'Abobrinha', imagem: '/produtos/abobrinha-editorial.png' },
+  { id: 'chuchu', nome: 'Chuchu', imagem: '/produtos/chuchu-editorial.png' },
+  { id: 'pimentao', nome: 'Pimentão', imagem: '/produtos/pimentao-editorial.png' },
+  { id: 'pepino', nome: 'Pepino', imagem: '/produtos/pepino-editorial.png' },
+  { id: 'mandioca', nome: 'Mandioca', imagem: '/produtos/mandioca-editorial.png' },
 ]
 
 // A cesta pronta usa uma composição cadastrada para cada tamanho.
@@ -55,11 +55,11 @@ const composicoesProntas = {
 }
 
 // Converte os identificadores da composição em dados completos para a tela.
-function obterItensCestaPronta(tamanho) {
+function obterItensCestaPronta(tamanho, produtos) {
   const idsDosProdutos = composicoesProntas[tamanho] ?? []
 
   return idsDosProdutos.map((id) => {
-    const produto = catalogoProdutos.find((item) => item.id === id)
+    const produto = produtos.find((item) => item.id === id)
 
     return {
       ...produto,
@@ -70,11 +70,23 @@ function obterItensCestaPronta(tamanho) {
 
 // Esta é a tela principal da assinante. Os campos seguintes aparecem de acordo
 // com a escolha feita no primeiro passo, evitando mostrar decisões desnecessárias.
-function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico }) {
+function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [], catalogoCarregado }) {
   const [modoSelecionado, setModoSelecionado] = useState('')
   const [tamanhoSelecionado, setTamanhoSelecionado] = useState('')
   const [quantidadesSelecionadas, setQuantidadesSelecionadas] = useState({})
   const [erro, setErro] = useState('')
+  const produtosCatalogo = catalogoProdutos.map((produto) => ({
+    ...produto,
+    ...(produtosDisponiveis.find((item) => item.id === produto.id) ?? { estoque: 0 }),
+  }))
+
+  if (!catalogoCarregado) {
+    return (
+      <main className="pagina-pedido" role="status">
+        Consultando a disponibilidade dos produtos...
+      </main>
+    )
+  }
 
   // Quando o tipo muda, o tamanho e os produtos escolhidos começam novamente.
   function escolherModo(modo) {
@@ -95,8 +107,14 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico }) {
 
   // Adiciona ou remove produtos sem ultrapassar a quantidade de produtos do tamanho.
   function alternarProduto(idProduto) {
+    const produto = produtosCatalogo.find((item) => item.id === idProduto)
     const tamanho = tamanhos.find((item) => item.id === tamanhoSelecionado)
     const quantidadeAtual = quantidadesSelecionadas[idProduto] ?? 0
+
+    if (quantidadeAtual === 0 && produto.estoque <= 0) {
+      setErro(`${produto.nome} está esgotado no momento.`)
+      return
+    }
 
     if (quantidadeAtual === 0 && quantidadeProdutosSelecionados >= tamanho.limite) {
       setErro(`A cesta ${tamanho.nome.toLowerCase()} comporta até ${tamanho.limite} produtos diferentes.`)
@@ -116,7 +134,8 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico }) {
   }
 
   function alterarQuantidadeProduto(idProduto, quantidade) {
-    if (quantidade > limitePorProduto) {
+    const produto = produtosCatalogo.find((item) => item.id === idProduto)
+    if (quantidade > Math.min(limitePorProduto, produto.estoque)) {
       return
     }
 
@@ -137,8 +156,8 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico }) {
     const tamanho = tamanhos.find((item) => item.id === tamanhoSelecionado)
     const produtos =
       modoSelecionado === 'pronta'
-        ? obterItensCestaPronta(tamanhoSelecionado)
-        : catalogoProdutos
+        ? obterItensCestaPronta(tamanhoSelecionado, produtosCatalogo)
+        : produtosCatalogo
             .filter((produto) => quantidadesSelecionadas[produto.id] > 0)
             .map((produto) => ({
               ...produto,
@@ -152,6 +171,12 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico }) {
 
     if (produtos.length === 0) {
       setErro('Escolha pelo menos um produto antes de continuar.')
+      return
+    }
+
+    const semEstoque = produtos.find((produto) => produto.quantidade > produto.estoque)
+    if (semEstoque) {
+      setErro(`${semEstoque.nome} tem somente ${semEstoque.estoque} unidade(s) disponível(is).`)
       return
     }
 
@@ -275,12 +300,21 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico }) {
             </div>
 
             <ul className="lista-produtos-prontos">
-              {obterItensCestaPronta(tamanhoSelecionado).map((produto) => (
+              {obterItensCestaPronta(tamanhoSelecionado, produtosCatalogo).map((produto) => (
                 <li className="item-produto-pronto" key={produto.id}>
                   <div className="botao-produto-pronto">
                     <img className="imagem-produto" src={produto.imagem} alt="" />
                     <span className="nome-produto">{produto.nome}</span>
                     <strong>{produto.quantidade} item</strong>
+                    {produto.estoque <= 10 && (
+                      <span className={produto.estoque === 0 ? 'aviso-estoque esgotado' : 'aviso-estoque'}>
+                        {produto.estoque === 0
+                          ? 'Esgotado'
+                          : produto.estoque === 10
+                            ? 'Atenção: temos 10 unidades em estoque'
+                            : `Atenção: restam ${produto.estoque} unidades em estoque`}
+                      </span>
+                    )}
                   </div>
                 </li>
               ))}
@@ -304,12 +338,13 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico }) {
             </div>
 
             <div className="opcoes-produtos">
-              {catalogoProdutos.map((produto) => {
+              {produtosCatalogo.map((produto) => {
                 const quantidade = quantidadesSelecionadas[produto.id] ?? 0
                 const selecionado = quantidade > 0
                 const tamanho = tamanhos.find((item) => item.id === tamanhoSelecionado)
-                const desabilitado =
-                  !selecionado && quantidadeProdutosSelecionados >= tamanho.limite
+                const desabilitado = !selecionado && (
+                  produto.estoque === 0 || quantidadeProdutosSelecionados >= tamanho.limite
+                )
 
                 return (
                   <article
@@ -331,6 +366,15 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico }) {
                       <strong className="indicador-selecao">
                         {selecionado ? '✓ Selecionado' : 'Selecionar'}
                       </strong>
+                      {produto.estoque <= 10 && (
+                        <span className={produto.estoque === 0 ? 'aviso-estoque esgotado' : 'aviso-estoque'}>
+                          {produto.estoque === 0
+                            ? 'Esgotado'
+                            : produto.estoque === 10
+                              ? 'Atenção: temos 10 unidades em estoque'
+                              : `Atenção: restam ${produto.estoque} unidades em estoque`}
+                        </span>
+                      )}
                     </label>
                     {selecionado && (
                       <div className="controle-quantidade-selecionavel">
@@ -347,12 +391,12 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico }) {
                           className="botao-quantidade-fechamento"
                           type="button"
                           aria-label={`Aumentar quantidade de ${produto.nome}`}
-                          disabled={quantidade >= limitePorProduto}
+                          disabled={quantidade >= Math.min(limitePorProduto, produto.estoque)}
                           onClick={() => alterarQuantidadeProduto(produto.id, quantidade + 1)}
                         >
                           +
                         </button>
-                        <span>de {limitePorProduto} un.</span>
+                        <span>de {Math.min(limitePorProduto, produto.estoque)} un.</span>
                       </div>
                     )}
                   </article>

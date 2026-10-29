@@ -1,5 +1,7 @@
 """Cria as tabelas e carrega os dados mínimos para a demonstração."""
 
+from sqlalchemy import inspect, text
+
 from banco import Base, Sessao, engine
 from modelos.cesta import Cesta
 from modelos.produto import Produto
@@ -32,6 +34,13 @@ def criar_tabelas() -> None:
     """Cria as tabelas sem apagar dados existentes e inclui dados ausentes."""
 
     Base.metadata.create_all(bind=engine)
+    colunas_produtos = {coluna["name"] for coluna in inspect(engine).get_columns("produtos")}
+    if "estoque" not in colunas_produtos:
+        # create_all não altera tabelas existentes; atualiza o banco local sem apagar dados.
+        with engine.begin() as conexao:
+            conexao.execute(
+                text("ALTER TABLE produtos ADD COLUMN estoque INTEGER NOT NULL DEFAULT 20")
+            )
     sessao = Sessao()
     try:
         for produto_id, nome in PRODUTOS_INICIAIS:

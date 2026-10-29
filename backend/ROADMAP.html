@@ -144,7 +144,7 @@
         <div class="intro">
           <p>Este documento registra onde o sistema está hoje, quais entregas já foram concluídas e o caminho recomendado para as próximas versões.</p>
           <div class="meta">
-            <span class="pill">Atualizado em 27/10/2026</span>
+            <span class="pill">Atualizado em 29/10/2026</span>
             <span class="pill">Backend FastAPI</span>
             <span class="pill">Frontend React + Vite</span>
             <span class="pill">Banco SQLAlchemy</span>
@@ -156,7 +156,7 @@
     <main class="container">
       <section>
         <div class="summary-grid">
-          <article class="card metric green"><span>Testes automatizados</span><strong>38</strong><span>Funções de teste no código; execução local pendente</span></article>
+          <article class="card metric green"><span>Testes automatizados</span><strong>40</strong><span>Suíte backend existente; pytest indisponível neste ambiente</span></article>
           <article class="card metric green"><span>Segurança de senha</span><strong>Argon2</strong><span>Hash implementado no backend</span></article>
           <article class="card metric blue"><span>Autenticação</span><strong>24 h</strong><span>Sessão JWT em cookie HttpOnly</span></article>
           <article class="card metric amber"><span>Publicação</span><strong>Pendente</strong><span>Infraestrutura documentada, sem deploy confirmado</span></article>
@@ -166,7 +166,7 @@
       <section>
         <div class="section-heading">
           <div><div class="eyebrow">Status atual</div><h2>O que já está funcionando</h2></div>
-          <p>O produto já tem autenticação, persistência e o ciclo principal de pedido e separação. A validação desta cópia e a publicação ainda precisam ser concluídas.</p>
+            <p>O produto já tem autenticação, persistência, controle de estoque e o ciclo principal de pedidos. Build e lint do frontend passaram; a suíte backend e a publicação ainda precisam de validação.</p>
         </div>
         <div class="cards">
           <article class="card status-card">
@@ -192,8 +192,18 @@
             <p>Persistência SQLAlchemy com migrações Alembic e configuração para SQLite ou MySQL.</p>
             <ul>
               <li>Limite de produtos diferentes: 5, 8 ou 12 por tamanho.</li>
-              <li>Até 10 unidades por produto; validação de quantidades na API.</li>
-              <li>38 funções de teste estão no código; não foram executadas nesta cópia.</li>
+              <li>O produtor define o estoque de cada produto; a API valida disponibilidade ao criar e separar pedidos.</li>
+              <li>Aviso de estoque baixo quando restam 10 unidades ou menos; o catálogo informa indisponibilidade quando zera.</li>
+              <li>40 funções de teste backend estão no código; pytest não está instalado no ambiente virtual disponível.</li>
+            </ul>
+          </article>
+          <article class="card status-card">
+            <div class="status-top"><span class="dot"></span><h3>Estoque e atualizações</h3></div>
+            <p>O produtor controla a disponibilidade do catálogo e os dois perfis acompanham o andamento dos pedidos.</p>
+            <ul>
+              <li>Somente o perfil produtor pode definir o estoque; pedidos respeitam as quantidades disponíveis.</li>
+              <li>Estoque baixo é sinalizado a partir de 10 unidades.</li>
+              <li>Sino de notificações apresenta mudanças de status para assinante e produtor enquanto usam o sistema.</li>
             </ul>
           </article>
           <article class="card status-card">
@@ -218,14 +228,15 @@
           <div class="milestone"><div class="milestone-number">2</div><article class="card"><h3>Autenticação e controle de acesso</h3><p>Argon2, JWT em cookie HttpOnly, sessão de 24 horas, perfis e autorização por proprietário.</p><span class="tag">Implementado</span></article></div>
           <div class="milestone"><div class="milestone-number">3</div><article class="card"><h3>Ciclo completo da cesta</h3><p>Pedido, cancelamento, separação em lote, conclusão, confirmação de recebimento e expiração em sete dias.</p><span class="tag">Implementado</span></article></div>
           <div class="milestone"><div class="milestone-number">4</div><article class="card"><h3>Frontend conectado por ambiente</h3><p>Chamadas centralizadas com cookie de sessão; endereço da API configurado para desenvolvimento e caminho /api de produção.</p><span class="tag">Implementado</span></article></div>
-          <div class="milestone pending"><div class="milestone-number">5</div><article class="card"><h3>Verificação nesta cópia</h3><p>O código contém 38 funções de teste backend. Esta máquina ainda não tem o ambiente Python nem as dependências npm instaladas, portanto os testes, lint e build precisam ser executados.</p><span class="tag">Validação pendente</span></article></div>
+          <div class="milestone"><div class="milestone-number">5</div><article class="card"><h3>Estoque e notificações</h3><p>Estoque configurável pelo produtor, validação de disponibilidade, aviso de baixo estoque e notificações de andamento dos pedidos.</p><span class="tag">Implementado</span></article></div>
+          <div class="milestone pending"><div class="milestone-number">6</div><article class="card"><h3>Verificação automatizada</h3><p>Build e lint do frontend passaram em 29/10/2026. Os arquivos Python compilaram; a suíte contém 40 testes, mas não foi executada porque pytest não está instalado no ambiente virtual disponível.</p><span class="tag">Parcialmente validado</span></article></div>
         </div>
       </section>
 
       <section>
         <div class="section-heading">
           <div><div class="eyebrow">Próximas etapas prioritárias</div><h2>Validar antes de publicar</h2></div>
-          <p>Primeiro confirmar a qualidade do código nesta máquina; depois percorrer o fluxo real e preparar o ambiente de produção.</p>
+          <p>Executar a suíte backend e validar o fluxo integrado de estoque e pedidos; depois revisar o ambiente de produção.</p>
         </div>
         <div class="cards">
           <article class="card status-card">
@@ -234,7 +245,7 @@
             <ul>
               <li>Backend: pytest -q dentro de backend.</li>
               <li>Frontend: npm run lint e npm run build dentro de frontend.</li>
-              <li>Conferir e atualizar a documentação de testes, hoje ainda marcada com 11 casos.</li>
+              <li>Instalar as dependências de desenvolvimento e executar os 40 testes backend.</li>
             </ul>
             <span class="tag" style="color: var(--amber); background: var(--amber-soft)">Prioridade imediata</span>
           </article>
@@ -243,8 +254,8 @@
             <p>Conferir frontend, API e banco usando sessões reais dos dois perfis.</p>
             <ul>
               <li>Aplicar migrações e confirmar login, cadastro e restauração da sessão.</li>
-              <li>Assinante cria e cancela um pedido; produtor separa e conclui outro.</li>
-              <li>Assinante confirma a entrega; conferir isolamento e mensagens de erro.</li>
+              <li>Testar estoque baixo, produto esgotado e tentativa de alteração pelo perfil assinante.</li>
+              <li>Assinante cria e cancela pedido; produtor separa, conclui e ambos recebem atualizações de status.</li>
             </ul>
             <span class="tag" style="color: var(--amber); background: var(--amber-soft)">Próxima validação</span>
           </article>
@@ -268,7 +279,7 @@
         </div>
         <div class="future-grid">
           <article class="card future-card"><h3>Recuperação de senha real</h3><p>A tela atual apenas demonstra visualmente a recuperação; faltam endpoint, token temporário e envio seguro de e-mail.</p><small>Experiência e segurança</small></article>
-          <article class="card future-card"><h3>Assistente de pedido com IA</h3><p>Existe uma proposta documentada, mas não há integração com provedor, endpoint ou chamada a modelo implementada.</p><small>Proposta, não implementada</small></article>
+          <article class="card future-card"><h3>Assistente de pedido com IA · UC3</h3><p>Planejar uma experiência que interpreta o pedido em linguagem natural e sugere uma cesta conforme catálogo, estoque e limites. A pessoa revisa e confirma antes de criar o pedido.</p><small>Próxima etapa: definir exemplos, gerar proposta editável e validar com usuários; integração com modelo ainda não implementada.</small></article>
           <article class="card future-card"><h3>Testes de interface e E2E</h3><p>Adicionar testes automatizados do frontend e da jornada completa em navegador, além da suíte backend existente.</p><small>Qualidade</small></article>
           <article class="card future-card"><h3>Pipeline de CI</h3><p>Executar testes, lint e build automaticamente a cada alteração no repositório.</p><small>Entrega contínua</small></article>
           <article class="card future-card"><h3>Gestão operacional de usuários</h3><p>Administrar contas, perfis e redefinições sem editar diretamente o banco.</p><small>Operação</small></article>
@@ -281,10 +292,10 @@
           <div><div class="eyebrow">Mapa técnico</div><h2>Como as partes se conectam</h2></div>
         </div>
         <div class="architecture">
-          <div><strong>Frontend React</strong><span>Login, pedidos, histórico e envio automático do cookie.</span></div>
-          <div><strong>API FastAPI</strong><span>Rotas, validação, regras de perfil e respostas HTTP.</span></div>
-          <div><strong>Serviços</strong><span>Argon2, JWT, regras de cesta e autorização.</span></div>
-          <div><strong>Banco SQL</strong><span>Usuários, cestas, produtos, itens e separações.</span></div>
+          <div><strong>Frontend React</strong><span>Landing page, login, catálogo, estoque, pedidos, histórico e notificações.</span></div>
+          <div><strong>API FastAPI</strong><span>Rotas autenticadas, validação de estoque, pedidos e regras por perfil.</span></div>
+          <div><strong>Serviços</strong><span>Argon2, JWT, autorização, disponibilidade e ciclo da cesta.</span></div>
+          <div><strong>Banco SQL</strong><span>Usuários, cestas, produtos, níveis de estoque, itens e separações.</span></div>
         </div>
       </section>
     </main>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 
 function criarQuantidadesAtuais(cesta) {
   if (!cesta) {
@@ -241,7 +242,7 @@ function TelaFechamento({
             .toLowerCase()
             .replace(/\s+/g, '-')}`}
         >
-          {cesta.situacao}
+          {obterRotuloSituacao(cesta.situacao, cesta.separacaoConcluidaEm)}
         </span>
       </section>
 
@@ -298,7 +299,7 @@ function TelaFechamento({
               >
                 <img
                   className="imagem-produto-fechamento"
-                  src={`/produtos/${produto.id}.jpg`}
+                  src={`/produtos/${produto.id}-editorial.png`}
                   alt=""
                 />
                 <strong className="nome-produto-fechamento">{produto.nome}</strong>

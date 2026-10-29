@@ -47,13 +47,13 @@
 /* Mantém a mesma estrutura visual com contraste adequado no tema escuro. */
 :root[data-tema='escuro'] {
   color-scheme: dark;
-  --cor-verde-horta: #77c486;
-  --cor-verde-escuro: #b4e6b7;
-  --cor-verde-claro: #263d2d;
+  --cor-verde-horta: #78a889;
+  --cor-verde-escuro: #b2cdb8;
+  --cor-verde-claro: #293a31;
   --cor-terracota: #f08a68;
   --cor-amarelo-colheita: #f3c56d;
-  --cor-creme-natural: #17211b;
-  --cor-branco: #223027;
+  --cor-creme-natural: #1d2420;
+  --cor-branco: #29312c;
   --cor-texto-escuro: #e7f0e8;
   --cor-pedida: #8ec9e8;
   --cor-texto-separacao: #ffd27b;

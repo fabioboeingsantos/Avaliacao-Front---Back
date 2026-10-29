@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from configuracao import obter_origens_frontend
 from rotas.autenticacao import router as rotas_de_autenticacao
 from rotas.cestas import router as rotas_de_cestas
+from rotas.produtos import router as rotas_de_produtos
 from rotas.sistemas import router as rotas_de_sistema
 from rotas.usuarios import router as rotas_de_usuarios
 
@@ -26,6 +27,7 @@ app.add_middleware(
 )
 
 app.include_router(rotas_de_cestas)
+app.include_router(rotas_de_produtos)
 app.include_router(rotas_de_autenticacao)
 app.include_router(rotas_de_sistema)
 app.include_router(rotas_de_usuarios)
