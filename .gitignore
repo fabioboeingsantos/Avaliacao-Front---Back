@@ -11,3 +11,5 @@ dist/
 .uv-python/
 tmp/
 /.env
+.vercel
+.env*
