@@ -70,7 +70,7 @@ function TelaFechamento({
     (produto) => Number(quantidades[produto.id]) > obterQuantidadeSeparada(produto.id),
   )
   const separacaoCompleta = cesta.produtos.every(
-    (produto) => obterQuantidadeSeparada(produto.id) >= produto.quantidade,
+    (produto) => Number(quantidades[produto.id]) >= produto.quantidade,
   )
 
   function alterarQuantidade(produtoId, quantidade) {
@@ -185,7 +185,11 @@ function TelaFechamento({
     setSalvando(true)
 
     try {
-      const resultado = await aoConcluirSeparacao(cesta.id)
+      const produtosParaRegistrar = itensPendentes.map((produto) => ({
+        produtoId: produto.id,
+        quantidade: Number(quantidades[produto.id]) - obterQuantidadeSeparada(produto.id),
+      }))
+      const resultado = await aoConcluirSeparacao(cesta.id, produtosParaRegistrar)
       if (!resultado?.sucesso) {
         setErro(resultado?.erro ?? 'Não foi possível concluir a separação.')
         return
@@ -351,19 +355,17 @@ function TelaFechamento({
           })}
         </ul>
 
+        {itensPendentes.length > 0 && (
+          <button
+            className="botao botao-secundario"
+            type="submit"
+            disabled={salvando || desfazendo}
+          >
+            {salvando ? 'Registrando separação...' : `Salvar progresso (${itensPendentes.length} produto(s))`}
+          </button>
+        )}
         <button
           className="botao botao-primario"
-          type="submit"
-          disabled={salvando || desfazendo || itensPendentes.length === 0}
-        >
-          {salvando
-            ? 'Registrando separação...'
-            : itensPendentes.length === 0
-              ? 'Separação atualizada'
-              : `Registrar ${itensPendentes.length} produto(s)`}
-        </button>
-        <button
-          className="botao botao-secundario"
           type="button"
           disabled={salvando || desfazendo || !separacaoCompleta || separacaoJaConcluida}
           onClick={concluirSeparacao}

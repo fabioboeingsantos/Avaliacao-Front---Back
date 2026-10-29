@@ -585,9 +585,20 @@ function App() {
     return { sucesso: true }
   }
 
-  async function concluirSeparacao(pedidoId) {
+  async function concluirSeparacao(pedidoId, produtosParaRegistrar = []) {
     if (typeof pedidoId === 'number') {
       try {
+        if (produtosParaRegistrar.length > 0) {
+          await chamarApi(`/cestas/${pedidoId}/separacoes/lote`, {
+            method: 'POST',
+            body: JSON.stringify({
+              produtos: produtosParaRegistrar.map(({ produtoId: id, quantidade }) => ({
+                produto_id: id,
+                quantidade,
+              })),
+            }),
+          })
+        }
         const cestaAtualizada = await chamarApi(`/cestas/${pedidoId}/separacoes/concluir`, {
           method: 'POST',
         })
@@ -602,13 +613,27 @@ function App() {
     }
 
     const cestaLocal = pedidos.find((pedido) => pedido.id === pedidoId)
-    const faltando = cestaLocal?.produtos.filter((produto) => {
+    if (!cestaLocal) {
+      return { sucesso: false, erro: 'Não foi possível localizar esta cesta.' }
+    }
+
+    const separacoesAtualizadas = [...(cestaLocal.separacoes ?? [])]
+    for (const { produtoId, quantidade } of produtosParaRegistrar) {
+      const existente = separacoesAtualizadas.find((item) => item.produtoId === produtoId)
+      if (existente) {
+        existente.quantidade += quantidade
+      } else {
+        separacoesAtualizadas.push({ produtoId, quantidade })
+      }
+    }
+
+    const faltando = cestaLocal.produtos.filter((produto) => {
       const quantidadeSeparada =
-        cestaLocal.separacoes?.find((item) => item.produtoId === produto.id)?.quantidade ?? 0
+        separacoesAtualizadas.find((item) => item.produtoId === produto.id)?.quantidade ?? 0
       return quantidadeSeparada < produto.quantidade
     })
 
-    if (!cestaLocal || faltando.length > 0) {
+    if (faltando.length > 0) {
       return { sucesso: false, erro: 'Separe todos os produtos antes de concluir a cesta.' }
     }
     if (cestaLocal.separacaoConcluidaEm || cestaLocal.situacao === 'Entregue') {
@@ -621,6 +646,7 @@ function App() {
           ? {
               ...pedido,
               situacao: 'Em separação',
+              separacoes: separacoesAtualizadas,
               separacaoConcluidaEm: new Date().toISOString(),
             }
           : pedido,

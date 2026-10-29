@@ -21,6 +21,13 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
     return (cesta.separacoes ?? []).reduce((total, item) => total + item.quantidade, 0)
   }
 
+  function separacaoFoiCompleta(cesta) {
+    const separacoes = new Map((cesta.separacoes ?? []).map((item) => [item.produtoId, item.quantidade]))
+    return cesta.produtos.length > 0 && cesta.produtos.every(
+      (produto) => (separacoes.get(produto.id) ?? 0) >= produto.quantidade,
+    )
+  }
+
   // Converte a situação da cesta em uma classe CSS segura para o indicador visual.
   function obterClasseSituacao(situacao) {
     const semAcentos = situacao.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -79,10 +86,16 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
     const correspondeAoTamanho = filtroTamanho === 'todos' || cesta.tamanhoNome === filtroTamanho
     const correspondeASituacao = filtroSituacao === 'Aguardando recebimento'
       ? cesta.situacao === 'Em separação' && Boolean(cesta.separacaoConcluidaEm)
-      : cesta.situacao === filtroSituacao && !cesta.separacaoConcluidaEm
+      : cesta.situacao === filtroSituacao
+        && (filtroSituacao !== 'Em separação' || !cesta.separacaoConcluidaEm)
 
     return correspondeAoTamanho && correspondeASituacao
   })
+
+  const cestasProntasParaConcluir = cestas.filter(
+    (cesta) => cesta.situacao === 'Em separação' && !cesta.separacaoConcluidaEm && separacaoFoiCompleta(cesta),
+  )
+  const produtosComEstoqueBaixo = produtos.filter((produto) => produto.estoque <= 10)
 
   return (
     <main className="pagina-pedido pagina-produtor">
@@ -124,6 +137,50 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
         </p>
       </section>
 
+      {(cestasProntasParaConcluir.length > 0 || produtosComEstoqueBaixo.length > 0) && (
+        <section className="avisos-produtor" aria-labelledby="titulo-avisos-produtor">
+          <div className="cabecalho-avisos-produtor">
+            <div>
+              <p className="texto-saudacao">Atenção</p>
+              <h2 id="titulo-avisos-produtor">Avisos do produtor</h2>
+            </div>
+            <span className="contador-avisos-produtor">
+              {cestasProntasParaConcluir.length + produtosComEstoqueBaixo.length}
+            </span>
+          </div>
+
+          <div className="lista-avisos-produtor">
+            {cestasProntasParaConcluir.map((cesta) => (
+              <article className="aviso-produtor aviso-conclusao" key={`concluir-${cesta.id}`}>
+                <div>
+                  <strong>Separação pronta para concluir</strong>
+                  <p>{cesta.tamanhoNome} · pedido #{formatarIdSolicitacao(cesta.id)} já tem todos os itens separados.</p>
+                </div>
+                <button className="botao botao-primario" type="button" onClick={() => aoAbrirFechamento(cesta.id)}>
+                  Concluir pedido
+                </button>
+              </article>
+            ))}
+
+            {produtosComEstoqueBaixo.length > 0 && (
+              <article className="aviso-produtor aviso-estoque-baixo">
+                <div>
+                  <strong>Estoque baixo</strong>
+                  <p>
+                    {produtosComEstoqueBaixo.map((produto) => (
+                      `${produto.nome}: ${produto.estoque === 0 ? 'esgotado' : `${produto.estoque} unidade(s)`}`
+                    )).join(' · ')}
+                  </p>
+                </div>
+                <button className="botao botao-secundario" type="button" onClick={aoAbrirEstoque}>
+                  Ver estoque
+                </button>
+              </article>
+            )}
+          </div>
+        </section>
+      )}
+
       {modo === 'separacao' && <section className="filtros-separacao" aria-labelledby="titulo-filtros-separacao">
         <h2 id="titulo-filtros-separacao">Filtrar cestas</h2>
         <div className="campos-filtro-separacao">
@@ -150,14 +207,8 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
         </div>
       </section>}
 
-      <details className="painel-estoque-produtor" open={modo === 'estoque'}>
-        <summary>
-          <span>
-            <strong>Gerenciar estoque</strong>
-            <small>Defina a quantidade disponível de cada produto.</small>
-          </span>
-          <span aria-hidden="true">⌄</span>
-        </summary>
+      {modo === 'estoque' && (
+        <section className="painel-estoque-produtor" aria-label="Gerenciar estoque">
         <div className="grade-estoque-produtor">
           {produtos.map((produto) => (
             <form
@@ -217,7 +268,8 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
             </form>
           ))}
         </div>
-      </details>
+        </section>
+      )}
 
       {modo === 'separacao' && (cestasFiltradas.length === 0 ? (
         <section className="estado-vazio estado-vazio-historico">

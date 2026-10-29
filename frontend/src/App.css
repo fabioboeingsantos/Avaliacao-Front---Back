@@ -383,7 +383,8 @@
 .painel-notificacoes li {
   padding: 11px;
   border-radius: 10px;
-  background: var(--cor-fundo, #f6f5f0);
+  color: var(--cor-texto-escuro);
+  background: var(--cor-creme-natural);
 }
 
 .notificacao-link {
@@ -412,13 +413,88 @@
 }
 
 .painel-notificacoes time {
-  color: var(--cor-texto-secundario, #59655d);
+  color: var(--cor-verde-escuro);
   font-size: 0.75rem;
 }
 
 .notificacoes-vazias {
   margin: 0;
   font-size: 0.9rem;
+}
+
+.avisos-produtor {
+  display: grid;
+  gap: 14px;
+  margin: 0 0 20px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--cor-terracota) 35%, var(--cor-borda));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--cor-terracota) 8%, var(--cor-branco));
+}
+
+.cabecalho-avisos-produtor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cabecalho-avisos-produtor h2 {
+  margin: 0;
+  color: var(--cor-verde-escuro);
+  font-size: 1.05rem;
+}
+
+.cabecalho-avisos-produtor .texto-saudacao {
+  margin: 0 0 3px;
+}
+
+.contador-avisos-produtor {
+  display: grid;
+  min-width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--cor-branco);
+  background: var(--cor-terracota);
+  font-weight: 700;
+}
+
+.lista-avisos-produtor {
+  display: grid;
+  gap: 10px;
+}
+
+.aviso-produtor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border-left: 4px solid var(--cor-terracota);
+  border-radius: 10px;
+  background: var(--cor-branco);
+}
+
+.aviso-produtor p {
+  margin: 4px 0 0;
+  color: var(--cor-texto-escuro);
+  font-size: 0.9rem;
+}
+
+.aviso-estoque-baixo {
+  border-left-color: #bf7b16;
+}
+
+@media (max-width: 680px) {
+  .aviso-produtor {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .aviso-produtor .botao {
+    width: 100%;
+  }
 }
 
 .painel-estoque-produtor {
@@ -1530,6 +1606,10 @@
   display: grid;
   gap: 24px;
   margin-bottom: 24px;
+}
+
+.avaliacao-cesta + .detalhes-cesta-assinante {
+  margin-top: 24px;
 }
 
 .lista-detalhes-cesta {
