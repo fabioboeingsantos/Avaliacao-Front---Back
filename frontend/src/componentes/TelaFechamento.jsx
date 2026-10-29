@@ -288,7 +288,7 @@ function TelaFechamento({
             const quantidadeDosOutros = totalPlanejado - quantidadePlanejada
             const maximoPermitido = Math.max(
               atual,
-              Math.min(produto.quantidade, limite - quantidadeDosOutros),
+              Math.min(produto.quantidade, cesta.limite - quantidadeDosOutros),
             )
 
             return (
