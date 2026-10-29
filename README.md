@@ -1,6 +1,10 @@
-# Projeto da cartilha
+# Cesta do Vale
 
-Projeto estruturado para desenvolver o sistema da cartilha da aula 5.
+Sistema web para pedidos semanais de cestas de uma horta comunitária. A assinante monta e acompanha
+o pedido; o produtor gerencia o estoque, separa os produtos e conclui a entrega.
+
+O projeto usa React 19 + Vite 8 no frontend e FastAPI + SQLAlchemy + Alembic no backend. O banco pode
+ser SQLite para desenvolvimento, MySQL no Docker Compose ou PostgreSQL/Supabase em produção.
 
 ## Como rodar com Docker Compose
 
@@ -96,7 +100,12 @@ O fluxo de demonstração é:
 1. Entre como `aline` com a senha de teste `aline123`.
 2. Crie e finalize uma cesta.
 3. Saia pela opção de retorno e entre como `vanderlei` com a senha `vanderlei123`.
-4. Abra a cesta na tela `A separação` e registre os produtos em `O fechamento`.
+4. Consulte ou atualize o estoque na aba `Gerenciar estoque`.
+5. Abra a cesta na tela `A separação` e registre os produtos em `O fechamento`.
+
+O estoque é reservado ao criar o pedido e devolvido quando uma cesta pendente é cancelada. A
+interface também exibe notificações internas no navegador quando identifica atualizações nos pedidos;
+não há envio externo por e-mail, SMS ou mensageria.
 
 Rotas disponíveis:
 
@@ -104,6 +113,8 @@ Rotas disponíveis:
 - `POST /usuarios`: cadastra uma conta de assinante com e-mail e senha protegida.
 - `POST /autenticacao/login`: valida e-mail ou usuário e cria a sessão JWT em cookie `HttpOnly`, válida por pelo menos 24 horas.
 - `POST /autenticacao/logout`: remove o cookie da sessão atual.
+- `GET /produtos`: lista o catálogo e o estoque disponível para o usuário autenticado.
+- `PUT /produtos/{produto_id}/estoque`: permite ao produtor atualizar o estoque de um produto.
 - `GET /cestas?assinante=aline&tamanho=pequena`: lista e filtra cestas.
 - `GET /cestas/{id}`: mostra uma cesta.
 - `POST /cestas`: cria uma cesta pendente.
@@ -132,9 +143,10 @@ cd backend
 python -m alembic upgrade head
 ```
 
-As migrações atualizam as contas e os estados das cestas, preservando os hashes Argon2 e registrando a data de conclusão da separação.
+As migrações atualizam as contas, os estados das cestas e o estoque dos produtos, preservando os
+hashes Argon2 e registrando a data de conclusão da separação.
 
-Estado validado em 28/10/2026: o Supabase está em `20261021_0007 (head)`, com as tabelas
+O estado esperado do banco após aplicar as migrações é `20261029_0008 (head)`, com as tabelas
 `usuarios`, `produtos`, `cestas`, `itens_cesta`, `separacoes` e `alembic_version`. As cestas
 são criadas durante o fluxo de demonstração; o carregamento inicial não cria pedidos.
 

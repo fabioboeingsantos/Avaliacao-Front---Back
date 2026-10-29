@@ -10,7 +10,7 @@ Este roteiro cobre os quatro requisitos da apresentação. Use os slides como ap
 - Deixe a apresentação em tela cheia. Na demonstração, tenha o endereço do site à mão e alterne para o navegador quando indicado.
 - Se o acesso ao Supabase ou à publicação não estiver disponível, explique essa limitação e não afirme que a etapa foi demonstrada.
 
-## 1. Apresentar as duas personas · slides 1 a 3
+## 1. Apresentar as duas personas · slides 1 a 5
 
 ### Slide 1 · Cesta do Vale
 
@@ -20,13 +20,21 @@ Apresente brevemente o projeto e a proposta de organizar a relação entre a col
 
 Explique que Aline é uma persona fictícia criada para representar quem recebe a cesta. Conte sua rotina como numa entrevista: como decide o que pedir, como faz isso hoje e que informação precisa para confiar no pedido. Termine com a fala dela no slide, que apresenta o problema com as palavras da própria persona.
 
-### Slide 3 · Vanderlei, produtor
+### Slide 3 · Aline no dia a dia
+
+Mostre a linha do tempo da Aline: ela acorda com a rotina corrida, encontra a dificuldade de organizar a cesta e perde tempo procurando informações. Em seguida, apresente a virada no sistema, com escolha, revisão, envio e acompanhamento da separação.
+
+### Slide 4 · Vanderlei, produtor
 
 Explique que Vanderlei também é fictício e representa quem prepara as cestas. Descreva como acompanha os pedidos, confere produtos e quantidades e organiza a separação. Use a fala dele para mostrar a dificuldade de trabalhar com pedidos dispersos ou sem uma visão clara do que falta.
 
+### Slide 5 · Vanderlei no dia a dia
+
+Mostre a sequência visual dos processos de Vanderlei: colheita, transporte das caixas, conferência dos produtos, dificuldade com pedidos espalhados, uso do painel e separação organizada das cestas.
+
 **Transição:** “As duas rotinas mostram o mesmo desafio por lados diferentes. A solução foi desenhada para conectar quem pede e quem prepara.”
 
-## 2. Explicar a solução e o MVP · slide 4
+## 2. Explicar a solução e o MVP · slide 6
 
 Explique a solução de forma breve: o assinante escolhe e revisa uma cesta; o produtor consulta o pedido, acompanha o estoque e registra a separação; ambos acompanham a situação.
 
@@ -35,7 +43,7 @@ Explique a solução de forma breve: o assinante escolhe e revisa uma cesta; o p
 - **Telas e funcionalidades:** apresente as telas de escolha e revisão da cesta, histórico e detalhes do pedido, separação do produtor, controle de estoque e notificações. Destaque que o estoque é definido pelo produtor e que pedidos respeitam a disponibilidade.
 - **Limite do MVP:** mostre o que já funciona e deixe funcionalidades futuras para a seção 4, especialmente a assistência por IA.
 
-## 3. Demonstrar o sistema publicado · slide 8 e navegador
+## 3. Demonstrar o sistema publicado · slide 10 e navegador
 
 Comece esta parte na tela de login do sistema publicado. Use o endereço indicado no slide 8 para abrir a aplicação na Vercel. Diga à turma que agora você vai percorrer o fluxo real.
 
@@ -48,7 +56,7 @@ Comece esta parte na tela de login do sistema publicado. Use o endereço indicad
 
 Conclua a demonstração resumindo o percurso: cadastro e acesso, pedido, separação e acompanhamento. Se algum serviço estiver indisponível, descreva o passo sem alegar que foi concluído.
 
-## 4. Apresentar os próximos passos · slides 5 a 7
+## 4. Apresentar os próximos passos · slides 7 a 9
 
 Use o backlog visual dos slides para separar o que já foi entregue do que ainda está planejado. Não apresente a IA como funcionalidade pronta.
 

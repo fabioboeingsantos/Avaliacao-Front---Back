@@ -2,11 +2,15 @@
 
 ## Execução de 28/10/2026
 
+Este registro é histórico. Depois dessa execução, a migração `20261029_0008_estoque_produtos`
+adicionou o estoque ao catálogo; a validação do banco e do fluxo de estoque precisa ser repetida
+em um ambiente Python funcional antes de ser apresentada como evidência atual.
+
 - Backend: `40 passed` na suíte `pytest -q`.
 - Frontend: `npm run lint` concluído sem erros.
 - Frontend: `npm run build` concluído sem erros.
 - Supabase: conexão PostgreSQL confirmada.
-- Migração: `20261021_0007 (head)`.
+- Migração naquele momento: `20261021_0007 (head)`.
 - Tabelas: `usuarios`, `produtos`, `cestas`, `itens_cesta`, `separacoes` e `alembic_version`.
 - Dados iniciais: 2 usuários de demonstração e 12 produtos.
 - API: `/saude` retornou `ok` e `/docs` retornou HTTP 200.

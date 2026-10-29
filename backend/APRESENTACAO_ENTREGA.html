@@ -11,16 +11,18 @@
       .deck { min-height:100vh; padding:28px; }
       .slide { display:none; position:relative; width:min(1400px,100%); aspect-ratio:16/9; min-height:620px; margin:0 auto 24px; padding:clamp(42px,5vw,78px); overflow:hidden; border:1px solid var(--linha); border-radius:26px; background:radial-gradient(circle at 96% 0,#e4efdf 0,transparent 28%),radial-gradient(circle at 0 100%,#f4dfd6 0,transparent 28%),var(--creme); box-shadow:0 18px 50px rgba(31,77,46,.12); }
       .slide.active { display:block; }
-      .slide::after { content:attr(data-number) " / 08"; position:absolute; right:42px; bottom:28px; color:#7a8a7f; font-size:.75rem; font-weight:700; letter-spacing:.14em; }
+      .slide::after { content:attr(data-number) " / 10"; position:absolute; right:42px; bottom:28px; color:#7a8a7f; font-size:.75rem; font-weight:700; letter-spacing:.14em; }
       .eyebrow { color:var(--terracota); font-size:.8rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
       h1,h2,h3,p { margin:0; } h1,h2,h3 { line-height:1.08; } h1 { max-width:900px; margin-top:18px; font-size:clamp(2.8rem,6vw,6.5rem); letter-spacing:-.06em; color:var(--verde); } h2 { margin-top:12px; font-size:clamp(2rem,4vw,4.2rem); letter-spacing:-.05em; color:var(--verde); } h3 { color:var(--verde); font-size:1.25rem; }
       p,li { color:var(--muted); font-size:clamp(.92rem,1.3vw,1.18rem); line-height:1.45; } .lead { max-width:760px; margin-top:24px; font-size:clamp(1.1rem,1.9vw,1.55rem); }
       .logo { display:block; width:min(180px,24vw); height:145px; object-fit:contain; object-position:left center; margin:0 0 8px -12px; filter:drop-shadow(0 12px 22px rgba(31,20,10,.2)); } .brand-name { color:var(--verde); font-size:clamp(2rem,4.6vw,4.8rem); font-weight:900; letter-spacing:-.07em; line-height:.95; } .meta { display:flex; flex-wrap:wrap; gap:10px; margin-top:32px; } .pill { padding:8px 14px; border:1px solid var(--linha); border-radius:999px; color:var(--verde); background:#fff9; font-size:.85rem; font-weight:700; }
       .cover-slide { flex-direction:column; justify-content:center; min-height:620px; background:#17251b; color:white; }
-      .cover-slide::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(10,20,13,.63),rgba(10,20,13,.12) 70%),linear-gradient(0deg,rgba(10,20,13,.28),transparent 45%); }
-      .cover-brand { position:relative; z-index:1; width:min(470px,72%); padding:24px 30px 28px; border:1.5px solid rgba(245,145,47,.88); border-radius:28px; background:rgba(15,25,17,.18); box-shadow:0 0 0 1px rgba(255,185,91,.2),0 0 24px rgba(242,139,34,.22),0 18px 50px rgba(0,0,0,.12); backdrop-filter:blur(2px); }
-      .cover-brand .logo { width:150px; height:138px; margin:0 auto 8px; object-position:center; }
-      .cover-brand .brand-name { color:#fffdf5; text-align:center; font-size:clamp(2.2rem,4.4vw,4.2rem); text-shadow:0 3px 16px rgba(0,0,0,.68); }
+      .cover-slide::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(10,20,13,.34),rgba(10,20,13,.06) 70%),linear-gradient(0deg,rgba(10,20,13,.16),transparent 45%); }
+      .cover-brand { position:relative; z-index:1; width:min(560px,78%); padding:32px 42px 36px; border:1.5px solid rgba(245,145,47,.92); border-radius:30px; background:rgba(255,248,230,.12); box-shadow:0 0 0 1px rgba(255,185,91,.22),0 0 28px rgba(242,139,34,.22),0 22px 60px rgba(0,0,0,.14); backdrop-filter:blur(3px) saturate(1.06); text-align:center; overflow:hidden; }
+      .cover-brand::before { content:""; position:absolute; top:0; left:15%; right:15%; height:3px; border-radius:0 0 8px 8px; background:linear-gradient(90deg,transparent,#f0b35e,transparent); box-shadow:0 0 18px rgba(240,179,94,.75); }
+      .cover-brand::after { content:"✦"; position:absolute; right:22px; top:18px; color:#f0b35e; font-size:1rem; opacity:.9; }
+      .cover-brand .logo { width:220px; height:160px; margin:0 auto 2px; padding:8px 18px; border-radius:28px; object-position:center; background:radial-gradient(ellipse at center,rgba(255,232,181,.18) 0%,rgba(255,232,181,.08) 48%,transparent 76%); filter:drop-shadow(0 12px 20px rgba(0,0,0,.34)) drop-shadow(0 0 12px rgba(239,171,74,.22)); }
+      .cover-brand .brand-name { color:#fffdf5; text-align:center; font-size:clamp(2.6rem,5vw,4.8rem); font-weight:900; letter-spacing:-.075em; line-height:.9; text-shadow:0 3px 16px rgba(0,0,0,.72); }
       .grid { display:grid; gap:18px; margin-top:34px; } .grid-2 { grid-template-columns:repeat(2,1fr); } .grid-3 { grid-template-columns:repeat(3,1fr); } .grid-4 { grid-template-columns:repeat(4,1fr); }
       .card { padding:24px; border:1px solid var(--linha); border-radius:18px; background:#fff9; } .card strong { display:block; margin-bottom:8px; color:var(--verde); font-size:1.15rem; } .card p { font-size:1rem; }
       .persona { display:grid; grid-template-columns:180px 1fr; align-items:center; gap:22px; } .avatar { display:grid; width:150px; height:150px; place-items:center; border-radius:50%; color:#fff; background:var(--verde); font-size:3.8rem; font-weight:800; } .avatar.produtor { background:var(--terracota); }
@@ -55,6 +57,35 @@
       .infographic-quote { margin-top:20px; padding:12px 15px; border-left:3px solid #d99b68; border-radius:0 10px 10px 0; background:rgba(197,104,64,.2); color:#fff1dc; font-size:1.05rem; line-height:1.35; }
       .infographic-quote strong { display:block; margin-bottom:4px; color:#eab27d; font-size:.82rem; letter-spacing:.1em; text-transform:uppercase; }
       .infographic-slide::after { color:#e6d6c3; }
+      .timeline-slide { padding:0; border:0; background:#132019; color:#fff9ee; }
+      .timeline-photo { position:absolute; inset:0; background:url('personas/aline-dia-a-dia.png') center/cover; }
+      .timeline-photo::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(10,20,16,.97) 0%,rgba(10,20,16,.92) 29%,rgba(10,20,16,.58) 52%,rgba(10,20,16,.12) 84%,rgba(10,20,16,.06)); }
+      .timeline-illustration { background-image:url('personas/aline-timeline-ilustrada.png'); background-position:center; }
+      .aline-timeline { background-image:url('personas/aline-processos-ilustrados.png'); }
+      .vanderlei-timeline { background-image:url('personas/vanderlei-processos-ilustrados.png'); background-position:center; }
+      .timeline-illustration::after { display:none; }
+      .process-captions { position:absolute; z-index:2; left:clamp(24px,3.5vw,56px); right:clamp(24px,3.5vw,56px); bottom:clamp(28px,4vw,58px); display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }
+      .process-caption { min-height:82px; padding:12px 12px 11px; border-top:3px solid #edb583; border-radius:0 0 10px 10px; background:rgba(15,31,22,.78); color:#fff8e9; box-shadow:0 8px 20px rgba(0,0,0,.18); backdrop-filter:blur(4px); }
+      .process-caption strong { display:block; margin-bottom:5px; color:#edb583; font-size:.82rem; line-height:1.1; }
+      .process-caption span { display:block; color:#fffdf6; font-size:.78rem; line-height:1.25; }
+      .timeline-content { position:relative; z-index:1; width:100%; height:100%; padding:clamp(34px,4vw,64px); display:flex; flex-direction:column; justify-content:space-between; }
+      .timeline-title { max-width:660px; }
+      .timeline-title .eyebrow { color:#edb583; }
+      .timeline-title h2 { margin-top:12px; color:#fffdf6; font-size:clamp(2.2rem,4.5vw,4.7rem); letter-spacing:-.06em; text-shadow:0 3px 16px rgba(0,0,0,.65); }
+      .timeline-title p { max-width:600px; margin-top:12px; color:#f4eee4; font-size:clamp(1rem,1.5vw,1.25rem); text-shadow:0 2px 8px rgba(0,0,0,.7); }
+      .timeline-line { position:relative; display:grid; grid-template-columns:repeat(5,1fr); gap:10px; width:min(100%,1160px); margin-bottom:26px; padding-top:28px; }
+      .timeline-line::before { content:""; position:absolute; left:14px; right:14px; top:14px; height:2px; background:linear-gradient(90deg,#d99b68,#f2d6b1 46%,#d99b68); box-shadow:0 0 12px rgba(237,181,131,.4); }
+      .timeline-step { position:relative; padding:0 16px 16px 0; }
+      .timeline-dot { position:absolute; top:-28px; left:0; width:28px; height:28px; display:grid; place-items:center; border:2px solid #ffe0b7; border-radius:50%; color:#18241b; background:#edb583; font-size:.78rem; font-weight:900; box-shadow:0 0 0 5px rgba(237,181,131,.16); }
+      .timeline-step h3 { margin-top:20px; color:#fff8e9; font-size:1.08rem; text-shadow:0 2px 8px rgba(0,0,0,.7); }
+      .timeline-step p { margin-top:6px; color:#fffdf6; font-size:.96rem; line-height:1.3; text-shadow:0 2px 8px rgba(0,0,0,.7); }
+      .timeline-note { align-self:flex-start; margin-top:10px; padding:12px 16px; border-left:4px solid #edb583; border-radius:0 12px 12px 0; background:rgba(15,31,22,.58); color:#fff8e9; font-size:1rem; line-height:1.35; backdrop-filter:blur(3px); }
+      .timeline-slide::after { display:none; }
+      .deck > .slide:nth-child(6)::after { content:"06 / 10"; }
+      .deck > .slide:nth-child(7)::after { content:"07 / 10"; }
+      .deck > .slide:nth-child(8)::after { content:"08 / 10"; }
+      .deck > .slide:nth-child(9)::after { content:"09 / 10"; }
+      .deck > .slide:nth-child(10)::after { content:"10 / 10"; }
       /* A visibilidade dos slides é controlada pela classe active, inclusive na capa. */
       .deck > .slide { display:none; }
       .deck > .slide.active { display:flex; }
@@ -132,7 +163,7 @@
       .visit-site strong { display:block; margin-bottom:4px; color:#edb583; font-size:.9rem; }
       .visit-site span { display:block; color:#fff8e9; font-size:1.05rem; font-weight:700; overflow-wrap:anywhere; }
       @media (max-width:900px) { .story-left { width:94%; padding:28px; } .story-explanations { gap:12px; } .story-slide { min-height:820px; } }
-      @media (max-width:600px) { .story-left { width:100%; padding:28px 24px 55px; } .story-photo::after { background:rgba(10,20,16,.82); } .story-explanations { grid-template-columns:1fr; gap:18px; } .story-slide { min-height:0; } }
+      @media (max-width:600px) { .story-left { width:100%; padding:28px 24px 55px; } .story-photo::after { background:rgba(10,20,16,.82); } .story-explanations { grid-template-columns:1fr; gap:18px; } .story-slide { min-height:0; } .timeline-slide { min-height:900px; } .timeline-content { padding:30px 24px 58px; } .timeline-line { grid-template-columns:1fr; gap:20px; padding-top:0; margin-top:24px; } .timeline-line::before { left:13px; top:0; bottom:0; width:2px; height:auto; right:auto; background:linear-gradient(180deg,#d99b68,#f2d6b1 46%,#d99b68); } .timeline-step { padding:0 0 0 48px; min-height:70px; } .timeline-dot { top:0; left:0; } .timeline-step h3 { margin-top:0; } .timeline-note { margin-top:18px; } .process-captions { left:18px; right:18px; bottom:18px; grid-template-columns:repeat(2,1fr); gap:8px; } .process-caption { min-height:68px; padding:9px; } .process-caption strong { font-size:.72rem; } .process-caption span { font-size:.7rem; } }
       button, input, select, textarea { font-family:Arial, sans-serif; }
     </style>
   </head>
@@ -159,7 +190,18 @@
           <div class="infographic-quote"><strong>Ela diria</strong> “Quero fazer a cesta rápido e saber o que já foi separado.”</div>
         </div>
       </section>
-      <section class="slide infographic-slide" data-number="03">
+      <section class="slide timeline-slide" data-number="03">
+        <div class="timeline-photo timeline-illustration aline-timeline" aria-label="Ilustração visual da rotina de Aline, da dificuldade à solução"></div>
+        <div class="process-captions" aria-label="Explicações curtas dos processos e dores da Aline">
+          <div class="process-caption"><strong>Rotina corrida</strong><span>Divide o tempo entre dois filhos e muitas tarefas.</span></div>
+          <div class="process-caption"><strong>Pedido no ônibus</strong><span>Precisa resolver a cesta em poucos minutos.</span></div>
+          <div class="process-caption"><strong>Tamanho da cesta</strong><span>Escolhe entre pequena, média ou grande.</span></div>
+          <div class="process-caption"><strong>Minhas cestas</strong><span>Vê seus pedidos reunidos em um só lugar.</span></div>
+          <div class="process-caption"><strong>Situação do pedido</strong><span>Consulta o andamento sem procurar mensagens.</span></div>
+          <div class="process-caption"><strong>Produtos separados</strong><span>Abre a cesta e sabe o que vai chegar.</span></div>
+        </div>
+      </section>
+      <section class="slide infographic-slide" data-number="04">
         <div class="infographic-scene" style="background-image:url('personas/vanderlei-infografico.png')"></div>
         <div class="infographic-panel">
           <h2>Vanderlei e a separação das cestas</h2>
@@ -179,8 +221,22 @@
 <section class="slide story-slide story-06" data-number="06"><div class="story-photo" aria-hidden="true"></div><div class="story-left"><div class="eyebrow">Próximos passos</div><h2>Uma ideia vira<br>uma cesta revisável</h2><p class="story-intro">IA planejada: da intenção à revisão, com confirmação da pessoa.</p><ol class="story-explanations"><li><span class="explanation-number">01</span><div><h3>1 · Base atual</h3><ul><li>Pedido, catálogo e estoque no MVP</li><li>Regras existentes orientam a proposta</li></ul></div></li><li><span class="explanation-number">02</span><div><h3>2 · IA planejada</h3><ul><li>Entende o pedido em linguagem natural</li><li>Sugere produtos disponíveis</li><li>Exemplo: cesta para salada</li></ul></div></li><li><span class="explanation-number">03</span><div><h3>3 · Próxima evolução</h3><ul><li>Definir exemplos e experiência</li><li>Prototipar sugestão editável</li><li>Validar; pessoa revisa e confirma</li></ul></div></li></ol></div></section>
 <section class="slide story-slide story-07" data-number="07"><div class="story-photo" aria-hidden="true"></div><div class="story-left"><div class="eyebrow">Impacto na rotina</div><h2>Uma cesta.<br>Duas rotinas conectadas.</h2><p class="story-intro">Os efeitos de um fluxo organizado, do pedido ao recebimento.</p><ol class="story-explanations"><li><span class="explanation-number">01</span><div><h3>1 · Assinante</h3><ul><li>Escolhe com mais clareza</li><li>Confere antes de enviar</li></ul></div></li><li><span class="explanation-number">02</span><div><h3>2 · Produtor</h3><ul><li>Organiza a separação</li><li>Confere produtos e quantidades</li></ul></div></li><li><span class="explanation-number">03</span><div><h3>3 · Evolução</h3><ul><li>Estoque conecta pedido e colheita</li><li>IA apoia; pessoa decide</li></ul></div></li></ol></div></section>
 <section class="slide story-slide story-08" data-number="08"><div class="story-photo" aria-hidden="true"></div><div class="story-left"><div class="eyebrow">Experimente o sistema</div><h2>Sua próxima cesta<br>começa aqui</h2><p class="story-intro">Crie sua conta e conheça o percurso do pedido.</p><ol class="story-explanations"><li><span class="explanation-number">01</span><div><h3>1 · Acesse o sistema</h3><ul><li>cesta-do-vale.vercel.app</li><li>Comece pela tela publicada</li></ul></div></li><li><span class="explanation-number">02</span><div><h3>2 · Demonstre os perfis</h3><ul><li>Cadastro e hash no Supabase</li><li>Assinante: pedir e acompanhar</li><li>Produtor: estoque e separação</li></ul></div></li><li><span class="explanation-number">03</span><div><h3>3 · Teste e feche</h3><ul><li>Mostre mensagem de senha incorreta ou cadastro inválido</li><li>Retome o fluxo completo do pedido</li></ul></div></li></ol><div class="visit-site"><strong>ACESSE O SITE</strong><span>cesta-do-vale.vercel.app</span></div></div></section>
+      <section class="slide timeline-slide" data-number="05">
+        <div class="timeline-photo timeline-illustration vanderlei-timeline" aria-label="Ilustração visual dos processos de trabalho do Vanderlei"></div>
+        <div class="process-captions" aria-label="Explicações curtas dos processos do Vanderlei">
+          <div class="process-caption"><strong>Colheita</strong><span>Retira os produtos no ponto certo.</span></div>
+          <div class="process-caption"><strong>Transporte</strong><span>Leva as caixas até a área de montagem.</span></div>
+          <div class="process-caption"><strong>Conferência</strong><span>Separa e verifica qualidade e quantidade.</span></div>
+          <div class="process-caption"><strong>Pedidos</strong><span>Organiza informações que antes ficavam espalhadas.</span></div>
+          <div class="process-caption"><strong>Painel</strong><span>Consulta pedidos, estoque e tamanhos.</span></div>
+          <div class="process-caption"><strong>Separação</strong><span>Monta cada cesta com mais segurança.</span></div>
+        </div>
+      </section>
     </main>
     <script>
+      const vanderleiTimeline = document.querySelector('.vanderlei-timeline')?.closest('.slide');
+      const solutionSlide = document.querySelector('.story-slide.story-04');
+      if (vanderleiTimeline && solutionSlide) solutionSlide.before(vanderleiTimeline);
       const slides = [...document.querySelectorAll('.slide')]; let current = 0;
       function showSlide(index) { current = Math.max(0, Math.min(index, slides.length - 1)); slides.forEach((slide, position) => slide.classList.toggle('active', position === current)); }
       document.addEventListener('keydown', (event) => { if (['INPUT','TEXTAREA','BUTTON','A'].includes(event.target.tagName)) return; if (['ArrowRight','ArrowLeft','PageDown','PageUp',' '].includes(event.key)) event.preventDefault(); if (['ArrowRight','PageDown',' '].includes(event.key)) showSlide(current + 1); if (['ArrowLeft','PageUp'].includes(event.key)) showSlide(current - 1); if (event.key === 'Home') showSlide(0); if (event.key === 'End') showSlide(slides.length - 1); });

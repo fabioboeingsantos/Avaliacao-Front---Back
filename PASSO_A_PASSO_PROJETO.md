@@ -28,6 +28,7 @@ O fluxo principal é:
 - **JavaScript com JSX:** linguagem dos componentes.
 - **CSS puro:** estilização e responsividade.
 - **Fetch API:** comunicação com o backend.
+- **Notificações internas:** atualização periódica dos pedidos e armazenamento local das notificações no navegador.
 - **Oxlint:** verificação de qualidade do código.
 
 ### Backend
@@ -56,6 +57,7 @@ projeto/
 │   ├── public/
 │   ├── src/
 │   │   ├── componentes/
+│   │   ├── utilitarios/
 │   │   ├── App.jsx
 │   │   ├── App.css
 │   │   ├── index.css
@@ -159,6 +161,9 @@ Exemplos:
 - Batata;
 - Cebola.
 
+Além do nome e do identificador, o produto possui estoque disponível. O produtor pode consultar e
+alterar essa quantidade; a assinante só consegue montar uma cesta dentro do estoque atual.
+
 ### Cesta
 
 Representa o pedido feito pela assinante.
@@ -197,10 +202,11 @@ Regras principais:
 2. O limite do tamanho se aplica à quantidade de produtos diferentes, não à soma das unidades.
 3. Cada produto pode ter até 10 unidades por cesta.
 4. Um produto separado precisa pertencer à cesta, e a quantidade separada não pode exceder a quantidade pedida.
-5. O primeiro produto separado altera a situação para **Em separação**.
-6. A situação permanece **Em separação** após a conclusão; a data de conclusão inicia o prazo de sete dias para confirmação do recebimento.
-7. A cesta passa para **Entregue** quando a assinante confirma o recebimento ou quando esse prazo termina. A expiração é atualizada quando a cesta é consultada pela API.
-8. A assinante pode cancelar a própria cesta somente enquanto ela estiver **Pendente** e sem separações. A situação passa para **Cancelado**, e o produtor não pode iniciar ou continuar a separação.
+5. O estoque é reservado quando o pedido é criado e devolvido quando a cesta pendente é cancelada.
+6. O primeiro produto separado altera a situação para **Em separação**.
+7. A situação permanece **Em separação** após a conclusão; a data de conclusão inicia o prazo de sete dias para confirmação do recebimento.
+8. A cesta passa para **Entregue** quando a assinante confirma o recebimento ou quando esse prazo termina. A expiração é atualizada quando a cesta é consultada pela API.
+9. A assinante pode cancelar a própria cesta somente enquanto ela estiver **Pendente** e sem separações. A situação passa para **Cancelado**, e o produtor não pode iniciar ou continuar a separação.
 
 As situações possíveis são **Pendente**, **Em separação**, **Cancelado** e **Entregue**.
 
@@ -216,8 +222,9 @@ Antes de escrever código, documentar:
 - quais regras precisam ser respeitadas;
 - o que ficará fora do escopo.
 
-O sistema permite confirmar o recebimento da cesta, mas não inclui pagamento, estoque em quilos,
-troca de produtos ou notificações automáticas.
+O sistema permite confirmar o recebimento da cesta, controlar o estoque por unidades e exibir
+notificações internas no navegador. Não inclui pagamento, estoque em quilos, troca de produtos ou
+avisos externos por e-mail, SMS ou mensagem.
 
 ### Etapa 2 — Criar o frontend
 
@@ -307,6 +314,8 @@ Rotas atuais:
 | `GET` | `/usuarios/me`, `/usuarios/eu` | Consultar a conta autenticada |
 | `POST` | `/autenticacao/login` | Validar o acesso e iniciar uma sessão |
 | `POST` | `/autenticacao/logout` | Encerrar a sessão removendo o cookie |
+| `GET` | `/produtos` | Listar o catálogo e o estoque disponível |
+| `PUT` | `/produtos/{produto_id}/estoque` | Permitir ao produtor atualizar o estoque de um produto |
 | `GET` | `/cestas` | Listar cestas; assinantes veem somente as próprias |
 | `GET` | `/cestas/{id}` | Consultar uma cesta dentro do escopo do usuário |
 | `POST` | `/cestas` | Criar uma cesta pendente para a conta autenticada |
@@ -335,22 +344,24 @@ http://127.0.0.1:8000/docs
 ### Etapa 7 — Conectar o frontend à API
 
 O frontend atual centraliza as chamadas HTTP em uma função comum e envia credenciais para
-compartilhar a sessão por cookie `HttpOnly`.
+compartilhar a sessão por cookie `HttpOnly`. A URL é configurada pela variável
+`VITE_URL_DA_API`, definida em `frontend/.env.development`, `frontend/.env.production` ou
+`frontend/.env.local`.
 
 Exemplo de configuração:
 
 ```javascript
-const URL_API =
-  import.meta.env.VITE_API_URL ??
-  `${window.location.protocol}//${window.location.hostname}:8000`
+const URL_API = import.meta.env.VITE_URL_DA_API
 ```
 
 O frontend:
 
 - envia login e cadastro à API;
 - busca as cestas permitidas para a conta;
+- carrega o catálogo e o estoque disponível antes de montar a cesta;
 - persiste pedidos concluídos, separações e confirmação de recebimento;
 - permite cancelar pedidos pendentes, com confirmação da pessoa usuária;
+- permite ao produtor atualizar o estoque e receber notificações internas sobre mudanças nos pedidos;
 - exibe erros das operações e atualiza a interface após alterações.
 
 ### Etapa 8 — Implementar autenticação e perfis
@@ -361,6 +372,7 @@ Depois do login:
 
 - o perfil `assinante` acessa o fluxo de pedidos;
 - o perfil `produtor` acessa o fluxo de separação.
+- o perfil `produtor` também acessa o gerenciamento do estoque.
 
 O backend valida a conta ativa e o grupo em cada operação protegida. A sessão é enviada em cookie
 JWT `HttpOnly` com validade mínima de 24 horas; ao reabrir a aplicação, o frontend consulta
@@ -378,10 +390,11 @@ Fluxo de teste recomendado:
 4. Para testar a separação, criar outro pedido e entrar com o perfil produtor em outra sessão.
 5. Entrar com `vanderlei` e abrir a tela de separação.
 6. Registrar um ou mais produtos, sem exceder as quantidades pedidas.
-7. Tentar registrar uma quantidade inválida e confirmar que a API recusa a operação.
-8. Separar todos os itens e concluir a separação.
-9. Voltar a entrar com `aline`, abrir os detalhes do pedido e confirmar o recebimento.
-10. Verificar que a situação aparece como **Entregue**.
+7. Atualizar o estoque de um produto como `vanderlei` e confirmar a nova disponibilidade no catálogo.
+8. Tentar registrar uma quantidade inválida ou acima do estoque e confirmar que a API recusa a operação.
+9. Separar todos os itens e concluir a separação.
+10. Voltar a entrar com `aline`, abrir os detalhes do pedido e confirmar o recebimento.
+11. Verificar que a situação aparece como **Entregue** e que a notificação interna é exibida.
 
 ### Etapa 10 — Preparar a publicação
 
@@ -436,10 +449,9 @@ O fluxo principal já inclui autenticação, permissões por grupo, vínculo das
 proteção dos pedidos de outras pessoas, cancelamento antes da separação, testes automatizados e
 persistência por SQLite, PostgreSQL/Supabase ou MySQL. Possíveis evoluções:
 
-1. Configurar pipeline automatizado de validação, build e deploy.
-2. Planejar a operação de produção com banco gerenciado, backups e variáveis de ambiente seguras.
-3. Avaliar observabilidade e notificações, caso passem a fazer parte dos requisitos.
-4. Separar o estado do frontend em hooks ou serviços específicos se a complexidade crescer.
+1. Planejar a operação de produção com banco gerenciado, backups e variáveis de ambiente seguras.
+2. Avaliar observabilidade e avisos externos, caso passem a fazer parte dos requisitos.
+3. Separar o estado do frontend em hooks ou serviços específicos se a complexidade crescer.
 
 ## 10. Resumo da decisão técnica
 
