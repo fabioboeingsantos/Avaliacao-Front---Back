@@ -147,7 +147,12 @@ def criar_cesta(sessao: Session, dados: dict, usuario: Usuario) -> dict:
         "limite": limite,
         "situacao": "Pendente",
         "produtos": [
-            {"id": produto["id"], "nome": produto["nome"], "quantidade": quantidade}
+            {
+                "id": produto["id"],
+                "nome": produto["nome"],
+                "quantidade": quantidade,
+                "preco_unitario_centavos": produto["preco_centavos"],
+            }
             for produto, quantidade in produtos
         ],
     }

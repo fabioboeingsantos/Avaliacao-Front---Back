@@ -997,6 +997,35 @@
   background: var(--cor-verde-claro);
 }
 
+/* Destaca o preço unitário para deixar explícito que a cobrança é por unidade. */
+.preco-produto {
+  color: var(--cor-verde-escuro);
+  font-size: var(--texto-rotulo);
+  font-weight: 700;
+}
+
+/* Reserva visualmente o valor final da cesta em cada etapa do pedido. */
+.total-pedido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+  padding: 16px 18px;
+  border: 1px solid var(--cor-verde-horta);
+  border-radius: 14px;
+  background: var(--cor-creme-natural);
+  color: var(--cor-verde-escuro);
+}
+
+.total-pedido strong {
+  font-size: 1.25rem;
+}
+
+.total-pedido-historico {
+  margin-bottom: 18px;
+}
+
 .cartao-produto-selecionavel.produto-em-foco {
   border-color: var(--cor-verde-horta);
   background: var(--cor-creme-natural);

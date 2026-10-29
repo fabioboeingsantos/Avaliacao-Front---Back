@@ -14,6 +14,19 @@ from modelos.separacao import Separacao
 def _serializar_cesta(cesta: Cesta) -> dict:
     """Converte o modelo e seus relacionamentos em dados para o servico."""
 
+    produtos = []
+    for item in cesta.itens:
+        preco_centavos = item.preco_unitario_centavos or item.produto.preco_centavos
+        produtos.append(
+            {
+                "id": item.produto_id,
+                "nome": item.produto.nome,
+                "quantidade": item.quantidade,
+                "preco_unitario": preco_centavos / 100,
+                "subtotal": (preco_centavos * item.quantidade) / 100,
+            }
+        )
+
     return {
         "id": cesta.id,
         "assinante": cesta.assinante,
@@ -28,10 +41,8 @@ def _serializar_cesta(cesta: Cesta) -> dict:
             if cesta.separacao_concluida_em is not None
             else None
         ),
-        "produtos": [
-            {"id": item.produto_id, "nome": item.produto.nome, "quantidade": item.quantidade}
-            for item in cesta.itens
-        ],
+        "produtos": produtos,
+        "valor_total": sum(item["subtotal"] for item in produtos),
         "separacoes": [
             {
                 "produto_id": item.produto_id,
@@ -67,7 +78,11 @@ def adicionar_cesta(sessao: Session, dados: dict, usuario_id: int) -> dict:
     """Cria a cesta e seus itens a partir de dados simples do servico."""
 
     itens = [
-        ItemCesta(produto_id=produto["id"], quantidade=produto["quantidade"])
+        ItemCesta(
+            produto_id=produto["id"],
+            quantidade=produto["quantidade"],
+            preco_unitario_centavos=produto["preco_unitario_centavos"],
+        )
         for produto in dados["produtos"]
     ]
     cesta = Cesta(
@@ -148,7 +163,12 @@ def listar_produtos_disponiveis(sessao: Session) -> list[dict]:
 
     produtos = sessao.scalars(select(Produto).order_by(Produto.id)).all()
     return [
-        {"id": produto.id, "nome": produto.nome, "estoque": produto.estoque}
+        {
+            "id": produto.id,
+            "nome": produto.nome,
+            "estoque": produto.estoque,
+            "preco_centavos": produto.preco_centavos,
+        }
         for produto in produtos
     ]
 

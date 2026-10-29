@@ -1,5 +1,9 @@
 import { useState } from 'react'
 
+// Formata os preços unitários e subtotais exibidos durante a montagem da cesta.
+const formatarMoeda = (valor) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor ?? 0)
+
 // Os tamanhos e limites seguem as regras definidas para as cestas.
 const tamanhos = [
   { id: 'pequena', nome: 'Pequena', limite: 5 },
@@ -68,6 +72,11 @@ function obterItensCestaPronta(tamanho, produtos) {
   })
 }
 
+// Soma preço unitário vezes quantidade para atualizar a prévia sem esperar o envio do pedido.
+function calcularTotal(produtos) {
+  return produtos.reduce((total, produto) => total + (produto.precoUnitario ?? 0) * produto.quantidade, 0)
+}
+
 // Esta é a tela principal da assinante. Os campos seguintes aparecem de acordo
 // com a escolha feita no primeiro passo, evitando mostrar decisões desnecessárias.
 function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [], catalogoCarregado }) {
@@ -104,6 +113,13 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [
   }
 
   const quantidadeProdutosSelecionados = Object.keys(quantidadesSelecionadas).length
+
+  // Converte a seleção atual em itens completos para calcular a prévia do valor.
+  function obterProdutosSelecionados() {
+    return produtosCatalogo
+      .filter((produto) => quantidadesSelecionadas[produto.id] > 0)
+      .map((produto) => ({ ...produto, quantidade: quantidadesSelecionadas[produto.id] }))
+  }
 
   // Adiciona ou remove produtos sem ultrapassar a quantidade de produtos do tamanho.
   function alternarProduto(idProduto) {
@@ -157,12 +173,7 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [
     const produtos =
       modoSelecionado === 'pronta'
         ? obterItensCestaPronta(tamanhoSelecionado, produtosCatalogo)
-        : produtosCatalogo
-            .filter((produto) => quantidadesSelecionadas[produto.id] > 0)
-            .map((produto) => ({
-              ...produto,
-              quantidade: quantidadesSelecionadas[produto.id],
-            }))
+        : obterProdutosSelecionados()
 
     if (!modoSelecionado || !tamanhoSelecionado) {
       setErro('Escolha o tipo e o tamanho da cesta antes de continuar.')
@@ -185,6 +196,8 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [
       tamanhoNome: tamanho.nome,
       limite: tamanho.limite,
       produtos,
+      // O valor exibido é uma prévia; o backend recalcula e confirma o total ao salvar.
+      valorTotal: calcularTotal(produtos),
     })
   }
 
@@ -305,7 +318,7 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [
                   <div className="botao-produto-pronto">
                     <img className="imagem-produto" src={produto.imagem} alt="" />
                     <span className="nome-produto">{produto.nome}</span>
-                    <strong>{produto.quantidade} item</strong>
+                    <strong>{produto.quantidade} un. · {formatarMoeda(produto.precoUnitario * produto.quantidade)}</strong>
                     {produto.estoque <= 10 && (
                       <span className={produto.estoque === 0 ? 'aviso-estoque esgotado' : 'aviso-estoque'}>
                         {produto.estoque === 0
@@ -319,6 +332,10 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [
                 </li>
               ))}
             </ul>
+            <div className="total-pedido">
+              <span>Valor desta cesta pronta</span>
+              <strong>{formatarMoeda(calcularTotal(obterItensCestaPronta(tamanhoSelecionado, produtosCatalogo)))}</strong>
+            </div>
           </section>
         )}
 
@@ -362,7 +379,8 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [
                         onChange={() => alternarProduto(produto.id)}
                       />
                       <img className="imagem-produto" src={produto.imagem} alt="" />
-                      <span className="nome-produto">{produto.nome}</span>
+                        <span className="nome-produto">{produto.nome}</span>
+                        <span className="preco-produto">{formatarMoeda(produto.precoUnitario)} / un.</span>
                       <strong className="indicador-selecao">
                         {selecionado ? '✓ Selecionado' : 'Selecionar'}
                       </strong>
@@ -402,6 +420,10 @@ function TelaPedirCesta({ aoFinalizar, aoAbrirHistorico, produtosDisponiveis = [
                   </article>
                 )
               })}
+            </div>
+            <div className="total-pedido">
+              <span>Valor atual da cesta selecionável</span>
+              <strong>{formatarMoeda(calcularTotal(obterProdutosSelecionados()))}</strong>
             </div>
           </section>
         )}

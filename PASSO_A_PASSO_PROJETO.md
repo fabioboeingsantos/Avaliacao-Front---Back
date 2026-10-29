@@ -164,6 +164,10 @@ Exemplos:
 Além do nome e do identificador, o produto possui estoque disponível. O produtor pode consultar e
 alterar essa quantidade; a assinante só consegue montar uma cesta dentro do estoque atual.
 
+Cada produto também possui um preço fictício por unidade. A cesta calculável usa a fórmula `preço
+unitário × quantidade`, e o preço unitário é salvo no item do pedido para que o histórico não mude caso
+o catálogo seja alterado no futuro. Não são usados valores por quilo.
+
 ### Cesta
 
 Representa o pedido feito pela assinante.
@@ -314,7 +318,7 @@ Rotas atuais:
 | `GET` | `/usuarios/me`, `/usuarios/eu` | Consultar a conta autenticada |
 | `POST` | `/autenticacao/login` | Validar o acesso e iniciar uma sessão |
 | `POST` | `/autenticacao/logout` | Encerrar a sessão removendo o cookie |
-| `GET` | `/produtos` | Listar o catálogo e o estoque disponível |
+| `GET` | `/produtos` | Listar o catálogo, o estoque e o preço unitário disponível |
 | `PUT` | `/produtos/{produto_id}/estoque` | Permitir ao produtor atualizar o estoque de um produto |
 | `GET` | `/cestas` | Listar cestas; assinantes veem somente as próprias |
 | `GET` | `/cestas/{id}` | Consultar uma cesta dentro do escopo do usuário |
@@ -359,6 +363,7 @@ O frontend:
 - envia login e cadastro à API;
 - busca as cestas permitidas para a conta;
 - carrega o catálogo e o estoque disponível antes de montar a cesta;
+- exibe preço unitário, subtotal por produto e total atualizado conforme a quantidade muda;
 - persiste pedidos concluídos, separações e confirmação de recebimento;
 - permite cancelar pedidos pendentes, com confirmação da pessoa usuária;
 - permite ao produtor atualizar o estoque e receber notificações internas sobre mudanças nos pedidos;

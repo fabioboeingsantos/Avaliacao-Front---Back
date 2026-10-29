@@ -17,6 +17,7 @@ class ItemCesta(Base):
     cesta_id: Mapped[int] = mapped_column(ForeignKey("cestas.id", ondelete="CASCADE"), nullable=False)
     produto_id: Mapped[str] = mapped_column(ForeignKey("produtos.id"), nullable=False)
     quantidade: Mapped[int] = mapped_column(Integer, nullable=False)
+    preco_unitario_centavos: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     cesta: Mapped["Cesta"] = relationship(back_populates="itens")
     produto: Mapped[Produto] = relationship()

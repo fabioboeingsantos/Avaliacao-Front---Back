@@ -20,7 +20,15 @@ def listar_produtos(
 ):
     """Lista produtos e suas quantidades disponíveis para o catálogo."""
 
-    return repositorio.listar_produtos_disponiveis(sessao)
+    return [
+        {
+            "id": produto["id"],
+            "nome": produto["nome"],
+            "estoque": produto["estoque"],
+            "preco_unitario": produto["preco_centavos"] / 100,
+        }
+        for produto in repositorio.listar_produtos_disponiveis(sessao)
+    ]
 
 
 @router.put("/{produto_id}/estoque")

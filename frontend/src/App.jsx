@@ -38,6 +38,11 @@ function formatarNomeUsuario(nome) {
   return nome[0].toLocaleUpperCase('pt-BR') + nome.slice(1)
 }
 
+// Formata todos os valores monetários em reais, usando sempre duas casas decimais.
+function formatarMoeda(valor) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor ?? 0)
+}
+
 // Mantém o fluxo visual disponível quando a API ainda não estiver ligada.
 // Converte o formato snake_case da API no formato usado pelas telas React.
 function adaptarCestaDaApi(cesta) {
@@ -57,8 +62,13 @@ function adaptarCestaDaApi(cesta) {
       id: produto.id,
       nome: produto.nome,
       quantidade: produto.quantidade,
+      // O backend devolve o preço unitário congelado no momento do pedido.
+      precoUnitario: produto.preco_unitario,
+      subtotal: produto.subtotal,
       imagem: `/produtos/${produto.id}-editorial.png`,
     })),
+    // O total vem calculado pelo backend para evitar confiar em valor enviado pelo navegador.
+    valorTotal: cesta.valor_total,
     separacoes: cesta.separacoes.map((separacao) => ({
       produtoId: separacao.produto_id,
       quantidade: separacao.quantidade,
@@ -71,6 +81,8 @@ function adaptarProdutoDaApi(produto) {
     id: produto.id,
     nome: produto.nome,
     estoque: produto.estoque,
+    // O preço é unitário e não depende de peso ou quilograma.
+    precoUnitario: produto.preco_unitario,
     imagem: `/produtos/${produto.id}-editorial.png`,
   }
 }
@@ -439,7 +451,7 @@ function App() {
       })
       setPedidos((pedidosAtuais) => [adaptarCestaDaApi(cestaCriada), ...pedidosAtuais])
       carregarProdutosDoServidor()
-      setMensagemApi('Pedido registrado no backend.')
+      setMensagemApi(`Pedido registrado no backend. Total: ${formatarMoeda(cestaCriada.valor_total)}`)
     } catch (erro) {
       return { sucesso: false, erro: erro.message }
     }

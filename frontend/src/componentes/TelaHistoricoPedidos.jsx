@@ -2,6 +2,10 @@ import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
 
+// Exibe os valores registrados no pedido em reais, sem conversão por peso.
+const formatarMoeda = (valor) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor ?? 0)
+
 function obterClasseSituacao(situacao) {
   return situacao
     .toLowerCase()
@@ -108,10 +112,15 @@ function TelaHistoricoPedidos({
                       />
                       <span>{produto.nome}</span>
                     </span>
-                    <strong>{produto.quantidade} item</strong>
+                    <span>{formatarMoeda(produto.precoUnitario)} / un.</span>
+                    <strong>{produto.quantidade} un. · {formatarMoeda(produto.subtotal)}</strong>
                   </li>
                 ))}
               </ul>
+              <div className="total-pedido total-pedido-historico">
+                <span>Valor final do pedido</span>
+                <strong>{formatarMoeda(pedido.valorTotal)}</strong>
+              </div>
               <button
                 className="botao botao-secundario botao-detalhes-cesta"
                 type="button"

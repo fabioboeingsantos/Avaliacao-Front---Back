@@ -36,16 +36,34 @@ Mostre a sequência visual dos processos de Vanderlei: colheita, transporte das 
 
 ## 2. Explicar a solução e o MVP · slide 6
 
-Explique a solução de forma breve: o assinante escolhe e revisa uma cesta; o produtor consulta o pedido, acompanha o estoque e registra a separação; ambos acompanham a situação.
+### Slide 6 · Da necessidade à cesta organizada
 
-- **Briefing:** conte que as necessidades das duas personas e o contexto da horta orientaram as prioridades e o fluxo do MVP.
-- **Logomarca e cores:** mostre a marca e explique as escolhas: verde associado à horta e à confiança; terracota e dourado associados à terra e à colheita; a cesta representa os produtos e a entrega comunitária.
-- **Telas e funcionalidades:** apresente as telas de escolha e revisão da cesta, histórico e detalhes do pedido, separação do produtor, controle de estoque e notificações. Destaque que o estoque é definido pelo produtor e que pedidos respeitam a disponibilidade.
-- **Limite do MVP:** mostre o que já funciona e deixe funcionalidades futuras para a seção 4, especialmente a assistência por IA.
+Apresente este slide como a ponte entre o problema identificado nas personas e a solução construída. A
+explicação deve seguir os três blocos visuais do slide:
+
+1. **Problema:** os pedidos ficavam dispersos, dificultando a conferência e fazendo o produtor perder a visão do que ainda faltava.
+2. **Identidade:** explique que a identidade visual traduz o contexto do produto: verde remete à horta e à confiança; terracota e dourado remetem à terra, à colheita e aos alimentos; a cesta representa a entrega comunitária.
+3. **MVP:** mostre que a primeira versão resolve o fluxo essencial: a assinante escolhe e revisa a cesta, o produtor controla o estoque e separa os pedidos, e os dois acompanham a situação.
+
+Explique que o MVP foi priorizado a partir das necessidades das duas personas. O objetivo não foi criar
+um sistema genérico de comércio eletrônico, mas organizar o ciclo específico de pedido, disponibilidade,
+separação e acompanhamento de uma horta comunitária.
+
+Apresente rapidamente as telas que serão demonstradas: escolha e revisão da cesta, histórico, detalhes
+do pedido, separação do produtor, gerenciamento de estoque e notificações. Encerre dizendo que as
+funcionalidades adicionais, incluindo a assistência por IA, aparecem como evolução planejada e não como
+parte já implementada do MVP.
+
+**Transição:** “Com o problema e a solução definidos, agora vou mostrar como esse fluxo funciona no
+sistema publicado e quais regras ficam protegidas nos bastidores.”
 
 ## 3. Demonstrar o sistema publicado · slide 10 e navegador
 
-Comece esta parte na tela de login do sistema publicado. Use o endereço indicado no slide 8 para abrir a aplicação na Vercel. Diga à turma que agora você vai percorrer o fluxo real.
+### Slide 10 · Acesse o sistema
+
+Use este slide para apresentar o endereço publicado e explicar que a demonstração será feita no navegador.
+Mostre que a apresentação visual continua no slide enquanto o fluxo real é executado na aplicação. Use o
+endereço indicado no próprio slide 10 para abrir a aplicação na Vercel.
 
 1. **Abrir o endereço publicado:** acesse a URL da Vercel que aparece no slide. Confirme que a página carregou antes de continuar.
 2. **Cadastrar um usuário:** crie uma conta de demonstração com dados de teste. Em seguida, abra o Supabase e localize o registro correspondente.
@@ -54,16 +72,62 @@ Comece esta parte na tela de login do sistema publicado. Use o endereço indicad
 5. **Entrar como produtor:** encerre a sessão e use a conta de produtor. Mostre o controle de estoque, pedidos recebidos, abertura de um pedido, separação e atualização de situação. Se possível, destaque o aviso de estoque baixo e que a pessoa assinante também recebe atualizações.
 6. **Testar uma falha de acesso:** tente uma senha incorreta ou um cadastro inválido usando dados de demonstração. Mostre a mensagem apresentada e explique como ela orienta a pessoa a corrigir a entrada.
 
-Conclua a demonstração resumindo o percurso: cadastro e acesso, pedido, separação e acompanhamento. Se algum serviço estiver indisponível, descreva o passo sem alegar que foi concluído.
+Conclua a demonstração resumindo o percurso: cadastro e acesso, pedido, separação e acompanhamento. Se
+algum serviço estiver indisponível, descreva o passo sem alegar que foi concluído.
 
-## 4. Apresentar os próximos passos · slides 7 a 9
+## 4. Explicar o impacto e os próximos passos · slides 7 a 9
 
-Use o backlog visual dos slides para separar o que já foi entregue do que ainda está planejado. Não apresente a IA como funcionalidade pronta.
+Use estes slides para separar claramente o que já foi implementado, o benefício gerado pelo MVP e o que
+continua planejado. Não apresente a IA como funcionalidade pronta.
 
-- **O que está planejado:** recuperação real de senha, melhorias de operação e qualidade, e assistência para montar a cesta. Diferencie claramente esses itens do MVP implementado.
-- **Funcionalidade de IA:** explique que a proposta é interpretar um pedido em linguagem natural, sugerir produtos compatíveis com catálogo, estoque e tamanho da cesta, e permitir que a pessoa revise, edite e confirme.
-- **Justificativa:** a sugestão pode reduzir o esforço de escolher produtos, sobretudo no celular, mantendo a decisão final com quem pede.
-- **Próxima evolução:** indicar como trabalhos futuros definir exemplos de pedidos, desenhar e prototipar a proposta editável e validar a experiência. A integração com um modelo e o uso da IA ainda precisam ser implementados.
+### Slide 7 · O que acontece nos bastidores?
+
+Explique que o sistema não é apenas uma tela de formulário. Existem regras técnicas protegendo o fluxo:
+
+- o login separa os perfis de assinante e produtor e mantém a sessão em cookie seguro;
+- o produtor define o estoque disponível;
+- a criação do pedido verifica estoque, tamanho e quantidade máxima por produto;
+- quando o estoque chega a zero, o produto fica indisponível para novos pedidos;
+- o sino de notificações informa atualizações do pedido para as pessoas envolvidas.
+
+Destaque que essas regras são aplicadas no backend, não apenas no frontend. Assim, mesmo que alguém tente
+enviar uma requisição manualmente, a API continua validando permissões, estoque e limites.
+
+### Slide 8 · Uma ideia vira uma cesta revisável
+
+Apresente a IA como uma evolução planejada para reduzir o esforço de montar uma cesta no celular. A pessoa
+poderá escrever algo como “quero uma cesta média para preparar saladas, com tomate e cenoura, sem cebola”,
+e receber uma proposta para revisar.
+
+Para a banca de T.I., explique a arquitetura prevista:
+
+1. O frontend envia a mensagem ao backend; o componente React não chama o provedor diretamente.
+2. O backend envia ao Agente 1 a mensagem, o catálogo com IDs, os tamanhos válidos e os limites da cesta.
+3. O Agente 1 retorna uma proposta estruturada em JSON, com tamanho, produtos, quantidades, exclusões e dúvidas.
+4. O Agente 2 recebe a mensagem original e a proposta para revisar divergências, omissões e ambiguidades.
+5. O backend valida o formato, os IDs, o estoque e os limites de 5, 8 ou 12 produtos antes de aceitar a proposta.
+6. A pessoa revisa, edita ou rejeita a sugestão; somente depois da confirmação humana o fluxo atual de criação da cesta é chamado.
+
+Reforce os limites de segurança: os agentes não terão acesso direto ao banco, às rotas de gravação, às
+credenciais ou às regras de negócio. A resposta do modelo será uma sugestão, nunca uma autorização para
+criar pedidos.
+
+Explique também o tratamento de falhas: se o provedor não responder, devolver JSON inválido ou apontar uma
+dúvida, nada será gravado automaticamente. A interface deverá mostrar a pendência e permitir continuar
+pelo formulário manual. A OpenAI é o provedor proposto, mas o modelo, endpoint, custo e configuração segura
+da chave ainda serão definidos durante a implementação.
+
+### Slide 9 · Uma cesta, duas rotinas conectadas
+
+Use este slide para fechar a narrativa mostrando o impacto do produto:
+
+- **Para a assinante:** o pedido fica mais claro, revisável e fácil de acompanhar.
+- **Para o produtor:** a separação passa a seguir pedidos, quantidades e disponibilidade reais, reduzindo o trabalho “no chute”.
+- **Para o sistema:** o estoque conecta o pedido à capacidade de montagem e as notificações reduzem a necessidade de procurar mensagens.
+- **Para a evolução:** a IA apoia a interpretação do pedido, mas a pessoa continua decidindo e o backend continua validando.
+
+Finalize retomando que o MVP organiza o fluxo atual e que a IA será construída sobre essa base, sem substituir
+autenticação, permissões ou regras determinísticas.
 
 Finalize retomando o impacto esperado para Aline e Vanderlei e agradeça à turma. Deixe o endereço publicado visível para quem quiser anotá-lo.
 

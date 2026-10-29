@@ -10,18 +10,18 @@ from seguranca import criar_hash_de_senha, senha_ja_esta_protegida
 
 
 PRODUTOS_INICIAIS = [
-    ("alface", "Alface"),
-    ("tomate", "Tomate"),
-    ("cenoura", "Cenoura"),
-    ("batata", "Batata"),
-    ("cebola", "Cebola"),
-    ("couve", "Couve"),
-    ("beterraba", "Beterraba"),
-    ("abobrinha", "Abobrinha"),
-    ("chuchu", "Chuchu"),
-    ("pimentao", "Pimentão"),
-    ("pepino", "Pepino"),
-    ("mandioca", "Mandioca"),
+    ("alface", "Alface", 450),
+    ("tomate", "Tomate", 700),
+    ("cenoura", "Cenoura", 500),
+    ("batata", "Batata", 600),
+    ("cebola", "Cebola", 400),
+    ("couve", "Couve", 550),
+    ("beterraba", "Beterraba", 500),
+    ("abobrinha", "Abobrinha", 650),
+    ("chuchu", "Chuchu", 450),
+    ("pimentao", "Pimentão", 800),
+    ("pepino", "Pepino", 550),
+    ("mandioca", "Mandioca", 750),
 ]
 
 USUARIOS_INICIAIS = [
@@ -34,18 +34,36 @@ def criar_tabelas() -> None:
     """Cria as tabelas sem apagar dados existentes e inclui dados ausentes."""
 
     Base.metadata.create_all(bind=engine)
+    # Mantém bancos locais antigos compatíveis com as colunas adicionadas ao catálogo.
     colunas_produtos = {coluna["name"] for coluna in inspect(engine).get_columns("produtos")}
-    if "estoque" not in colunas_produtos:
+    preco_adicionado_agora = "preco_centavos" not in colunas_produtos
+    if "estoque" not in colunas_produtos or "preco_centavos" not in colunas_produtos:
         # create_all não altera tabelas existentes; atualiza o banco local sem apagar dados.
         with engine.begin() as conexao:
+            if "estoque" not in colunas_produtos:
+                conexao.execute(text("ALTER TABLE produtos ADD COLUMN estoque INTEGER NOT NULL DEFAULT 20"))
+            if preco_adicionado_agora:
+                conexao.execute(text("ALTER TABLE produtos ADD COLUMN preco_centavos INTEGER NOT NULL DEFAULT 500"))
+
+    # Bancos que já tinham pedidos também recebem o preço congelado de cada item.
+    colunas_itens = {coluna["name"] for coluna in inspect(engine).get_columns("itens_cesta")}
+    if "preco_unitario_centavos" not in colunas_itens:
+        with engine.begin() as conexao:
+            conexao.execute(text("ALTER TABLE itens_cesta ADD COLUMN preco_unitario_centavos INTEGER"))
             conexao.execute(
-                text("ALTER TABLE produtos ADD COLUMN estoque INTEGER NOT NULL DEFAULT 20")
+                text(
+                    "UPDATE itens_cesta SET preco_unitario_centavos = "
+                    "(SELECT preco_centavos FROM produtos WHERE produtos.id = itens_cesta.produto_id)"
+                )
             )
     sessao = Sessao()
     try:
-        for produto_id, nome in PRODUTOS_INICIAIS:
+        for produto_id, nome, preco_centavos in PRODUTOS_INICIAIS:
             if sessao.get(Produto, produto_id) is None:
-                sessao.add(Produto(id=produto_id, nome=nome))
+                sessao.add(Produto(id=produto_id, nome=nome, preco_centavos=preco_centavos))
+            elif preco_adicionado_agora:
+                # Atualiza bancos antigos com os valores fictícios definidos para a demonstração.
+                sessao.get(Produto, produto_id).preco_centavos = preco_centavos
 
         for nome, email, senha, perfil in USUARIOS_INICIAIS:
             usuario_existente = sessao.query(Usuario).filter_by(usuario=nome).first()

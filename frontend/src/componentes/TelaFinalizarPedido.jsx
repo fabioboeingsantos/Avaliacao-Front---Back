@@ -1,5 +1,9 @@
 import { useState } from 'react'
 
+// Mantém a apresentação monetária padronizada em reais e por unidade.
+const formatarMoeda = (valor) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor ?? 0)
+
 // Esta tela permite conferir a cesta antes de registrar o pedido no histórico.
 function TelaFinalizarPedido({
   pedido,
@@ -88,10 +92,15 @@ function TelaFinalizarPedido({
             <li className="item-resumo-pedido" key={produto.id}>
               <img className="imagem-produto" src={produto.imagem} alt="" />
               <span className="nome-produto">{produto.nome}</span>
-              <strong>{produto.quantidade} item</strong>
+              <span>{formatarMoeda(produto.precoUnitario)} / un.</span>
+              <strong>{produto.quantidade} un. · {formatarMoeda(produto.precoUnitario * produto.quantidade)}</strong>
             </li>
           ))}
         </ul>
+        <div className="total-pedido">
+          <span>Valor de conclusão do pedido</span>
+          <strong>{formatarMoeda(pedido.valorTotal)}</strong>
+        </div>
       </section>
 
       {erro && <p className="mensagem mensagem-erro" role="alert">{erro}</p>}

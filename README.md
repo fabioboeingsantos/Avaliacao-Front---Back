@@ -107,6 +107,30 @@ O estoque é reservado ao criar o pedido e devolvido quando uma cesta pendente �
 interface também exibe notificações internas no navegador quando identifica atualizações nos pedidos;
 não há envio externo por e-mail, SMS ou mensageria.
 
+### Preços fictícios por unidade
+
+Os valores abaixo são demonstrativos e não usam peso ou quilograma. O total de cada cesta é calculado
+pela soma de `preço unitário × quantidade`; por isso, aumentar ou diminuir a quantidade atualiza o valor
+antes da conclusão.
+
+| Produto | Valor por unidade |
+|---|---:|
+| Alface | R$ 4,50 |
+| Tomate | R$ 7,00 |
+| Cenoura | R$ 5,00 |
+| Batata | R$ 6,00 |
+| Cebola | R$ 4,00 |
+| Couve | R$ 5,50 |
+| Beterraba | R$ 5,00 |
+| Abobrinha | R$ 6,50 |
+| Chuchu | R$ 4,50 |
+| Pimentão | R$ 8,00 |
+| Pepino | R$ 5,50 |
+| Mandioca | R$ 7,50 |
+
+Na tela de finalização aparece o valor de cada item, sua quantidade, o subtotal e o valor de conclusão
+do pedido. O histórico preserva o preço unitário praticado no momento da criação da cesta.
+
 Rotas disponíveis:
 
 - `GET /saude`: verifica se a API está online.
@@ -146,7 +170,7 @@ python -m alembic upgrade head
 As migrações atualizam as contas, os estados das cestas e o estoque dos produtos, preservando os
 hashes Argon2 e registrando a data de conclusão da separação.
 
-O estado esperado do banco após aplicar as migrações é `20261029_0008 (head)`, com as tabelas
+O estado esperado do banco após aplicar as migrações é `20261029_0009 (head)`, com as tabelas
 `usuarios`, `produtos`, `cestas`, `itens_cesta`, `separacoes` e `alembic_version`. As cestas
 são criadas durante o fluxo de demonstração; o carregamento inicial não cria pedidos.
 
