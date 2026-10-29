@@ -1461,6 +1461,43 @@
   text-decoration: underline;
 }
 
+.miniaturas-cesta-produtor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  overflow-x: auto;
+  padding: 2px 0;
+}
+
+.miniatura-produto-cesta {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+  background: var(--cor-creme-natural);
+  object-fit: cover;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.resumo-pedido-recolhido:hover .miniatura-produto-cesta {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(31, 77, 46, .16);
+}
+
+.contador-miniaturas-cesta {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--cor-verde-escuro);
+  background: var(--cor-verde-claro);
+  font-weight: var(--peso-semi);
+}
+
 .conteudo-pedido-expandido {
   display: grid;
   gap: 14px;

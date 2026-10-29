@@ -302,6 +302,20 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
                   <strong>{totalSeparado} de {totalPedido} itens separados</strong>
                   <span>Faltam {restantePedido} · Espaço livre: {espacoLivre}</span>
                 </div>
+                <div className="miniaturas-cesta-produtor" aria-label="Pré-visualização dos produtos da cesta">
+                  {cesta.produtos.slice(0, 5).map((produto) => (
+                    <img
+                      className="miniatura-produto-cesta"
+                      key={produto.id}
+                      src={produto.imagem ?? `/produtos/${produto.id}-editorial.png`}
+                      alt={produto.nome}
+                      title={produto.nome}
+                    />
+                  ))}
+                  {cesta.produtos.length > 5 && (
+                    <span className="contador-miniaturas-cesta">+{cesta.produtos.length - 5}</span>
+                  )}
+                </div>
                 <span className="rotulo-expandir-pedido">Abrir cesta e produtos</span>
                 </summary>
                 <div className="conteudo-pedido-expandido">
