@@ -55,7 +55,7 @@ Use o backlog visual dos slides para separar o que já foi entregue do que ainda
 - **O que está planejado:** recuperação real de senha, melhorias de operação e qualidade, e assistência para montar a cesta. Diferencie claramente esses itens do MVP implementado.
 - **Funcionalidade de IA:** explique que a proposta é interpretar um pedido em linguagem natural, sugerir produtos compatíveis com catálogo, estoque e tamanho da cesta, e permitir que a pessoa revise, edite e confirme.
 - **Justificativa:** a sugestão pode reduzir o esforço de escolher produtos, sobretudo no celular, mantendo a decisão final com quem pede.
-- **UC3 a partir de 04/11:** indicar como próximos trabalhos definir exemplos de pedidos, desenhar e prototipar a proposta editável e validar a experiência. A integração com um modelo e o uso da IA ainda precisam ser implementados.
+- **Próxima evolução:** indicar como trabalhos futuros definir exemplos de pedidos, desenhar e prototipar a proposta editável e validar a experiência. A integração com um modelo e o uso da IA ainda precisam ser implementados.
 
 Finalize retomando o impacto esperado para Aline e Vanderlei e agradeça à turma. Deixe o endereço publicado visível para quem quiser anotá-lo.
 
@@ -66,4 +66,4 @@ Finalize retomando o impacto esperado para Aline e Vanderlei e agradeça à turm
 - Na demonstração, narre cada ação antes de fazê-la e diga o que a turma deve observar na tela.
 - Mantenha dados de teste prontos e evite improvisar senhas ou informações pessoais durante a apresentação.
 - Faça uma pausa entre as quatro partes e use as transições sugeridas para conectar os assuntos.
-- Termine distinguindo o que foi demonstrado do que será desenvolvido na UC3.
+- Termine distinguindo o que foi demonstrado do que será desenvolvido nas próximas etapas.
