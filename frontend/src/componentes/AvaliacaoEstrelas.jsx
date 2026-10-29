@@ -37,10 +37,16 @@ function AvaliacaoEstrelas({ titulo, valor, aoSalvar }) {
     }
   }
 
+  const nivelVisual = estrelasEmFoco ?? estrelasSelecionadas
+
   return (
     <section className="avaliacao-cesta" aria-label={titulo}>
       <strong>{titulo}</strong>
-      <div className="estrelas-avaliacao" role="group" aria-label="Escolha de uma a cinco estrelas">
+      <div
+        className={`estrelas-avaliacao ${nivelVisual > 0 ? `nivel-estrelas-${nivelVisual}` : ''}`}
+        role="group"
+        aria-label="Escolha de uma a cinco estrelas"
+      >
         {[1, 2, 3, 4, 5].map((estrela) => (
           <button
             className={`botao-estrela ${estrela <= estrelasSelecionadas ? 'estrela-ativa' : ''} ${estrelasEmFoco !== null && estrela <= estrelasEmFoco ? 'estrela-em-foco' : ''}`}

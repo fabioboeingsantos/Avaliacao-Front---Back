@@ -934,6 +934,41 @@
   transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
+.estrelas-avaliacao.nivel-estrelas-1 .botao-estrela.estrela-ativa,
+.estrelas-avaliacao.nivel-estrelas-1 .botao-estrela.estrela-em-foco {
+  border-color: #c94b45;
+  color: #c94b45;
+  background: #fff0ee;
+}
+
+.estrelas-avaliacao.nivel-estrelas-2 .botao-estrela.estrela-ativa,
+.estrelas-avaliacao.nivel-estrelas-2 .botao-estrela.estrela-em-foco {
+  border-color: #e27c2f;
+  color: #e27c2f;
+  background: #fff3e8;
+}
+
+.estrelas-avaliacao.nivel-estrelas-3 .botao-estrela.estrela-ativa,
+.estrelas-avaliacao.nivel-estrelas-3 .botao-estrela.estrela-em-foco {
+  border-color: #d8aa27;
+  color: #d8aa27;
+  background: #fff8dc;
+}
+
+.estrelas-avaliacao.nivel-estrelas-4 .botao-estrela.estrela-ativa,
+.estrelas-avaliacao.nivel-estrelas-4 .botao-estrela.estrela-em-foco {
+  border-color: #70a94d;
+  color: #70a94d;
+  background: #eef8e8;
+}
+
+.estrelas-avaliacao.nivel-estrelas-5 .botao-estrela.estrela-ativa,
+.estrelas-avaliacao.nivel-estrelas-5 .botao-estrela.estrela-em-foco {
+  border-color: #2f7d45;
+  color: #2f7d45;
+  background: #e6f4e8;
+}
+
 .botao-salvar-avaliacao {
   justify-self: start;
 }
