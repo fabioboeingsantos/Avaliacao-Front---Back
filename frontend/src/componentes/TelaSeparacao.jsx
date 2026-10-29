@@ -3,7 +3,9 @@ import { useState } from 'react'
 // Esta é a tela principal do produtor, com as cestas filtradas para a separação da semana.
 function TelaSeparacao({ cestas, aoAbrirFechamento }) {
   const [filtroTamanho, setFiltroTamanho] = useState('todos')
-  const [filtroSituacao, setFiltroSituacao] = useState('Em separação')
+  // Pedidos recém-criados entram como Pendentes e precisam aparecer primeiro
+  // para o produtor iniciar a separação.
+  const [filtroSituacao, setFiltroSituacao] = useState('Pendente')
 
   // Soma o que já foi separado para mostrar o espaço restante da cesta.
   function obterTotalSeparado(cesta) {
