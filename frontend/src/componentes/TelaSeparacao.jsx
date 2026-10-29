@@ -95,6 +95,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
   const cestasProntasParaConcluir = cestas.filter(
     (cesta) => cesta.situacao === 'Em separação' && !cesta.separacaoConcluidaEm && separacaoFoiCompleta(cesta),
   )
+  const cestasPendentes = cestas.filter((cesta) => cesta.situacao === 'Pendente')
   const produtosComEstoqueBaixo = produtos.filter((produto) => produto.estoque <= 10)
 
   return (
@@ -182,7 +183,23 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
       )}
 
       {modo === 'separacao' && <section className="filtros-separacao" aria-labelledby="titulo-filtros-separacao">
-        <h2 id="titulo-filtros-separacao">Filtrar cestas</h2>
+        <div className="cabecalho-filtros-separacao">
+          <h2 id="titulo-filtros-separacao">Filtrar cestas</h2>
+          {cestasPendentes.length > 0 && (
+            <button
+              className="alerta-pendencias-cestas"
+              type="button"
+              onClick={() => setFiltroSituacao('Pendente')}
+              aria-label={`Ver ${cestasPendentes.length} pedido${cestasPendentes.length === 1 ? '' : 's'} pendente${cestasPendentes.length === 1 ? '' : 's'}`}
+            >
+              <span className="icone-alerta-pendencias" aria-hidden="true">!</span>
+              <span>
+                <strong>{cestasPendentes.length} pedido{cestasPendentes.length === 1 ? '' : 's'} pendente{cestasPendentes.length === 1 ? '' : 's'}</strong>
+                <small>Ver pendências</small>
+              </span>
+            </button>
+          )}
+        </div>
         <div className="campos-filtro-separacao">
           <label className="campo-login">
             <span>Tamanho</span>

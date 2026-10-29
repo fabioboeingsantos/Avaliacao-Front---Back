@@ -1794,6 +1794,68 @@
   background: var(--cor-branco);
 }
 
+.cabecalho-filtros-separacao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cabecalho-filtros-separacao h2 {
+  margin: 0;
+}
+
+.alerta-pendencias-cestas {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 12px 7px 7px;
+  border: 1px solid #d79a25;
+  border-radius: 999px;
+  color: #6f4a08;
+  background: #fff5d9;
+  cursor: pointer;
+  text-align: left;
+  animation: pulsar-pendencias 1.6s ease-in-out infinite;
+}
+
+.alerta-pendencias-cestas:hover {
+  background: #ffedb4;
+}
+
+.alerta-pendencias-cestas small {
+  display: block;
+  margin-top: 1px;
+  color: #89600e;
+}
+
+.icone-alerta-pendencias {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--cor-branco);
+  background: #d79a25;
+  font-weight: 800;
+}
+
+@keyframes pulsar-pendencias {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(215, 154, 37, .36); }
+  50% { box-shadow: 0 0 0 7px rgba(215, 154, 37, 0); }
+}
+
+@media (max-width: 680px) {
+  .cabecalho-filtros-separacao {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .alerta-pendencias-cestas {
+    justify-content: flex-start;
+  }
+}
+
 .filtros-separacao h2 {
   margin-bottom: 16px;
 }
