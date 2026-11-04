@@ -350,7 +350,7 @@ function TelaFechamento({
           >
             Editar separação novamente
           </button>
-        )}
+        ) : null}
       </form>
       <aside
         className={`aviso-status-separacao ${separacaoJaConcluida ? 'aviso-separacao-completa' : 'aviso-separacao-pendente'}`}
