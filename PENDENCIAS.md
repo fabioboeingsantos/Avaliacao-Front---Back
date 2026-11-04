@@ -26,6 +26,7 @@ O deploy foi verificado, mas o envio SMTP e a entrega real dos e-mails continuam
 
 - [ ] Executar o roteiro completo no ambiente publicado com contas de demonstração que consigam entrar.
 - [ ] Registrar uma evidência simples do fluxo publicado funcionando.
+- [ ] Aplicar em sequência `supabase_20261104_0013.sql` e `supabase_20261104_0014.sql` no Supabase antes de publicar envio, notificações e fechamento com faltantes. A 0014 atualiza somente preços unitários nulos; valores já congelados permanecem intactos. Após SQL manual, executar `python -m alembic stamp 20261104_0014` com a revisão 0013 já aplicada.
 - [x] Testes automatizados locais do backend: 72 passaram.
 - [x] Lint e build de produção do frontend passaram localmente.
 - [x] Pipeline de CI para testes do backend, lint e build do frontend existe em

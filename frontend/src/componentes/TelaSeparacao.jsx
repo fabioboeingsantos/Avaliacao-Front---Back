@@ -4,7 +4,7 @@ import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
 import AvaliacaoEstrelas from './AvaliacaoEstrelas'
 
 // Esta é a tela principal do produtor, com as cestas filtradas para a separação da semana.
-function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEstoque, aoAtualizarPreco, aoAvaliarCesta, modo = 'separacao', aoAbrirEstoque, aoVoltarSeparacao }) {
+function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnviado, aoAtualizarEstoque, aoAtualizarPreco, aoAvaliarCesta, modo = 'separacao', aoAbrirEstoque, aoVoltarSeparacao }) {
   const [filtroTamanho, setFiltroTamanho] = useState('todos')
   const [rascunhosEstoque, setRascunhosEstoque] = useState({})
   const [estoqueSalvando, setEstoqueSalvando] = useState('')
@@ -12,9 +12,10 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
   const [rascunhosPrecos, setRascunhosPrecos] = useState({})
   const [precoSalvando, setPrecoSalvando] = useState('')
   const [mensagensPrecos, setMensagensPrecos] = useState({})
-  // Pedidos recém-criados entram como Pendentes e precisam aparecer primeiro
-  // para o produtor iniciar a separação.
-  const [filtroSituacao, setFiltroSituacao] = useState('Pendente')
+  const [envioSalvando, setEnvioSalvando] = useState(null)
+  const [mensagensEnvio, setMensagensEnvio] = useState({})
+  // Mostra o fluxo inteiro para o produtor conseguir continuar do preparado ao enviado.
+  const [filtroSituacao, setFiltroSituacao] = useState('todos')
 
   // Soma o que já foi separado para mostrar o espaço restante da cesta.
   function obterTotalSeparado(cesta) {
@@ -32,6 +33,19 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
   function obterClasseSituacao(situacao) {
     const semAcentos = situacao.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     return `status-${semAcentos.toLowerCase().replace(/\s+/g, '-')}`
+  }
+
+  async function marcarComoEnviado(cesta) {
+    setEnvioSalvando(cesta.id)
+    setMensagensEnvio((atuais) => ({ ...atuais, [cesta.id]: '' }))
+    const resultado = await aoMarcarEnviado(cesta.id)
+    if (!resultado?.sucesso) {
+      setMensagensEnvio((atuais) => ({
+        ...atuais,
+        [cesta.id]: resultado?.erro ?? 'Não foi possível registrar o envio.',
+      }))
+    }
+    setEnvioSalvando(null)
   }
 
   async function salvarEstoque(produto) {
@@ -84,10 +98,12 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
   // Aplica os dois filtros opcionais sem alterar a lista original de cestas.
   const cestasFiltradas = cestas.filter((cesta) => {
     const correspondeAoTamanho = filtroTamanho === 'todos' || cesta.tamanhoNome === filtroTamanho
-    const correspondeASituacao = filtroSituacao === 'Aguardando recebimento'
-      ? cesta.situacao === 'Em separação' && Boolean(cesta.separacaoConcluidaEm)
+    const correspondeASituacao = filtroSituacao === 'todos'
+      || (filtroSituacao === 'Preparado para envio'
+      ? cesta.situacao === 'Preparado para envio'
+        || (cesta.situacao === 'Em separação' && Boolean(cesta.separacaoConcluidaEm))
       : cesta.situacao === filtroSituacao
-        && (filtroSituacao !== 'Em separação' || !cesta.separacaoConcluidaEm)
+        && (filtroSituacao !== 'Em separação' || !cesta.separacaoConcluidaEm))
 
     return correspondeAoTamanho && correspondeASituacao
   })
@@ -157,7 +173,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
                   <strong>Separação pronta para concluir</strong>
                   <p>{cesta.tamanhoNome} · pedido #{formatarIdSolicitacao(cesta.id)} já tem todos os itens separados.</p>
                 </div>
-                <button className="botao botao-primario" type="button" onClick={() => aoAbrirFechamento(cesta.id)}>
+                <button className="botao botao-primario" type="button" onClick={() => aoAbrirFechamento(cesta)}>
                   Concluir pedido
                 </button>
               </article>
@@ -214,9 +230,11 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
           <label className="campo-login">
             <span>Situação</span>
             <select value={filtroSituacao} onChange={(evento) => setFiltroSituacao(evento.target.value)}>
+              <option value="todos">Todas as situações</option>
               <option value="Pendente">Pendente</option>
               <option value="Em separação">Em separação</option>
-              <option value="Aguardando recebimento">Aguardando recebimento</option>
+              <option value="Preparado para envio">Preparado para envio</option>
+              <option value="Enviado">Enviado</option>
               <option value="Entregue">Entregue</option>
               <option value="Cancelado">Cancelado</option>
             </select>
@@ -310,8 +328,13 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
                   <div>
                     <p className="rotulo-cartao">{formatarIdSolicitacao(cesta.id)} · pedido de {cesta.data}</p>
                     <h2>Cesta {cesta.tamanhoNome}</h2>
+                    <p className="cliente-cartao-produtor">
+                      Cliente: {cesta.assinante
+                        ? cesta.assinante[0].toLocaleUpperCase('pt-BR') + cesta.assinante.slice(1)
+                        : 'não identificado'}
+                    </p>
                   </div>
-                  <span className={`status-cesta ${obterClasseSituacao(cesta.situacao)}`}>
+                  <span className={`status-cesta ${obterClasseSituacao(obterRotuloSituacao(cesta.situacao, cesta.separacaoConcluidaEm))}`}>
                     {obterRotuloSituacao(cesta.situacao, cesta.separacaoConcluidaEm)}
                   </span>
                 </div>
@@ -359,15 +382,36 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoAtualizarEs
 
                   {!['Entregue', 'Cancelado'].includes(cesta.situacao) && (
                     <div className="acoes-cesta-produtor">
-                      <button
-                        className="botao botao-primario"
-                        type="button"
-                        onClick={() => aoAbrirFechamento(cesta)}
-                      >
-                        {cesta.separacaoConcluidaEm ? 'Em andamento' : 'Separar produtos'}
-                      </button>
-                      {cesta.separacaoConcluidaEm && (
-                        <span>Aguardando confirmação de recebimento do cliente</span>
+                      {cesta.situacao === 'Enviado' ? (
+                        <span>Pedido enviado; aguardando confirmação do cliente.</span>
+                      ) : (
+                        <>
+                          <button
+                            className="botao botao-primario"
+                            type="button"
+                            onClick={() => cesta.situacao === 'Preparado para envio'
+                              ? marcarComoEnviado(cesta)
+                              : aoAbrirFechamento(cesta)}
+                            disabled={envioSalvando === cesta.id}
+                          >
+                            {envioSalvando === cesta.id
+                              ? 'Registrando envio...'
+                              : cesta.situacao === 'Preparado para envio'
+                                ? 'Marcar como enviado'
+                                : cesta.separacaoConcluidaEm ? 'Editar separação' : 'Separar produtos'}
+                          </button>
+                          {cesta.separacaoConcluidaEm && (
+                            <>
+                              <span>Separação concluída; cesta pronta para envio.</span>
+                              <button className="botao botao-secundario" type="button" onClick={() => aoAbrirFechamento(cesta)}>
+                                Editar separação
+                              </button>
+                            </>
+                          )}
+                        </>
+                      )}
+                      {mensagensEnvio[cesta.id] && (
+                        <p className="mensagem mensagem-erro" role="alert">{mensagensEnvio[cesta.id]}</p>
                       )}
                     </div>
                   )}

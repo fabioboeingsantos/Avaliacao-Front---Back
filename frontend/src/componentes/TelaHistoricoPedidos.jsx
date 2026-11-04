@@ -111,7 +111,7 @@ function TelaHistoricoPedidos({
                   </div>
                 </div>
                 <span
-                  className={`status-historico status-${obterClasseSituacao(pedido.situacao)}`}
+                  className={`status-historico status-${obterClasseSituacao(obterRotuloSituacao(pedido.situacao, pedido.separacaoConcluidaEm))}`}
                 >
                   {obterRotuloSituacao(pedido.situacao, pedido.separacaoConcluidaEm)}
                 </span>
@@ -134,7 +134,13 @@ function TelaHistoricoPedidos({
                       <span>{produto.nome}</span>
                     </span>
                     <span>{formatarMoeda(produto.precoUnitario)} / un.</span>
-                    <strong>{produto.quantidade} un. · {formatarMoeda(produto.subtotal)}</strong>
+                    <strong>
+                      {produto.quantidadeCobrada ?? produto.quantidade} un.
+                      {produto.quantidadeCobrada < produto.quantidade
+                        ? ` de ${produto.quantidade} pedidas`
+                        : ''}
+                      {' · '}{formatarMoeda(produto.subtotal)}
+                    </strong>
                   </li>
                 ))}
               </ul>

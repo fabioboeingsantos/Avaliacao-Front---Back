@@ -1093,6 +1093,16 @@
   background: var(--cor-fundo-etiqueta-separacao);
 }
 
+.status-preparado-para-envio {
+  color: var(--cor-sucesso);
+  background: var(--cor-fundo-sucesso);
+}
+
+.status-enviado {
+  color: #2F6B8A;
+  background: #E8F1F5;
+}
+
 .status-entregue {
   color: var(--cor-sucesso);
   background: var(--cor-fundo-sucesso);
@@ -1916,6 +1926,13 @@
 
 .cabecalho-cartao-produtor h2 {
   margin-bottom: 0;
+}
+
+.cliente-cartao-produtor {
+  margin: 4px 0 0;
+  color: var(--cor-texto-escuro);
+  font-size: var(--texto-rotulo);
+  font-weight: var(--peso-semi);
 }
 
 /* Destaca o limite que orienta a separação sem exigir cálculos manuais. */

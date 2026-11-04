@@ -7,6 +7,7 @@ from modelos.cesta import Cesta
 from modelos.produto import Produto
 from modelos.usuario import Usuario
 from modelos.token_conta import TokenConta  # noqa: F401
+from modelos.notificacao import Notificacao  # noqa: F401
 from seguranca import criar_hash_de_senha, senha_ja_esta_protegida
 
 
@@ -57,15 +58,20 @@ def criar_tabelas() -> None:
     if "preco_unitario_centavos" not in colunas_itens:
         with engine.begin() as conexao:
             conexao.execute(text("ALTER TABLE itens_cesta ADD COLUMN preco_unitario_centavos INTEGER"))
-            conexao.execute(
-                text(
-                    "UPDATE itens_cesta SET preco_unitario_centavos = "
-                    "(SELECT preco_centavos FROM produtos WHERE produtos.id = itens_cesta.produto_id)"
-                )
+    with engine.begin() as conexao:
+        conexao.execute(
+            text(
+                "UPDATE itens_cesta SET preco_unitario_centavos = "
+                "(SELECT preco_centavos FROM produtos WHERE produtos.id = itens_cesta.produto_id) "
+                "WHERE preco_unitario_centavos IS NULL"
             )
+        )
 
-    # Bancos locais antigos recebem as colunas de avaliação sem perder pedidos existentes.
+    # Bancos locais antigos recebem as colunas de envio e avaliação sem perder pedidos existentes.
     colunas_cestas = {coluna["name"] for coluna in inspect(engine).get_columns("cestas")}
+    if "enviado_em" not in colunas_cestas:
+        with engine.begin() as conexao:
+            conexao.execute(text("ALTER TABLE cestas ADD COLUMN enviado_em TIMESTAMP"))
     colunas_avaliacao = {
         "avaliacao_assinante": "avaliacao_assinante",
         "avaliacao_produtor": "avaliacao_produtor",

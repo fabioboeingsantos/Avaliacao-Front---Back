@@ -20,12 +20,16 @@ function formatarNomeCliente(nome) {
   return nome[0].toLocaleUpperCase('pt-BR') + nome.slice(1)
 }
 
+const formatarMoeda = (valor) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor ?? 0)
+
 // Esta tela permite ao produtor ajustar e registrar todos os produtos de uma vez.
 function TelaFechamento({
   cesta,
   aoAbrirSeparacao,
   aoSalvarSeparacao,
   aoReabrirSeparacao,
+  aoEncerrarComFaltantes,
 }) {
   const [edicaoQuantidades, setEdicaoQuantidades] = useState(() => ({
     cestaId: cesta?.id ?? null,
@@ -55,7 +59,7 @@ function TelaFechamento({
     ? cesta.id === edicaoQuantidades.cestaId
       ? edicaoQuantidades.quantidades
       : criarQuantidadesAtuais(cesta)
-    : Object.fromEntries(cesta.produtos.map((produto) => [produto.id, String(produto.quantidade)]))
+    : Object.fromEntries(cesta.produtos.map((produto) => [produto.id, String(obterQuantidadeSeparada(produto.id))]))
 
   function obterQuantidadeSeparada(produtoId) {
     return cesta.separacoes?.find((item) => item.produtoId === produtoId)?.quantidade ?? 0
@@ -159,6 +163,33 @@ function TelaFechamento({
       }
       setEdicaoQuantidades({ cestaId: cesta.id, quantidades: criarQuantidadesAtuais(cesta) })
       setMensagem('Separação reaberta para edição.')
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  async function encerrarComFaltantes() {
+    setErro('')
+    setMensagem('')
+    if (!totalPlanejado) {
+      setErro('Registre ao menos um item separado antes de encerrar o pedido com faltantes.')
+      return
+    }
+
+    setSalvando(true)
+    try {
+      const produtosConferidos = cesta.produtos.map((produto) => ({
+        produtoId: produto.id,
+        quantidade: Number(quantidades[produto.id]) || 0,
+      }))
+      const resultado = await aoEncerrarComFaltantes(cesta.id, produtosConferidos)
+      if (!resultado?.sucesso) {
+        setErro(resultado?.erro ?? 'Não foi possível encerrar o pedido com faltantes.')
+        return
+      }
+      setMensagem(
+        `Pedido encerrado com faltantes. Valor ajustado para ${formatarMoeda(resultado.valorTotal)}. O cliente verá os itens que faltaram e poderá aceitar após o envio.`,
+      )
     } finally {
       setSalvando(false)
     }
@@ -321,7 +352,7 @@ function TelaFechamento({
                   </div>
                 ) : (
                   <span className="quantidade-fixa-produto">
-                    Quantidade: {produto.quantidade}
+                    Separado: {atual} de {produto.quantidade} pedido(s)
                   </span>
                 )}
               </li>
@@ -330,17 +361,29 @@ function TelaFechamento({
         </ul>
 
         {!separacaoJaConcluida ? (
-          <button
-            className="botao botao-primario"
-            type="submit"
-            disabled={salvando}
-          >
-            {salvando
-              ? 'Salvando separação...'
-              : separacaoCompleta
-                ? 'Salvar e concluir separação'
-                : 'Salvar progresso da separação'}
-          </button>
+          <>
+            <button
+              className="botao botao-primario"
+              type="submit"
+              disabled={salvando}
+            >
+              {salvando
+                ? 'Salvando separação...'
+                : separacaoCompleta
+                  ? 'Salvar e concluir separação'
+                  : 'Salvar progresso da separação'}
+            </button>
+            {!separacaoCompleta && totalPlanejado > 0 && (
+              <button
+                className="botao botao-secundario"
+                type="button"
+                disabled={salvando}
+                onClick={encerrarComFaltantes}
+              >
+                Encerrar com faltantes e ajustar valor
+              </button>
+            )}
+          </>
         ) : cesta.situacao !== 'Entregue' && cesta.situacao !== 'Cancelado' ? (
           <button
             className="botao botao-secundario"
@@ -356,7 +399,9 @@ function TelaFechamento({
         className={`aviso-status-separacao ${separacaoJaConcluida ? 'aviso-separacao-completa' : 'aviso-separacao-pendente'}`}
         role="status"
       >
-        {separacaoJaConcluida ? (
+        {separacaoJaConcluida && itensNaoAtendidos.length > 0 ? (
+          <><strong>Pedido encerrado com faltantes.</strong> {itensNaoAtendidos.map((produto) => `${produto.nome}: vieram ${produto.quantidade - produto.falta} de ${produto.quantidade}; faltaram ${produto.falta}`).join('; ')}. O valor foi ajustado à quantidade separada. Se houver estoque, você pode reabrir para corrigir.</>
+        ) : separacaoJaConcluida ? (
           <><strong>Todos os itens foram separados.</strong> A cesta está concluída. Se houver algum engano, use “Editar separação novamente”.</>
         ) : itensNaoAtendidos.length > 0 ? (
           <><strong>Separação incompleta.</strong> {itensNaoAtendidos.map((produto) => `${produto.nome}: faltam ${produto.falta}`).join('; ')}. Se algum item estiver sem estoque, ajuste a quantidade ao que está disponível; a pendência continuará visível aqui.</>

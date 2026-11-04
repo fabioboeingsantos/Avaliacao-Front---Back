@@ -16,10 +16,10 @@ confirmação ou ainda não foram definidos.
   detalhes da composição e da separação.
 - **Separação do produtor:** Vanderlei acompanha as cestas, abre a separação e registra produtos em
   lote. Também pode desfazer o último lote registrado.
-- **Situações e recebimento:** as situações são `Pendente`, `Em separação` e `Entregue`. Depois que
-  o produtor conclui a separação, a cesta permanece `Em separação` enquanto aguarda a confirmação
-  da assinante. A assinante pode confirmar o recebimento; se não confirmar, a cesta passa para
-  `Entregue` após sete dias da conclusão da separação, quando consultada pela API.
+- **Situações e recebimento:** as situações incluem `Pendente`, `Em separação`, `Preparado para envio`,
+  `Enviado` e `Entregue`. Depois que o produtor conclui a separação, a cesta fica `Preparado para envio`;
+  ao registrar o envio, o cliente recebe uma notificação persistente. A cesta passa para `Entregue`
+  quando a assinante confirma o recebimento ou sete dias após o envio, quando consultada pela API.
 - **Cesta selecionável:** Pequena, Média e Grande limitam a quantidade de produtos diferentes a
   5, 8 e 12, respectivamente. Cada produto pode ter até 10 unidades; esses limites não restringem
   a soma das unidades.
@@ -35,7 +35,7 @@ confirmação ou ainda não foram definidos.
 | Autenticação e persistência | O briefing descrevia listas em memória e um ciclo sem banco/login. | Foram adotados backend autenticado e persistência para guardar pedidos e vincular cada cesta à conta da assinante. |
 | Limite da cesta selecionável | A cartilha contava unidades no limite: 5, 8 e 12 itens. | O tamanho conta produtos distintos; cada produto pode ter até 10 unidades. A regra foi esclarecida durante a evolução do fluxo. |
 | Separação | O fluxo inicial descrevia separação produto a produto. | O produtor pode registrar produtos em lote e desfazer o último lote, para reduzir ações repetitivas e corrigir erros de operação. |
-| Situação do pedido | A cartilha descrevia `pedida` e `em separação`. | O sistema usa `Pendente`, `Em separação` e `Entregue` para representar espera de início, separação/espera de recebimento e entrega confirmada ou expirada. |
+| Situação do pedido | A cartilha descrevia `pedida` e `em separação`. | O sistema usa `Pendente`, `Em separação`, `Preparado para envio`, `Enviado` e `Entregue` para representar pedido aguardando, separação parcial, cesta completa, envio registrado e entrega confirmada ou expirada. |
 | Confirmação de recebimento | A cartilha não definia confirmação pelo cliente nem expiração. | A assinante pode confirmar o recebimento; sem confirmação, a cesta passa a `Entregue` após sete dias da conclusão da separação. |
 | Repetição de composição | A ideia aparecia como evolução futura. | O histórico oferece “Repetir composição”, carregando o modo, tamanho e quantidades para uma nova conferência. |
 | Apresentação visual | Não havia regra para exibir produtos em cartões compactos na lista do produtor. | A tela do produtor apresenta os produtos em blocos compactos com imagem, nome e quantidades, para economizar espaço e facilitar a conferência. |

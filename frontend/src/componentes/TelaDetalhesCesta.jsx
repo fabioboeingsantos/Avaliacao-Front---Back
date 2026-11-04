@@ -3,6 +3,9 @@ import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
 import AvaliacaoEstrelas from './AvaliacaoEstrelas'
 
+const formatarMoeda = (valor) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor ?? 0)
+
 function obterPendencias(cesta) {
   const separacoes = new Map((cesta.separacoes ?? []).map((item) => [item.produtoId, item.quantidade]))
 
@@ -48,6 +51,7 @@ function TelaDetalhesCesta({
   const totalPedido = cesta.produtos.reduce((total, produto) => total + produto.quantidade, 0)
   const totalSeparado = separacoes.reduce((total, separacao) => total + separacao.quantidade, 0)
   const produtosPendentes = obterPendencias(cesta)
+  const pedidoEncerradoComFaltantes = Boolean(cesta.separacaoConcluidaEm && produtosPendentes.length)
 
   async function confirmarRecebimento() {
     setConfirmando(true)
@@ -103,6 +107,7 @@ function TelaDetalhesCesta({
           <p className="resumo-pedido-detalhe">
             {totalSeparado} de {totalPedido} itens separados
           </p>
+          <p className="resumo-pedido-detalhe">Valor atual: <strong>{formatarMoeda(cesta.valorTotal)}</strong></p>
         </div>
         <span className="etiqueta-perfil">{cesta.modoNome}</span>
       </section>
@@ -115,35 +120,46 @@ function TelaDetalhesCesta({
 
       {produtosPendentes.length > 0 && cesta.situacao !== 'Cancelado' && (
         <section className="alerta-separacao-parcial" role="status" aria-label="Alerta de separação parcial">
-          <strong>Atenção: pedido separado parcialmente</strong>
+          <strong>{pedidoEncerradoComFaltantes ? 'Pedido encerrado com quantidade ajustada' : 'Atenção: pedido separado parcialmente'}</strong>
           <p>
-            O produtor separou {totalSeparado} de {totalPedido} itens. Confira as pendências antes de confirmar o recebimento.
+            {pedidoEncerradoComFaltantes
+              ? `O produtor encerrou com ${totalSeparado} de ${totalPedido} itens. O valor foi reduzido para ${formatarMoeda(cesta.valorTotal)}; confira os faltantes antes de aceitar.`
+              : `O produtor separou ${totalSeparado} de ${totalPedido} itens. O pedido ainda não foi encerrado.`}
           </p>
           <ul>
             {produtosPendentes.map((produto) => (
               <li key={produto.id}>
-                {produto.nome}: {produto.separado} separado(s) de {produto.quantidade} pedido(s) — faltam {produto.faltante}.
+                {produto.nome}: {produto.separado} recebido(s) de {produto.quantidade} pedido(s) — faltaram {produto.faltante}. Valor: {formatarMoeda(produto.subtotal)}.
               </li>
             ))}
           </ul>
         </section>
       )}
 
-      {cesta.separacaoConcluidaEm && cesta.situacao !== 'Entregue' && (
+      {cesta.situacao === 'Preparado para envio' && (
+        <p>A cesta está preparada. Você receberá uma notificação quando o produtor marcar o envio.</p>
+      )}
+      {cesta.situacao === 'Enviado' && (
         <section className="composicao-cesta">
-          <p>Recebeu sua cesta? Confirme para atualizar a situação para “Entregue”.</p>
+          <p>{pedidoEncerradoComFaltantes
+            ? 'Ao confirmar, você aceita as quantidades que chegaram e o valor ajustado do pedido.'
+            : 'Recebeu sua cesta? Confirme para atualizar a situação para “Entregue”.'}</p>
           <button
             className="botao botao-primario"
             type="button"
             disabled={confirmando}
             onClick={confirmarRecebimento}
           >
-            {confirmando ? 'Confirmando...' : 'Concluído: recebi a cesta'}
+            {confirmando
+              ? 'Confirmando...'
+              : pedidoEncerradoComFaltantes
+                ? 'Aceitar quantidades e encerrar pedido'
+                : 'Concluído: recebi a cesta'}
           </button>
         </section>
       )}
-      {cesta.separacaoConcluidaEm && cesta.situacao !== 'Entregue' && (
-        <p>Se não confirmar o recebimento, a situação mudará para “Entregue” após sete dias.</p>
+      {cesta.situacao === 'Enviado' && (
+        <p>Se não confirmar o recebimento, a situação mudará para “Entregue” sete dias após o envio.</p>
       )}
 
       {cesta.situacao === 'Entregue' && (
@@ -165,13 +181,15 @@ function TelaDetalhesCesta({
             {cesta.produtos.map((produto) => {
               const separacao = separacoes.find((item) => item.produtoId === produto.id)
               const quantidadeSeparada = separacao?.quantidade ?? 0
+              const quantidadeFaltante = Math.max(0, produto.quantidade - quantidadeSeparada)
 
               return (
                 <li className="item-detalhes-cesta cartao-detalhe-produto" key={produto.id}>
                   <img className="imagem-produto-detalhe" src={produto.imagem ?? `/produtos/${produto.id}-editorial.png`} alt="" />
                   <div>
                     <strong>{produto.nome}</strong>
-                    <span>{produto.quantidade} item(ns) pedido(s)</span>
+                    <span>{produto.quantidade} pedido(s) · {quantidadeSeparada} separado(s){pedidoEncerradoComFaltantes ? ` · ${quantidadeFaltante} faltante(s)` : ''}</span>
+                    <span>{formatarMoeda(produto.precoUnitario)} / un. · subtotal {formatarMoeda(produto.subtotal)}</span>
                   </div>
                   <span className="quantidade-separada">
                     {quantidadeSeparada} separado(s)
@@ -180,6 +198,11 @@ function TelaDetalhesCesta({
               )
             })}
           </ul>
+        </section>
+
+        <section className="total-pedido total-pedido-historico" aria-label="Valor do pedido">
+          <span>{pedidoEncerradoComFaltantes ? 'Total ajustado às quantidades separadas' : 'Valor do pedido'}</span>
+          <strong>{formatarMoeda(cesta.valorTotal)}</strong>
         </section>
 
         <section className="composicao-cesta" aria-labelledby="titulo-separados-cesta">

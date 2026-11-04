@@ -141,6 +141,8 @@ Rotas disponíveis:
 - `POST /autenticacao/verificar-email`: confirma o e-mail por token de uso único.
 - `POST /autenticacao/solicitar-recuperacao`: solicita um link de recuperação por e-mail.
 - `POST /autenticacao/redefinir-senha`: altera a senha com token e revoga as sessões antigas.
+- `GET /notificacoes`: lista os avisos persistentes da conta autenticada.
+- `POST /notificacoes/lidas`: marca os avisos da conta como lidos.
 
 - `GET /produtos`: lista o catálogo e o estoque disponível para o usuário autenticado.
 - `PUT /produtos/{produto_id}/estoque`: permite ao produtor atualizar o estoque de um produto.
@@ -149,17 +151,19 @@ Rotas disponíveis:
 - `GET /cestas/{id}`: mostra uma cesta.
 - `POST /cestas`: cria uma cesta pendente.
 - `POST /cestas/{id}/cancelar`: permite à assinante cancelar um pedido que ainda esteja pendente.
+- `POST /cestas/{id}/enviar`: permite ao produtor marcar como enviado e notifica o cliente.
 - `GET /cestas/{id}/separacoes`: lista os produtos separados.
 - `POST /cestas/{id}/separacoes`: registra uma separação e aplica o limite.
 - `POST /cestas/{id}/separacoes/lote`: registra o lote de produtos atomicamente.
 - `POST /cestas/{id}/separacoes/concluir`: conclui a separação após validar todos os itens e inicia o prazo de sete dias para confirmação do recebimento.
+- `POST /cestas/{id}/separacoes/encerrar-com-faltantes`: encerra com as quantidades disponíveis, devolve ao estoque o que faltou e ajusta o valor cobrado pelos preços unitários já congelados no pedido.
 - `POST /cestas/{id}/separacoes/desfazer`: desfaz atomicamente o último lote de separações.
 - `POST /cestas/{id}/entrega/confirmar`: permite à assinante confirmar o recebimento da cesta.
 
 Confirmar o e-mail é opcional e não bloqueia o acesso. Com SMTP configurado, também ficam disponíveis
 o envio de confirmação e a recuperação de senha. Veja [Autenticação por e-mail](docs/AUTENTICACAO_EMAIL.md).
 
-As cestas usam as situações `Pendente`, `Em separação`, `Cancelado` e `Entregue`. A assinante pode cancelar o pedido enquanto ele estiver pendente; depois que o produtor inicia a separação, o cancelamento não fica disponível. O sistema considera a cesta entregue quando a assinante confirma o recebimento ou, se não houver confirmação, ao completar sete dias da conclusão da separação. A expiração é aplicada quando a cesta é consultada pela API.
+As cestas usam as situações `Pendente`, `Em separação`, `Preparado para envio`, `Enviado`, `Cancelado` e `Entregue`. A assinante pode cancelar o pedido enquanto ele estiver pendente; depois que o produtor inicia a separação, o cancelamento não fica disponível. Quando todos os itens são separados, o status muda para `Preparado para envio`. Se faltar produto, o produtor pode encerrar com as quantidades reais; o total cai apenas pelo preço das unidades faltantes, e a tela do cliente destaca as faltas. O cliente aceita as quantidades e o valor ajustado ao confirmar o recebimento depois do envio. Preços unitários já gravados nos pedidos antigos são preservados. Para pedidos antigos sem snapshot de preço, a migração `20261104_0014` preenche somente campos nulos usando o mesmo preço de catálogo que era usado como fallback pela aplicação. O produtor pode marcar o pedido como `Enviado`, gerando uma notificação persistente para a assinante. A cesta passa a `Entregue` quando a assinante confirma o recebimento ou, sem confirmação, sete dias após o envio. A expiração é aplicada quando a cesta é consultada pela API. Para o banco Supabase, aplique [`supabase_20261104_0013.sql`](backend/migracoes/supabase_20261104_0013.sql) e depois [`supabase_20261104_0014.sql`](backend/migracoes/supabase_20261104_0014.sql), em sequência, após a revisão `20261104_0012`.
 
 A sessão de login é mantida em cookie JWT `HttpOnly` por pelo menos 24 horas. Ao reabrir ou atualizar
 a aplicação nesse período, o frontend valida o cookie em `/usuarios/me` e restaura o perfil. Navegar

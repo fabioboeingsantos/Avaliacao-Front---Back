@@ -2,9 +2,11 @@
 
 from datetime import date, datetime, timedelta, timezone
 
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from modelos.usuario import Usuario
+from modelos.notificacao import Notificacao
 from repositorios import cesta as repositorio
 from servicos.excecoes import (
     CestaNaoEncontrada,
@@ -51,6 +53,8 @@ def nome_tamanho(tamanho: str) -> str:
 def serializar_cesta(cesta: dict) -> dict:
     """Devolve os dados da cesta no formato usado pela rota e pelo frontend."""
 
+    if cesta.get("situacao") == "Em separação" and cesta.get("separacao_concluida_em"):
+        return {**cesta, "situacao": "Preparado para envio"}
     return cesta
 
 
@@ -100,7 +104,7 @@ def buscar_cesta(sessao: Session, id_cesta: int, usuario_id: int | None = None) 
     cesta = repositorio.buscar_cesta_por_id(sessao, id_cesta, usuario_id=usuario_id)
     if cesta is None:
         raise CestaNaoEncontrada("Cesta não encontrada.")
-    return cesta
+    return serializar_cesta(cesta)
 
 
 def _marcar_entregues_expiradas(sessao: Session) -> None:
@@ -337,7 +341,7 @@ def concluir_separacao(sessao: Session, id_cesta: int) -> dict:
     if cesta["separacao_concluida_em"] is not None:
         raise QuantidadeExcedida("A separação desta cesta já foi concluída.")
 
-    cesta["situacao"] = "Em separação"
+    cesta["situacao"] = "Preparado para envio"
     cesta["separacao_concluida_em"] = datetime.now(timezone.utc)
     return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
 
@@ -352,6 +356,23 @@ def salvar_separacao(sessao: Session, id_cesta: int, produtos: list[dict]) -> di
         raise QuantidadeExcedida("Reabra a separação antes de corrigir as quantidades.")
 
     itens_pedido = {item["id"]: item for item in cesta["produtos"]}
+    quantidades = _validar_quantidades_conferidas(itens_pedido, produtos)
+
+    cesta["separacoes"] = [
+        {"produto_id": produto_id, "nome": itens_pedido[produto_id]["nome"], "quantidade": quantidade}
+        for produto_id, quantidade in quantidades.items()
+        if quantidade > 0
+    ]
+    completa = all(quantidades[item["id"]] == item["quantidade"] for item in cesta["produtos"])
+    cesta["separacao_concluida_em"] = datetime.now(timezone.utc) if completa else None
+    cesta["situacao"] = (
+        "Preparado para envio" if completa else
+        "Em separação" if cesta["separacoes"] else "Pendente"
+    )
+    return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
+
+
+def _validar_quantidades_conferidas(itens_pedido: dict, produtos: list[dict]) -> dict[str, int]:
     quantidades = {}
     for produto in produtos:
         produto_id = produto["produto_id"]
@@ -366,15 +387,39 @@ def salvar_separacao(sessao: Session, id_cesta: int, produtos: list[dict]) -> di
 
     if set(quantidades) != set(itens_pedido):
         raise QuantidadeExcedida("Informe a quantidade conferida de todos os produtos da cesta.")
+    return quantidades
+
+
+def encerrar_separacao_com_faltantes(sessao: Session, id_cesta: int, produtos: list[dict]) -> dict:
+    """Finaliza com as quantidades reais, reduz o valor e devolve ao estoque o que faltou."""
+
+    cesta = buscar_cesta(sessao, id_cesta)
+    if cesta["situacao"] in {"Enviado", "Entregue", "Cancelado"}:
+        raise QuantidadeExcedida("Um pedido enviado, entregue ou cancelado não pode ser ajustado.")
+    if cesta["separacao_concluida_em"] is not None:
+        raise QuantidadeExcedida("A separação deste pedido já foi encerrada.")
+
+    itens_pedido = {item["id"]: item for item in cesta["produtos"]}
+    quantidades = _validar_quantidades_conferidas(itens_pedido, produtos)
+    if not any(quantidades.values()):
+        raise QuantidadeExcedida("Separe ao menos um item antes de encerrar o pedido com faltantes.")
+
+    faltantes = [
+        {"id": produto_id, "quantidade": item["quantidade"] - quantidades[produto_id]}
+        for produto_id, item in itens_pedido.items()
+        if quantidades[produto_id] < item["quantidade"]
+    ]
+    if not faltantes:
+        raise QuantidadeExcedida("Todos os itens foram separados. Use o fechamento normal do pedido.")
 
     cesta["separacoes"] = [
         {"produto_id": produto_id, "nome": itens_pedido[produto_id]["nome"], "quantidade": quantidade}
         for produto_id, quantidade in quantidades.items()
         if quantidade > 0
     ]
-    completa = all(quantidades[item["id"]] == item["quantidade"] for item in cesta["produtos"])
-    cesta["separacao_concluida_em"] = datetime.now(timezone.utc) if completa else None
-    cesta["situacao"] = "Em separação" if cesta["separacoes"] else "Pendente"
+    repositorio.devolver_estoque(sessao, faltantes)
+    cesta["separacao_concluida_em"] = datetime.now(timezone.utc)
+    cesta["situacao"] = "Preparado para envio"
     return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
 
 
@@ -382,10 +427,23 @@ def reabrir_separacao(sessao: Session, id_cesta: int) -> dict:
     """Reabre uma separação concluída para permitir correções antes da entrega."""
 
     cesta = buscar_cesta(sessao, id_cesta)
-    if cesta["situacao"] in {"Entregue", "Cancelado"}:
-        raise QuantidadeExcedida("Uma cesta entregue ou cancelada não pode ser reaberta.")
+    if cesta["situacao"] in {"Enviado", "Entregue", "Cancelado"}:
+        raise QuantidadeExcedida("Uma cesta enviada, entregue ou cancelada não pode ser reaberta.")
     if cesta["separacao_concluida_em"] is None:
         raise QuantidadeExcedida("A separação desta cesta ainda não foi concluída.")
+
+    separacoes = {item["produto_id"]: item["quantidade"] for item in cesta["separacoes"]}
+    faltantes_reservados = [
+        {"id": produto["id"], "quantidade": produto["quantidade"] - separacoes.get(produto["id"], 0)}
+        for produto in cesta["produtos"]
+        if (produto["quantidade"] - separacoes.get(produto["id"], 0)) > 0
+    ]
+    if faltantes_reservados:
+        produto_sem_estoque = repositorio.reservar_estoque(sessao, faltantes_reservados)
+        if produto_sem_estoque:
+            raise EstoqueInsuficiente(
+                f"Não há estoque suficiente de {produto_sem_estoque} para reabrir o pedido."
+            )
 
     cesta["separacao_concluida_em"] = None
     cesta["situacao"] = "Em separação" if cesta["separacoes"] else "Pendente"
@@ -414,13 +472,42 @@ def confirmar_entrega(sessao: Session, id_cesta: int, usuario_id: int) -> dict:
     cesta = buscar_cesta(sessao, id_cesta, usuario_id=usuario_id)
     if cesta["situacao"] == "Entregue":
         return cesta
-    if cesta["separacao_concluida_em"] is None:
+    if cesta.get("situacao") != "Enviado" or cesta.get("enviado_em") is None:
         raise QuantidadeExcedida(
-            "A entrega só pode ser confirmada após a conclusão da separação."
+            "O recebimento só pode ser confirmado depois que o produtor marcar o pedido como enviado."
         )
 
     cesta["situacao"] = "Entregue"
     return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
+
+
+def marcar_enviado(sessao: Session, id_cesta: int) -> dict:
+    """Marca a cesta preparada como enviada e registra aviso persistente ao cliente."""
+
+    cesta = buscar_cesta(sessao, id_cesta)
+    if cesta.get("situacao") == "Enviado":
+        return cesta
+    if cesta.get("situacao") != "Preparado para envio" or not cesta.get("separacao_concluida_em"):
+        raise QuantidadeExcedida("Conclua a separação antes de marcar o pedido como enviado.")
+
+    cesta["situacao"] = "Enviado"
+    cesta["enviado_em"] = datetime.now(timezone.utc)
+    cliente = sessao.scalar(
+        select(Usuario).where(func.lower(Usuario.usuario) == cesta["assinante"].strip().lower())
+    )
+    usuario_id = cliente.id if cliente else None
+    if usuario_id is not None:
+        sessao.add(Notificacao(
+            usuario_id=usuario_id,
+            cesta_id=id_cesta,
+            titulo="Pedido enviado",
+            mensagem=f"Seu pedido #{id_cesta:04d} foi marcado como enviado pelo produtor.",
+            criada_em=datetime.now(timezone.utc),
+            lida=False,
+        ))
+
+    cesta_atualizada = repositorio.atualizar_cesta(sessao, cesta)
+    return serializar_cesta(cesta_atualizada)
 
 
 def avaliar_cesta(sessao: Session, id_cesta: int, usuario: Usuario, estrelas: int) -> dict:

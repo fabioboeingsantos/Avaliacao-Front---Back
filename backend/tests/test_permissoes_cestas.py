@@ -154,7 +154,7 @@ def test_produtor_conclui_separacao_depois_de_separar_todos_os_itens(cliente):
     resposta = cliente.post("/cestas/1/separacoes/concluir", headers=headers)
 
     assert resposta.status_code == 200
-    assert resposta.json()["situacao"] == "Em separação"
+    assert resposta.json()["situacao"] == "Preparado para envio"
     assert resposta.json()["separacao_concluida_em"] is not None
 
 
@@ -192,6 +192,7 @@ def test_assinante_pode_confirmar_recebimento_da_cesta(cliente):
         json={"produtos": [{"produto_id": "alface", "quantidade": 2}]},
     )
     cliente.post("/cestas/1/separacoes/concluir")
+    cliente.post("/cestas/1/enviar")
 
     fazer_login(cliente, "aline", "aline123")
     resposta = cliente.post("/cestas/1/entrega/confirmar")
@@ -209,7 +210,7 @@ def test_assinante_nao_confirma_entrega_antes_da_conclusao_da_separacao(cliente)
     resposta = cliente.post("/cestas/1/entrega/confirmar")
 
     assert resposta.status_code == 422
-    assert resposta.json()["detail"].startswith("A entrega")
+    assert resposta.json()["detail"].startswith("O recebimento")
 
 
 def test_assinante_nao_confirma_entrega_de_cesta_de_outra_conta(cliente):
@@ -230,6 +231,7 @@ def test_assinante_e_produtor_avaliam_pedido_entregue(cliente):
         json={"produtos": [{"produto_id": "alface", "quantidade": 2}]},
     )
     cliente.post("/cestas/1/separacoes/concluir")
+    cliente.post("/cestas/1/enviar")
 
     fazer_login(cliente, "aline", "aline123")
     cliente.post("/cestas/1/entrega/confirmar")
@@ -256,6 +258,7 @@ def test_avaliacao_so_pode_ser_registrada_uma_vez_por_perfil(cliente):
         json={"produtos": [{"produto_id": "alface", "quantidade": 2}]},
     )
     cliente.post("/cestas/1/separacoes/concluir")
+    cliente.post("/cestas/1/enviar")
     fazer_login(cliente, "aline", "aline123")
     cliente.post("/cestas/1/entrega/confirmar")
     cliente.post("/cestas/1/avaliacao", json={"estrelas": 3})
@@ -284,8 +287,8 @@ def test_produtor_nao_pode_confirmar_entrega(cliente):
     assert resposta.status_code == 403
 
 
-def test_cesta_expira_para_entregue_sete_dias_apos_conclusao(cliente):
-    """A primeira consulta apos sete dias atualiza a situacao para entregue."""
+def test_cesta_expira_para_entregue_sete_dias_apos_envio(cliente):
+    """A primeira consulta sete dias apos o envio atualiza a situacao para entregue."""
 
     fazer_login(cliente, "vanderlei", "vanderlei123")
     cliente.post(
@@ -293,10 +296,11 @@ def test_cesta_expira_para_entregue_sete_dias_apos_conclusao(cliente):
         json={"produtos": [{"produto_id": "alface", "quantidade": 2}]},
     )
     cliente.post("/cestas/1/separacoes/concluir")
+    cliente.post("/cestas/1/enviar")
 
     sessao = SessaoDeTeste()
     cesta = sessao.get(Cesta, 1)
-    cesta.separacao_concluida_em = datetime.now(timezone.utc) - timedelta(days=7, seconds=1)
+    cesta.enviado_em = datetime.now(timezone.utc) - timedelta(days=7, seconds=1)
     sessao.commit()
     sessao.close()
 

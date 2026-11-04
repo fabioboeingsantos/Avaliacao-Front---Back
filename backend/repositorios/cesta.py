@@ -15,15 +15,31 @@ def _serializar_cesta(cesta: Cesta) -> dict:
     """Converte o modelo e seus relacionamentos em dados para o servico."""
 
     produtos = []
+    quantidades_separadas = {item.produto_id: item.quantidade for item in cesta.separacoes}
+    fechamento_com_faltantes = (
+        cesta.situacao in {"Preparado para envio", "Enviado"}
+        and any(
+            quantidades_separadas.get(item.produto_id, 0) < item.quantidade
+            for item in cesta.itens
+        )
+    )
     for item in cesta.itens:
-        preco_centavos = item.preco_unitario_centavos or item.produto.preco_centavos
+        preco_centavos = (
+            item.preco_unitario_centavos
+            if item.preco_unitario_centavos is not None
+            else item.produto.preco_centavos
+        )
+        quantidade_separada = quantidades_separadas.get(item.produto_id, 0)
+        quantidade_cobrada = quantidade_separada if fechamento_com_faltantes else item.quantidade
         produtos.append(
             {
                 "id": item.produto_id,
                 "nome": item.produto.nome,
                 "quantidade": item.quantidade,
+                "quantidade_separada": quantidade_separada,
+                "quantidade_cobrada": quantidade_cobrada,
                 "preco_unitario": preco_centavos / 100,
-                "subtotal": (preco_centavos * item.quantidade) / 100,
+                "subtotal": (preco_centavos * quantidade_cobrada) / 100,
             }
         )
 
@@ -41,6 +57,7 @@ def _serializar_cesta(cesta: Cesta) -> dict:
             if cesta.separacao_concluida_em is not None
             else None
         ),
+        "enviado_em": cesta.enviado_em.isoformat() if cesta.enviado_em is not None else None,
         "avaliacao_assinante": cesta.avaliacao_assinante,
         "avaliacao_produtor": cesta.avaliacao_produtor,
         "produtos": produtos,
@@ -133,26 +150,30 @@ def atualizar_cesta(sessao: Session, dados: dict) -> dict | None:
     cesta.separacao_concluida_em = (
         datetime.fromisoformat(concluida_em) if isinstance(concluida_em, str) else concluida_em
     )
+    enviado_em = dados.get("enviado_em")
+    cesta.enviado_em = (
+        datetime.fromisoformat(enviado_em) if isinstance(enviado_em, str) else enviado_em
+    )
     sessao.commit()
     sessao.refresh(cesta)
     return _serializar_cesta(cesta)
 
 
 def marcar_entregues_expiradas(sessao: Session, agora) -> None:
-    """Marca como entregues as cestas concluídas há pelo menos sete dias."""
+    """Marca como entregues as cestas enviadas há pelo menos sete dias."""
 
     cestas = sessao.scalars(
         select(Cesta).where(
-            Cesta.separacao_concluida_em.is_not(None),
+            Cesta.enviado_em.is_not(None),
             Cesta.situacao != "Entregue",
         )
     ).all()
     alteradas = False
     for cesta in cestas:
-        concluida_em = cesta.separacao_concluida_em
-        if concluida_em.tzinfo is None:
-            concluida_em = concluida_em.replace(tzinfo=agora.tzinfo)
-        if agora - concluida_em >= timedelta(days=7):
+        enviado_em = cesta.enviado_em
+        if enviado_em.tzinfo is None:
+            enviado_em = enviado_em.replace(tzinfo=agora.tzinfo)
+        if agora - enviado_em >= timedelta(days=7):
             cesta.situacao = "Entregue"
             alteradas = True
 

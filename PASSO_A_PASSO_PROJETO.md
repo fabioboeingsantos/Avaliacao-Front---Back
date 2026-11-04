@@ -16,8 +16,8 @@ O fluxo principal é:
 3. Confirma o pedido, que fica pendente.
 4. Enquanto o pedido estiver pendente, Aline pode cancelá-lo.
 5. Vanderlei visualiza as cestas e registra os produtos separados.
-6. Depois de separar todos os itens, Vanderlei conclui a separação.
-7. Aline confirma o recebimento; se não confirmar, a cesta passa para entregue sete dias após a conclusão.
+6. Se houver todos os itens, Vanderlei marca a cesta como preparada. Se houver faltantes, pode encerrar com as quantidades disponíveis; o valor é recalculado com os preços congelados no pedido e os faltantes são destacados.
+7. Vanderlei marca a cesta como enviada. Aline recebe uma notificação persistente e confirma o recebimento, aceitando as quantidades e o valor ajustado quando houver faltantes; sem confirmação, a cesta passa para entregue sete dias após o envio.
 
 ## 2. Tecnologias utilizadas
 
@@ -213,11 +213,11 @@ Regras principais:
 4. Um produto separado precisa pertencer à cesta, e a quantidade separada não pode exceder a quantidade pedida.
 5. O estoque é reservado quando o pedido é criado e devolvido quando a cesta pendente é cancelada.
 6. O primeiro produto separado altera a situação para **Em separação**.
-7. A situação permanece **Em separação** após a conclusão; a data de conclusão inicia o prazo de sete dias para confirmação do recebimento.
-8. A cesta passa para **Entregue** quando a assinante confirma o recebimento ou quando esse prazo termina. A expiração é atualizada quando a cesta é consultada pela API.
+7. Quando todos os itens estão separados, a situação muda para **Preparado para envio**. O produtor pode marcar a cesta como **Enviado**, o que cria uma notificação persistente para a assinante.
+8. A cesta passa para **Entregue** quando a assinante confirma o recebimento ou sete dias após o envio. A expiração é atualizada quando a cesta é consultada pela API.
 9. A assinante pode cancelar a própria cesta somente enquanto ela estiver **Pendente** e sem separações. A situação passa para **Cancelado**, e o produtor não pode iniciar ou continuar a separação.
 
-As situações possíveis são **Pendente**, **Em separação**, **Cancelado** e **Entregue**.
+As situações possíveis são **Pendente**, **Em separação**, **Preparado para envio**, **Enviado**, **Cancelado** e **Entregue**.
 
 ## 7. Passo a passo para construir do zero
 
@@ -337,11 +337,14 @@ Rotas atuais:
 | `GET` | `/cestas/{id}/separacoes` | Listar separações |
 | `PUT` | `/cestas/{id}/separacoes` | Salvar quantidades separadas; conclui automaticamente quando todos os itens foram separados |
 | `POST` | `/cestas/{id}/separacoes/reabrir` | Reabrir uma separação concluída para correção |
+| `POST` | `/cestas/{id}/enviar` | Marcar como enviado e criar uma notificação para a pessoa assinante |
 | `POST` | `/cestas/{id}/separacoes` | Registrar uma separação |
 | `POST` | `/cestas/{id}/separacoes/lote` | Registrar várias separações atomicamente |
 | `POST` | `/cestas/{id}/separacoes/desfazer` | Desfazer quantidades separadas antes de concluir |
 | `POST` | `/cestas/{id}/separacoes/concluir` | Concluir após separar todos os itens |
 | `POST` | `/cestas/{id}/entrega/confirmar` | Confirmar o recebimento da própria cesta |
+| `GET` | `/notificacoes` | Listar notificações persistidas da conta autenticada |
+| `POST` | `/notificacoes/lidas` | Marcar notificações como lidas |
 
 A API pode ser iniciada com:
 
@@ -475,6 +478,14 @@ npm.cmd run dev -- --host 0.0.0.0
 
 Descubra o IPv4 do computador com `ipconfig` e abra no celular `http://IP_DO_COMPUTADOR:5173`.
 Mantenha o backend em execução e permita a porta no firewall caso o Windows solicite.
+
+## Migrações Supabase para preços e faltantes
+
+Aplique `backend/migracoes/supabase_20261104_0013.sql` e depois
+`backend/migracoes/supabase_20261104_0014.sql`. A migração 0014 preserva os preços unitários já
+registrados nos pedidos e preenche somente snapshots nulos com o preço de catálogo que a aplicação
+já usava como fallback. Se aplicar manualmente pelo SQL Editor, alinhe o Alembic com
+`python -m alembic stamp 20261104_0014` depois de confirmar que a revisão atual é `20261104_0013`.
 
 ## 9. Melhorias futuras
 

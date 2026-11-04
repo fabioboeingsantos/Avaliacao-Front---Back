@@ -163,6 +163,25 @@ def salvar_separacao(
         raise traduzir_erro(erro) from erro
 
 
+@router.post("/{id_cesta}/separacoes/encerrar-com-faltantes")
+def encerrar_separacao_com_faltantes(
+    id_cesta: int,
+    dados: SalvarSeparacao,
+    sessao: Session = Depends(obter_sessao),
+    usuario: Usuario = Depends(exigir_permissao("cestas.concluir_separacao")),
+):
+    """Finaliza com o que foi separado e ajusta o total cobrado ao cliente."""
+
+    try:
+        return servico.encerrar_separacao_com_faltantes(
+            sessao,
+            id_cesta,
+            [produto.model_dump() for produto in dados.produtos],
+        )
+    except ErroDeAplicacao as erro:
+        raise traduzir_erro(erro) from erro
+
+
 @router.post("/{id_cesta}/separacoes/desfazer")
 def desfazer_separacoes(
     id_cesta: int,
@@ -206,6 +225,20 @@ def reabrir_separacao(
 
     try:
         return servico.reabrir_separacao(sessao, id_cesta)
+    except ErroDeAplicacao as erro:
+        raise traduzir_erro(erro) from erro
+
+
+@router.post("/{id_cesta}/enviar")
+def marcar_cesta_enviada(
+    id_cesta: int,
+    sessao: Session = Depends(obter_sessao),
+    usuario: Usuario = Depends(exigir_permissao("cestas.marcar_enviado")),
+):
+    """Marca como enviada uma cesta preparada e notifica a assinante."""
+
+    try:
+        return servico.marcar_enviado(sessao, id_cesta)
     except ErroDeAplicacao as erro:
         raise traduzir_erro(erro) from erro
 

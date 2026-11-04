@@ -33,6 +33,8 @@ com texto explícito.
 |---|---|---|---|
 | Pedida | Azul suave | `#2F6B8A` | Etiqueta e indicação textual da cesta pedida |
 | Em separação | Amarelo colheita | `#E6A23C` | Etiqueta e indicação textual da cesta em separação |
+| Preparado para envio | Verde sucesso | `#2F7D32` | Etiqueta da cesta com todos os itens separados |
+| Enviado | Azul suave | `#2F6B8A` | Etiqueta da cesta cujo envio foi registrado |
 | Sucesso | Verde sucesso | `#2F7D32` | Confirmação de ação concluída |
 | Erro | Vermelho erro | `#B42318` | Mensagens de erro e validação |
 

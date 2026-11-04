@@ -9,6 +9,7 @@ import TelaSeparacao from './componentes/TelaSeparacao'
 import TelaFechamento from './componentes/TelaFechamento'
 import SinoNotificacoes from './componentes/SinoNotificacoes'
 import { chamarApi } from './api.js'
+import { formatarIdSolicitacao } from './utilitarios/identificadorPedido'
 import './App.css'
 
 function TemaToggle({ tema, aoAlternar }) {
@@ -81,12 +82,15 @@ function adaptarCestaDaApi(cesta) {
     limite: cesta.limite,
     situacao: cesta.situacao,
     separacaoConcluidaEm: cesta.separacao_concluida_em,
+    enviadoEm: cesta.enviado_em,
     avaliacaoAssinante: cesta.avaliacao_assinante,
     avaliacaoProdutor: cesta.avaliacao_produtor,
     produtos: cesta.produtos.map((produto) => ({
       id: produto.id,
       nome: produto.nome,
       quantidade: produto.quantidade,
+      quantidadeSeparada: produto.quantidade_separada ?? 0,
+      quantidadeCobrada: produto.quantidade_cobrada ?? produto.quantidade,
       // O backend devolve o preço unitário congelado no momento do pedido.
       precoUnitario: produto.preco_unitario,
       subtotal: produto.subtotal,
@@ -335,7 +339,7 @@ function App() {
                 )
               }
               if (!anterior.separacaoConcluidaEm && cesta.separacaoConcluidaEm) {
-                criarNotificacao(cesta, 'pronto-recebimento', 'Cesta pronta para receber', 'a separação terminou; confirme quando receber.')
+                criarNotificacao(cesta, 'pronto-envio', 'Pedido preparado para envio', 'todos os itens foram separados e a cesta está pronta para envio.')
               }
               if (anterior.situacao !== 'Entregue' && cesta.situacao === 'Entregue') {
                 criarNotificacao(cesta, 'entregue', 'Pedido atualizado', 'o recebimento da cesta foi confirmado.')
@@ -361,6 +365,18 @@ function App() {
         setPedidos(cestasAtuais)
         const produtos = await chamarApi('/produtos')
         setProdutosDisponiveis(produtos.map(adaptarProdutoDaApi))
+      try {
+        const notificacoesDoServidor = await chamarApi('/notificacoes')
+        setNotificacoes((atuais) => {
+          const porId = new Map(atuais.map((item) => [String(item.id), item]))
+          for (const item of notificacoesDoServidor) porId.set(String(item.id), item)
+          return [...porId.values()]
+            .sort((a, b) => new Date(b.criadaEm) - new Date(a.criadaEm))
+            .slice(0, 40)
+        })
+      } catch {
+        // Notificações persistentes podem estar indisponíveis durante uma atualização da API.
+      }
       } catch {
         // Uma falha temporária de rede não interrompe o uso da tela; a próxima consulta tenta novamente.
       } finally {
@@ -368,6 +384,7 @@ function App() {
       }
     }
 
+    atualizarPedidosCompartilhados()
     const intervalo = window.setInterval(atualizarPedidosCompartilhados, 8000)
     return () => window.clearInterval(intervalo)
   }, [usuarioAutenticado, perfilAtual])
@@ -381,6 +398,7 @@ function App() {
 
   function marcarNotificacoesComoLidas() {
     setNotificacoes((atuais) => atuais.map((notificacao) => ({ ...notificacao, lida: true })))
+    chamarApi('/notificacoes/lidas', { method: 'POST' }).catch(() => {})
   }
 
   function abrirDestinoDaNotificacao(notificacao) {
@@ -568,7 +586,7 @@ function App() {
     }
 
     const cestaLocal = pedidos.find((pedido) => pedido.id === pedidoId)
-    if (!cestaLocal?.separacaoConcluidaEm || cestaLocal.situacao === 'Entregue') {
+    if (!cestaLocal?.separacaoConcluidaEm || ['Enviado', 'Entregue'].includes(cestaLocal.situacao)) {
       return { sucesso: false, erro: 'Esta separação não pode ser reaberta.' }
     }
     setPedidos((pedidosAtuais) =>
@@ -632,11 +650,105 @@ function App() {
               ...pedido,
               separacoes,
               separacaoConcluidaEm: completa ? new Date().toISOString() : null,
-              situacao: separacoes.length ? 'Em separação' : 'Pendente',
+              situacao: completa
+                ? 'Preparado para envio'
+                : separacoes.length ? 'Em separação' : 'Pendente',
             }
           : pedido,
       ),
     )
+    return { sucesso: true }
+  }
+
+  async function encerrarSeparacaoComFaltantes(pedidoId, produtos) {
+    if (typeof pedidoId === 'number') {
+      try {
+        const atualizada = await chamarApi(`/cestas/${pedidoId}/separacoes/encerrar-com-faltantes`, {
+          method: 'POST',
+          body: JSON.stringify({
+            produtos: produtos.map(({ produtoId, quantidade }) => ({
+              produto_id: produtoId,
+              quantidade,
+            })),
+          }),
+        })
+        const cestaAdaptada = adaptarCestaDaApi(atualizada)
+        setPedidos((atuais) => atuais.map((pedido) => pedido.id === pedidoId ? cestaAdaptada : pedido))
+        return { sucesso: true, valorTotal: cestaAdaptada.valorTotal }
+      } catch (erro) {
+        return { sucesso: false, erro: erro.message }
+      }
+    }
+
+    const cesta = pedidos.find((pedido) => pedido.id === pedidoId)
+    if (!cesta || cesta.separacaoConcluidaEm || cesta.situacao === 'Enviado') {
+      return { sucesso: false, erro: 'Este pedido não pode ser encerrado com faltantes.' }
+    }
+    const quantidades = new Map(produtos.map(({ produtoId, quantidade }) => [produtoId, quantidade]))
+    if (cesta.produtos.some((produto) => {
+      const quantidade = quantidades.get(produto.id)
+      return !Number.isInteger(quantidade) || quantidade < 0 || quantidade > produto.quantidade
+    })) {
+      return { sucesso: false, erro: 'Confira as quantidades separadas antes de encerrar.' }
+    }
+    const faltantes = cesta.produtos.some((produto) => quantidades.get(produto.id) < produto.quantidade)
+    if (!faltantes || !produtos.some((produto) => produto.quantidade > 0)) {
+      return { sucesso: false, erro: 'Separe ao menos um item e confirme que há faltantes.' }
+    }
+    const separacoes = cesta.produtos
+      .filter((produto) => quantidades.get(produto.id) > 0)
+      .map((produto) => ({ produtoId: produto.id, nome: produto.nome, quantidade: quantidades.get(produto.id) }))
+    const valorTotal = cesta.produtos.reduce(
+      (total, produto) => total + (produto.precoUnitario ?? 0) * quantidades.get(produto.id),
+      0,
+    )
+    const produtosAtualizados = cesta.produtos.map((produto) => {
+      const quantidadeCobrada = quantidades.get(produto.id)
+      return {
+        ...produto,
+        quantidadeSeparada: quantidadeCobrada,
+        quantidadeCobrada,
+        subtotal: (produto.precoUnitario ?? 0) * quantidadeCobrada,
+      }
+    })
+    setPedidos((atuais) => atuais.map((pedido) => pedido.id === pedidoId
+      ? { ...pedido, produtos: produtosAtualizados, separacoes, situacao: 'Preparado para envio', separacaoConcluidaEm: new Date().toISOString(), valorTotal }
+      : pedido))
+    return { sucesso: true, valorTotal }
+  }
+
+  async function marcarPedidoEnviado(pedidoId) {
+    if (typeof pedidoId === 'number') {
+      try {
+        const atualizada = await chamarApi(`/cestas/${pedidoId}/enviar`, { method: 'POST' })
+        const cestaAdaptada = adaptarCestaDaApi(atualizada)
+        setPedidos((atuais) => atuais.map((pedido) => pedido.id === pedidoId ? cestaAdaptada : pedido))
+        return { sucesso: true }
+      } catch (erro) {
+        return { sucesso: false, erro: erro.message }
+      }
+    }
+    const cesta = pedidos.find((pedido) => pedido.id === pedidoId)
+    setPedidos((atuais) => atuais.map((pedido) => pedido.id === pedidoId
+      ? { ...pedido, situacao: 'Enviado', enviadoEm: new Date().toISOString() }
+      : pedido))
+    if (cesta?.assinante) {
+      const chave = `notificacoes-cesta-${cesta.assinante}`
+      const notificacao = {
+        id: `${pedidoId}-enviado`,
+        cestaId: pedidoId,
+        titulo: 'Pedido enviado',
+        mensagem: `Seu pedido ${formatarIdSolicitacao(pedidoId)} foi marcado como enviado pelo produtor.`,
+        criadaEm: new Date().toISOString(),
+        lida: false,
+      }
+      try {
+        const antigas = JSON.parse(window.localStorage.getItem(chave) || '[]')
+        window.localStorage.setItem(chave, JSON.stringify([notificacao, ...antigas].slice(0, 40)))
+      } catch {
+        // No modo local, o aviso fica disponível na sessão atual se o storage falhar.
+      }
+    }
     return { sucesso: true }
   }
 
@@ -657,10 +769,10 @@ function App() {
     }
 
     const cestaLocal = pedidos.find((pedido) => pedido.id === pedidoId)
-    if (!cestaLocal || !cestaLocal.separacaoConcluidaEm) {
+    if (!cestaLocal || cestaLocal.situacao !== 'Enviado' || !cestaLocal.enviadoEm) {
       return {
         sucesso: false,
-        erro: 'A entrega só pode ser confirmada após a conclusão da separação.',
+        erro: 'O recebimento só pode ser confirmado depois que o produtor marcar o pedido como enviado.',
       }
     }
 
@@ -821,6 +933,7 @@ function App() {
           aoAbrirSeparacao={() => setAbaAtual('separacao')}
           aoSalvarSeparacao={salvarSeparacao}
           aoReabrirSeparacao={reabrirSeparacao}
+          aoEncerrarComFaltantes={encerrarSeparacaoComFaltantes}
         />,
       )
     }
@@ -833,6 +946,7 @@ function App() {
         aoAbrirEstoque={() => setAbaAtual('estoque')}
         aoVoltarSeparacao={() => setAbaAtual('separacao')}
         aoAbrirFechamento={abrirFechamento}
+        aoMarcarEnviado={marcarPedidoEnviado}
         aoAtualizarEstoque={atualizarEstoque}
         aoAtualizarPreco={atualizarPreco}
         aoAvaliarCesta={avaliarCesta}

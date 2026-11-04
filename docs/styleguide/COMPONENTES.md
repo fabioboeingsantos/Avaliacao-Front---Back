@@ -80,6 +80,8 @@ Sempre exibe texto junto da cor:
 |---|---|---|
 | Pedida | `#E8F1F5` | `#2F6B8A` |
 | Em separação | `#FFF1D6` | `#7A4B00` |
+| Preparado para envio | `#E5F3E5` | `#2F7D32` |
+| Enviado | `#E8F1F5` | `#2F6B8A` |
 | Sucesso | `#E5F3E5` | `#2F7D32` |
 | Erro | `#FDE8E7` | `#B42318` |
 
