@@ -481,11 +481,13 @@ Mantenha o backend em execução e permita a porta no firewall caso o Windows so
 
 ## Migrações Supabase para preços e faltantes
 
-Aplique `backend/migracoes/supabase_20261104_0013.sql` e depois
-`backend/migracoes/supabase_20261104_0014.sql`. A migração 0014 preserva os preços unitários já
-registrados nos pedidos e preenche somente snapshots nulos com o preço de catálogo que a aplicação
-já usava como fallback. Se aplicar manualmente pelo SQL Editor, alinhe o Alembic com
-`python -m alembic stamp 20261104_0014` depois de confirmar que a revisão atual é `20261104_0013`.
+As revisões Alembic `20261104_0013` e `20261104_0014` estão em
+`backend/migracoes/versions/`. Para bancos que ainda não receberam essas alterações, execute
+`python -m alembic upgrade head` no diretório `backend`, com a conexão apontando para o banco correto.
+A migração 0014 preserva os preços unitários já registrados e preenche somente snapshots nulos
+com o preço de catálogo usado anteriormente como fallback. O Supabase deste projeto já está na
+revisão `20261104_0014`, conferida por consulta ao banco. Os arquivos SQL avulsos foram removidos
+a pedido; as revisões Alembic mantêm o histórico.
 
 ## 9. Melhorias futuras
 

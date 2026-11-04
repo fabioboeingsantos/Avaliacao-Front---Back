@@ -19,14 +19,16 @@ Atualizado em 04/11/2026. Este é o resumo central; detalhes do fluxo de e-mail 
   e-mail é opcional e não exige plano de transição.
 
 **Concluído:** o SQL da revisão `20261104_0012` foi aplicado no Supabase; a tabela `tokens_conta`,
-as colunas e o RLS foram conferidos; `alembic_version` foi atualizado para `20261104_0012`.
+as colunas e o RLS foram conferidos. As revisões 0013 e 0014 também foram aplicadas,
+e `alembic_version` agora registra `20261104_0014`.
 O deploy foi verificado, mas o envio SMTP e a entrega real dos e-mails continuam pendentes.
 
 ## Validação da entrega
 
 - [ ] Executar o roteiro completo no ambiente publicado com contas de demonstração que consigam entrar.
 - [ ] Registrar uma evidência simples do fluxo publicado funcionando.
-- [ ] Aplicar em sequência `supabase_20261104_0013.sql` e `supabase_20261104_0014.sql` no Supabase antes de publicar envio, notificações e fechamento com faltantes. A 0014 atualiza somente preços unitários nulos; valores já congelados permanecem intactos. Após SQL manual, executar `python -m alembic stamp 20261104_0014` com a revisão 0013 já aplicada.
+- [x] Aplicar as revisões `20261104_0013` e `20261104_0014` no Supabase. A coluna de envio, a tabela de notificações e seu RLS foram conferidos; nenhum item ficou sem preço congelado e o histórico está alinhado em `20261104_0014`. Os scripts SQL avulsos foram removidos a pedido; as revisões Alembic permanecem versionadas.
+- [x] Corrigir a configuração local e confirmar a conexão com `SELECT 1`; a consulta também confirmou a revisão `20261104_0014`. O usuário confirmou a conexão do ambiente publicado após atualizar as variáveis da API.
 - [x] Testes automatizados locais do backend: 72 passaram.
 - [x] Lint e build de produção do frontend passaram localmente.
 - [x] Pipeline de CI para testes do backend, lint e build do frontend existe em
@@ -45,7 +47,7 @@ O deploy foi verificado, mas o envio SMTP e a entrega real dos e-mails continuam
 
 ## Estado já verificado nesta etapa
 
-- Banco Supabase atualizado para a revisão `20261104_0012`; RLS da tabela de tokens ativado,
+- Banco Supabase atualizado para a revisão `20261104_0014`; RLS da tabela de tokens ativado,
   sem políticas públicas.
 - Implementação de cadastro com confirmação de e-mail e recuperação de senha publicada; SMTP ainda
   não foi configurado e os fluxos dependentes de e-mail não foram validados em produção.
