@@ -3,6 +3,9 @@
 from datetime import datetime, timedelta, timezone
 
 from modelos.cesta import Cesta
+from modelos.notificacao import Notificacao
+from modelos.produto import Produto
+from modelos.usuario import Usuario
 
 from .conftest import SessaoDeTeste, fazer_login
 
@@ -211,6 +214,72 @@ def test_assinante_nao_confirma_entrega_antes_da_conclusao_da_separacao(cliente)
 
     assert resposta.status_code == 422
     assert resposta.json()["detail"].startswith("O recebimento")
+
+
+def test_pedido_parcial_preserva_preco_notifica_envio_e_mantem_total_apos_entrega(cliente):
+    """O parcial cobra apenas o separado, devolve estoque e conserva o valor após a entrega."""
+
+    fazer_login(cliente, "aline", "aline123")
+    criada = cliente.post(
+        "/cestas",
+        json={
+            "tamanho": "pequena",
+            "modo": "selecionavel",
+            "produtos": [{"id": "alface", "nome": "Alface", "quantidade": 2}],
+        },
+    )
+    assert criada.status_code == 201
+    assert criada.json()["assinante"] == "aline"
+    id_cesta = criada.json()["id"]
+
+    # Mudar o catálogo depois do pedido não altera o preço congelado nessa cesta.
+    with SessaoDeTeste() as sessao:
+        sessao.get(Produto, "alface").preco_centavos = 900
+        sessao.commit()
+
+    fazer_login(cliente, "vanderlei", "vanderlei123")
+    fechamento = cliente.post(
+        f"/cestas/{id_cesta}/separacoes/encerrar-com-faltantes",
+        json={"produtos": [{"produto_id": "alface", "quantidade": 1}]},
+    )
+    assert fechamento.status_code == 200
+    assert fechamento.json()["situacao"] == "Preparado para envio"
+    assert fechamento.json()["produtos"][0]["quantidade"] == 2
+    assert fechamento.json()["produtos"][0]["quantidade_separada"] == 1
+    assert fechamento.json()["produtos"][0]["quantidade_cobrada"] == 1
+    assert fechamento.json()["produtos"][0]["preco_unitario"] == 5
+    assert fechamento.json()["valor_total"] == 5
+
+    enviado = cliente.post(f"/cestas/{id_cesta}/enviar")
+    assert enviado.status_code == 200
+    assert enviado.json()["situacao"] == "Enviado"
+    assert enviado.json()["valor_total"] == 5
+    # Repetir a ação não cria notificações duplicadas.
+    assert cliente.post(f"/cestas/{id_cesta}/enviar").status_code == 200
+    with SessaoDeTeste() as sessao:
+        notificacoes = sessao.query(Notificacao).filter_by(cesta_id=id_cesta).all()
+        assinante = sessao.query(Usuario).filter_by(usuario="aline").one()
+        produto = sessao.get(Produto, "alface")
+        assert len(notificacoes) == 1
+        assert notificacoes[0].usuario_id == assinante.id
+        assert notificacoes[0].titulo == "Pedido enviado"
+        assert produto.estoque == 19
+
+    fazer_login(cliente, "aline", "aline123")
+    avisos = cliente.get("/notificacoes")
+    assert avisos.status_code == 200
+    assert len([item for item in avisos.json() if item["cestaId"] == id_cesta]) == 1
+
+    recebida = cliente.post(f"/cestas/{id_cesta}/entrega/confirmar")
+    assert recebida.status_code == 200
+    assert recebida.json()["situacao"] == "Entregue"
+    assert recebida.json()["produtos"][0]["quantidade_cobrada"] == 1
+    assert recebida.json()["produtos"][0]["preco_unitario"] == 5
+    assert recebida.json()["valor_total"] == 5
+
+    historico = cliente.get(f"/cestas/{id_cesta}")
+    assert historico.status_code == 200
+    assert historico.json()["valor_total"] == 5
 
 
 def test_assinante_nao_confirma_entrega_de_cesta_de_outra_conta(cliente):

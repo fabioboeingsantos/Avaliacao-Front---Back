@@ -17,7 +17,7 @@ def _serializar_cesta(cesta: Cesta) -> dict:
     produtos = []
     quantidades_separadas = {item.produto_id: item.quantidade for item in cesta.separacoes}
     fechamento_com_faltantes = (
-        cesta.situacao in {"Preparado para envio", "Enviado"}
+        cesta.situacao in {"Preparado para envio", "Enviado", "Entregue"}
         and any(
             quantidades_separadas.get(item.produto_id, 0) < item.quantidade
             for item in cesta.itens
