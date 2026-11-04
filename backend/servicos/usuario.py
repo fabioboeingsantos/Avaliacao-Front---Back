@@ -42,9 +42,16 @@ def cadastrar(sessao: Session, usuario: str, email: str, senha: str) -> dict:
     from servicos import email_conta, tokens_conta
     sessao.add(conta)
     sessao.flush()
-    mensagem = tokens_conta.emitir(sessao, conta, "confirmacao_email")
+    mensagem = None
+    try:
+        email_conta.validar_configuracao()
+        mensagem = tokens_conta.emitir(sessao, conta, "confirmacao_email")
+    except RuntimeError:
+        # Confirmação é opcional: indisponibilidade de SMTP não bloqueia cadastro.
+        pass
     sessao.commit()
-    email_conta.enviar_com_seguranca(*mensagem)
+    if mensagem:
+        email_conta.enviar_com_seguranca(*mensagem)
     return serializar_usuario(conta)
 
 

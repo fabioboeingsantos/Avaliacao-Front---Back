@@ -68,7 +68,7 @@ def obter_usuario_atual(
         )
 
     usuario = repositorio_de_usuarios.buscar_por_usuario(sessao, dados_token["sub"])
-    if (usuario is None or not usuario.ativo or not usuario.email_verificado
+    if (usuario is None or not usuario.ativo
             or dados_token.get("sv", 0) != usuario.versao_sessao):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -131,8 +131,6 @@ def fazer_login(
 
     # Um login correto limpa o limite da conta, mantendo o controle por IP.
     limitador.limpar("login-conta", identificador.strip().lower())
-    if not usuario["email_verificado"]:
-        raise HTTPException(403, "Confirme seu e-mail antes de entrar. Você pode reenviar a confirmação.")
     token = criar_token_de_acesso(usuario["usuario"], usuario["perfil"], usuario["versao_sessao"])
     # O navegador guarda o token sem permitir acesso por JavaScript.
     resposta.set_cookie(

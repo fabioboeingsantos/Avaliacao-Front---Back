@@ -156,8 +156,8 @@ Rotas disponíveis:
 - `POST /cestas/{id}/separacoes/desfazer`: desfaz atomicamente o último lote de separações.
 - `POST /cestas/{id}/entrega/confirmar`: permite à assinante confirmar o recebimento da cesta.
 
-O acesso exige e-mail confirmado. Para configurar SMTP, migrar contas existentes e ativar esses
-fluxos, siga [Autenticação por e-mail](docs/AUTENTICACAO_EMAIL.md).
+Confirmar o e-mail é opcional e não bloqueia o acesso. Com SMTP configurado, também ficam disponíveis
+o envio de confirmação e a recuperação de senha. Veja [Autenticação por e-mail](docs/AUTENTICACAO_EMAIL.md).
 
 As cestas usam as situações `Pendente`, `Em separação`, `Cancelado` e `Entregue`. A assinante pode cancelar o pedido enquanto ele estiver pendente; depois que o produtor inicia a separação, o cancelamento não fica disponível. O sistema considera a cesta entregue quando a assinante confirma o recebimento ou, se não houver confirmação, ao completar sete dias da conclusão da separação. A expiração é aplicada quando a cesta é consultada pela API.
 

@@ -100,7 +100,7 @@ function TelaLogin({ aoEntrar, aoCadastrar, mensagemSistema, modoInicial = 'entr
       setCarregando(false)
 
       if (resultado?.sucesso) {
-        setMensagem('Cadastro realizado. Confira seu e-mail e confirme a conta antes de entrar. Se não receber, use Reenviar confirmação.')
+        setMensagem('Cadastro realizado. Você já pode entrar. A confirmação do e-mail é opcional.')
         setModo('entrar')
         setSenha('')
         setConfirmarSenha('')

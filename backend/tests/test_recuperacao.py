@@ -36,7 +36,7 @@ def test_cadastro_confirmacao_login_e_uso_unico(cliente, emails):
         assert registro.token_hash == sha256(token.encode()).hexdigest()
         assert token not in registro.token_hash
     login = {'usuario': 'nova', 'senha': 'senha-segura'}
-    assert cliente.post('/autenticacao/login', json=login).status_code == 403
+    assert cliente.post('/autenticacao/login', json=login).status_code == 200
     assert cliente.post('/autenticacao/verificar-email', json={'token': token}).status_code == 200
     assert cliente.post('/autenticacao/verificar-email', json={'token': token}).status_code == 400
     assert cliente.post('/autenticacao/login', json=login).status_code == 200
@@ -140,11 +140,13 @@ def test_login_por_email_longo(cliente):
     assert resposta.status_code == 200
 
 
-def test_configuracao_ausente_nao_persiste_cadastro(cliente, emails, monkeypatch):
+def test_configuracao_ausente_nao_bloqueia_cadastro_ou_login(cliente, emails, monkeypatch):
     def indisponivel():
         raise RuntimeError('configuração ausente')
     monkeypatch.setattr(email_conta, 'validar_configuracao', indisponivel)
-    assert cadastrar(cliente).status_code == 503
+    assert cadastrar(cliente).status_code == 201
+    assert cliente.post('/autenticacao/login', json={
+        'usuario': 'nova', 'senha': 'senha-segura'}).status_code == 200
     with SessaoDeTeste() as sessao:
         assert sessao.scalar(select(Usuario).where(Usuario.usuario == 'nova')) is None
 

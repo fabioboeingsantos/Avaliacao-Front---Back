@@ -149,6 +149,11 @@ Campos principais:
 Os perfis atuais são `assinante` e `produtor`. As senhas são armazenadas com hash Argon2,
 nunca em texto puro.
 
+A confirmação do e-mail é opcional: a conta pode entrar e usar o sistema sem confirmá-lo. Quando
+SMTP está configurado, a API pode enviar link de confirmação e de recuperação de senha, ambos com
+token de uso único. Sem SMTP, o cadastro e o acesso continuam funcionando; somente os envios por
+e-mail ficam indisponíveis.
+
 ### Produto
 
 Representa um produto disponível no catálogo da horta.
@@ -318,6 +323,10 @@ Rotas atuais:
 | `GET` | `/usuarios/me`, `/usuarios/eu` | Consultar a conta autenticada |
 | `POST` | `/autenticacao/login` | Validar o acesso e iniciar uma sessão |
 | `POST` | `/autenticacao/logout` | Encerrar a sessão removendo o cookie |
+| `POST` | `/autenticacao/reenviar-confirmacao` | Reenviar o link de confirmação de e-mail |
+| `POST` | `/autenticacao/verificar-email` | Confirmar o e-mail com token de uso único |
+| `POST` | `/autenticacao/solicitar-recuperacao` | Solicitar recuperação de senha por e-mail |
+| `POST` | `/autenticacao/redefinir-senha` | Redefinir a senha com token de uso único |
 | `GET` | `/produtos` | Listar o catálogo, o estoque e o preço unitário disponível |
 | `PUT` | `/produtos/{produto_id}/estoque` | Permitir ao produtor atualizar o estoque de um produto |
 | `PUT` | `/produtos/{produto_id}/preco` | Permitir ao produtor atualizar o preço unitário de um produto |
@@ -326,6 +335,8 @@ Rotas atuais:
 | `POST` | `/cestas` | Criar uma cesta pendente para a conta autenticada |
 | `POST` | `/cestas/{id}/cancelar` | Cancelar a própria cesta enquanto estiver pendente |
 | `GET` | `/cestas/{id}/separacoes` | Listar separações |
+| `PUT` | `/cestas/{id}/separacoes` | Salvar quantidades separadas; conclui automaticamente quando todos os itens foram separados |
+| `POST` | `/cestas/{id}/separacoes/reabrir` | Reabrir uma separação concluída para correção |
 | `POST` | `/cestas/{id}/separacoes` | Registrar uma separação |
 | `POST` | `/cestas/{id}/separacoes/lote` | Registrar várias separações atomicamente |
 | `POST` | `/cestas/{id}/separacoes/desfazer` | Desfazer quantidades separadas antes de concluir |
@@ -385,6 +396,10 @@ JWT `HttpOnly` com validade mínima de 24 horas; ao reabrir a aplicação, o fro
 `/usuarios/me` para restaurar a sessão ainda válida. As senhas são armazenadas com hash Argon2. As
 permissões ficam centralizadas na matriz de grupos, e os serviços validam as regras de negócio
 específicas.
+
+Na tela de fechamento, o produtor ajusta as quantidades e salva em uma única ação. Se a cesta
+estiver completa, essa ação também conclui a separação; se faltarem itens, salva o progresso e a
+tela informa o que ainda falta. Depois da conclusão, há uma ação para reabrir e corrigir a separação.
 
 ### Etapa 9 — Testar o fluxo completo
 

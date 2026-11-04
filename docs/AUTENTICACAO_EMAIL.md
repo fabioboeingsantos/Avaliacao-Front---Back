@@ -4,7 +4,7 @@ Implementação local de 04/11/2026. O envio real requer um provedor SMTP config
 
 ## Comportamento
 
-- Cadastro cria assinante com `email_verificado=false`. O login e as rotas protegidas exigem confirmação.
+- Cadastro cria assinante com `email_verificado=false`, mas a confirmação é opcional: o login e as rotas protegidas funcionam sem confirmar o e-mail. Se SMTP estiver configurado, o sistema envia um link para quem quiser confirmar.
 - O link de confirmação vence em 24 horas. Na tela, a pessoa clica em **Confirmar e-mail**;
   abrir o link sozinho não o consome, evitando ativação por scanners de e-mail.
 - **Reenviar confirmação** gera outro link e invalida o anterior.
@@ -36,7 +36,7 @@ Para TLS implícito use `SMTP_SECURITY=ssl` e a porta fornecida pelo provedor, n
 TLS verifica o certificado do servidor. HTTP é permitido nos links somente em localhost/127.0.0.1.
 Não coloque essas credenciais em variáveis `VITE_`, no Git ou em logs.
 Configure SPF/DKIM/DMARC conforme as instruções do provedor e confirme o remetente/domínio.
-Sem configuração válida, novos cadastros e solicitações retornam 503; o cadastro não fica persistido.
+Sem configuração válida, o cadastro continua funcionando e a conta fica utilizável imediatamente. Somente solicitações de envio/recuperação retornam 503.
 
 ## Migração e publicação
 
@@ -54,10 +54,9 @@ Sem configuração válida, novos cadastros e solicitações retornam 503; o cad
 3. Publique o backend e o frontend no mesmo ciclo de atualização.
 4. Teste entrega real, confirmação, reenvio e recuperação com uma caixa de e-mail sob seu controle.
 
-**Contas existentes:** a migração as marca como não confirmadas. Após a atualização, use
-**Reenviar confirmação**. Contas de demonstração com e-mails fictícios precisarão receber um
-endereço controlado pelo responsável antes de poderem ser confirmadas. Não marque e-mails como
-verificados sem uma comprovação. Sessões de contas não confirmadas também deixarão de funcionar.
+**Contas existentes:** a migração as marca como não confirmadas, mas elas continuam podendo entrar.
+Se quiser, use **Reenviar confirmação** para confirmar um endereço sob seu controle. A confirmação
+é opcional e não afeta o acesso; não marque e-mails como verificados sem uma comprovação.
 
 `criar_tabelas.py` também atualiza essas colunas em bancos locais antigos, mas o caminho
 recomendado para banco versionado/produção é Alembic.

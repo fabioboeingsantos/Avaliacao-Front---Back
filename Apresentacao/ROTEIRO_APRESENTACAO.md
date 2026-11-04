@@ -5,7 +5,7 @@ Este roteiro cobre os quatro requisitos da apresentação. Use os slides como ap
 ## Preparação antes de apresentar
 
 - Confirme que o endereço publicado abre e que a API e o banco estão respondendo.
-- Prepare uma conta de assinante e uma de produtor. Se for demonstrar cadastro, use uma conta de teste nova e dados fictícios.
+- Prepare uma conta de assinante e uma de produtor que já consigam entrar. A confirmação do e-mail é opcional; como SMTP ainda não está configurado, não conte com envio de confirmação ou recuperação ao vivo na publicação.
 - Tenha acesso ao painel do Supabase para conferir o registro criado. Não mostre nem leia senhas; confira somente que o campo armazenado contém um hash, nunca a senha em texto.
 - Deixe a apresentação em tela cheia. Na demonstração, tenha o endereço do site à mão e alterne para o navegador quando indicado.
 - Se o acesso ao Supabase ou à publicação não estiver disponível, explique essa limitação e não afirme que a etapa foi demonstrada.
@@ -66,11 +66,11 @@ Mostre que a apresentação visual continua no slide enquanto o fluxo real é ex
 endereço indicado no próprio slide 10 para abrir a aplicação na Vercel.
 
 1. **Abrir o endereço publicado:** acesse a URL da Vercel que aparece no slide. Confirme que a página carregou antes de continuar.
-2. **Cadastrar um usuário:** crie uma conta de demonstração com dados de teste. Em seguida, abra o Supabase e localize o registro correspondente.
-3. **Conferir a proteção da senha:** mostre apenas que o banco guarda um hash e que a senha original não aparece em texto. Não exiba credenciais, tokens ou dados pessoais.
+2. **Explicar cadastro e senha:** o cadastro permite entrar imediatamente; confirmar o e-mail é opcional. Com SMTP configurado, a aplicação também pode enviar link de confirmação e de recuperação. Como SMTP ainda está pendente, explique esses recursos sem prometer o envio ao vivo.
+3. **Conferir a proteção da senha:** se houver acesso preparado ao Supabase, mostre apenas que o banco guarda um hash e que a senha original não aparece em texto. Não exiba credenciais, tokens ou dados pessoais.
 4. **Entrar como assinante:** use a conta de assinante preparada. Demonstre escolha do tipo e tamanho da cesta, seleção dos produtos disponíveis, revisão e envio do pedido; depois, mostre histórico, situação, notificações e o botão **Repetir composição**, que carrega o pedido anterior para uma nova conferência sem criar nada automaticamente.
-5. **Entrar como produtor:** encerre a sessão e use a conta de produtor. Mostre o controle de estoque, pedidos recebidos, abertura de um pedido, separação e atualização de situação. Se possível, destaque o aviso de estoque baixo e que a pessoa assinante também recebe atualizações.
-6. **Testar uma falha de acesso:** tente uma senha incorreta ou um cadastro inválido usando dados de demonstração. Mostre a mensagem apresentada e explique como ela orienta a pessoa a corrigir a entrada.
+5. **Entrar como produtor:** encerre a sessão e use a conta de produtor. Mostre o controle de estoque, pedidos recebidos e a tela de fechamento. O produtor ajusta as quantidades e usa o botão único para salvar; se todos os itens estiverem separados, o mesmo botão conclui a separação. Depois, pode reabrir para corrigir um engano. Se possível, destaque o aviso de estoque baixo e as atualizações internas para a pessoa assinante.
+6. **Testar uma falha de acesso:** tente uma senha incorreta usando dados de demonstração. Mostre a mensagem apresentada e explique como ela orienta a pessoa a corrigir a entrada.
 
 Conclua a demonstração resumindo o percurso: cadastro e acesso, pedido, separação e acompanhamento. Se
 algum serviço estiver indisponível, descreva o passo sem alegar que foi concluído.
