@@ -16,8 +16,8 @@ O fluxo principal é:
 3. Confirma o pedido, que fica pendente.
 4. Enquanto o pedido estiver pendente, Aline pode cancelá-lo.
 5. Vanderlei visualiza as cestas e registra os produtos separados.
-6. Se houver todos os itens, Vanderlei marca a cesta como preparada. Se houver faltantes, pode encerrar com as quantidades disponíveis; o valor é recalculado com os preços congelados no pedido e os faltantes são destacados.
-7. Vanderlei marca a cesta como enviada. Aline recebe uma notificação persistente e confirma o recebimento, aceitando as quantidades e o valor ajustado quando houver faltantes; sem confirmação, a cesta passa para entregue sete dias após o envio.
+6. Vanderlei salva o progresso da separação. Quando todos os itens forem separados, a cesta fica preparada para envio; se houver faltantes, pode encerrar com as quantidades disponíveis. Nesse caso, o valor é recalculado com os preços unitários congelados no pedido e os faltantes ficam destacados.
+7. Na lista de pedidos, Vanderlei confirma o envio. Aline recebe uma notificação persistente com o estado real da separação e, se houver faltantes, com a quantidade recebida e o valor ajustado. Aline confere e confirma o recebimento; sem confirmação, a cesta passa para entregue sete dias após o envio.
 
 ## 2. Tecnologias utilizadas
 
@@ -28,7 +28,7 @@ O fluxo principal é:
 - **JavaScript com JSX:** linguagem dos componentes.
 - **CSS puro:** estilização e responsividade.
 - **Fetch API:** comunicação com o backend.
-- **Notificações internas:** atualização periódica dos pedidos e armazenamento local das notificações no navegador.
+- **Notificações internas:** a API armazena avisos de pedido no banco, e a interface atualiza e exibe esses avisos no sino; há cache local no navegador.
 - **Oxlint:** verificação de qualidade do código.
 
 ### Backend
@@ -213,7 +213,7 @@ Regras principais:
 4. Um produto separado precisa pertencer à cesta, e a quantidade separada não pode exceder a quantidade pedida.
 5. O estoque é reservado quando o pedido é criado e devolvido quando a cesta pendente é cancelada.
 6. O primeiro produto separado altera a situação para **Em separação**.
-7. Quando todos os itens estão separados, a situação muda para **Preparado para envio**. O produtor pode marcar a cesta como **Enviado**, o que cria uma notificação persistente para a assinante.
+7. Quando todos os itens estão separados, a situação muda para **Preparado para envio**. Se faltarem itens, o produtor pode encerrar a separação com as quantidades disponíveis. O backend recalcula o valor usando o preço unitário salvo em cada item do pedido, sem alterar pedidos antigos quando o catálogo mudar. O produtor confirma o envio na lista de pedidos, o que cria uma notificação persistente para a assinante com a situação completa ou parcial.
 8. A cesta passa para **Entregue** quando a assinante confirma o recebimento ou sete dias após o envio. A expiração é atualizada quando a cesta é consultada pela API.
 9. A assinante pode cancelar a própria cesta somente enquanto ela estiver **Pendente** e sem separações. A situação passa para **Cancelado**, e o produtor não pode iniciar ou continuar a separação.
 
@@ -400,13 +400,14 @@ JWT `HttpOnly` com validade mínima de 24 horas; ao reabrir a aplicação, o fro
 permissões ficam centralizadas na matriz de grupos, e os serviços validam as regras de negócio
 específicas.
 
-Na tela de fechamento, o produtor ajusta as quantidades e salva em uma única ação. Se a cesta
-estiver completa, essa ação também conclui a separação; se faltarem itens, salva o progresso e a
-tela informa o que ainda falta. Depois da conclusão, há uma ação para reabrir e corrigir a separação.
+Na tela de fechamento, o produtor ajusta as quantidades e pode salvar o progresso enquanto trabalha.
+Também pode encerrar com faltantes e ajustar o valor quando não houver estoque suficiente. Ao concluir,
+há uma ação para reabrir e corrigir a separação. Na lista de pedidos, **Confirmar envio** registra o
+despacho e gera a notificação para a assinante; a tela de detalhes mostra a composição, faltantes e valor.
 
 ### Etapa 9 — Testar o fluxo completo
 
-Fluxo de teste recomendado:
+Fluxo de teste recomendado (use contas e pedidos de demonstração; não altere pedidos reais):
 
 1. Entrar com `aline` e escolher uma cesta pequena, média ou grande.
 2. Confirmar o pedido e verificar que aparece como **Pendente** no histórico.
@@ -416,9 +417,15 @@ Fluxo de teste recomendado:
 6. Registrar um ou mais produtos, sem exceder as quantidades pedidas.
 7. Atualizar o estoque de um produto como `vanderlei` e confirmar a nova disponibilidade no catálogo.
 8. Tentar registrar uma quantidade inválida ou acima do estoque e confirmar que a API recusa a operação.
-9. Separar todos os itens e concluir a separação.
-10. Voltar a entrar com `aline`, abrir os detalhes do pedido e confirmar o recebimento.
-11. Verificar que a situação aparece como **Entregue** e que a notificação interna é exibida.
+9. Para testar o caso completo, separar todos os itens e concluir a separação. Na lista do produtor,
+   confirmar o envio e conferir a notificação como assinante.
+10. Para testar o caso parcial, crie outro pedido. Separe somente parte de ao menos um produto e use
+    **Encerrar com faltantes e ajustar valor**. Confira que o total diminuiu conforme os preços unitários
+    congelados no pedido e que a tela destaca quantidades faltantes.
+11. Na lista do produtor, use **Confirmar envio**. Como assinante, confira se a notificação informa
+    separação parcial, itens faltantes e valor ajustado, sem dizer que todos os itens foram separados.
+12. Confirme o recebimento como assinante. Verifique **Entregue** e que o total reduzido permanece no
+    histórico. O preço do pedido deve continuar igual mesmo se o produtor alterar o preço atual do catálogo.
 
 ### Etapa 10 — Preparar a publicação
 

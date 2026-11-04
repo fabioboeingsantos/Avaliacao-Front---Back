@@ -101,11 +101,13 @@ O fluxo de demonstração é:
 2. Crie e finalize uma cesta.
 3. Saia pela opção de retorno e entre como `vanderlei` com a senha `vanderlei123`.
 4. Consulte ou atualize o estoque na aba `Gerenciar estoque`.
-5. Abra a cesta na tela `A separação` e registre os produtos em `O fechamento`.
+5. Abra a cesta em `A separação`, ajuste quantidades em `O fechamento` e salve o progresso ou encerre
+   com faltantes. Depois, confirme o envio na lista de pedidos e confira o aviso como assinante.
 
-O estoque é reservado ao criar o pedido e devolvido quando uma cesta pendente é cancelada. A
-interface também exibe notificações internas no navegador quando identifica atualizações nos pedidos;
-não há envio externo por e-mail, SMS ou mensageria.
+O estoque é reservado ao criar o pedido e devolvido quando uma cesta pendente é cancelada. As
+notificações de pedidos ficam persistidas no banco e aparecem no sino da aplicação. E-mail é usado
+para confirmação de conta e recuperação de senha; confirmação de e-mail é opcional para entrar. Não há
+envio de atualizações de pedidos por e-mail, SMS ou mensageria.
 
 ### Preços por unidade
 
@@ -160,8 +162,10 @@ Rotas disponíveis:
 - `POST /cestas/{id}/separacoes/desfazer`: desfaz atomicamente o último lote de separações.
 - `POST /cestas/{id}/entrega/confirmar`: permite à assinante confirmar o recebimento da cesta.
 
-Confirmar o e-mail é opcional e não bloqueia o acesso. Com SMTP configurado, também ficam disponíveis
-o envio de confirmação e a recuperação de senha. Veja [Autenticação por e-mail](docs/AUTENTICACAO_EMAIL.md).
+Confirmar o e-mail é opcional e não bloqueia o acesso. Com SMTP configurado, ficam disponíveis o envio
+de confirmação e a recuperação de senha. O SMTP temporário foi configurado e testado para a apresentação;
+após a apresentação, as credenciais temporárias devem ser revogadas e removidas das variáveis de ambiente.
+Veja [Autenticação por e-mail](docs/AUTENTICACAO_EMAIL.md).
 
 As cestas usam as situações `Pendente`, `Em separação`, `Preparado para envio`, `Enviado`, `Cancelado` e `Entregue`. A assinante pode cancelar o pedido enquanto ele estiver pendente; depois que o produtor inicia a separação, o cancelamento não fica disponível. Quando todos os itens são separados, o status muda para `Preparado para envio`. Se faltar produto, o produtor pode encerrar com as quantidades reais; o total cai apenas pelo preço das unidades faltantes, e a tela do cliente destaca as faltas. O cliente aceita as quantidades e o valor ajustado ao confirmar o recebimento depois do envio. Preços unitários já gravados nos pedidos antigos são preservados. Para pedidos antigos sem snapshot de preço, a migração `20261104_0014` preenche somente campos nulos usando o mesmo preço de catálogo que era usado como fallback pela aplicação. O produtor pode marcar o pedido como `Enviado`, gerando uma notificação persistente para a assinante. A cesta passa a `Entregue` quando a assinante confirma o recebimento ou, sem confirmação, sete dias após o envio. A expiração é aplicada quando a cesta é consultada pela API. As revisões Alembic `20261104_0013` e `20261104_0014` estão em `backend/migracoes/versions/`; para bancos ainda não atualizados, execute `python -m alembic upgrade head` no diretório `backend`. O Supabase deste projeto já está na revisão `20261104_0014`, conferida por consulta ao banco. Os scripts SQL avulsos foram removidos a pedido.
 
@@ -183,7 +187,7 @@ python -m alembic upgrade head
 As migrações atualizam as contas, os estados das cestas e o estoque dos produtos, preservando os
 hashes Argon2 e registrando a data de conclusão da separação.
 
-O estado esperado do banco após aplicar as migrações é `20261029_0010 (head)`, com as tabelas
+O estado esperado do banco deste projeto após aplicar as migrações é `20261104_0014 (head)`, com as tabelas
 `usuarios`, `produtos`, `cestas`, `itens_cesta`, `separacoes` e `alembic_version`. As cestas
 são criadas durante o fluxo de demonstração; o carregamento inicial não cria pedidos.
 

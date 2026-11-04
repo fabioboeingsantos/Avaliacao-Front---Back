@@ -5,7 +5,7 @@ Este roteiro cobre os quatro requisitos da apresentação. Use os slides como ap
 ## Preparação antes de apresentar
 
 - Confirme que o endereço publicado abre e que a API e o banco estão respondendo.
-- Prepare uma conta de assinante e uma de produtor que já consigam entrar. A confirmação do e-mail é opcional; como SMTP ainda não está configurado, não conte com envio de confirmação ou recuperação ao vivo na publicação.
+- Prepare uma conta de assinante e uma de produtor que já consigam entrar. A confirmação do e-mail é opcional. O envio SMTP de confirmação e recuperação foi configurado e testado; mantenha as contas preparadas como alternativa caso o provedor esteja indisponível durante a apresentação.
 - Tenha acesso ao painel do Supabase para conferir o registro criado. Não mostre nem leia senhas; confira somente que o campo armazenado contém um hash, nunca a senha em texto.
 - Deixe a apresentação em tela cheia. Na demonstração, tenha o endereço do site à mão e alterne para o navegador quando indicado.
 - Se o acesso ao Supabase ou à publicação não estiver disponível, explique essa limitação e não afirme que a etapa foi demonstrada.
@@ -65,12 +65,13 @@ Use este slide para apresentar o endereço publicado e explicar que a demonstra�
 Mostre que a apresentação visual continua no slide enquanto o fluxo real é executado na aplicação. Use o
 endereço indicado no próprio slide 10 para abrir a aplicação na Vercel.
 
-1. **Abrir o endereço publicado:** acesse a URL da Vercel que aparece no slide. Confirme que a página carregou antes de continuar.
-2. **Explicar cadastro e senha:** o cadastro permite entrar imediatamente; confirmar o e-mail é opcional. Com SMTP configurado, a aplicação também pode enviar link de confirmação e de recuperação. Como SMTP ainda está pendente, explique esses recursos sem prometer o envio ao vivo.
+1. **Abrir o endereço publicado:** acesse `https://cestadovale.vercel.app/` (também indicado no slide). Confirme que a página carregou antes de continuar.
+2. **Explicar cadastro e senha:** o cadastro permite entrar imediatamente; confirmar o e-mail é opcional. A aplicação envia links de confirmação e recuperação por SMTP. Se demonstrar esse recurso, use uma conta de teste e não mostre tokens ou credenciais.
 3. **Conferir a proteção da senha:** se houver acesso preparado ao Supabase, mostre apenas que o banco guarda um hash e que a senha original não aparece em texto. Não exiba credenciais, tokens ou dados pessoais.
 4. **Entrar como assinante:** use a conta de assinante preparada. Demonstre escolha do tipo e tamanho da cesta, seleção dos produtos disponíveis, revisão e envio do pedido; depois, mostre histórico, situação, notificações e o botão **Repetir composição**, que carrega o pedido anterior para uma nova conferência sem criar nada automaticamente.
-5. **Entrar como produtor:** encerre a sessão e use a conta de produtor. Mostre o controle de estoque, pedidos recebidos e a tela de fechamento. O produtor ajusta as quantidades e usa o botão único para salvar; se todos os itens estiverem separados, o mesmo botão conclui a separação. Depois, pode reabrir para corrigir um engano. Se possível, destaque o aviso de estoque baixo e as atualizações internas para a pessoa assinante.
-6. **Testar uma falha de acesso:** tente uma senha incorreta usando dados de demonstração. Mostre a mensagem apresentada e explique como ela orienta a pessoa a corrigir a entrada.
+5. **Entrar como produtor:** encerre a sessão e use a conta de produtor. Mostre o controle de estoque, pedidos recebidos e a tela de fechamento. O produtor ajusta e salva o progresso; quando houver faltantes, pode encerrar o pedido com as quantidades disponíveis e o valor recalculado pelos preços unitários congelados no pedido. Após concluir, pode reabrir a separação para corrigir um engano. Na lista de pedidos, use **Confirmar envio** e mostre a notificação correspondente para a pessoa assinante. Se possível, destaque também o aviso de estoque baixo.
+6. **Conferir o pedido como assinante:** abra os detalhes e confira os itens separados, os faltantes e o total ajustado. Confirme o recebimento e verifique a situação **Entregue** e o total preservado no histórico.
+7. **Testar uma falha de acesso:** tente uma senha incorreta usando dados de demonstração. Mostre a mensagem apresentada e explique como ela orienta a pessoa a corrigir a entrada.
 
 Conclua a demonstração resumindo o percurso: cadastro e acesso, pedido, separação e acompanhamento. Se
 algum serviço estiver indisponível, descreva o passo sem alegar que foi concluído.

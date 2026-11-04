@@ -43,15 +43,47 @@ function obterNomeAssinante(cesta) {
   return formatarNomeUsuario(cesta.assinante) || 'A pessoa assinante'
 }
 
+function obterNotificacaoPreparo(cesta) {
+  const pendencias = obterPendenciasDaCesta(cesta)
+  if (!pendencias.length) {
+    return {
+      titulo: 'Pedido preparado para envio',
+      mensagem: 'todos os itens foram separados e a cesta está pronta para envio.',
+    }
+  }
+
+  const totalSeparado = cesta.separacoes.reduce((total, item) => total + item.quantidade, 0)
+  const totalPedido = cesta.produtos.reduce((total, item) => total + item.quantidade, 0)
+  const faltantes = pendencias.map((item) => `${item.nome}: faltam ${item.faltante}`).join('; ')
+  return {
+    titulo: 'Pedido preparado com faltantes',
+    mensagem: `foram separados ${totalSeparado} de ${totalPedido} itens. ` +
+      `Valor ajustado para ${formatarMoeda(cesta.valorTotal)}. Itens faltantes: ${faltantes}. ` +
+      'O cliente poderá conferir e aceitar o pedido após o envio.',
+  }
+}
+
 function atualizarNotificacoesComNomes(notificacoes, cestas) {
   const cestasPorId = new Map(cestas.map((cesta) => [String(cesta.id), cesta]))
 
   return notificacoes.map((notificacao) => {
     const cesta = cestasPorId.get(String(notificacao.cestaId))
-    if (!cesta || !/assinante/i.test(notificacao.mensagem)) {
+    if (!cesta) {
       return notificacao
     }
 
+    if (String(notificacao.id).endsWith('-pronto-envio')) {
+      const preparo = obterNotificacaoPreparo(cesta)
+      return {
+        ...notificacao,
+        titulo: preparo.titulo,
+        mensagem: `Cesta ${cesta.tamanhoNome}: ${preparo.mensagem}`,
+      }
+    }
+
+    if (!/assinante/i.test(notificacao.mensagem)) {
+      return notificacao
+    }
     const nome = obterNomeAssinante(cesta)
     return {
       ...notificacao,
@@ -339,7 +371,8 @@ function App() {
                 )
               }
               if (!anterior.separacaoConcluidaEm && cesta.separacaoConcluidaEm) {
-                criarNotificacao(cesta, 'pronto-envio', 'Pedido preparado para envio', 'todos os itens foram separados e a cesta está pronta para envio.')
+                const preparo = obterNotificacaoPreparo(cesta)
+                criarNotificacao(cesta, 'pronto-envio', preparo.titulo, preparo.mensagem)
               }
               if (anterior.situacao !== 'Entregue' && cesta.situacao === 'Entregue') {
                 criarNotificacao(cesta, 'entregue', 'Pedido atualizado', 'o recebimento da cesta foi confirmado.')

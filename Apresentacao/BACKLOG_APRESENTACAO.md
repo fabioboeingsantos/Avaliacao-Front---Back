@@ -18,15 +18,17 @@
 
 ## Validar antes da apresentação
 
-- [ ] Publicar as alterações locais após configurar o envio de e-mail; ver [`PENDENCIAS.md`](../PENDENCIAS.md).
+- [ ] Após esta publicação, concluir no site o teste do ciclo parcial: separar menos itens, conferir
+  o total com preço congelado, confirmar o envio, verificar a notificação com faltantes e confirmar
+  o recebimento; ver [`PENDENCIAS.md`](../PENDENCIAS.md).
 - [ ] Executar o roteiro completo no ambiente publicado e registrar uma evidência simples.
 - [x] Confirmar a migração de autenticação no Supabase (revisão `20261104_0012`, estrutura e RLS).
-- [x] Testes locais atuais: 72 testes backend passaram; lint e build frontend passaram.
+- [x] Confirmação de e-mail e recuperação de senha testadas com envio SMTP; a confirmação de e-mail
+  é opcional para entrar.
+- [x] Pipeline CI para lint, build e testes (`.github/workflows/ci.yml`).
 
 ## Evolução planejada
 
-- [ ] Ativar em produção a confirmação de e-mail e a recuperação por token; o código está implementado e testado localmente, mas ainda falta SMTP e publicação.
 - [ ] Assistente de pedido com IA e revisão humana.
 - [ ] Testes E2E no navegador.
-- [x] Pipeline CI para lint, build e testes (`.github/workflows/ci.yml`).
 - [ ] Observabilidade, backup e controles de produção.

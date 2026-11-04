@@ -6,6 +6,12 @@ import AvaliacaoEstrelas from './AvaliacaoEstrelas'
 const formatarMoeda = (valor) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor ?? 0)
 
+const imagensCestaPorTamanho = {
+  Pequena: '/marca/cesta-pequena.png',
+  Média: '/marca/cesta-media.png',
+  Grande: '/marca/cesta-grande.png',
+}
+
 function obterPendencias(cesta) {
   const separacoes = new Map((cesta.separacoes ?? []).map((item) => [item.produtoId, item.quantidade]))
 
@@ -52,6 +58,7 @@ function TelaDetalhesCesta({
   const totalSeparado = separacoes.reduce((total, separacao) => total + separacao.quantidade, 0)
   const produtosPendentes = obterPendencias(cesta)
   const pedidoEncerradoComFaltantes = Boolean(cesta.separacaoConcluidaEm && produtosPendentes.length)
+  const imagemCesta = imagensCestaPorTamanho[cesta.tamanhoNome] ?? imagensCestaPorTamanho.Média
 
   async function confirmarRecebimento() {
     setConfirmando(true)
@@ -92,12 +99,15 @@ function TelaDetalhesCesta({
         </div>
       </header>
 
-      <section className="introducao-pedido" aria-labelledby="titulo-detalhes-cesta">
-        <p className="texto-saudacao">Acompanhe sua cesta</p>
-        <h1 id="titulo-detalhes-cesta">{formatarIdSolicitacao(cesta.id)} · Cesta {cesta.tamanhoNome}</h1>
-        <p>
-          Veja o que foi pedido e o que o produtor ja separou para voce.
-        </p>
+      <section className="introducao-pedido introducao-detalhes-cesta" aria-labelledby="titulo-detalhes-cesta">
+        <div>
+          <p className="texto-saudacao">Acompanhe sua cesta</p>
+          <h1 id="titulo-detalhes-cesta">{formatarIdSolicitacao(cesta.id)} · Cesta {cesta.tamanhoNome}</h1>
+          <p>
+            Veja o que foi pedido e o que o produtor ja separou para voce.
+          </p>
+        </div>
+        <img className="imagem-cesta-detalhes" src={imagemCesta} alt={`Cesta ${cesta.tamanhoNome}`} />
       </section>
 
       <section className="resumo-finalizacao resumo-detalhes-cesta" aria-label="Resumo da cesta">
@@ -200,11 +210,6 @@ function TelaDetalhesCesta({
           </ul>
         </section>
 
-        <section className="total-pedido total-pedido-historico" aria-label="Valor do pedido">
-          <span>{pedidoEncerradoComFaltantes ? 'Total ajustado às quantidades separadas' : 'Valor do pedido'}</span>
-          <strong>{formatarMoeda(cesta.valorTotal)}</strong>
-        </section>
-
         <section className="composicao-cesta" aria-labelledby="titulo-separados-cesta">
           <div>
             <p className="rotulo-cartao">Separacao do produtor</p>
@@ -237,6 +242,11 @@ function TelaDetalhesCesta({
           )}
         </section>
       </div>
+
+      <section className="total-pedido total-pedido-historico" aria-label="Valor do pedido">
+        <span>{pedidoEncerradoComFaltantes ? 'Total ajustado às quantidades separadas' : 'Valor do pedido'}</span>
+        <strong>{formatarMoeda(cesta.valorTotal)}</strong>
+      </section>
 
       <button className="botao botao-secundario" type="button" onClick={aoAbrirHistorico}>
         Voltar ao historico

@@ -409,6 +409,13 @@ function TelaFechamento({
           <><strong>Todos os itens estão planejados.</strong> Salve para registrar e concluir a separação.</>
         )}
       </aside>
+      <button
+        className="botao botao-secundario botao-voltar-separacao"
+        type="button"
+        onClick={aoAbrirSeparacao}
+      >
+        Voltar para a lista de separação
+      </button>
     </main>
   )
 }

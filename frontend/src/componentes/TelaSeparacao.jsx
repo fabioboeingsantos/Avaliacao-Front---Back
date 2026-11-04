@@ -384,31 +384,35 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
                     <div className="acoes-cesta-produtor">
                       {cesta.situacao === 'Enviado' ? (
                         <span>Pedido enviado; aguardando confirmação do cliente.</span>
-                      ) : (
+                      ) : cesta.separacaoConcluidaEm ? (
                         <>
-                          <button
-                            className="botao botao-primario"
-                            type="button"
-                            onClick={() => cesta.situacao === 'Preparado para envio'
-                              ? marcarComoEnviado(cesta)
-                              : aoAbrirFechamento(cesta)}
-                            disabled={envioSalvando === cesta.id}
-                          >
-                            {envioSalvando === cesta.id
-                              ? 'Registrando envio...'
-                              : cesta.situacao === 'Preparado para envio'
-                                ? 'Marcar como enviado'
-                                : cesta.separacaoConcluidaEm ? 'Editar separação' : 'Separar produtos'}
-                          </button>
-                          {cesta.separacaoConcluidaEm && (
-                            <>
-                              <span>Separação concluída; cesta pronta para envio.</span>
-                              <button className="botao botao-secundario" type="button" onClick={() => aoAbrirFechamento(cesta)}>
-                                Editar separação
-                              </button>
-                            </>
-                          )}
+                          <span>Separação concluída; cesta pronta para envio.</span>
+                          <div className="botoes-envio-cesta-produtor">
+                            <button
+                              className="botao botao-primario"
+                              type="button"
+                              onClick={() => marcarComoEnviado(cesta)}
+                              disabled={envioSalvando === cesta.id}
+                            >
+                              {envioSalvando === cesta.id ? 'Registrando envio...' : 'Confirmar envio'}
+                            </button>
+                            <button
+                              className="botao botao-secundario"
+                              type="button"
+                              onClick={() => aoAbrirFechamento(cesta)}
+                            >
+                              Editar separação
+                            </button>
+                          </div>
                         </>
+                      ) : (
+                        <button
+                          className="botao botao-primario"
+                          type="button"
+                          onClick={() => aoAbrirFechamento(cesta)}
+                        >
+                          Separar produtos
+                        </button>
                       )}
                       {mensagensEnvio[cesta.id] && (
                         <p className="mensagem mensagem-erro" role="alert">{mensagensEnvio[cesta.id]}</p>

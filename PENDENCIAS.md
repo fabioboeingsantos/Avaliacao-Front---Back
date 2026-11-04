@@ -2,11 +2,11 @@
 
 Atualizado em 04/11/2026. Esta lista contém somente ações ainda não concluídas.
 
-## Quando liberar o deploy
+## Validar no site
 
-- [ ] Publicar a correção local do pedido parcial e validar no site o ciclo completo: separação,
-  total com preço congelado, envio, notificação ao cliente e confirmação de entrega. Os 35 testes
-  locais do fluxo de cestas passaram; a correção ainda não foi publicada.
+- [ ] Após esta publicação, concluir no site o teste do pedido parcial: confirmar envio, conferir a
+  notificação, confirmar entrega e verificar o total reduzido no histórico. A correção do total na
+  API já foi publicada no commit `bfea902`.
 
 ## Após a apresentação
 
