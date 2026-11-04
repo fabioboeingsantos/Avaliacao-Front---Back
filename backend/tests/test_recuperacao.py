@@ -113,7 +113,12 @@ def test_reset_rejeita_senha_curta_sem_consumir_token(cliente, emails):
     token = token_email(emails)
     assert cliente.post('/autenticacao/redefinir-senha', json={'token': token, 'senha': 'curta'}).status_code == 422
     assert cliente.post('/autenticacao/redefinir-senha', json={'token': token, 'senha': 'senha-valida-nova'}).status_code == 200
-    assert cliente.post('/autenticacao/login', json={'usuario': 'nova', 'senha': 'senha-valida-nova'}).status_code == 403
+    resposta = cliente.post('/autenticacao/login', json={'usuario': 'nova', 'senha': 'senha-valida-nova'})
+    assert resposta.status_code == 200
+    with SessaoDeTeste() as sessao:
+        conta = sessao.scalar(select(Usuario).where(Usuario.usuario == 'nova'))
+        assert conta.email_verificado is False
+    assert cliente.post('/autenticacao/login', json={'usuario': 'nova', 'senha': 'senha-segura'}).status_code == 401
 
 
 def test_cadastro_rejeita_senha_muito_comum(cliente, emails):
@@ -148,7 +153,11 @@ def test_configuracao_ausente_nao_bloqueia_cadastro_ou_login(cliente, emails, mo
     assert cliente.post('/autenticacao/login', json={
         'usuario': 'nova', 'senha': 'senha-segura'}).status_code == 200
     with SessaoDeTeste() as sessao:
-        assert sessao.scalar(select(Usuario).where(Usuario.usuario == 'nova')) is None
+        conta = sessao.scalar(select(Usuario).where(Usuario.usuario == 'nova'))
+        assert conta is not None
+        assert conta.ativo is True
+        assert conta.email_verificado is False
+    assert not emails
 
 
 def test_falha_entrega_permite_novo_reenvio(cliente, emails, monkeypatch):
