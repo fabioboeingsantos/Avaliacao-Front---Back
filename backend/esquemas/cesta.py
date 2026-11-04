@@ -46,6 +46,19 @@ class NovasSeparacoes(BaseModel):
     produtos: list[ProdutoParaSeparar] = Field(min_length=1)
 
 
+class QuantidadePlanejada(BaseModel):
+    """Quantidade final conferida de um produto dentro de uma cesta."""
+
+    produto_id: str = Field(min_length=1)
+    quantidade: int = Field(ge=0)
+
+
+class SalvarSeparacao(BaseModel):
+    """Estado completo das quantidades separadas, inclusive correções."""
+
+    produtos: list[QuantidadePlanejada] = Field(min_length=1)
+
+
 class SeparacaoParaDesfazer(BaseModel):
     """Quantidade registrada que deve ser removida de um produto."""
 

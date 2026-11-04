@@ -6,6 +6,7 @@ from banco import Base, Sessao, engine
 from modelos.cesta import Cesta
 from modelos.produto import Produto
 from modelos.usuario import Usuario
+from modelos.token_conta import TokenConta  # noqa: F401
 from seguranca import criar_hash_de_senha, senha_ja_esta_protegida
 
 
@@ -34,6 +35,12 @@ def criar_tabelas() -> None:
     """Cria as tabelas sem apagar dados existentes e inclui dados ausentes."""
 
     Base.metadata.create_all(bind=engine)
+    colunas_usuarios = {coluna['name'] for coluna in inspect(engine).get_columns('usuarios')}
+    with engine.begin() as conexao:
+        if 'email_verificado' not in colunas_usuarios:
+            conexao.execute(text('ALTER TABLE usuarios ADD COLUMN email_verificado BOOLEAN NOT NULL DEFAULT FALSE'))
+        if 'versao_sessao' not in colunas_usuarios:
+            conexao.execute(text('ALTER TABLE usuarios ADD COLUMN versao_sessao INTEGER NOT NULL DEFAULT 0'))
     # Mantém bancos locais antigos compatíveis com as colunas adicionadas ao catálogo.
     colunas_produtos = {coluna["name"] for coluna in inspect(engine).get_columns("produtos")}
     preco_adicionado_agora = "preco_centavos" not in colunas_produtos

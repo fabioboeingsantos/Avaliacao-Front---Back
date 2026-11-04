@@ -49,7 +49,7 @@ class LimitadorAutenticacao:
 
             if registro.quantidade >= limite:
                 registro.bloqueado_ate = agora + obter_duracao_bloqueio()
-                logger.warning("Limite de autenticacao atingido: grupo=%s chave=%s", grupo, chave)
+                logger.warning("Limite de autenticacao atingido: grupo=%s", grupo)
                 return False, obter_duracao_bloqueio()
 
             registro.quantidade += 1

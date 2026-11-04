@@ -17,3 +17,5 @@ class Usuario(Base):
     senha_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     perfil: Mapped[str] = mapped_column(String(20), nullable=False, default="assinante")
     ativo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    email_verificado: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    versao_sessao: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

@@ -17,6 +17,7 @@ function obterPendencias(cesta) {
 
 // Mostra para a assinante o que foi pedido e o que o produtor ja separou.
 function TelaDetalhesCesta({
+  usuario,
   cesta,
   aoAbrirPedido,
   aoAbrirHistorico,
@@ -72,7 +73,7 @@ function TelaDetalhesCesta({
       <header className="cabecalho-pagina">
         <div>
           <p className="marca-pequena">Cesta do Vale</p>
-          <p className="contexto-usuario">Aline · assinante</p>
+          <p className="contexto-usuario">{usuario} · assinante</p>
         </div>
 
         <div className="cabecalho-acoes">

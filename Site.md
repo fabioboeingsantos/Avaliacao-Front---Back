@@ -1,1 +1,1 @@
-https://cesta-do-vale.vercel.app
+https://cestadovale.vercel.app

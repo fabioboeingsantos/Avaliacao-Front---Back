@@ -25,6 +25,7 @@ from modelos.item_cesta import ItemCesta  # noqa: E402
 from modelos.produto import Produto  # noqa: E402
 from modelos.usuario import Usuario  # noqa: E402
 from seguranca import criar_hash_de_senha  # noqa: E402
+from servicos import email_conta  # noqa: E402
 
 
 BANCO_DE_TESTE = create_engine(
@@ -46,11 +47,13 @@ def obter_sessao_de_teste() -> Generator[Session, None, None]:
 
 
 @pytest.fixture
-def cliente() -> Generator[TestClient, None, None]:
+def cliente(monkeypatch) -> Generator[TestClient, None, None]:
     """Cria um banco limpo e um cliente HTTP para cada teste."""
 
     # Cada teste começa com as janelas de protecao vazias.
     limitador.resetar()
+    monkeypatch.setattr(email_conta, 'validar_configuracao', lambda: 'https://cesta.example.com')
+    monkeypatch.setattr(email_conta, 'enviar', lambda *args: None)
     Base.metadata.create_all(bind=BANCO_DE_TESTE)
     sessao = SessaoDeTeste()
     sessao.add_all(
@@ -61,6 +64,7 @@ def cliente() -> Generator[TestClient, None, None]:
                 senha_hash=criar_hash_de_senha("aline123"),
                 perfil="assinante",
                 ativo=True,
+                email_verificado=True,
             ),
             Usuario(
                 usuario="vanderlei",
@@ -68,6 +72,7 @@ def cliente() -> Generator[TestClient, None, None]:
                 senha_hash=criar_hash_de_senha("vanderlei123"),
                 perfil="produtor",
                 ativo=True,
+                email_verificado=True,
             ),
             *[
                 Produto(id=produto_id, nome=produto_id.title())

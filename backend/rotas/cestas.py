@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from banco import obter_sessao
 from rotas.autenticacao import exigir_permissao
-from esquemas.cesta import AvaliacaoCesta, DesfazerSeparacoes, NovaCesta, NovasSeparacoes, NovaSeparacao
+from esquemas.cesta import AvaliacaoCesta, DesfazerSeparacoes, NovaCesta, NovasSeparacoes, NovaSeparacao, SalvarSeparacao
 from servicos import cesta as servico
 from servicos.excecoes import AcessoNegado, CestaNaoEncontrada, ErroDeAplicacao
 from modelos.usuario import Usuario
@@ -144,6 +144,25 @@ def registrar_separacoes_em_lote(
         raise traduzir_erro(erro) from erro
 
 
+@router.put("/{id_cesta}/separacoes")
+def salvar_separacao(
+    id_cesta: int,
+    dados: SalvarSeparacao,
+    sessao: Session = Depends(obter_sessao),
+    usuario: Usuario = Depends(exigir_permissao("cestas.registrar_separacao")),
+):
+    """Salva as quantidades planejadas e finaliza automaticamente quando estão completas."""
+
+    try:
+        return servico.salvar_separacao(
+            sessao,
+            id_cesta,
+            [produto.model_dump() for produto in dados.produtos],
+        )
+    except ErroDeAplicacao as erro:
+        raise traduzir_erro(erro) from erro
+
+
 @router.post("/{id_cesta}/separacoes/desfazer")
 def desfazer_separacoes(
     id_cesta: int,
@@ -173,6 +192,20 @@ def concluir_separacao(
 
     try:
         return servico.concluir_separacao(sessao, id_cesta)
+    except ErroDeAplicacao as erro:
+        raise traduzir_erro(erro) from erro
+
+
+@router.post("/{id_cesta}/separacoes/reabrir")
+def reabrir_separacao(
+    id_cesta: int,
+    sessao: Session = Depends(obter_sessao),
+    usuario: Usuario = Depends(exigir_permissao("cestas.reabrir_separacao")),
+):
+    """Reabre uma separação concluída para correção pelo produtor."""
+
+    try:
+        return servico.reabrir_separacao(sessao, id_cesta)
     except ErroDeAplicacao as erro:
         raise traduzir_erro(erro) from erro
 

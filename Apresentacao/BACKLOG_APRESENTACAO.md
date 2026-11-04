@@ -18,16 +18,15 @@
 
 ## Validar antes da apresentação
 
-- [ ] Confirmar o endereço publicado.
-- [ ] Executar o roteiro completo no ambiente publicado.
-- [x] Confirmar contas e dados iniciais no banco Supabase.
-- [x] Reexecutar os testes backend em ambiente Python liberado: 45 testes passaram.
-- [ ] Registrar uma evidência simples do fluxo funcionando.
+- [ ] Publicar as alterações locais após configurar o envio de e-mail; ver [`PENDENCIAS.md`](../PENDENCIAS.md).
+- [ ] Executar o roteiro completo no ambiente publicado e registrar uma evidência simples.
+- [x] Confirmar a migração de autenticação no Supabase (revisão `20261104_0012`, estrutura e RLS).
+- [x] Testes locais atuais: 72 testes backend passaram; lint e build frontend passaram.
 
 ## Evolução planejada
 
-- [ ] Recuperação real de senha com token temporário.
+- [ ] Ativar em produção a confirmação de e-mail e a recuperação por token; o código está implementado e testado localmente, mas ainda falta SMTP e publicação.
 - [ ] Assistente de pedido com IA e revisão humana.
 - [ ] Testes E2E no navegador.
-- [ ] Pipeline CI para lint, build e testes.
+- [x] Pipeline CI para lint, build e testes (`.github/workflows/ci.yml`).
 - [ ] Observabilidade, backup e controles de produção.

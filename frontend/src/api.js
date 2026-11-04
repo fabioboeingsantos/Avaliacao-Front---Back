@@ -20,7 +20,10 @@ export async function chamarApi(caminho, opcoes = {}) {
 
   if (!resposta.ok) {
     const corpo = await resposta.json().catch(() => ({}))
-    const erro = new Error(corpo.detail ?? 'Não foi possível concluir a operação.')
+    const detalhe = Array.isArray(corpo.detail)
+      ? corpo.detail.map((item) => `${item.loc?.at(-1) ?? 'Campo'}: ${item.msg}`).join('; ')
+      : corpo.detail
+    const erro = new Error(detalhe ?? 'Não foi possível concluir a operação.')
     erro.status = resposta.status
     throw erro
   }

@@ -36,12 +36,12 @@ def senha_ja_esta_protegida(senha_hash: str) -> bool:
     return senha_hash.startswith("$argon2")
 
 
-def criar_token_de_acesso(usuario: str, perfil: str) -> str:
+def criar_token_de_acesso(usuario: str, perfil: str, versao_sessao: int = 0) -> str:
     """Cria um JWT assinado com identidade, perfil e expiração."""
 
     agora = datetime.now(timezone.utc)
     expiracao = agora + timedelta(minutes=obter_duracao_token_minutos())
-    dados = {"sub": usuario, "perfil": perfil, "iat": agora, "exp": expiracao}
+    dados = {"sub": usuario, "perfil": perfil, "iat": agora, "exp": expiracao, "sv": versao_sessao}
     return jwt.encode(dados, obter_chave_jwt(), algorithm=obter_algoritmo_jwt())
 
 

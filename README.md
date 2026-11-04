@@ -137,6 +137,11 @@ Rotas disponíveis:
 - `POST /usuarios`: cadastra uma conta de assinante com e-mail e senha protegida.
 - `POST /autenticacao/login`: valida e-mail ou usuário e cria a sessão JWT em cookie `HttpOnly`, válida por pelo menos 24 horas.
 - `POST /autenticacao/logout`: remove o cookie da sessão atual.
+- `POST /autenticacao/reenviar-confirmacao`: reenvia o link de confirmação do e-mail.
+- `POST /autenticacao/verificar-email`: confirma o e-mail por token de uso único.
+- `POST /autenticacao/solicitar-recuperacao`: solicita um link de recuperação por e-mail.
+- `POST /autenticacao/redefinir-senha`: altera a senha com token e revoga as sessões antigas.
+
 - `GET /produtos`: lista o catálogo e o estoque disponível para o usuário autenticado.
 - `PUT /produtos/{produto_id}/estoque`: permite ao produtor atualizar o estoque de um produto.
 - `PUT /produtos/{produto_id}/preco`: permite ao produtor atualizar o preço unitário de um produto.
@@ -150,6 +155,9 @@ Rotas disponíveis:
 - `POST /cestas/{id}/separacoes/concluir`: conclui a separação após validar todos os itens e inicia o prazo de sete dias para confirmação do recebimento.
 - `POST /cestas/{id}/separacoes/desfazer`: desfaz atomicamente o último lote de separações.
 - `POST /cestas/{id}/entrega/confirmar`: permite à assinante confirmar o recebimento da cesta.
+
+O acesso exige e-mail confirmado. Para configurar SMTP, migrar contas existentes e ativar esses
+fluxos, siga [Autenticação por e-mail](docs/AUTENTICACAO_EMAIL.md).
 
 As cestas usam as situações `Pendente`, `Em separação`, `Cancelado` e `Entregue`. A assinante pode cancelar o pedido enquanto ele estiver pendente; depois que o produtor inicia a separação, o cancelamento não fica disponível. O sistema considera a cesta entregue quando a assinante confirma o recebimento ou, se não houver confirmação, ao completar sete dias da conclusão da separação. A expiração é aplicada quando a cesta é consultada pela API.
 
@@ -177,10 +185,10 @@ são criadas durante o fluxo de demonstração; o carregamento inicial não cria
 
 ### Segurança do Supabase
 
-O Row Level Security (RLS) está ativado nas seis tabelas públicas do projeto. Não foram criadas
-políticas de acesso público: a API usa a conexão administrativa do banco e mantém a autorização
-por perfil nas rotas FastAPI. A API de dados do Supabase continua bloqueada para papéis comuns
-sem políticas explícitas.
+O Row Level Security (RLS) está ativado nas tabelas públicas do projeto, incluindo `tokens_conta`.
+Não foram criadas políticas de acesso público: a API usa a conexão administrativa do banco e
+mantém a autorização por perfil nas rotas FastAPI. A API de dados do Supabase continua bloqueada
+para papéis comuns sem políticas explícitas.
 
 ### Protecao contra abuso de autenticacao
 
@@ -246,7 +254,7 @@ Se a API receber outro subdomínio, atualize o `destination` desse arquivo antes
 
 URLs publicadas atuais:
 
-- Tela: `https://cesta-do-vale.vercel.app`
+- Tela: `https://cestadovale.vercel.app`
 - API: `https://avaliacao-front-back-backend.vercel.app`
 - Saúde da API: `https://avaliacao-front-back-backend.vercel.app/health`
 

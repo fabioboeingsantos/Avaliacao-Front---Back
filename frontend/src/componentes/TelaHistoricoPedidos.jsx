@@ -28,6 +28,7 @@ function obterImagemDaCesta(pedido) {
 
 // Esta tela reúne os pedidos registrados para consulta da assinante.
 function TelaHistoricoPedidos({
+  usuario,
   pedidos,
   aoAbrirPedido,
   aoAbrirDetalhes,
@@ -63,7 +64,7 @@ function TelaHistoricoPedidos({
       <header className="cabecalho-pagina">
         <div>
           <p className="marca-pequena">Cesta do Vale</p>
-          <p className="contexto-usuario">Aline · assinante</p>
+          <p className="contexto-usuario">{usuario} · assinante</p>
         </div>
 
         <div className="cabecalho-acoes">

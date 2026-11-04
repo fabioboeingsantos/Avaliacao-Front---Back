@@ -1,11 +1,10 @@
-function TelaInicio({ controleTema, aoEntrar, aoCriarConta }) {
+function TelaInicio({ aoEntrar, aoCriarConta }) {
   return (
     <main className="pagina-inicial">
-      <header className="acoes-iniciais" aria-label="Acesso e aparência">
+      <header className="acoes-iniciais" aria-label="Acesso">
         <button className="botao-entrar-inicial" type="button" onClick={aoEntrar}>
           Entrar
         </button>
-        {controleTema}
       </header>
 
       <section className="mensagem-inicial" aria-labelledby="titulo-inicial">

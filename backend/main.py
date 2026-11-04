@@ -9,6 +9,7 @@ from rotas.cestas import router as rotas_de_cestas
 from rotas.produtos import router as rotas_de_produtos
 from rotas.sistemas import router as rotas_de_sistema
 from rotas.usuarios import router as rotas_de_usuarios
+from rotas.recuperacao import router as rotas_de_recuperacao
 
 
 app = FastAPI(
@@ -31,3 +32,4 @@ app.include_router(rotas_de_produtos)
 app.include_router(rotas_de_autenticacao)
 app.include_router(rotas_de_sistema)
 app.include_router(rotas_de_usuarios)
+app.include_router(rotas_de_recuperacao)

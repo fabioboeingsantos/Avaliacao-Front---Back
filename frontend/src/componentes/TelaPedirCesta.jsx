@@ -96,6 +96,7 @@ function calcularTotal(produtos) {
 // Esta é a tela principal da assinante. Os campos seguintes aparecem de acordo
 // com a escolha feita no primeiro passo, evitando mostrar decisões desnecessárias.
 function TelaPedirCesta({
+  usuario,
   aoFinalizar,
   aoAbrirHistorico,
   produtosDisponiveis = [],
@@ -264,7 +265,7 @@ function TelaPedirCesta({
       <header className="cabecalho-pagina">
         <div>
           <p className="marca-pequena">Cesta do Vale</p>
-          <p className="contexto-usuario">Aline · assinante</p>
+          <p className="contexto-usuario">{usuario} · assinante</p>
         </div>
 
         <div className="cabecalho-acoes">
@@ -280,7 +281,7 @@ function TelaPedirCesta({
       </header>
 
       <section className="introducao-pedido" aria-labelledby="titulo-pedido">
-        <p className="texto-saudacao">Olá, Aline</p>
+        <p className="texto-saudacao">Olá, {usuario}</p>
         <h1 id="titulo-pedido">Peça sua cesta da semana</h1>
         <p>
           Escolha primeiro como quer receber sua cesta. Depois, o sistema mostra somente as opções

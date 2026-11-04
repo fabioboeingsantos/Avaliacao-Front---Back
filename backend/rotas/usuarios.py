@@ -44,6 +44,9 @@ def cadastrar_usuario(
 
     try:
         return servico.cadastrar(sessao, dados.usuario, dados.email, dados.senha)
+    except RuntimeError as erro:
+        sessao.rollback()
+        raise HTTPException(503, "Envio de e-mail indisponível. Tente novamente mais tarde.") from erro
     except UsuarioJaExiste as erro:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(erro)) from erro
     except IntegrityError as erro:

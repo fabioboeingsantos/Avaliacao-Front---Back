@@ -6,6 +6,7 @@ const formatarMoeda = (valor) =>
 
 // Esta tela permite conferir a cesta antes de registrar o pedido no histórico.
 function TelaFinalizarPedido({
+  usuario,
   pedido,
   aoFinalizar,
   aoAbrirPedido,
@@ -46,7 +47,7 @@ function TelaFinalizarPedido({
       <header className="cabecalho-pagina">
         <div>
           <p className="marca-pequena">Cesta do Vale</p>
-          <p className="contexto-usuario">Aline · assinante</p>
+          <p className="contexto-usuario">{usuario} · assinante</p>
         </div>
 
         <div className="cabecalho-acoes">

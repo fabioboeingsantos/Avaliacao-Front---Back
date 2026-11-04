@@ -43,8 +43,9 @@ confirmação ou ainda não foram definidos.
 ## Pontos não implementados ou a confirmar
 
 - **Assistente de pedido com IA:** planejado, sem integração, endpoint ou chamada a modelo implementada.
-- **Recuperação de senha:** há uma opção visual no fluxo de login, mas não foi localizada uma rota de
-  backend que conclua a recuperação. O comportamento completo ainda precisa ser verificado. `?`
+- **Recuperação de senha e confirmação de e-mail:** implementadas no backend e frontend com testes
+  automatizados. A ativação em produção depende de SMTP e aplicação da migração; veja
+  [AUTENTICACAO_EMAIL.md](AUTENTICACAO_EMAIL.md).
 - **Provedor de IA, endpoint, custo e metas de qualidade:** ainda não definidos. `?`
 
 ## Funcionalidade planejada com IA

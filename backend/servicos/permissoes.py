@@ -28,6 +28,7 @@ PERMISSOES_POR_GRUPO = {
         "cestas.registrar_separacao",
         "cestas.desfazer_separacao",
         "cestas.concluir_separacao",
+        "cestas.reabrir_separacao",
         "cestas.avaliar",
         "produtos.listar",
         "produtos.atualizar_estoque",

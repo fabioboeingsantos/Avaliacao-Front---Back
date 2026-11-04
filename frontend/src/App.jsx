@@ -140,7 +140,18 @@ function App() {
     }
   })
   const [usuarioAutenticado, setUsuarioAutenticado] = useState('')
-  const [dialogoAcesso, setDialogoAcesso] = useState(null)
+  const [linkAcesso, setLinkAcesso] = useState(() => {
+    const parametros = new URLSearchParams(window.location.hash.slice(1))
+    const verificar = parametros.get('verificar-email')
+    const redefinir = parametros.get('redefinir-senha')
+    return { token: verificar || redefinir || '', modo: verificar ? 'verificar' : 'redefinir' }
+  })
+  const [dialogoAcesso, setDialogoAcesso] = useState(linkAcesso.token ? linkAcesso.modo : null)
+  useEffect(() => {
+    if (linkAcesso.token) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
+  }, [linkAcesso])
   // Aguarda a validação do cookie antes de decidir se mostra o login ou a área autenticada.
   const [sessaoVerificada, setSessaoVerificada] = useState(false)
   const [erroRestauracao, setErroRestauracao] = useState('')
@@ -392,22 +403,26 @@ function App() {
   }
 
   // Encerra a sessão no servidor antes de limpar o estado autenticado da tela.
+  function limparSessaoLocal() {
+    setUsuarioAutenticado('')
+    setPerfilAtual('')
+    setPedidos([])
+    setProdutosDisponiveis([])
+    setNotificacoes([])
+    cestasAnterioresRef.current = null
+    setPedidoEmRevisao(null)
+    setCestaEmFechamento(null)
+    setCestaEmDetalhes(null)
+    setAbaAtual('pedido')
+  }
+
   async function sairDoSistema() {
     setSaindo(true)
     setErroLogout('')
 
     try {
       await chamarApi('/autenticacao/logout', { method: 'POST' })
-      setUsuarioAutenticado('')
-      setPerfilAtual('')
-      setPedidos([])
-      setProdutosDisponiveis([])
-      setNotificacoes([])
-      cestasAnterioresRef.current = null
-      setPedidoEmRevisao(null)
-      setCestaEmFechamento(null)
-      setCestaEmDetalhes(null)
-      setAbaAtual('pedido')
+      limparSessaoLocal()
     } catch (erro) {
       setErroLogout(
         erro instanceof TypeError
@@ -536,11 +551,45 @@ function App() {
     setAbaAtual('pedido')
   }
 
-  async function registrarSeparacoesEmLote({ pedidoId, produtos }) {
+  async function reabrirSeparacao(pedidoId) {
     if (typeof pedidoId === 'number') {
       try {
-        const cestaAtualizada = await chamarApi(`/cestas/${pedidoId}/separacoes/lote`, {
+        const cestaAtualizada = await chamarApi(`/cestas/${pedidoId}/separacoes/reabrir`, {
           method: 'POST',
+        })
+        const cestaAdaptada = adaptarCestaDaApi(cestaAtualizada)
+        setPedidos((pedidosAtuais) =>
+          pedidosAtuais.map((pedido) => (pedido.id === pedidoId ? cestaAdaptada : pedido)),
+        )
+        return { sucesso: true }
+      } catch (erro) {
+        return { sucesso: false, erro: erro.message }
+      }
+    }
+
+    const cestaLocal = pedidos.find((pedido) => pedido.id === pedidoId)
+    if (!cestaLocal?.separacaoConcluidaEm || cestaLocal.situacao === 'Entregue') {
+      return { sucesso: false, erro: 'Esta separação não pode ser reaberta.' }
+    }
+    setPedidos((pedidosAtuais) =>
+      pedidosAtuais.map((pedido) =>
+        pedido.id === pedidoId
+          ? {
+              ...pedido,
+              situacao: pedido.separacoes?.length ? 'Em separação' : 'Pendente',
+              separacaoConcluidaEm: null,
+            }
+          : pedido,
+      ),
+    )
+    return { sucesso: true }
+  }
+
+  async function salvarSeparacao(pedidoId, produtos) {
+    if (typeof pedidoId === 'number') {
+      try {
+        const cestaAtualizada = await chamarApi(`/cestas/${pedidoId}/separacoes`, {
+          method: 'PUT',
           body: JSON.stringify({
             produtos: produtos.map(({ produtoId, quantidade }) => ({
               produto_id: produtoId,
@@ -552,84 +601,6 @@ function App() {
         setPedidos((pedidosAtuais) =>
           pedidosAtuais.map((pedido) => (pedido.id === pedidoId ? cestaAdaptada : pedido)),
         )
-        setMensagemApi('Lote de separação registrado no backend.')
-        return { sucesso: true }
-      } catch (erro) {
-        setMensagemApi(erro.message)
-        return { sucesso: false, erro: erro.message }
-      }
-    }
-
-    const cestaLocal = pedidos.find((pedido) => pedido.id === pedidoId)
-    if (!cestaLocal) {
-      return { sucesso: false, erro: 'Não foi possível localizar esta cesta.' }
-    }
-    if (cestaLocal.separacaoConcluidaEm || cestaLocal.situacao === 'Entregue') {
-      return { sucesso: false, erro: 'A separação desta cesta já foi concluída.' }
-    }
-
-    const separacoes = cestaLocal.separacoes ?? []
-    const novasQuantidades = new Map()
-    for (const { produtoId, quantidade } of produtos) {
-      if (novasQuantidades.has(produtoId)) {
-        return { sucesso: false, erro: 'O lote contém o mesmo produto mais de uma vez.' }
-      }
-
-      const produto = cestaLocal.produtos.find((item) => item.id === produtoId)
-      const atual = separacoes.find((item) => item.produtoId === produtoId)?.quantidade ?? 0
-      if (!produto || !Number.isInteger(quantidade) || quantidade <= 0 || atual + quantidade > produto.quantidade) {
-        return { sucesso: false, erro: `A quantidade de ${produto?.nome ?? produtoId} não é válida.` }
-      }
-      novasQuantidades.set(produtoId, quantidade)
-    }
-
-    setPedidos((pedidosAtuais) =>
-      pedidosAtuais.map((pedido) => {
-        if (pedido.id !== pedidoId) {
-          return pedido
-        }
-
-        const separacoesAtualizadas = [...(pedido.separacoes ?? [])]
-        for (const [produtoId, quantidade] of novasQuantidades) {
-          const existente = separacoesAtualizadas.find((item) => item.produtoId === produtoId)
-          if (existente) {
-            existente.quantidade += quantidade
-          } else {
-            const produto = pedido.produtos.find((item) => item.id === produtoId)
-            separacoesAtualizadas.push({ produtoId, nome: produto.nome, quantidade })
-          }
-        }
-        return {
-          ...pedido,
-          situacao: 'Em separação',
-          separacoes: separacoesAtualizadas,
-        }
-      }),
-    )
-    return { sucesso: true }
-  }
-
-  async function concluirSeparacao(pedidoId, produtosParaRegistrar = []) {
-    if (typeof pedidoId === 'number') {
-      try {
-        if (produtosParaRegistrar.length > 0) {
-          await chamarApi(`/cestas/${pedidoId}/separacoes/lote`, {
-            method: 'POST',
-            body: JSON.stringify({
-              produtos: produtosParaRegistrar.map(({ produtoId: id, quantidade }) => ({
-                produto_id: id,
-                quantidade,
-              })),
-            }),
-          })
-        }
-        const cestaAtualizada = await chamarApi(`/cestas/${pedidoId}/separacoes/concluir`, {
-          method: 'POST',
-        })
-        const cestaAdaptada = adaptarCestaDaApi(cestaAtualizada)
-        setPedidos((pedidosAtuais) =>
-          pedidosAtuais.map((pedido) => (pedido.id === pedidoId ? cestaAdaptada : pedido)),
-        )
         return { sucesso: true }
       } catch (erro) {
         return { sucesso: false, erro: erro.message }
@@ -637,41 +608,31 @@ function App() {
     }
 
     const cestaLocal = pedidos.find((pedido) => pedido.id === pedidoId)
-    if (!cestaLocal) {
-      return { sucesso: false, erro: 'Não foi possível localizar esta cesta.' }
+    if (!cestaLocal || cestaLocal.situacao === 'Entregue' || cestaLocal.situacao === 'Cancelado') {
+      return { sucesso: false, erro: 'Esta cesta não pode ser alterada.' }
     }
-
-    const separacoesAtualizadas = [...(cestaLocal.separacoes ?? [])]
-    for (const { produtoId, quantidade } of produtosParaRegistrar) {
-      const existente = separacoesAtualizadas.find((item) => item.produtoId === produtoId)
-      if (existente) {
-        existente.quantidade += quantidade
-      } else {
-        separacoesAtualizadas.push({ produtoId, quantidade })
-      }
+    const mapa = new Map(produtos.map(({ produtoId, quantidade }) => [produtoId, quantidade]))
+    if (
+      mapa.size !== cestaLocal.produtos.length ||
+      cestaLocal.produtos.some((produto) => {
+        const quantidade = mapa.get(produto.id)
+        return !Number.isInteger(quantidade) || quantidade < 0 || quantidade > produto.quantidade
+      })
+    ) {
+      return { sucesso: false, erro: 'Confira as quantidades informadas para todos os produtos.' }
     }
-
-    const faltando = cestaLocal.produtos.filter((produto) => {
-      const quantidadeSeparada =
-        separacoesAtualizadas.find((item) => item.produtoId === produto.id)?.quantidade ?? 0
-      return quantidadeSeparada < produto.quantidade
-    })
-
-    if (faltando.length > 0) {
-      return { sucesso: false, erro: 'Separe todos os produtos antes de concluir a cesta.' }
-    }
-    if (cestaLocal.separacaoConcluidaEm || cestaLocal.situacao === 'Entregue') {
-      return { sucesso: false, erro: 'A separação desta cesta já foi concluída.' }
-    }
-
+    const separacoes = cestaLocal.produtos
+      .filter((produto) => mapa.get(produto.id) > 0)
+      .map((produto) => ({ produtoId: produto.id, nome: produto.nome, quantidade: mapa.get(produto.id) }))
+    const completa = cestaLocal.produtos.every((produto) => mapa.get(produto.id) === produto.quantidade)
     setPedidos((pedidosAtuais) =>
       pedidosAtuais.map((pedido) =>
         pedido.id === pedidoId
           ? {
               ...pedido,
-              situacao: 'Em separação',
-              separacoes: separacoesAtualizadas,
-              separacaoConcluidaEm: new Date().toISOString(),
+              separacoes,
+              separacaoConcluidaEm: completa ? new Date().toISOString() : null,
+              situacao: separacoes.length ? 'Em separação' : 'Pendente',
             }
           : pedido,
       ),
@@ -773,82 +734,10 @@ function App() {
     return { sucesso: true }
   }
 
-  async function desfazerSeparacoes({ pedidoId, produtos }) {
-    if (typeof pedidoId === 'number') {
-      try {
-        const cestaAtualizada = await chamarApi(`/cestas/${pedidoId}/separacoes/desfazer`, {
-          method: 'POST',
-          body: JSON.stringify({
-            produtos: produtos.map(({ produtoId, quantidade }) => ({
-              produto_id: produtoId,
-              quantidade,
-            })),
-          }),
-        })
-        const cestaAdaptada = adaptarCestaDaApi(cestaAtualizada)
-        setPedidos((pedidosAtuais) =>
-          pedidosAtuais.map((pedido) => (pedido.id === pedidoId ? cestaAdaptada : pedido)),
-        )
-        return { sucesso: true }
-      } catch (erro) {
-        return { sucesso: false, erro: erro.message }
-      }
-    }
-
-    const cestaLocal = pedidos.find((pedido) => pedido.id === pedidoId)
-    if (cestaLocal?.separacaoConcluidaEm || cestaLocal?.situacao === 'Entregue') {
-      return { sucesso: false, erro: 'A separação desta cesta já foi concluída.' }
-    }
-    const separacoes = cestaLocal?.separacoes ?? []
-    const quantidadesParaDesfazer = new Map()
-
-    for (const { produtoId, quantidade } of produtos) {
-      if (quantidadesParaDesfazer.has(produtoId)) {
-        return { sucesso: false, erro: 'O lote contém o mesmo produto mais de uma vez.' }
-      }
-      quantidadesParaDesfazer.set(produtoId, quantidade)
-    }
-
-    if (
-      !cestaLocal ||
-      [...quantidadesParaDesfazer].some(([produtoId, quantidade]) => {
-        const separacao = separacoes.find((item) => item.produtoId === produtoId)
-        return !separacao || quantidade > separacao.quantidade
-      })
-    ) {
-      return { sucesso: false, erro: 'A quantidade registrada mudou e não pode ser desfeita.' }
-    }
-
-    setPedidos((pedidosAtuais) =>
-      pedidosAtuais.map((pedido) => {
-        if (pedido.id !== pedidoId) {
-          return pedido
-        }
-
-        const separacoesAtualizadas = (pedido.separacoes ?? [])
-          .map((separacao) => ({
-            ...separacao,
-            quantidade: separacao.quantidade - (quantidadesParaDesfazer.get(separacao.produtoId) ?? 0),
-          }))
-          .filter((separacao) => separacao.quantidade > 0)
-        return {
-          ...pedido,
-          situacao: separacoesAtualizadas.length > 0 ? 'Em separação' : 'Pendente',
-          separacoes: separacoesAtualizadas,
-        }
-      }),
-    )
-
-    return { sucesso: true }
-  }
-
-  if (!usuarioAutenticado) {
+  if (!usuarioAutenticado || linkAcesso.token) {
     if (!sessaoVerificada) {
       return (
         <main className="pagina-inicial verificacao-sessao" role="status">
-          <header className="acoes-iniciais" aria-label="Aparência">
-            {controleTema}
-          </header>
           <p>
             Verificando sua sessão...
           </p>
@@ -859,7 +748,6 @@ function App() {
     return (
       <>
         <TelaInicio
-          controleTema={controleTema}
           aoEntrar={() => setDialogoAcesso('entrar')}
           aoCriarConta={() => setDialogoAcesso('cadastro')}
         />
@@ -867,10 +755,19 @@ function App() {
           <TelaLogin
             key={dialogoAcesso}
             modoInicial={dialogoAcesso}
-            aoEntrar={entrarNoSistema}
+            token={linkAcesso.token}
+            aoSenhaRedefinida={limparSessaoLocal}
+            aoEntrar={async (dados) => {
+              const resultado = await entrarNoSistema(dados)
+              if (resultado?.sucesso) {
+                setLinkAcesso({ token: '', modo: '' })
+                setDialogoAcesso(null)
+              }
+              return resultado
+            }}
             aoCadastrar={cadastrarUsuario}
             mensagemSistema={erroRestauracao}
-            aoFechar={() => setDialogoAcesso(null)}
+            aoFechar={() => { setDialogoAcesso(null); setLinkAcesso({ token: '', modo: '' }) }}
           />
         )}
       </>
@@ -922,9 +819,8 @@ function App() {
         <TelaFechamento
           cesta={cestaSelecionada}
           aoAbrirSeparacao={() => setAbaAtual('separacao')}
-          aoRegistrarSeparacoes={registrarSeparacoesEmLote}
-          aoDesfazerSeparacoes={desfazerSeparacoes}
-          aoConcluirSeparacao={concluirSeparacao}
+          aoSalvarSeparacao={salvarSeparacao}
+          aoReabrirSeparacao={reabrirSeparacao}
         />,
       )
     }
@@ -948,6 +844,7 @@ function App() {
   if (abaAtual === 'finalizacao') {
     return envolverAreaAutenticada(
       <TelaFinalizarPedido
+        usuario={formatarNomeUsuario(usuarioAutenticado)}
         pedido={pedidoEmRevisao}
         aoFinalizar={registrarPedido}
         aoAbrirPedido={() => setAbaAtual('pedido')}
@@ -959,6 +856,7 @@ function App() {
   if (abaAtual === 'historico') {
     return envolverAreaAutenticada(
       <TelaHistoricoPedidos
+        usuario={formatarNomeUsuario(usuarioAutenticado)}
         pedidos={pedidos}
         aoAbrirPedido={() => setAbaAtual('pedido')}
         aoAbrirDetalhes={abrirDetalhes}
@@ -973,6 +871,7 @@ function App() {
 
     return envolverAreaAutenticada(
       <TelaDetalhesCesta
+        usuario={formatarNomeUsuario(usuarioAutenticado)}
         cesta={cestaSelecionada}
         aoAbrirPedido={() => setAbaAtual('pedido')}
         aoAbrirHistorico={() => setAbaAtual('historico')}
@@ -984,6 +883,7 @@ function App() {
 
   return envolverAreaAutenticada(
     <TelaPedirCesta
+      usuario={formatarNomeUsuario(usuarioAutenticado)}
       produtosDisponiveis={produtosDisponiveis}
       catalogoCarregado={catalogoCarregado}
       pedidoInicial={pedidoParaRepetir}

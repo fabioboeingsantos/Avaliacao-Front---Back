@@ -2011,6 +2011,29 @@
   background: var(--cor-branco);
 }
 
+.aviso-status-separacao {
+  margin-top: 12px;
+  padding: 16px 18px;
+  border-left: 4px solid var(--cor-verde-horta);
+  border-radius: 8px;
+  background: var(--cor-verde-claro);
+  color: var(--cor-texto-escuro);
+  line-height: 1.5;
+}
+
+.aviso-status-separacao strong {
+  color: var(--cor-verde-escuro);
+}
+
+.aviso-separacao-pendente {
+  border-left-color: #bd5a3d;
+  background: #fff3ed;
+}
+
+.aviso-separacao-completa {
+  border-left-color: var(--cor-verde-horta);
+}
+
 .instrucao-fechamento {
   margin: 6px 0 0;
   color: var(--cor-texto-escuro);

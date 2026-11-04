@@ -1,5 +1,6 @@
 backend/.env
 backend/.venv/
+.venv-tests/
 backend/venv/
 backend/*.db
 .imagegen-venv/

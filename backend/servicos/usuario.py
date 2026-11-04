@@ -18,6 +18,7 @@ def serializar_usuario(conta: Usuario) -> dict:
         "perfil": conta.perfil,
         "grupo": conta.perfil,
         "ativo": conta.ativo,
+        "email_verificado": conta.email_verificado,
     }
 
 
@@ -38,7 +39,13 @@ def cadastrar(sessao: Session, usuario: str, email: str, senha: str) -> dict:
         perfil="assinante",
         ativo=True,
     )
-    return serializar_usuario(repositorio.salvar(sessao, conta))
+    from servicos import email_conta, tokens_conta
+    sessao.add(conta)
+    sessao.flush()
+    mensagem = tokens_conta.emitir(sessao, conta, "confirmacao_email")
+    sessao.commit()
+    email_conta.enviar_com_seguranca(*mensagem)
+    return serializar_usuario(conta)
 
 
 def autenticar(sessao: Session, identificador: str, senha: str) -> dict | None:
@@ -57,4 +64,6 @@ def autenticar(sessao: Session, identificador: str, senha: str) -> dict | None:
         "email": conta.email,
         "perfil": conta.perfil,
         "grupo": conta.perfil,
+        "email_verificado": conta.email_verificado,
+        "versao_sessao": conta.versao_sessao,
     }
