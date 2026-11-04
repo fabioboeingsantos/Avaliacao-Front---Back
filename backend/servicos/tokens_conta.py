@@ -31,12 +31,22 @@ def emitir(sessao, conta, tipo):
         expira_em=instante + timedelta(minutes=minutos)))
     acao = "verificar-email" if tipo == "confirmacao_email" else "redefinir-senha"
     assunto = "Confirme seu e-mail" if tipo == "confirmacao_email" else "Redefina sua senha"
+    if tipo == "confirmacao_email":
+        condicoes = (
+            "Validade: 24 horas. Este link pode ser usado uma vez. "
+            "Se solicitar outro e-mail de confirmação, o link anterior será invalidado."
+        )
+    else:
+        condicoes = (
+            "Validade: 30 minutos. Este link pode ser usado uma vez. "
+            "Se solicitar outra redefinição de senha, o link anterior será invalidado."
+        )
     # Fragmento evita expor tokens no access log e no Referer do navegador.
     link = f"{origem}/#{acao}={token}"
     return (
         conta.email,
         f"Cesta do Vale — {assunto}",
-        f"{assunto}:\n\n{link}\n\nValidade: {minutos} minutos. "
+        f"{assunto}:\n\n{link}\n\n{condicoes}\n\n"
         "Se não fez esta solicitação, ignore esta mensagem.",
     )
 

@@ -5,23 +5,27 @@ Atualizado em 04/11/2026. Este é o resumo central; detalhes do fluxo de e-mail 
 
 ## Para ativar confirmação e recuperação de conta
 
-- [ ] Escolher/configurar o provedor de envio. O endereço Senac está conectado ao Outlook, mas um
-  teste enviado para o Yahoo não chegou; a entrega e a permissão SMTP para uso pela Vercel não foram
-  confirmadas. A configuração de e-mail fica pausada por enquanto, conforme combinado.
-- [ ] Cadastrar as variáveis SMTP no projeto Vercel **da API**, somente em Production. Não enviar
-  senhas de app ou chaves no chat nem versioná-las no repositório.
+- [x] Configurar temporariamente o Gmail para a apresentação. A autenticação SMTP local,
+  a configuração Production na Vercel e a entrega real foram confirmadas; o e-mail de recuperação
+  chegou e o link mais recente permitiu redefinir a senha.
+- [ ] Após a apresentação, revogar a senha de app do Gmail e retirar a credencial SMTP do `.env`
+  e da Vercel. O uso da conta pessoal foi autorizado somente para essa apresentação.
+- [ ] Publicar o aviso atualizado sobre validade, uso único e invalidação dos links. A alteração
+  está no workspace, mas ainda não foi implantada.
 - [x] Publicar as alterações de autenticação e separação na branch de produção (`master`).
   O commit `dbc4076` está publicado; o frontend `cestadovale` e a API `avaliacao-front-back-backend`
   aparecem como implantados com sucesso na Vercel.
-- [ ] Fazer um teste real, com uma caixa controlada: criar conta, receber e confirmar o e-mail;
-  solicitar recuperação, redefinir a senha e entrar novamente.
+- [x] Validar o fluxo de confirmação de e-mail com uma conta controlada; a mensagem chegou e a
+  validação foi testada.
+- [x] Confirmar o login com a nova senha após a recuperação de conta.
 - [x] Contas preexistentes com `email_verificado=false` continuam podendo entrar; confirmação de
   e-mail é opcional e não exige plano de transição.
 
 **Concluído:** o SQL da revisão `20261104_0012` foi aplicado no Supabase; a tabela `tokens_conta`,
 as colunas e o RLS foram conferidos. As revisões 0013 e 0014 também foram aplicadas,
 e `alembic_version` agora registra `20261104_0014`.
-O deploy foi verificado, mas o envio SMTP e a entrega real dos e-mails continuam pendentes.
+O deploy SMTP está configurado; a entrega e a confirmação de e-mail foram testadas, assim como o
+link de recuperação. Falta publicar o texto atualizado das condições dos links.
 
 ## Validação da entrega
 
@@ -53,5 +57,5 @@ O deploy foi verificado, mas o envio SMTP e a entrega real dos e-mails continuam
   não foi configurado e os fluxos dependentes de e-mail não foram validados em produção.
 - Validação local registrada: 72 testes do backend passaram; lint e build de produção do frontend
   concluídos sem avisos.
-- SMTP permanece pendente; isso afeta somente envio de confirmação e recuperação de senha, não o
-  cadastro nem o acesso. O domínio novo da publicação é `https://cestadovale.vercel.app/`.
+- SMTP está configurado na Vercel para Production e a recuperação de senha foi validada com uma
+  caixa controlada. O domínio novo da publicação é `https://cestadovale.vercel.app/`.

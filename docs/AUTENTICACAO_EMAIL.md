@@ -5,10 +5,12 @@ Implementação local de 04/11/2026. O envio real requer um provedor SMTP config
 ## Comportamento
 
 - Cadastro cria assinante com `email_verificado=false`, mas a confirmação é opcional: o login e as rotas protegidas funcionam sem confirmar o e-mail. Se SMTP estiver configurado, o sistema envia um link para quem quiser confirmar.
-- O link de confirmação vence em 24 horas. Na tela, a pessoa clica em **Confirmar e-mail**;
+- O link de confirmação vence em 24 horas, só pode ser usado uma vez e um novo pedido invalida
+  os links de confirmação anteriores. Na tela, a pessoa clica em **Confirmar e-mail**;
   abrir o link sozinho não o consome, evitando ativação por scanners de e-mail.
 - **Reenviar confirmação** gera outro link e invalida o anterior.
-- **Esqueci minha senha** solicita o e-mail cadastrado e envia um link válido por 30 minutos.
+- **Esqueci minha senha** solicita o e-mail cadastrado e envia um link válido por 30 minutos,
+  de uso único; uma nova solicitação invalida os links de recuperação anteriores.
 - A redefinição exige senha de 8 a 128 caracteres, bloqueia algumas senhas muito comuns,
   mantém Argon2 e encerra todas as sessões antigas, inclusive cookies e tokens Bearer.
 - Recuperar senha não confirma automaticamente o e-mail nem faz login automático.
