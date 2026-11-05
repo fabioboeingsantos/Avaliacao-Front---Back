@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cesta do Vale | Tabelas do banco de dados</title>
+  <style>
+    :root { --ink:#183027; --muted:#66756b; --green:#285f3c; --green-2:#dcebd5; --orange:#b45f3e; --cream:#f7f4eb; --line:#d8e0d4; --white:#fffdf8; --blue:#496f83; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; background:radial-gradient(circle at 10% 0%, #e3efdd, transparent 34%), radial-gradient(circle at 100% 75%, #f0ded2, transparent 30%), #eef1eb; }
+    .page { max-width:1600px; margin:auto; padding:38px clamp(18px,4vw,70px) 60px; }
+    header { display:flex; justify-content:space-between; gap:28px; align-items:flex-end; margin-bottom:28px; }
+    .eyebrow { color:var(--orange); font-size:.76rem; font-weight:850; letter-spacing:.16em; text-transform:uppercase; }
+    h1 { margin:10px 0 8px; max-width:850px; color:var(--green); font-size:clamp(2.5rem,5vw,5.8rem); letter-spacing:-.075em; line-height:.96; }
+    .intro { max-width:720px; margin:0; color:var(--muted); font-size:1.05rem; line-height:1.5; }
+    .badge { padding:11px 15px; border:1px solid #c9d9c6; border-radius:999px; color:var(--green); background:#ffffffaa; font-size:.83rem; font-weight:750; white-space:nowrap; }
+    .summary { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:26px 0 34px; }
+    .metric { padding:17px 19px; border:1px solid var(--line); border-radius:17px; background:#ffffff9c; }
+    .metric strong { display:block; color:var(--green); font-size:1.8rem; letter-spacing:-.05em; }
+    .metric span { color:var(--muted); font-size:.82rem; }
+    .legend { display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; margin-bottom:22px; color:var(--muted); font-size:.82rem; }
+    .legend b { color:var(--ink); }
+    .key { display:inline-flex; align-items:center; gap:6px; }
+    .icon { display:inline-grid; place-items:center; width:20px; height:20px; border-radius:5px; color:var(--white); background:var(--green); font-size:.68rem; font-weight:900; }
+    .icon.fk { background:var(--blue); } .icon.null { color:var(--muted); border:1px solid #b8c3ba; background:transparent; }
+    .schema { position:relative; display:grid; grid-template-columns:repeat(12, 1fr); gap:22px; align-items:start; padding:32px; border:1px solid #d5ded1; border-radius:26px; overflow:hidden; background-image:radial-gradient(#cbd7c8 1px,transparent 1px); background-size:18px 18px; box-shadow:0 20px 55px #29463212; }
+    .schema::before { content:"MODELO RELACIONAL"; position:absolute; top:14px; left:24px; color:#97a89b; font-size:.66rem; font-weight:850; letter-spacing:.18em; }
+    .table { position:relative; z-index:2; min-width:0; overflow:hidden; border:1px solid #ccd8ca; border-radius:13px; background:var(--white); box-shadow:0 8px 18px #1b3e2a12; }
+    .table h2 { display:flex; align-items:center; gap:8px; margin:0; padding:12px 13px; color:var(--white); background:var(--green); font-size:.93rem; letter-spacing:-.01em; }
+    .table h2::before { content:"▦"; color:#d4e8ca; font-size:1rem; }
+    .table small { margin-left:auto; color:#d1e2ce; font-size:.62rem; font-weight:600; }
+    .columns { margin:0; padding:0; list-style:none; }
+    .column { display:grid; grid-template-columns:22px minmax(0,1fr) auto; gap:6px; align-items:center; min-height:34px; padding:6px 10px; border-top:1px solid #e5ebe3; }
+    .column:first-child { border-top:0; }
+    .column-name { overflow:hidden; color:#2b4136; font-size:.75rem; font-weight:720; text-overflow:ellipsis; white-space:nowrap; }
+    .type { color:#788980; font-family:ui-monospace, SFMono-Regular, Consolas, monospace; font-size:.64rem; }
+    .mark { display:inline-grid; place-items:center; width:18px; height:18px; color:#fff; border-radius:5px; background:#7d9183; font-size:.58rem; font-weight:900; }
+    .mark.pk { background:var(--green); } .mark.fk { background:var(--blue); } .mark.unique { background:var(--orange); } .mark.nullable { color:#75857a; border:1px solid #bcc8bd; background:transparent; }
+    .default { display:block; padding:0 10px 8px 38px; color:#8a998d; font-family:ui-monospace, SFMono-Regular, Consolas, monospace; font-size:.59rem; }
+    .products { grid-column:5 / span 3; grid-row:1; }
+    .users { grid-column:9 / span 3; grid-row:2; }
+    .baskets { grid-column:5 / span 3; grid-row:2; }
+    .version { grid-column:1 / span 3; grid-row:1; }
+    .items { grid-column:1 / span 3; grid-row:2; }
+    .splits { grid-column:1 / span 3; grid-row:3; }
+    .tokens { grid-column:5 / span 3; grid-row:3; }
+    .notifications { grid-column:9 / span 3; grid-row:3; }
+    svg.links { position:absolute; z-index:1; inset:0; width:100%; height:100%; pointer-events:none; }
+    .links path { fill:none; stroke:#8eaa90; stroke-width:1.7; stroke-dasharray:5 5; }
+    .links circle { fill:#fffdf8; stroke:#709177; stroke-width:2; }
+    .notes { display:grid; grid-template-columns:1.1fr .9fr; gap:18px; margin-top:22px; }
+    .note { padding:20px 22px; border:1px solid var(--line); border-radius:17px; background:#ffffffa8; }
+    .note h3 { margin:0 0 8px; color:var(--green); font-size:1rem; }
+    .note p { margin:0; color:var(--muted); font-size:.9rem; line-height:1.5; }
+    code { padding:2px 5px; border-radius:5px; color:#2b5540; background:#e8f0e5; font-size:.82em; }
+    footer { margin-top:24px; color:#829087; font-size:.78rem; }
+    @media (max-width:1000px) { header { align-items:flex-start; flex-direction:column; } .schema { grid-template-columns:repeat(2,1fr); padding:25px 18px; } .table { grid-column:auto; grid-row:auto; } svg.links { display:none; } .notes { grid-template-columns:1fr; } }
+    @media (max-width:620px) { .summary { grid-template-columns:repeat(2,1fr); } .schema { grid-template-columns:1fr; } .table { grid-column:1; } .metric strong { font-size:1.45rem; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div>
+        <div class="eyebrow">Cesta do Vale · documentação técnica</div>
+        <h1>Tabelas do banco de dados</h1>
+        <p class="intro">Visão geral do esquema relacional da aplicação, com campos, tipos, chaves, restrições e relações entre as entidades.</p>
+      </div>
+      <div class="badge">PostgreSQL · schema public</div>
+    </header>
+
+    <section class="summary" aria-label="Resumo do esquema">
+      <div class="metric"><strong>8</strong><span>tabelas</span></div>
+      <div class="metric"><strong>49</strong><span>colunas documentadas</span></div>
+      <div class="metric"><strong>8</strong><span>relações estrangeiras</span></div>
+      <div class="metric"><strong>3</strong><span>índices únicos explícitos</span></div>
+    </section>
+
+    <div class="legend" aria-label="Legenda">
+      <b>Legenda</b>
+      <span class="key"><i class="icon">PK</i> chave primária</span>
+      <span class="key"><i class="icon fk">FK</i> chave estrangeira</span>
+      <span class="key"><i class="icon null">○</i> permite nulo</span>
+      <span class="key"><i class="icon" style="background:var(--orange)">U</i> único</span>
+      <span class="key">⋯ linhas tracejadas = relacionamento</span>
+    </div>
+
+    <section class="schema" aria-label="Diagrama das tabelas">
+      <svg class="links" viewBox="0 0 1200 900" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M 335 190 C 420 190, 430 175, 500 175"/><circle cx="335" cy="190" r="5"/><circle cx="500" cy="175" r="5"/>
+        <path d="M 830 245 C 765 245, 735 245, 670 245"/><circle cx="830" cy="245" r="5"/><circle cx="670" cy="245" r="5"/>
+        <path d="M 500 330 C 420 380, 380 450, 330 470"/><circle cx="500" cy="330" r="5"/><circle cx="330" cy="470" r="5"/>
+        <path d="M 500 330 C 460 430, 400 575, 330 650"/><circle cx="500" cy="330" r="5"/><circle cx="330" cy="650" r="5"/>
+        <path d="M 670 410 C 720 500, 720 560, 670 610"/><circle cx="670" cy="410" r="5"/><circle cx="670" cy="610" r="5"/>
+        <path d="M 830 320 C 860 440, 900 560, 930 650"/><circle cx="830" cy="320" r="5"/><circle cx="930" cy="650" r="5"/>
+        <path d="M 670 370 C 820 430, 900 480, 950 525"/><circle cx="670" cy="370" r="5"/><circle cx="950" cy="525" r="5"/>
+      </svg>
+
+      <article class="table version"><h2>alembic_version <small>controle</small></h2><ul class="columns"><li class="column"><span class="mark pk">PK</span><span class="column-name">version_num</span><span class="type">varchar</span></li></ul></article>
+      <article class="table products"><h2>produtos <small>catálogo</small></h2><ul class="columns"><li class="column"><span class="mark pk">PK</span><span class="column-name">id</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">nome</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">estoque</span><span class="type">integer</span></li><li class="column"><span class="mark">•</span><span class="column-name">preco_centavos</span><span class="type">integer</span></li></ul><span class="default">estoque = 20 · preco_centavos = 500</span></article>
+      <article class="table users"><h2>usuarios <small>acesso</small></h2><ul class="columns"><li class="column"><span class="mark pk">PK</span><span class="column-name">id</span><span class="type">integer</span></li><li class="column"><span class="mark unique">U</span><span class="column-name">usuario</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">perfil</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">ativo</span><span class="type">boolean</span></li><li class="column"><span class="mark unique">U</span><span class="column-name">email</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">senha_hash</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">email_verificado</span><span class="type">boolean</span></li><li class="column"><span class="mark">•</span><span class="column-name">versao_sessao</span><span class="type">integer</span></li></ul><span class="default">email_verificado = false · versao_sessao = 0</span></article>
+      <article class="table baskets"><h2>cestas <small>assinaturas</small></h2><ul class="columns"><li class="column"><span class="mark pk">PK</span><span class="column-name">id</span><span class="type">integer</span></li><li class="column"><span class="mark">•</span><span class="column-name">assinante</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">semana</span><span class="type">date</span></li><li class="column"><span class="mark">•</span><span class="column-name">tamanho</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">tamanho_nome</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">modo</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">limite</span><span class="type">integer</span></li><li class="column"><span class="mark">•</span><span class="column-name">situacao</span><span class="type">varchar</span></li><li class="column"><span class="mark fk">FK</span><span class="column-name">usuario_id</span><span class="type">integer?</span></li><li class="column"><span class="mark nullable">○</span><span class="column-name">separacao_concluida_em</span><span class="type">timestamptz?</span></li><li class="column"><span class="mark nullable">○</span><span class="column-name">avaliacao_assinante</span><span class="type">integer?</span></li><li class="column"><span class="mark nullable">○</span><span class="column-name">avaliacao_produtor</span><span class="type">integer?</span></li><li class="column"><span class="mark nullable">○</span><span class="column-name">enviado_em</span><span class="type">timestamptz?</span></li></ul></article>
+      <article class="table items"><h2>itens_cesta <small>composição</small></h2><ul class="columns"><li class="column"><span class="mark pk">PK</span><span class="column-name">id</span><span class="type">integer</span></li><li class="column"><span class="mark fk">FK</span><span class="column-name">cesta_id</span><span class="type">integer</span></li><li class="column"><span class="mark fk">FK</span><span class="column-name">produto_id</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">quantidade</span><span class="type">integer</span></li><li class="column"><span class="mark nullable">○</span><span class="column-name">preco_unitario_centavos</span><span class="type">integer?</span></li></ul></article>
+      <article class="table splits"><h2>separacoes <small>operação</small></h2><ul class="columns"><li class="column"><span class="mark pk">PK</span><span class="column-name">id</span><span class="type">integer</span></li><li class="column"><span class="mark fk">FK</span><span class="column-name">cesta_id</span><span class="type">integer</span></li><li class="column"><span class="mark fk">FK</span><span class="column-name">produto_id</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">quantidade</span><span class="type">integer</span></li></ul></article>
+      <article class="table tokens"><h2>tokens_conta <small>segurança</small></h2><ul class="columns"><li class="column"><span class="mark pk">PK</span><span class="column-name">id</span><span class="type">identity</span></li><li class="column"><span class="mark fk">FK</span><span class="column-name">usuario_id</span><span class="type">integer</span></li><li class="column"><span class="mark">•</span><span class="column-name">tipo</span><span class="type">varchar</span></li><li class="column"><span class="mark unique">U</span><span class="column-name">token_hash</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">criado_em</span><span class="type">timestamp</span></li><li class="column"><span class="mark">•</span><span class="column-name">expira_em</span><span class="type">timestamp</span></li><li class="column"><span class="mark nullable">○</span><span class="column-name">usado_em</span><span class="type">timestamp?</span></li></ul></article>
+      <article class="table notifications"><h2>notificacoes <small>comunicação</small></h2><ul class="columns"><li class="column"><span class="mark pk">PK</span><span class="column-name">id</span><span class="type">identity</span></li><li class="column"><span class="mark fk">FK</span><span class="column-name">usuario_id</span><span class="type">integer</span></li><li class="column"><span class="mark fk">FK</span><span class="column-name">cesta_id</span><span class="type">integer</span></li><li class="column"><span class="mark">•</span><span class="column-name">titulo</span><span class="type">varchar</span></li><li class="column"><span class="mark">•</span><span class="column-name">mensagem</span><span class="type">text</span></li><li class="column"><span class="mark">•</span><span class="column-name">criada_em</span><span class="type">timestamptz</span></li><li class="column"><span class="mark">•</span><span class="column-name">lida</span><span class="type">boolean</span></li></ul><span class="default">lida = false</span></article>
+    </section>
+
+    <section class="notes">
+      <div class="note"><h3>Regras de integridade</h3><p><code>avaliacao_assinante</code> e <code>avaliacao_produtor</code> aceitam valores de 0 a 5. As chaves estrangeiras garantem a ligação entre usuários, cestas e produtos.</p></div>
+      <div class="note"><h3>Relacionamentos principais</h3><p>Um usuário pode possuir várias cestas, tokens e notificações. Uma cesta reúne itens, separações e notificações; cada produto pode aparecer em várias cestas.</p></div>
+    </section>
+    <footer>Documento gerado a partir do schema fornecido · nomes e tipos preservados conforme a definição SQL.</footer>
+  </main>
+</body>
+</html>

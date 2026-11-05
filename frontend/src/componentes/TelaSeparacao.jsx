@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
+import { formatarQuantidade, obterNumeroDaQuantidade } from '../utilitarios/formatarQuantidade'
 import AvaliacaoEstrelas from './AvaliacaoEstrelas'
 
 // Esta é a tela principal do produtor, com as cestas filtradas para a separação da semana.
@@ -49,7 +50,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
   }
 
   async function salvarEstoque(produto) {
-    const valor = Number(rascunhosEstoque[produto.id] ?? produto.estoque)
+    const valor = obterNumeroDaQuantidade(rascunhosEstoque[produto.id] ?? produto.estoque)
     if (!Number.isInteger(valor) || valor < 0) {
       setMensagensEstoque((atuais) => ({ ...atuais, [produto.id]: 'Informe um número inteiro igual ou maior que zero.' }))
       return
@@ -185,7 +186,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
                   <strong>Estoque baixo</strong>
                   <p>
                     {produtosComEstoqueBaixo.map((produto) => (
-                      `${produto.nome}: ${produto.estoque === 0 ? 'esgotado' : `${produto.estoque} unidade(s)`}`
+                      `${produto.nome}: ${produto.estoque === 0 ? 'esgotado' : `${formatarQuantidade(produto.estoque)} unidade(s)`}`
                     )).join(' · ')}
                   </p>
                 </div>
@@ -229,15 +230,25 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
 
           <label className="campo-login">
             <span>Situação</span>
-            <select value={filtroSituacao} onChange={(evento) => setFiltroSituacao(evento.target.value)}>
-              <option value="todos">Todas as situações</option>
-              <option value="Pendente">Pendente</option>
-              <option value="Em separação">Em separação</option>
-              <option value="Preparado para envio">Preparado para envio</option>
-              <option value="Enviado">Enviado</option>
-              <option value="Entregue">Entregue</option>
-              <option value="Cancelado">Cancelado</option>
-            </select>
+            <span className="campo-select-com-indicador">
+              <select value={filtroSituacao} onChange={(evento) => setFiltroSituacao(evento.target.value)}>
+                <option value="todos">Todas as situações</option>
+                <option value="Pendente">Pendente</option>
+                <option value="Em separação">Em separação</option>
+                <option value="Preparado para envio">Preparado para envio</option>
+                <option value="Enviado">Enviado</option>
+                <option value="Aguardando recebimento">Aguardando recebimento</option>
+                <option value="Entregue">Entregue</option>
+                <option value="Cancelado">Cancelado</option>
+              </select>
+              {cestasPendentes.length > 0 && (
+                <span
+                  className="indicador-notificacao-situacao"
+                  title={`${cestasPendentes.length} pedido${cestasPendentes.length === 1 ? '' : 's'} pendente${cestasPendentes.length === 1 ? '' : 's'}`}
+                  aria-label={`${cestasPendentes.length} pedido${cestasPendentes.length === 1 ? '' : 's'} pendente${cestasPendentes.length === 1 ? '' : 's'}`}
+                />
+              )}
+            </span>
           </label>
         </div>
       </section>}
@@ -259,17 +270,19 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
                 <strong>{produto.nome}</strong>
                 {produto.estoque <= 10 && (
                   <span className={produto.estoque === 0 ? 'aviso-estoque esgotado' : 'aviso-estoque'}>
-                    {produto.estoque === 0 ? 'Esgotado' : `Estoque baixo: ${produto.estoque} unidade(s)`}
+                    {produto.estoque === 0 ? 'Esgotado' : `Estoque baixo: ${formatarQuantidade(produto.estoque)} unidade(s)`}
                   </span>
                 )}
                 <label>
                   <span>Unidades disponíveis</span>
                   <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={rascunhosEstoque[produto.id] ?? produto.estoque}
-                    onChange={(evento) => setRascunhosEstoque((atuais) => ({ ...atuais, [produto.id]: evento.target.value }))}
+                    type="text"
+                    inputMode="numeric"
+                    value={rascunhosEstoque[produto.id] ?? formatarQuantidade(produto.estoque)}
+                    onChange={(evento) => setRascunhosEstoque((atuais) => ({
+                      ...atuais,
+                      [produto.id]: formatarQuantidade(obterNumeroDaQuantidade(evento.target.value)),
+                    }))}
                   />
                 </label>
                 <label>
@@ -373,7 +386,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
                           />
                           <span className="nome-produto-cesta">{produto.nome}</span>
                           <strong>
-                            {quantidadeSeparada} de {produto.quantidade}
+                            {formatarQuantidade(quantidadeSeparada)} de {formatarQuantidade(produto.quantidade)}
                           </strong>
                         </li>
                       )

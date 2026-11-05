@@ -57,13 +57,13 @@ parte já implementada do MVP.
 **Transição:** “Com o problema e a solução definidos, agora vou mostrar como esse fluxo funciona no
 sistema publicado e quais regras ficam protegidas nos bastidores.”
 
-## 3. Demonstrar o sistema publicado · slide 10 e navegador
+## 3. Demonstrar o sistema publicado · slide 11 e navegador
 
-### Slide 10 · Acesse o sistema
+### Slide 11 · Acesse o sistema
 
 Use este slide para apresentar o endereço publicado e explicar que a demonstração será feita no navegador.
 Mostre que a apresentação visual continua no slide enquanto o fluxo real é executado na aplicação. Use o
-endereço indicado no próprio slide 10 para abrir a aplicação na Vercel.
+endereço indicado no próprio slide 11 para abrir a aplicação na Vercel.
 
 1. **Abrir o endereço publicado:** acesse `https://cestadovale.vercel.app/` (também indicado no slide). Confirme que a página carregou antes de continuar.
 2. **Explicar cadastro e senha:** o cadastro permite entrar imediatamente; confirmar o e-mail é opcional. A aplicação envia links de confirmação e recuperação por SMTP. Se demonstrar esse recurso, use uma conta de teste e não mostre tokens ou credenciais.
@@ -76,12 +76,28 @@ endereço indicado no próprio slide 10 para abrir a aplicação na Vercel.
 Conclua a demonstração resumindo o percurso: cadastro e acesso, pedido, separação e acompanhamento. Se
 algum serviço estiver indisponível, descreva o passo sem alegar que foi concluído.
 
-## 4. Explicar o impacto e os próximos passos · slides 7 a 9
+## 4. Explicar os requisitos, o impacto e os próximos passos · slides 7 a 10
 
 Use estes slides para separar claramente o que já foi implementado, o benefício gerado pelo MVP e o que
 continua planejado. Não apresente a IA como funcionalidade pronta.
 
-### Slide 7 · O que acontece nos bastidores?
+### Slide 7 · Requisitos que guiam o MVP
+
+Use este slide para separar os requisitos funcionais dos não funcionais e mostrar quem utiliza cada
+funcionalidade. Os marcadores com asterisco identificam os tipos de usuário envolvidos:
+
+- **Assinante:** cria e gerencia cestas, escolhe produtos e acompanha o pedido.
+- **Produtor:** cadastra produtos, controla o estoque e registra a separação.
+- **Ambos:** utilizam autenticação, permissões, segurança e validações do sistema.
+
+Nos requisitos não funcionais, destaque que hash de senha, controle de acesso, desempenho, responsividade
+e integridade do banco sustentam a experiência dos dois tipos de usuário. Este slide resume o critério
+técnico para considerar o MVP confiável.
+
+**Transição:** “Com os requisitos definidos, agora podemos observar como essas regras aparecem no
+funcionamento do sistema.”
+
+### Slide 8 · O que acontece nos bastidores?
 
 Explique que o sistema não é apenas uma tela de formulário. Existem regras técnicas protegendo o fluxo:
 
@@ -135,7 +151,7 @@ Use esta versão se precisar controlar o tempo:
 Essa fala cobre as proteções principais em aproximadamente 40 a 60 segundos. Deixe a explicação detalhada
 de Argon2, JWT, `Retry-After`, concorrência e Redis/Upstash apenas se a banca perguntar.
 
-### Slide 8 · Uma ideia vira uma cesta revisável
+### Slide 9 · Uma ideia vira uma cesta revisável
 
 #### Qual é a mensagem principal do slide?
 
@@ -232,7 +248,7 @@ regras de tamanho, criação de cestas e validação no backend, mas a integraç
 a tela do assistente ainda serão implementados. A OpenAI é o provedor proposto; o modelo específico,
 configuração da chave, custo e critérios de qualidade ainda precisam ser definidos.”
 
-### Slide 9 · Uma cesta, duas rotinas conectadas
+### Slide 10 · Uma cesta, duas rotinas conectadas
 
 Use este slide para fechar a narrativa mostrando o impacto do produto:
 

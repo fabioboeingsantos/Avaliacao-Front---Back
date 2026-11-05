@@ -1910,6 +1910,31 @@
   gap: 16px;
 }
 
+.campo-select-com-indicador {
+  position: relative;
+  display: block;
+}
+
+.indicador-notificacao-situacao {
+  position: absolute;
+  top: 50%;
+  right: 34px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--cor-branco);
+  border-radius: 50%;
+  background: #d9363e;
+  box-shadow: 0 0 0 1px #d9363e;
+  pointer-events: none;
+  transform: translateY(-50%);
+  animation: pulsar-indicador-situacao 1.5s ease-in-out infinite;
+}
+
+@keyframes pulsar-indicador-situacao {
+  0%, 100% { box-shadow: 0 0 0 1px #d9363e; }
+  50% { box-shadow: 0 0 0 5px rgba(217, 54, 62, .18); }
+}
+
 /* Apresenta as cestas como cartões com situação e limite visíveis. */
 .lista-cestas-produtor {
   display: grid;
