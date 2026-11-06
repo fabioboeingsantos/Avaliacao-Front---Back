@@ -11,6 +11,7 @@ from rotas.sistemas import router as rotas_de_sistema
 from rotas.usuarios import router as rotas_de_usuarios
 from rotas.recuperacao import router as rotas_de_recuperacao
 from rotas.notificacoes import router as rotas_de_notificacoes
+from rotas.assistente import router as rotas_do_assistente
 
 
 app = FastAPI(
@@ -35,3 +36,4 @@ app.include_router(rotas_de_sistema)
 app.include_router(rotas_de_usuarios)
 app.include_router(rotas_de_recuperacao)
 app.include_router(rotas_de_notificacoes)
+app.include_router(rotas_do_assistente)

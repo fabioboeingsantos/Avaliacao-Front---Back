@@ -1,0 +1,17 @@
+.assistente-dialogo {
+  width: min(480px, calc(100% - 32px)); max-height: 85dvh; overflow: auto;
+  padding: 24px; border: 1px solid #9dafa2; border-radius: 20px;
+  color: var(--cor-texto-escuro); background: var(--cor-creme-natural);
+  box-shadow: 0 20px 80px #0004;
+}
+.assistente-dialogo::backdrop { background: #14271e99; }
+.assistente-dialogo header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.assistente-dialogo h2 { margin: 4px 0 12px; font-size: 1.5rem; }
+.assistente-rotulo { margin: 0; font-size: .8rem; }
+.assistente-dialogo form { display: grid; gap: 10px; }
+.assistente-dialogo textarea { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #9dafa2; border-radius: 10px; font: inherit; color: inherit; background: inherit; resize: vertical; }
+.assistente-dialogo button { min-height: 40px; padding: 8px 14px; margin: 6px 6px 6px 0; border: 1px solid #688472; border-radius: 10px; background: transparent; color: inherit; cursor: pointer; font: inherit; }
+.assistente-dialogo button[type=submit], .assistente-previa button:first-of-type { background: #1f4d2e; color: white; }
+.assistente-dialogo button:disabled { opacity: .6; cursor: wait; }
+.assistente-dialogo :focus-visible { outline: 3px solid #93b856; outline-offset: 3px; }
+.assistente-previa { margin: 16px 0; padding: 14px; border: 1px solid #9dafa2; border-radius: 12px; }

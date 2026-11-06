@@ -14,6 +14,7 @@ function TelaInicio({ aoEntrar, aoCriarConta }) {
         <p className="descricao-inicial">
           Escolha sua cesta, acompanhe a separação e receba os produtos frescos da semana.
         </p>
+        <p className="descricao-inicial">Novo assistente de cestas: descreva seu pedido e confira a sugestão após entrar na sua conta.</p>
         <button className="botao-criar-conta-inicial" type="button" onClick={aoCriarConta}>
           Criar conta grátis
         </button>

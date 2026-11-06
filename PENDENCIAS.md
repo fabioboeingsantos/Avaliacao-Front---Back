@@ -1,6 +1,32 @@
 # Pendências do projeto Cesta do Vale
 
-Atualizado em 04/11/2026. Esta lista contém somente ações ainda não concluídas.
+Atualizado em 05/11/2026. Esta lista contém somente ações ainda não concluídas.
+
+## Assistente — próximas etapas
+
+Plataforma escolhida: **OpenRouter**. A integração com os agentes e o QA já está
+implementada. A chave foi validada e o modo OpenRouter ativado localmente. Os testes
+fictícios de pedido do assinante e separação do produtor passaram com QA aprovado,
+usando `nvidia/nemotron-3.5-super-vl:free`, JSON estrito e permissões explícitas.
+O Kimi continua como alternativa, mas a conta consultada estava com saldo zero.
+
+- [ ] Corrigir as falhas observadas no especialista e no QA da IA: tamanho ausente e cesta pequena
+  com seis produtos foram aprovados pelo modelo e barrados somente pelo backend.
+- [ ] Preservar os motivos específicos do QA quando a validação local recebe proposta nula.
+- [ ] Reexecutar os três cenários negativos após os ajustes e ampliar a validação real.
+  Evidências: [testes OpenRouter](docs/TESTES_ASSISTENTE_OPENROUTER.md).
+  Falhas do provedor e regras de bloqueio já possuem testes automatizados com transporte local.
+- [ ] Implementar conversa contínua, mantendo contexto e fazendo uma pergunta por vez.
+- [ ] Implementar voz, transcrição e revisão do texto antes do envio.
+- [ ] Completar as operações do produtor pelo assistente: envio, encerramento e desfazer separações,
+  respeitando permissões, situação da cesta e confirmação explícita.
+- [ ] Aplicar filtros solicitados em linguagem natural à lista de cestas.
+- [ ] Validar visualmente no navegador os dois perfis e testar o fluxo completo, da solicitação
+  à confirmação e gravação, além da alternativa manual.
+
+Referências da implementação atual: [guia OpenRouter](docs/ASSISTENTE_OPENROUTER.md),
+[guia Kimi](docs/ASSISTENTE_KIMI.md) e
+[briefing de IA](docs/BRIEFING_IA.md).
 
 ## Validar no site
 

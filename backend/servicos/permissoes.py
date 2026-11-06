@@ -21,6 +21,7 @@ PERMISSOES_POR_GRUPO = {
         "notificacoes.listar",
         "notificacoes.marcar_lidas",
         "produtos.listar",
+        "assistente.usar",
     },
     GRUPO_PRODUTOR: {
         "usuarios.consultar_propria_conta",
@@ -38,6 +39,7 @@ PERMISSOES_POR_GRUPO = {
         "produtos.listar",
         "produtos.atualizar_estoque",
         "produtos.atualizar_preco",
+        "assistente.usar",
     },
 }
 

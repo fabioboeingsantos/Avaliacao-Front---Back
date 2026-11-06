@@ -16,6 +16,9 @@ os.environ["JWT_SECRET_KEY"] = "chave-exclusiva-dos-testes-com-mais-de-32"
 os.environ["JWT_ALGORITHM"] = "HS256"
 # Mantém os testes alinhados à validade padrão da sessão.
 os.environ["JWT_EXPIRATION_MINUTES"] = "1440"
+os.environ["SUPABASE_DB_URL"] = "sqlite://"
+os.environ["SUPABASE_DB_PASSWORD"] = ""
+os.environ["ASSISTENTE_MODO"] = "simulado"
 
 from banco import Base, obter_sessao  # noqa: E402
 from limites_autenticacao import limitador  # noqa: E402

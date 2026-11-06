@@ -8,6 +8,7 @@ import TelaDetalhesCesta from './componentes/TelaDetalhesCesta'
 import TelaSeparacao from './componentes/TelaSeparacao'
 import TelaFechamento from './componentes/TelaFechamento'
 import SinoNotificacoes from './componentes/SinoNotificacoes'
+import Assistente from './componentes/Assistente'
 import { chamarApi } from './api.js'
 import { formatarIdSolicitacao } from './utilitarios/identificadorPedido'
 import './App.css'
@@ -195,6 +196,8 @@ function App() {
   const [saindo, setSaindo] = useState(false)
   // Identifica qual fluxo deve ser apresentado depois do acesso de demonstração.
   const [perfilAtual, setPerfilAtual] = useState('')
+  const [assistenteAberto, setAssistenteAberto] = useState(false)
+  const [revisaoFormulario, setRevisaoFormulario] = useState(0)
   // Controla a aba atual e mantém o pedido em revisão enquanto a pessoa confirma os dados.
   const [abaAtual, setAbaAtual] = useState('pedido')
   const [pedidoEmRevisao, setPedidoEmRevisao] = useState(null)
@@ -455,6 +458,7 @@ function App() {
 
   // Encerra a sessão no servidor antes de limpar o estado autenticado da tela.
   function limparSessaoLocal() {
+    setAssistenteAberto(false)
     setUsuarioAutenticado('')
     setPerfilAtual('')
     setPedidos([])
@@ -920,6 +924,62 @@ function App() {
   }
 
   // Mantém a ação de saída disponível em todas as telas autenticadas.
+  async function confirmarAssistente(proposta) {
+    if (proposta.tipo === 'consulta_cestas') {
+      const cesta = pedidos.find((item) => item.id === proposta.cesta_id)
+      if (proposta.cesta_id && !cesta) throw new Error('Atualize a lista para consultar essa cesta.')
+      if (perfilAtual === 'produtor') {
+        if (cesta) abrirFechamento(cesta)
+        else setAbaAtual('separacao')
+      } else if (cesta) abrirDetalhes(cesta)
+      else setAbaAtual('historico')
+      return
+    }
+    if (proposta.tipo === 'pedido_cesta' && perfilAtual === 'assinante') {
+      await chamarApi('/cestas', {
+        method: 'POST', body: JSON.stringify({
+          tamanho: proposta.tamanho, modo: proposta.modo,
+          produtos: proposta.produtos.map((item) => ({
+            id: item.produto_id,
+            nome: produtosDisponiveis.find((p) => p.id === item.produto_id)?.nome || item.produto_id,
+            quantidade: item.quantidade,
+          })),
+        }),
+      })
+      await carregarCestasDoServidor(usuarioAutenticado)
+      carregarProdutosDoServidor()
+      setAbaAtual('historico')
+      return
+    }
+    if (proposta.tipo === 'separacao' && perfilAtual === 'produtor') {
+      await chamarApi(`/cestas/${proposta.cesta_id}/separacoes/lote`, {
+        method: 'POST', body: JSON.stringify({ produtos: proposta.produtos }),
+      })
+      await carregarCestasDoServidor(null)
+      setCestaEmFechamento(proposta.cesta_id)
+      setAbaAtual('fechamento')
+      return
+    }
+    throw new Error('Continue essa solicitação pelo fluxo manual.')
+  }
+
+  function continuarAssistenteManual(proposta) {
+    setAssistenteAberto(false)
+    if (perfilAtual === 'assinante') {
+      if (proposta?.tipo === 'pedido_cesta') {
+        setPedidoParaRepetir({
+          modoNome: proposta.modo === 'pronta' ? 'Cesta pronta' : 'Cesta selecionável',
+          tamanhoNome: { pequena: 'Pequena', media: 'Média', grande: 'Grande' }[proposta.tamanho],
+          produtos: proposta.produtos.map((p) => ({ id: p.produto_id, quantidade: p.quantidade })),
+        })
+        setRevisaoFormulario((atual) => atual + 1)
+      }
+      setAbaAtual('pedido')
+    } else {
+      setAbaAtual('separacao')
+    }
+  }
+
   function envolverAreaAutenticada(conteudo) {
     return (
       <>
@@ -943,6 +1003,7 @@ function App() {
             aoSelecionarNotificacao={abrirDestinoDaNotificacao}
           />
           {controleTema}
+          <button type="button" className="botao-sair-sessao" onClick={() => setAssistenteAberto(true)}>Assistente de cestas</button>
           {erroLogout && (
             <p className="erro-sair-sessao" role="alert">
               {erroLogout}
@@ -950,6 +1011,13 @@ function App() {
           )}
         </header>
         {conteudo}
+        {assistenteAberto && <Assistente
+          key={usuarioAutenticado}
+          perfil={perfilAtual} produtos={produtosDisponiveis}
+          aoFechar={() => setAssistenteAberto(false)}
+          aoConfirmar={confirmarAssistente}
+          aoManual={continuarAssistenteManual}
+        />}
       </>
     )
   }
@@ -1030,6 +1098,7 @@ function App() {
 
   return envolverAreaAutenticada(
     <TelaPedirCesta
+      key={revisaoFormulario}
       usuario={formatarNomeUsuario(usuarioAutenticado)}
       produtosDisponiveis={produtosDisponiveis}
       catalogoCarregado={catalogoCarregado}

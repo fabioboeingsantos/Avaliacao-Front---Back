@@ -2,6 +2,17 @@
 
 > Rascunho para verificação. Este documento não substitui nem altera o briefing original.
 
+> Atualização da implementação: o backend agora oferece modo simulado e integração
+> configurável com OpenRouter (plataforma escolhida) ou Kimi, substituindo a escolha
+> anterior de OpenAI para esta etapa. A OpenRouter usa modelos gratuitos por padrão.
+> Intérprete, especialista do perfil e QA são chamadas separadas. Há botão autenticado,
+> prévia e confirmação para criar pedidos e registrar lotes de separação pelas rotas
+> existentes. O padrão de instalações novas continua simulado; o ambiente local já
+> está ativo na OpenRouter com `nvidia/nemotron-3.5-super-vl:free`, JSON estrito e
+> testes fictícios dos dois perfis aprovados pelo QA. Voz, memória da conversa e demais
+> operações do produtor seguem pendentes. O restante do documento preserva o histórico
+> do planejamento; a configuração atual está em [ASSISTENTE_OPENROUTER.md](ASSISTENTE_OPENROUTER.md).
+
 ## Objetivo
 
 Apresentar as diferenças entre a cartilha, o briefing atual e o sistema implementado, além de
@@ -226,3 +237,139 @@ a integração via API, a execução de ferramentas nem a coordenação automát
 - [ ] Executar os três testes manuais e registrar os resultados somente após recebê-los.
 - [ ] Revisar este documento antes de atualizar o briefing original ou registrar a funcionalidade
   como concluída.
+
+## Decisões atuais para a próxima versão
+
+Esta seção registra as decisões tomadas para evoluir o assistente de IA para os dois tipos de usuário
+do sistema: assinante e produtor. Para a próxima versão, estas decisões substituem
+os itens anteriores que estavam marcados como fora do escopo, mas continuam sujeitas à validação
+durante a implementação.
+
+### Entrada do assistente
+
+- O assistente será acessado inicialmente por um botão visível na tela inicial de cada tipo de usuário.
+- Na landing page pública haverá somente uma divulgação da nova funcionalidade, sem acesso ao
+  assistente e sem campo para envio de pedidos.
+- Ao clicar no botão, a pessoa abrirá uma função de IA com um campo simples para digitar ou falar.
+- A mesma experiência será usada por Aline e Vanderlei, mas o contexto, as permissões e as ações
+  disponíveis serão determinados pela conta autenticada.
+- A interação deverá aceitar linguagem natural, sem exigir comandos rígidos ou palavras-chave.
+- A resposta deverá ser objetiva e natural. Cards, filtros, prévias e outros elementos visuais podem
+  ser usados, mas de forma discreta, sem transformar a tela em um painel excessivamente carregado.
+- O assistente deverá fazer somente uma pergunta de esclarecimento por vez.
+- A pessoa poderá corrigir a solicitação durante a conversa ou abandonar o assistente e continuar
+  pela seleção ou operação manual.
+- Quando a entrada for feita por voz, o sistema deverá exibir a transcrição para revisão antes de
+  enviá-la para interpretação. Se a transcrição estiver incompleta ou não for compreensível, o
+  assistente deverá pedir que a pessoa repita ou digite a solicitação.
+
+### Confirmação e regras do sistema
+
+- Nenhuma ação que crie, altere, envie ou finalize dados será executada automaticamente.
+- Depois de interpretar o pedido, o assistente deverá apresentar uma prévia curta e solicitar
+  confirmação explícita.
+- A pessoa poderá aceitar ou rejeitar a sugestão. Também poderá editar os dados antes da confirmação.
+- A confirmação deverá ser exigida mesmo quando a sugestão parecer clara.
+- A IA poderá sugerir uma composição, filtro, próxima etapa ou quantidade, mas não poderá alterar as
+  regras de negócio.
+- O backend continuará sendo a fonte oficial para autenticação, permissões, catálogo, estoque,
+  limites, situação da cesta, quantidades e gravação.
+- Se a operação não for permitida pela situação atual da cesta, o assistente deverá explicar o
+  motivo e não oferecer um caminho que viole a regra. Uma cesta enviada, por exemplo, não deverá
+  aceitar novas separações ou alterações.
+- A disponibilidade e o preço deverão ser apresentados no momento definido pelo fluxo atual, depois
+  da separação, sem que a IA antecipe informações que o backend ainda não confirmou.
+
+### Memória e histórico
+
+- O assistente poderá consultar informações anteriores necessárias para responder ao pedido, como
+  pedidos da Aline, composições anteriores, cestas e separações do Vanderlei.
+- A consulta ficará restrita aos dados que a pessoa autenticada tem permissão para visualizar.
+- O histórico será usado como contexto e referência, não como autorização para executar uma ação.
+- Qualquer ação baseada em um pedido ou separação anterior deverá ser exibida em uma prévia e exigir
+  nova confirmação.
+
+### Tipos de usuário e responsabilidades
+
+#### Aline — assinante
+
+- Aline poderá solicitar qualquer tipo de cesta, desde que a intenção seja compreensível e possa ser
+  validada pelas regras do sistema.
+- O assistente deverá apoiar cesta pronta, cesta personalizada e repetição de composição, mantendo
+  somente as opções que se mostrarem úteis após os testes.
+- Quando Aline não informar o tamanho, o assistente deverá fazer uma pergunta objetiva antes de
+  montar a proposta.
+- Quando os produtos ou quantidades ultrapassarem o limite do tamanho escolhido, o assistente deverá
+  explicar o conflito e perguntar como deseja continuar. Não deverá remover itens silenciosamente.
+- Aline poderá expressar preferências naturais, como finalidade da cesta, itens que deseja evitar ou
+  combinações de produtos. Essas preferências só poderão influenciar a proposta quando houver regra
+  ou informação de catálogo que sustente a interpretação; caso contrário, deverão ser tratadas como
+  preferência a confirmar, não como recomendação garantida.
+- Aline poderá editar tamanho, produtos e quantidades nos controles da prévia antes de confirmar.
+- Após a confirmação, o pedido seguirá o fluxo normal da aplicação.
+
+#### Vanderlei — produtor
+
+- Vanderlei poderá consultar e executar as operações necessárias pelo assistente, reduzindo a
+  necessidade de interação manual com a tela.
+- O assistente deverá aceitar solicitações naturais para listar cestas, filtrar por situação ou
+  tamanho, consultar o que falta, inspecionar uma cesta, registrar separações e desfazer uma operação
+  quando essa ação for permitida pelo sistema.
+- Para registrar uma separação, a prévia deverá identificar claramente a cesta, o produto e a
+  quantidade. O assistente deverá pedir esses dados um por vez quando algum estiver ausente.
+- O assistente deverá seguir a cesta indicada por Vanderlei. Não deverá escolher outra cesta por
+  conta própria. Se houver mais de uma interpretação possível, deverá pedir esclarecimento.
+- Antes de registrar, deverá mostrar o que já foi separado, o que falta e quanto ainda cabe na cesta,
+  quando essas informações forem relevantes para a operação.
+- Depois da confirmação, o backend deverá validar a situação da cesta e os limites antes de gravar.
+- Cestas enviadas ou encerradas não deverão aceitar novas operações. O assistente deverá informar a
+  situação atual e orientar a consulta do detalhe da inspeção quando necessário.
+- A linguagem deverá ser natural e operacional, sem exigir que Vanderlei memorize comandos ou siga
+  respostas robotizadas.
+
+### Proposta de três agentes
+
+Para atender aos dois tipos de usuário, fica registrada a seguinte divisão inicial:
+
+1. **Agente intérprete:** identifica a intenção, os dados mencionados e o perfil de acesso no contexto
+   da solicitação. Para Aline, pode interpretar uma composição de cesta; para Vanderlei, uma consulta
+   ou operação de separação.
+2. **Agente especialista do tipo de usuário:** trabalha com as regras de linguagem e o fluxo do
+   assinante ou do produtor. Ele prepara uma proposta de consulta ou operação adequada ao tipo de
+   usuário autenticado.
+3. **Agente QA:** recebe a solicitação original e a proposta final, verifica se tudo está coerente,
+   se os dados necessários estão presentes e se a operação respeita as regras fornecidas pelo backend.
+   Ele deve aprovar, pedir esclarecimento ou bloquear a proposta.
+
+O agente QA é obrigatório no final do pedido. Sem uma aprovação do QA, não haverá prévia de confirmação
+nem execução da operação. O QA não corrige silenciosamente a proposta e não grava dados.
+
+O backend continua sendo o orquestrador, o executor das validações determinísticas e o responsável por
+gravar dados depois da confirmação humana. A quantidade real de chamadas à IA poderá ser reduzida
+depois dos testes, desde que a etapa QA continue sendo preservada.
+
+### Divisão dos agentes por tipo de usuário
+
+- **Agente do assinante:** atende montagem, consulta e repetição de cestas, além de preferências
+  expressas em linguagem natural.
+- **Agente do produtor:** atende consulta, inspeção, separação, encerramento e envio, respeitando a
+  situação atual da cesta.
+- **Agente QA comum:** revisa o resultado produzido por qualquer um dos dois agentes especializados.
+
+Os agentes especializados poderão utilizar o mesmo modelo e provedor, mas terão instruções, contexto,
+permissões e formatos de resposta diferentes. O sistema não deverá confiar somente na resposta do
+modelo para autorizar uma operação.
+
+### Perguntas ainda abertas
+
+- O botão terá o mesmo nome e ícone para os dois tipos de usuário ou uma chamada específica para cada fluxo?
+- A transcrição de voz poderá ser editada livremente antes do envio?
+- Quais operações do Vanderlei poderão ser desfeitas e por quanto tempo?
+- A repetição de composição da Aline deverá ser feita por comando de voz/texto, por botão no histórico,
+  ou pelas duas formas?
+- Quais preferências da Aline serão realmente suportadas no catálogo inicial e quais serão apenas
+  registradas como texto para evolução futura?
+- Quando uma solicitação estiver fora do escopo, a resposta deverá oferecer exemplos de pedidos
+  aceitos ou apenas encaminhar para o fluxo manual?
+- Qual será o modelo, o limite de tempo de resposta e a estratégia de fallback quando algum agente
+  falhar?

@@ -1,0 +1,133 @@
+"""Integração OpenRouter com transporte local, sem chave real ou consumo de cota."""
+
+import json
+
+import httpx
+import pytest
+
+from esquemas.assistente import InterpretacaoAgente
+from servicos import provedor_openrouter
+from servicos.provedor_ia import AssistenteIndisponivel
+from .conftest import fazer_login
+from .test_assistente import respostas_padrao
+
+
+def preparar(monkeypatch, respostas):
+    monkeypatch.setenv("ASSISTENTE_MODO", "openrouter")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "chave-ficticia-openrouter")
+    monkeypatch.setenv("OPENROUTER_MODEL", "openrouter/free")
+    for papel in ("INTERPRETE", "ASSINANTE", "PRODUTOR", "QA"):
+        monkeypatch.setenv(f"OPENROUTER_MODEL_{papel}", "")
+    capturas = []
+    cliente_original = httpx.Client
+
+    def responder(requisicao):
+        assert str(requisicao.url) == "https://openrouter.ai/api/v1/chat/completions"
+        capturas.append(json.loads(requisicao.content))
+        valor = respostas.pop(0)
+        if isinstance(valor, int):
+            return httpx.Response(valor, json={"error": {"message": "segredo-do-provedor"}})
+        return httpx.Response(200, json={"choices": [{"finish_reason": "stop", "message": {"content": json.dumps(valor)}}]})
+
+    monkeypatch.setattr(provedor_openrouter.httpx, "Client", lambda **opcoes: cliente_original(
+        transport=httpx.MockTransport(responder), **opcoes,
+    ))
+    return capturas
+
+
+def test_tres_chamadas_gratuitas_e_isolamento(cliente, monkeypatch):
+    capturas = preparar(monkeypatch, respostas_padrao())
+    fazer_login(cliente, "aline", "aline123")
+    antes = cliente.get("/cestas").json()
+    resposta = cliente.post("/assistente/analisar", json={"mensagem": "Cesta média com 2 tomates"})
+    assert resposta.status_code == 200
+    assert resposta.json()["modo"] == "openrouter"
+    assert resposta.json()["qa"]["status"] == "aprovado"
+    assert len(capturas) == 3
+    for corpo in capturas:
+        assert corpo["model"] == "openrouter/free"
+        assert corpo["provider"] == {"require_parameters": True, "max_price": {"prompt": 0, "completion": 0}}
+        assert "max_tokens" in corpo and "max_completion_tokens" not in corpo
+        assert corpo["reasoning"] == {"enabled": False}
+        formato = corpo["response_format"]
+        assert formato["type"] == "json_schema"
+        assert formato["json_schema"]["strict"] is True
+        schema = formato["json_schema"]["schema"]
+        assert set(schema["required"]) == set(schema["properties"])
+        contexto = json.loads(corpo["messages"][1]["content"])
+        assert contexto["operacoes_permitidas"] == ["consulta_cestas", "pedido_cesta"]
+        assert [c["id"] for c in contexto["cestas_autorizadas"]] == [antes[0]["id"]]
+    assert cliente.get("/cestas").json() == antes
+
+
+def test_modelos_separados_por_agente(cliente, monkeypatch):
+    capturas = preparar(monkeypatch, respostas_padrao())
+    monkeypatch.setenv("OPENROUTER_MODEL_QA", "exemplo/qa:free")
+    fazer_login(cliente, "aline", "aline123")
+    assert cliente.post("/assistente/analisar", json={"mensagem": "Uma cesta média"}).status_code == 200
+    assert [c["model"] for c in capturas] == ["openrouter/free", "openrouter/free", "exemplo/qa:free"]
+
+
+def test_agente_produtor(cliente, monkeypatch):
+    capturas = preparar(monkeypatch, respostas_padrao(proposta={
+        "tipo": "separacao", "cesta_id": 1, "produtos": [{"produto_id": "alface", "quantidade": 1}],
+    }))
+    monkeypatch.setenv("OPENROUTER_MODEL_PRODUTOR", "exemplo/produtor:free")
+    fazer_login(cliente, "vanderlei", "vanderlei123")
+    dados = cliente.post("/assistente/analisar", json={"mensagem": "Separe 1 alface na cesta 1"}).json()
+    assert dados["qa"]["status"] == "aprovado"
+    assert capturas[1]["model"] == "exemplo/produtor:free"
+    contexto_qa = json.loads(capturas[2]["messages"][1]["content"])
+    assert contexto_qa["operacoes_permitidas"] == ["consulta_cestas", "separacao"]
+
+
+def test_qa_reprovado_bloqueia(cliente, monkeypatch):
+    preparar(monkeypatch, respostas_padrao(qa={"status": "bloqueado", "problemas": ["Produto divergente"], "duvidas": []}))
+    fazer_login(cliente, "aline", "aline123")
+    dados = cliente.post("/assistente/analisar", json={"mensagem": "Uma cesta"}).json()
+    assert dados["proposta"] is None
+    assert dados["qa"]["status"] == "bloqueado"
+
+
+@pytest.mark.parametrize("codigo", [401, 402, 403, 404, 429, 500, 502, 503])
+def test_falhas_sem_vazamento_ou_retry(cliente, monkeypatch, codigo):
+    capturas = preparar(monkeypatch, [codigo])
+    fazer_login(cliente, "aline", "aline123")
+    resposta = cliente.post("/assistente/analisar", json={"mensagem": "Uma cesta"})
+    assert resposta.status_code == 503
+    assert "segredo-do-provedor" not in resposta.text
+    assert "chave-ficticia" not in resposta.text
+    assert len(capturas) == 1
+
+
+def test_sem_chave_nao_chama_provedor(cliente, monkeypatch):
+    capturas = preparar(monkeypatch, [])
+    monkeypatch.setenv("OPENROUTER_API_KEY", "")
+    fazer_login(cliente, "aline", "aline123")
+    assert cliente.post("/assistente/analisar", json={"mensagem": "Uma cesta"}).status_code == 503
+    assert not capturas
+
+
+def test_modelo_pago_bloqueado_sem_chamada(monkeypatch):
+    capturas = preparar(monkeypatch, [])
+    monkeypatch.setenv("OPENROUTER_MODEL", "exemplo/modelo-pago")
+    with pytest.raises(AssistenteIndisponivel, match=":free"):
+        provedor_openrouter.chamar_agente("interprete", "Teste", {}, InterpretacaoAgente)
+    assert not capturas
+
+
+def test_json_incompativel_bloqueia(cliente, monkeypatch):
+    preparar(monkeypatch, [{"campos": "inesperados"}])
+    fazer_login(cliente, "aline", "aline123")
+    assert cliente.post("/assistente/analisar", json={"mensagem": "Uma cesta"}).status_code == 503
+
+
+def test_schema_estrito_preserva_nulos_e_requer_objetos_aninhados():
+    from esquemas.assistente import RespostaEspecialista
+    schema = provedor_openrouter._schema_estrito(RespostaEspecialista.model_json_schema())
+    assert set(schema["required"]) == {"proposta", "pergunta", "mensagem"}
+    assert {"type": "null"} in schema["properties"]["pergunta"]["anyOf"]
+    for definicao in schema["$defs"].values():
+        if definicao.get("type") == "object":
+            assert definicao["additionalProperties"] is False
+            assert set(definicao["required"]) == set(definicao["properties"])
