@@ -10,8 +10,21 @@
 .assistente-rotulo { margin: 0; font-size: .8rem; }
 .assistente-dialogo form { display: grid; gap: 10px; }
 .assistente-dialogo textarea { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #9dafa2; border-radius: 10px; font: inherit; color: inherit; background: inherit; resize: vertical; }
+.assistente-dialogo .botao-microfone { display: inline-flex; align-items: center; justify-self: start; gap: 8px; margin: 0; }
+.botao-microfone svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.assistente-dialogo .botao-microfone[aria-pressed="true"] { border-color: #a33b2b; color: #8a2e23; background: #fff1ed; }
+.estado-voz { margin: 0; font-size: .85rem; line-height: 1.4; }
 .assistente-dialogo button { min-height: 40px; padding: 8px 14px; margin: 6px 6px 6px 0; border: 1px solid #688472; border-radius: 10px; background: transparent; color: inherit; cursor: pointer; font: inherit; }
 .assistente-dialogo button[type=submit], .assistente-previa button:first-of-type { background: #1f4d2e; color: white; }
 .assistente-dialogo button:disabled { opacity: .6; cursor: wait; }
 .assistente-dialogo :focus-visible { outline: 3px solid #93b856; outline-offset: 3px; }
 .assistente-previa { margin: 16px 0; padding: 14px; border: 1px solid #9dafa2; border-radius: 12px; }
+.aviso-confirmacao-separacao { padding: 10px; border-radius: 8px; background: var(--cor-verde-claro); }
+.resposta-texto-flora { white-space: pre-line; overflow-wrap: anywhere; }
+.controles-audio-flora, .identidade-flora-dialogo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.opcao-audio-flora { display: inline-flex; align-items: center; gap: 8px; font-size: .85rem; cursor: pointer; }
+.opcao-audio-flora input { width: 18px; height: 18px; min-height: 0; accent-color: var(--cor-verde-escuro); }
+.presenca-flora { width: 52px; height: 52px; object-fit: contain; border-radius: 50%; }
+.presenca-flora-ativa { animation: presenca-flora 1.6s ease-in-out infinite; }
+@keyframes presenca-flora { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--cor-verde-horta) 20%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .presenca-flora-ativa { animation: none; outline: 2px solid var(--cor-verde-horta); } }

@@ -34,6 +34,7 @@ backend/
 frontend/src/funcionalidades/assistente/
 ├── Assistente.jsx             # Mensagem, prévia e confirmação
 ├── Assistente.css
+├── useRespostaFalada.js        # Reprodução e interrupção da voz do navegador
 └── api.js                     # Chamada ao endpoint de análise
 ```
 
@@ -47,6 +48,45 @@ frontend/src/funcionalidades/assistente/
 6. A interface mostra a prévia quando existe proposta aprovada.
 7. A confirmação usa as rotas existentes de pedidos/separações, que validam novamente
    os dados e a situação atual antes de gravar. Consultas abrem o fluxo de consulta.
+
+### Separação do produtor pela Flora
+
+- Para abrir uma cesta e ajustar quantidades, o produtor pode pedir a cesta pelo número;
+  a Flora direciona ao fechamento manual, que mostra os produtos e controles de quantidade.
+- Para declarar que já separou o pedido completo, a Flora apresenta a lista inteira com
+  as quantidades pedidas. A pessoa produtora confere e confirma explicitamente.
+- A API valida novamente a cesta e as quantidades e só marca como preparada para envio
+  se a proposta contiver todos os itens com as quantidades exatas. A Flora não envia a cesta.
+- Se houver itens faltantes ou a proposta não corresponder ao pedido atual, a validação
+  bloqueia a conclusão e a pessoa continua pelo fechamento manual.
+
+### Consultas operacionais e voz
+
+`backend/ia/consultas.py` reconhece consultas de estoque, pendências, situações e
+detalhes de pedidos antes do fluxo de agentes. As respostas são montadas com dados
+atuais do banco, sem pedir ao modelo para gerar números. O status HTTP do resultado
+é `resposta`, sem proposta nem botão de execução. Funciona nos dois modos da Flora.
+
+O produtor consulta o estoque compartilhado e os pedidos do sistema, de acordo com
+o modelo de permissões já existente. Não existe estoque separado por produtor no banco.
+Assinantes consultam somente pedidos vinculados ao ID da conta autenticada e não
+recebem consultas de estoque pela Flora. Não são enviados nomes de clientes nesses
+relatórios. As contagens consideram todos os pedidos cadastrados, sem o corte de 20
+usado no contexto dos agentes; a mensagem lista até 30 pedidos e informa o total.
+
+Exemplos: “quantos tomates tenho no estoque?”, “mostre o estoque completo”,
+“quais são as pendências?”, “mostre as entregas pendentes”, “qual a situação do
+pedido 12?” e “resumo do sistema”. Estoque baixo segue o limite existente de 10
+unidades. Consultas não alteram estoque nem pedidos e não confirmam envio.
+
+As mensagens são exibidas em texto. A pessoa pode ativar “Responder por áudio” ou
+selecionar “Ouvir resposta”; “Parar áudio” interrompe a reprodução. A síntese usa
+as vozes do navegador, com preferência por voz local pt-BR quando disponível.
+A qualidade, disponibilidade e eventual processamento remoto dependem do navegador
+e da voz instalada. Não há nova integração paga de voz. A escuta exige clique,
+é interrompida após um minuto e para ao ocultar a página ou fechar o modal.
+A fala também para ao ocultar a página, iniciar o microfone ou trocar a solicitação.
+Voz não confirma operações; ações continuam exigindo a confirmação explícita na tela.
 
 Existem quatro papéis, mas três chamadas por análise: intérprete, **um** especialista
 (assinante ou produtor) e QA. Cada papel pode usar um modelo configurado diferente.
@@ -99,14 +139,15 @@ flowchart TD
 
 O [levantamento de interatividade inspirado no JARVIS](INTERATIVIDADE_FLORA.md)
 descreve os estados de escuta, processamento, resposta e interrupção, além da arte
-original criada para a Flora. Trata-se da direção proposta; voz e animação reativa
-ainda precisam ser integradas.
+original criada para a Flora. A fala para texto, a reprodução de respostas e um
+indicador visual de atividade estão integrados. Espectro reativo ao áudio e conversa
+contínua em tempo real permanecem como evolução.
 
 Memória de conversa exige ID de conversa vinculado à conta, armazenamento de mensagens
 e proposta pendente, expiração e testes de isolamento. Isso pode ser acrescentado a este
 módulo; LangGraph só deve ser avaliado quando a retomada e as ramificações justificarem.
 
-Permanecem pendentes voz, filtros em linguagem natural e operações adicionais do produtor.
+Permanecem pendentes conversa contínua, memória e operações adicionais do produtor.
 As limitações e evidências anteriores do QA estão preservadas em
 [cenários](cenarios.md) e em [PENDENCIAS.md](../../PENDENCIAS.md).
 

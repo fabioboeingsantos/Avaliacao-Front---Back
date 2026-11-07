@@ -952,6 +952,20 @@ function App() {
       return
     }
     if (proposta.tipo === 'separacao' && perfilAtual === 'produtor') {
+      if (proposta.concluir_separacao) {
+        await chamarApi(`/cestas/${proposta.cesta_id}/separacoes`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            produtos: proposta.produtos.map((item) => ({
+              produto_id: item.produto_id,
+              quantidade: item.quantidade,
+            })),
+          }),
+        })
+        await carregarCestasDoServidor(null)
+        setAbaAtual('entregas')
+        return
+      }
       await chamarApi(`/cestas/${proposta.cesta_id}/separacoes/lote`, {
         method: 'POST', body: JSON.stringify({ produtos: proposta.produtos }),
       })
@@ -976,7 +990,11 @@ function App() {
       }
       setAbaAtual('pedido')
     } else {
-      setAbaAtual('separacao')
+      const cesta = proposta?.tipo === 'separacao'
+        ? pedidos.find((pedido) => pedido.id === proposta.cesta_id)
+        : null
+      if (cesta) abrirFechamento(cesta)
+      else setAbaAtual('separacao')
     }
   }
 
@@ -984,26 +1002,39 @@ function App() {
     return (
       <>
         <header className="barra-sessao">
-          <div className="identidade-sessao">
-            <span>
-              Conectado como <strong>{formatarNomeUsuario(usuarioAutenticado)}</strong>
-            </span>
-            <button
-              className="botao-sair-sessao"
-              type="button"
-              onClick={sairDoSistema}
-              disabled={saindo}
-            >
-              {saindo ? 'Saindo...' : 'Sair'}
-            </button>
+          <div className="acoes-sessao">
+            <div className="identidade-sessao">
+              <span>
+                Conectado como <strong>{formatarNomeUsuario(usuarioAutenticado)}</strong>
+              </span>
+              <button
+                className="botao-sair-sessao"
+                type="button"
+                onClick={sairDoSistema}
+                disabled={saindo}
+              >
+                {saindo ? 'Saindo...' : 'Sair'}
+              </button>
+            </div>
+            <SinoNotificacoes
+              notificacoes={notificacoes}
+              aoMarcarComoLidas={marcarNotificacoesComoLidas}
+              aoSelecionarNotificacao={abrirDestinoDaNotificacao}
+            />
+            {controleTema}
           </div>
-          <SinoNotificacoes
-            notificacoes={notificacoes}
-            aoMarcarComoLidas={marcarNotificacoesComoLidas}
-            aoSelecionarNotificacao={abrirDestinoDaNotificacao}
-          />
-          {controleTema}
-          <button type="button" className="botao-sair-sessao" onClick={() => setAssistenteAberto(true)}>Falar com a Flora</button>
+          <button
+            type="button"
+            className={`botao-flora${perfilAtual === 'produtor' ? ' botao-flora-produtor' : ''}`}
+            onClick={() => setAssistenteAberto(true)}
+            aria-label="Abrir conversa com a Flora do Vale"
+            aria-haspopup="dialog"
+            title="Flora do Vale"
+          >
+            <img src="/marca/flora-do-vale-nucleo-v1.png" alt="" width="44" height="44" />
+            <span className="rotulo-flora">Flora do Vale</span>
+            <span className="descricao-flora">Assistente virtual I.A</span>
+          </button>
           {erroLogout && (
             <p className="erro-sair-sessao" role="alert">
               {erroLogout}
@@ -1043,8 +1074,9 @@ function App() {
       <TelaSeparacao
         cestas={cestasDaSemana}
         produtos={produtosDisponiveis}
-        modo={abaAtual === 'estoque' ? 'estoque' : 'separacao'}
+        modo={abaAtual === 'estoque' ? 'estoque' : abaAtual === 'entregas' ? 'entregas' : 'separacao'}
         aoAbrirEstoque={() => setAbaAtual('estoque')}
+        aoAbrirEntregas={() => setAbaAtual('entregas')}
         aoVoltarSeparacao={() => setAbaAtual('separacao')}
         aoAbrirFechamento={abrirFechamento}
         aoMarcarEnviado={marcarPedidoEnviado}

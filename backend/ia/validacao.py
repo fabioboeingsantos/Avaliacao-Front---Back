@@ -50,7 +50,18 @@ def validar_proposta(proposta, perfil, catalogo, cestas):
             separados = {i["produto_id"]: i["quantidade"] for i in cesta["separacoes"]}
             for item in p.produtos:
                 pedido = pedidos.get(item.produto_id)
-                if not pedido or item.quantidade + separados.get(item.produto_id, 0) > pedido["quantidade"]:
+                excede = pedido and (
+                    item.quantidade > pedido["quantidade"]
+                    or (not p.concluir_separacao and item.quantidade + separados.get(item.produto_id, 0) > pedido["quantidade"])
+                )
+                if not pedido or excede:
                     erros.append("A separação excede o que falta na cesta ou contém produto não solicitado.")
                     break
+        if p.concluir_separacao and cesta:
+            if cesta["situacao"] not in {"Pendente", "Em separação"} or cesta.get("separacao_concluida_em"):
+                erros.append("Esta cesta não está aberta para concluir a separação.")
+            quantidades_pedidas = {item["id"]: item["quantidade"] for item in cesta["produtos"]}
+            quantidades_propostas = {item.produto_id: item.quantidade for item in p.produtos}
+            if quantidades_propostas != quantidades_pedidas:
+                erros.append("Para concluir, confira todos os itens com as quantidades completas do pedido.")
     return erros

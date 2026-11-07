@@ -24,6 +24,7 @@ class PropostaAgente(BaseModel):
     tamanho: Literal["pequena", "media", "grande"] | None = None
     modo: Literal["pronta", "selecionavel"] = "selecionavel"
     cesta_id: int | None = Field(default=None, gt=0)
+    concluir_separacao: bool = False
     produtos: list[ItemProposta] = Field(default_factory=list, max_length=12)
     produtos_excluidos: list[str] = Field(default_factory=list, max_length=12)
 

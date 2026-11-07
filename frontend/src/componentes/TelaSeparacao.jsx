@@ -3,9 +3,10 @@ import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
 import { formatarQuantidade, obterNumeroDaQuantidade } from '../utilitarios/formatarQuantidade'
 import AvaliacaoEstrelas from './AvaliacaoEstrelas'
+import FiltroSituacao from './FiltroSituacao'
 
 // Esta é a tela principal do produtor, com as cestas filtradas para a separação da semana.
-function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnviado, aoAtualizarEstoque, aoAtualizarPreco, aoAvaliarCesta, modo = 'separacao', aoAbrirEstoque, aoVoltarSeparacao }) {
+function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnviado, aoAtualizarEstoque, aoAtualizarPreco, aoAvaliarCesta, modo = 'separacao', aoAbrirEstoque, aoAbrirEntregas, aoVoltarSeparacao }) {
   const [filtroTamanho, setFiltroTamanho] = useState('todos')
   const [rascunhosEstoque, setRascunhosEstoque] = useState({})
   const [estoqueSalvando, setEstoqueSalvando] = useState('')
@@ -16,7 +17,26 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
   const [envioSalvando, setEnvioSalvando] = useState(null)
   const [mensagensEnvio, setMensagensEnvio] = useState({})
   // Mostra o fluxo inteiro para o produtor conseguir continuar do preparado ao enviado.
-  const [filtroSituacao, setFiltroSituacao] = useState('todos')
+  const [filtrosSituacao, setFiltrosSituacao] = useState({})
+  const filtroSituacao = filtrosSituacao[modo] || 'todos'
+  function setFiltroSituacao(valor) {
+    setFiltrosSituacao((atuais) => ({ ...atuais, [modo]: valor }))
+  }
+  const opcoesSituacao = modo === 'entregas'
+    ? [
+      { valor: 'todos', rotulo: 'Todas as situações' },
+      { valor: 'Preparado para envio', rotulo: 'Preparado para envio' },
+      { valor: 'Enviado', rotulo: 'Enviado' },
+      { valor: 'Aguardando recebimento', rotulo: 'Aguardando recebimento' },
+    ]
+    : [
+      { valor: 'todos', rotulo: 'Todas as situações' },
+      { valor: 'Pendente', rotulo: 'Pendente' },
+      { valor: 'Em separação', rotulo: 'Em separação' },
+      { valor: 'Entregue', rotulo: 'Entregue' },
+      { valor: 'Cancelado', rotulo: 'Cancelado' },
+    ]
+
 
   // Soma o que já foi separado para mostrar o espaço restante da cesta.
   function obterTotalSeparado(cesta) {
@@ -98,13 +118,24 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
 
   // Aplica os dois filtros opcionais sem alterar a lista original de cestas.
   const cestasFiltradas = cestas.filter((cesta) => {
+    if (modo === 'entregas') {
+      const correspondeAoTamanho = filtroTamanho === 'todos' || cesta.tamanhoNome === filtroTamanho
+      const preparada = cesta.situacao === 'Preparado para envio'
+        || (cesta.situacao === 'Em separação' && Boolean(cesta.separacaoConcluidaEm))
+      const aguardandoEnvioOuRecebimento = ['Enviado', 'Aguardando recebimento'].includes(cesta.situacao)
+      const correspondeASituacao = filtroSituacao === 'todos'
+        || (filtroSituacao === 'Preparado para envio' && preparada)
+        || (['Enviado', 'Aguardando recebimento'].includes(filtroSituacao) && cesta.situacao === filtroSituacao)
+      return correspondeAoTamanho && (preparada || aguardandoEnvioOuRecebimento) && correspondeASituacao
+    }
+
+    const situacoesDaSeparacao = ['Pendente', 'Em separação', 'Entregue', 'Cancelado']
+    if (!situacoesDaSeparacao.includes(cesta.situacao)
+      || (cesta.situacao === 'Em separação' && cesta.separacaoConcluidaEm)) return false
+
     const correspondeAoTamanho = filtroTamanho === 'todos' || cesta.tamanhoNome === filtroTamanho
     const correspondeASituacao = filtroSituacao === 'todos'
-      || (filtroSituacao === 'Preparado para envio'
-      ? cesta.situacao === 'Preparado para envio'
-        || (cesta.situacao === 'Em separação' && Boolean(cesta.separacaoConcluidaEm))
-      : cesta.situacao === filtroSituacao
-        && (filtroSituacao !== 'Em separação' || !cesta.separacaoConcluidaEm))
+      || cesta.situacao === filtroSituacao
 
     return correspondeAoTamanho && correspondeASituacao
   })
@@ -134,6 +165,14 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
               A separação
             </button>
             <button
+              className={`aba-navegacao ${modo === 'entregas' ? 'aba-ativa' : ''}`}
+              type="button"
+              aria-current={modo === 'entregas' ? 'page' : undefined}
+              onClick={aoAbrirEntregas}
+            >
+              Cestas e entregas
+            </button>
+            <button
               className={`aba-navegacao ${modo === 'estoque' ? 'aba-ativa' : ''}`}
               type="button"
               aria-current={modo === 'estoque' ? 'page' : undefined}
@@ -146,16 +185,18 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
       </header>
 
       <section className="introducao-pedido" aria-labelledby="titulo-separacao">
-        <p className="texto-saudacao">{modo === 'estoque' ? 'Controle a disponibilidade' : 'Organize a colheita'}</p>
-        <h1 id="titulo-separacao">{modo === 'estoque' ? 'Gerenciar estoque' : 'A separação'}</h1>
+        <p className="texto-saudacao">{modo === 'estoque' ? 'Controle a disponibilidade' : modo === 'entregas' ? 'Acompanhe cada pedido' : 'Organize a colheita'}</p>
+        <h1 id="titulo-separacao">{modo === 'estoque' ? 'Gerenciar estoque' : modo === 'entregas' ? 'Cestas preparadas e entregas' : 'A separação'}</h1>
         <p>
           {modo === 'estoque'
             ? 'Consulte o estoque atual e edite a quantidade disponível de cada produto.'
-            : 'Veja as cestas pedidas e abra uma por vez para registrar os produtos separados.'}
+            : modo === 'entregas'
+              ? 'Veja as cestas com separação concluída, confirme os envios e acompanhe as que aguardam recebimento.'
+              : 'Veja as cestas pedidas e abra uma por vez para registrar os produtos separados.'}
         </p>
       </section>
 
-      {(cestasProntasParaConcluir.length > 0 || produtosComEstoqueBaixo.length > 0) && (
+      {modo !== 'entregas' && (cestasProntasParaConcluir.length > 0 || produtosComEstoqueBaixo.length > 0) && (
         <section className="avisos-produtor" aria-labelledby="titulo-avisos-produtor">
           <div className="cabecalho-avisos-produtor">
             <div>
@@ -199,7 +240,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
         </section>
       )}
 
-      {modo === 'separacao' && <section className="filtros-separacao" aria-labelledby="titulo-filtros-separacao">
+      {modo !== 'estoque' && <section className="filtros-separacao" aria-labelledby="titulo-filtros-separacao">
         <div className="cabecalho-filtros-separacao">
           <h2 id="titulo-filtros-separacao">Filtrar cestas</h2>
           {cestasPendentes.length > 0 && (
@@ -228,28 +269,10 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
             </select>
           </label>
 
-          <label className="campo-login">
-            <span>Situação</span>
-            <span className="campo-select-com-indicador">
-              <select value={filtroSituacao} onChange={(evento) => setFiltroSituacao(evento.target.value)}>
-                <option value="todos">Todas as situações</option>
-                <option value="Pendente">Pendente</option>
-                <option value="Em separação">Em separação</option>
-                <option value="Preparado para envio">Preparado para envio</option>
-                <option value="Enviado">Enviado</option>
-                <option value="Aguardando recebimento">Aguardando recebimento</option>
-                <option value="Entregue">Entregue</option>
-                <option value="Cancelado">Cancelado</option>
-              </select>
-              {cestasPendentes.length > 0 && (
-                <span
-                  className="indicador-notificacao-situacao"
-                  title={`${cestasPendentes.length} pedido${cestasPendentes.length === 1 ? '' : 's'} pendente${cestasPendentes.length === 1 ? '' : 's'}`}
-                  aria-label={`${cestasPendentes.length} pedido${cestasPendentes.length === 1 ? '' : 's'} pendente${cestasPendentes.length === 1 ? '' : 's'}`}
-                />
-              )}
-            </span>
-          </label>
+          <FiltroSituacao valor={filtroSituacao} aoAlterar={setFiltroSituacao}
+            quantidadePendentes={modo === 'separacao' ? cestasPendentes.length : 0}
+            opcoes={opcoesSituacao}
+            rotulo={modo === 'entregas' ? 'Situação da cesta' : 'Situação da separação'} />
         </div>
       </section>}
 
@@ -319,15 +342,17 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
         </section>
       )}
 
-      {modo === 'separacao' && (cestasFiltradas.length === 0 ? (
+      {modo !== 'estoque' && (cestasFiltradas.length === 0 ? (
         <section className="estado-vazio estado-vazio-historico">
-          <h2>Nenhuma cesta encontrada</h2>
+          <h2>{modo === 'entregas' ? 'Nenhuma cesta preparada ou aguardando entrega' : 'Nenhuma cesta encontrada'}</h2>
           <p>
-            {`Não há cestas com situação “${filtroSituacao}”.`}
+            {modo === 'entregas'
+              ? 'As cestas aparecerão aqui quando a separação for concluída.'
+              : `Não há cestas com situação “${filtroSituacao}”.`}
           </p>
         </section>
       ) : (
-        <section className="lista-cestas-produtor" aria-label="Cestas para separação">
+        <section className="lista-cestas-produtor" aria-label={modo === 'entregas' ? 'Cestas preparadas e entregas' : 'Cestas para separação'}>
           {cestasFiltradas.map((cesta) => {
             const totalSeparado = obterTotalSeparado(cesta)
             const totalPedido = cesta.produtos.reduce((total, produto) => total + produto.quantidade, 0)
@@ -395,7 +420,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
 
                   {!['Entregue', 'Cancelado'].includes(cesta.situacao) && (
                     <div className="acoes-cesta-produtor">
-                      {cesta.situacao === 'Enviado' ? (
+                      {['Enviado', 'Aguardando recebimento'].includes(cesta.situacao) ? (
                         <span>Pedido enviado; aguardando confirmação do cliente.</span>
                       ) : cesta.separacaoConcluidaEm ? (
                         <>

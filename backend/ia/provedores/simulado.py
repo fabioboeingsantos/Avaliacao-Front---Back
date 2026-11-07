@@ -73,11 +73,35 @@ def _analisar_assinante(mensagem: str, catalogo: list[dict]) -> dict:
 
 def _analisar_produtor(mensagem: str, cestas: list[dict]) -> dict:
     texto = _normalizar(mensagem)
-    palavras_validas = ("cesta", "separar", "separacao", "inspecionar", "mostrar", "listar", "falta")
+    palavras_validas = ("cesta", "pedido", "separ", "inspecionar", "mostrar", "listar", "falta")
     if not any(palavra in texto for palavra in palavras_validas):
         return {"status": "fora_do_escopo", "proposta": None, "qa": {"status": "bloqueado", "problemas": ["A mensagem não trata de uma operação do produtor."], "duvidas": []}}
     ids = [int(valor) for valor in re.findall(r"\b\d+\b", texto)]
     cesta = next((item for item in cestas if item["id"] in ids), None)
+    confirmar_completa = (
+        re.search(r"\b(?:ja\s+)?separei\s+(?:(?:o|a)\s+)?(?:pedido|cesta)\b", texto)
+        or "pedido separado" in texto
+        or "cesta separada" in texto
+        or "separacao concluida" in texto
+        or "terminei de separar" in texto
+    )
+    if confirmar_completa:
+        proposta = {
+            "tipo": "separacao", "cesta_id": cesta["id"] if cesta else None,
+            "concluir_separacao": True,
+            "produtos": [
+                {"produto_id": item["id"], "quantidade": item["quantidade"]}
+                for item in (cesta["produtos"] if cesta else [])
+            ],
+        }
+        qa = {"status": "aprovado", "problemas": [], "duvidas": []}
+        if cesta is None:
+            qa = {"status": "esclarecimento", "problemas": [], "duvidas": ["Qual é o número do pedido que você já separou?"]}
+        elif cesta["situacao"] not in {"Pendente", "Em separação"} or cesta.get("separacao_concluida_em"):
+            qa = {"status": "bloqueado", "problemas": ["Esta cesta não está aberta para concluir a separação."], "duvidas": []}
+        mensagem_resultado = "Confira todos os produtos e quantidades; só vou concluir depois da sua confirmação."
+        return {"status": "proposta" if qa["status"] == "aprovado" else "esclarecimento", "proposta": proposta, "qa": qa, "mensagem": mensagem_resultado}
+
     proposta = {"tipo": "consulta_cestas", "cesta_id": cesta["id"] if cesta else None, "operacao": "consultar"}
     if "separ" in texto:
         proposta["operacao"] = "preparar_separacao"
@@ -96,4 +120,4 @@ def analisar(mensagem, perfil, catalogo, cestas):
     else:
         resultado = _analisar_produtor(mensagem, cestas)
         mensagem_resultado = "Confira a operação antes de confirmar." if resultado["status"] == "proposta" else "Preciso esclarecer ou bloquear esta operação antes de continuar."
-    return {"modo": "simulado", "agente": perfil, **resultado, "mensagem": mensagem_resultado}
+    return {"modo": "simulado", "agente": perfil, **resultado, "mensagem": resultado.get("mensagem", mensagem_resultado)}

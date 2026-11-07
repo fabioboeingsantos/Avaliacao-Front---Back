@@ -22,7 +22,7 @@ class EntradaAssistente(BaseModel):
 class ResultadoAssistente(BaseModel):
     modo: Literal["simulado", "openrouter"]
     agente: Literal["assinante", "produtor"]
-    status: Literal["proposta", "esclarecimento", "fora_do_escopo"]
+    status: Literal["proposta", "esclarecimento", "fora_do_escopo", "resposta"]
     proposta: dict | None = None
     qa: ResultadoQA
     mensagem: str

@@ -142,5 +142,12 @@ Referências internas usadas para direção visual: `frontend/public/marca/logo-
 o detalhamento fotográfico de folhas e a luz quente, com um núcleo em verde e dourado.
 Os halos devem ser renderizados por código para reagirem à interação.
 
-Status desta entrega: pesquisa e arte prontas; integração dinâmica, voz e memória
-descritas aqui ainda não foram implementadas. Nenhum teste foi executado.
+Status: fala para texto no modal da Flora foi implementada com a API de reconhecimento
+de voz do navegador, mediante clique explícito. O navegador controla a permissão e
+seu serviço pode processar o áudio externamente. O frontend envia somente o texto
+revisado ao backend; o Cesta do Vale não grava nem envia arquivos de áudio. A
+disponibilidade varia conforme navegador e dispositivo. Respostas faladas agora usam
+SpeechSynthesis, com opção explícita e controles de reprodução/parada. O indicador
+visual acompanha os estados de escuta, processamento e reprodução; não representa um
+espectro de áudio real. Conversa contínua e memória ainda não foram implementadas.
+Nenhum teste foi executado para essas alterações, conforme orientação do usuário.

@@ -10,14 +10,16 @@ def carregar_catalogo(sessao):
     ]
 
 
-def carregar_cestas(sessao, perfil, usuario_id):
+def carregar_cestas(sessao, perfil, usuario_id, limite=20):
     if perfil not in {"assinante", "produtor"}:
         raise ValueError("Perfil sem acesso ao assistente.")
     if perfil == "assinante" and usuario_id is None:
         raise ValueError("A consulta exige a conta autenticada.")
     historico = repositorio_de_cestas.listar_cestas(
         sessao, usuario_id=usuario_id if perfil == "assinante" else None,
-    )[-20:]
+    )
+    if limite is not None:
+        historico = historico[-limite:]
     return [
         {campo: cesta[campo] for campo in (
             "id", "tamanho", "modo", "situacao", "separacao_concluida_em", "separacoes",
