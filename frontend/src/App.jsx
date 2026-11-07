@@ -8,7 +8,7 @@ import TelaDetalhesCesta from './componentes/TelaDetalhesCesta'
 import TelaSeparacao from './componentes/TelaSeparacao'
 import TelaFechamento from './componentes/TelaFechamento'
 import SinoNotificacoes from './componentes/SinoNotificacoes'
-import Assistente from './componentes/Assistente'
+import Assistente from './funcionalidades/assistente/Assistente'
 import { chamarApi } from './api.js'
 import { formatarIdSolicitacao } from './utilitarios/identificadorPedido'
 import './App.css'
@@ -1003,7 +1003,7 @@ function App() {
             aoSelecionarNotificacao={abrirDestinoDaNotificacao}
           />
           {controleTema}
-          <button type="button" className="botao-sair-sessao" onClick={() => setAssistenteAberto(true)}>Assistente de cestas</button>
+          <button type="button" className="botao-sair-sessao" onClick={() => setAssistenteAberto(true)}>Falar com a Flora</button>
           {erroLogout && (
             <p className="erro-sair-sessao" role="alert">
               {erroLogout}

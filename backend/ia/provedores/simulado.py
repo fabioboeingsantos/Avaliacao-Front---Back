@@ -1,17 +1,9 @@
-"""Orquestração local dos agentes do assistente para demonstração.
-
-Este módulo simula intérprete, agente especializado e QA sem fazer chamadas
-externas. O contrato foi separado para a futura integração com um provedor.
-"""
+"""Interpretação local para demonstração, sem chamadas externas."""
 
 import re
 import unicodedata
-import os
 
-from repositorios import cesta as repositorio_de_cestas
-
-
-LIMITES = {"pequena": 5, "media": 8, "grande": 12}
+from servicos.cesta import LIMITES_POR_TAMANHO as LIMITES
 
 
 def _normalizar(texto: str) -> str:
@@ -97,36 +89,11 @@ def _analisar_produtor(mensagem: str, cestas: list[dict]) -> dict:
     return {"status": "proposta" if qa["status"] == "aprovado" else "esclarecimento", "proposta": proposta, "qa": qa}
 
 
-def analisar(mensagem: str, perfil: str, sessao, usuario_id: int | None = None) -> dict:
-    catalogo = [
-        {"id": item["id"], "nome": item["nome"], "estoque": item["estoque"]}
-        for item in repositorio_de_cestas.listar_produtos_disponiveis(sessao)
-    ]
-    modo = os.getenv("ASSISTENTE_MODO", "simulado").strip().lower()
-    if modo in {"kimi", "openrouter"}:
-        from servicos.agentes import analisar_agentes
-        if modo == "openrouter":
-            from servicos.provedor_openrouter import chamar_agente
-        else:
-            from servicos.provedor_kimi import chamar_agente
-        # A conta vem da sessão autenticada, nunca da mensagem ou do modelo.
-        if perfil == "assinante" and usuario_id is None:
-            raise ValueError("A consulta exige a conta autenticada.")
-        historico = repositorio_de_cestas.listar_cestas(
-            sessao, usuario_id=usuario_id if perfil == "assinante" else None,
-        )[-20:]
-        cestas = [{campo: cesta[campo] for campo in (
-            "id", "tamanho", "modo", "situacao", "separacao_concluida_em", "separacoes",
-        )} | {"produtos": [{"id": p["id"], "quantidade": p["quantidade"]} for p in cesta["produtos"]]}
-                  for cesta in historico]
-        return analisar_agentes(mensagem, perfil, catalogo, cestas, chamar_agente=chamar_agente, modo=modo)
-    if modo != "simulado":
-        from servicos.provedor_ia import AssistenteIndisponivel
-        raise AssistenteIndisponivel("ASSISTENTE_MODO deve ser simulado, kimi ou openrouter.")
+def analisar(mensagem, perfil, catalogo, cestas):
     if perfil == "assinante":
         resultado = _analisar_assinante(mensagem, catalogo)
         mensagem_resultado = "Revise a sugestão antes de confirmar." if resultado["status"] == "proposta" else "Preciso esclarecer um ponto antes de continuar."
     else:
-        resultado = _analisar_produtor(mensagem, repositorio_de_cestas.listar_cestas(sessao))
+        resultado = _analisar_produtor(mensagem, cestas)
         mensagem_resultado = "Confira a operação antes de confirmar." if resultado["status"] == "proposta" else "Preciso esclarecer ou bloquear esta operação antes de continuar."
     return {"modo": "simulado", "agente": perfil, **resultado, "mensagem": mensagem_resultado}

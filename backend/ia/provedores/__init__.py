@@ -1,0 +1,1 @@
+"""Componentes internos do assistente."""

@@ -1,4 +1,9 @@
-# Funcionalidade de IA — Assistente de pedido da Aline
+# Funcionalidade de IA — registro histórico
+
+> Este documento preserva o planejamento original. A implementação atual está em
+> [Arquitetura do assistente](ia/arquitetura.md), com OpenRouter, três etapas por
+> análise e confirmação pelas rotas existentes. As descrições de funcionalidade
+> ainda não implementada e de provedor abaixo referem-se ao planejamento antigo.
 
 > Registro da ideia definida para a próxima etapa do projeto. Esta funcionalidade está planejada e ainda não foi implementada.
 

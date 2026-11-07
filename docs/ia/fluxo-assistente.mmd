@@ -1,0 +1,12 @@
+flowchart TD
+    %% Flora do Vale — fluxo de evolução da assistente de IA
+    A[Mensagem] --> B[Interpretar]
+    B --> C[Especialista do perfil]
+    C --> D[Validação local]
+    D --> E{Faltam informações?}
+    E -->|Sim| F[Perguntar e salvar estado]
+    F --> G[Nova resposta do usuário]
+    G --> C
+    E -->|Não| H[Revisão QA]
+    H --> I[Prévia para confirmação]
+    I --> J[Backend revalida e executa]

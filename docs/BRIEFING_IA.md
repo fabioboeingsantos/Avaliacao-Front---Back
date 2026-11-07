@@ -1,9 +1,12 @@
 # Briefing para revisão — Cesta do Vale
 
+> Organização atual do código e imagem do fluxo: [Arquitetura de IA](ia/arquitetura.md).
+> Nome público da assistente: **Flora do Vale**, acessada por **Falar com a Flora**.
+
 > Rascunho para verificação. Este documento não substitui nem altera o briefing original.
 
 > Atualização da implementação: o backend agora oferece modo simulado e integração
-> configurável com OpenRouter (plataforma escolhida) ou Kimi, substituindo a escolha
+> configurável com OpenRouter (plataforma escolhida), substituindo a escolha
 > anterior de OpenAI para esta etapa. A OpenRouter usa modelos gratuitos por padrão.
 > Intérprete, especialista do perfil e QA são chamadas separadas. Há botão autenticado,
 > prévia e confirmação para criar pedidos e registrar lotes de separação pelas rotas

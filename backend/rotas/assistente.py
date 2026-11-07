@@ -1,4 +1,4 @@
-"""Endpoint do assistente em modo simulado."""
+"""Endpoint autenticado do assistente de cestas."""
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -7,8 +7,8 @@ from banco import obter_sessao
 from esquemas.assistente import EntradaAssistente, ResultadoAssistente
 from modelos.usuario import Usuario
 from rotas.autenticacao import exigir_permissao
-from servicos.assistente import analisar
-from servicos.provedor_ia import AssistenteIndisponivel
+from ia.servico import analisar
+from ia.provedores.contrato import AssistenteIndisponivel
 
 
 router = APIRouter(prefix="/assistente", tags=["Assistente"])

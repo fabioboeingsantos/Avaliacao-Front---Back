@@ -44,7 +44,9 @@ O processo de montagem das cestas precisa ser organizado, rastreável e simples 
 
 ### Ideia futura
 
-O assistente de pedido com IA está documentado em [`ia.md`](ia.md), mas ainda não foi implementado. A confirmação final permanece sob responsabilidade da pessoa usuária.
+O assistente de IA possui modo simulado e integração OpenRouter, documentados em
+[arquitetura de IA](ia/arquitetura.md). A confirmação final permanece sob responsabilidade
+da pessoa usuária. Memória entre mensagens e voz continuam pendentes.
 
 ## 6. Regras principais
 

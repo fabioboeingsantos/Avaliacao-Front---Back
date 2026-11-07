@@ -5,11 +5,20 @@ import json
 import httpx
 import pytest
 
-from esquemas.assistente import InterpretacaoAgente
-from servicos import provedor_openrouter
-from servicos.provedor_ia import AssistenteIndisponivel
-from .conftest import fazer_login
-from .test_assistente import respostas_padrao
+from ia.contratos import InterpretacaoAgente
+from ia.provedores import openrouter as provedor_openrouter
+from ia.provedores.contrato import AssistenteIndisponivel
+from ..conftest import fazer_login
+
+
+def respostas_padrao(qa=None, proposta=None):
+    return [
+        {"intencao": "Montar cesta", "fora_do_escopo": False},
+        {"mensagem": "Confira sua cesta.", "pergunta": None, "proposta": proposta or {
+            "tipo": "pedido_cesta", "tamanho": "media", "produtos": [{"produto_id": "tomate", "quantidade": 2}],
+        }},
+        qa or {"status": "aprovado", "problemas": [], "duvidas": []},
+    ]
 
 
 def preparar(monkeypatch, respostas):
@@ -123,7 +132,7 @@ def test_json_incompativel_bloqueia(cliente, monkeypatch):
 
 
 def test_schema_estrito_preserva_nulos_e_requer_objetos_aninhados():
-    from esquemas.assistente import RespostaEspecialista
+    from ia.contratos import RespostaEspecialista
     schema = provedor_openrouter._schema_estrito(RespostaEspecialista.model_json_schema())
     assert set(schema["required"]) == {"proposta", "pergunta", "mensagem"}
     assert {"type": "null"} in schema["properties"]["pergunta"]["anyOf"]

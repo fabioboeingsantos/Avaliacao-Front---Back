@@ -1,4 +1,7 @@
-# Assistente com OpenRouter
+# Flora do Vale com OpenRouter
+
+Arquitetura atual: [módulo de IA e fluxograma](ia/arquitetura.md).
+Código em `backend/ia/`; testes em `backend/tests/ia/`.
 
 Este é o guia da plataforma escolhida para a próxima etapa do projeto.
 A integração está implementada e foi validada com a chave local e dados fictícios
@@ -19,7 +22,7 @@ A configuração local está ativa (`ASSISTENTE_MODO=openrouter`) e fixa o model
    OPENROUTER_MAX_TOKENS=2048
    ```
 
-3. Reinicie a API. Entre no sistema e abra **Assistente de cestas**.
+3. Reinicie a API. Entre no sistema e clique em **Falar com a Flora**.
 4. Teste com uma solicitação fictícia, por exemplo: `Quero uma cesta pequena com
    2 tomates e 1 cenoura, sem cebola`. Confira a proposta antes de confirmar.
 

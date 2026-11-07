@@ -33,9 +33,9 @@ def main():
     # Os serviços importam a infraestrutura SQLAlchemy; isolar antes de importar.
     os.environ["SUPABASE_DB_URL"] = "sqlite://"
     os.environ["SUPABASE_DB_PASSWORD"] = ""
-    from servicos.agentes import analisar_agentes
-    from servicos.provedor_openrouter import chamar_agente
-    from servicos.provedor_ia import AssistenteIndisponivel
+    from ia.fluxo import analisar_agentes
+    from ia.provedores.openrouter import chamar_agente
+    from ia.provedores.contrato import AssistenteIndisponivel
 
     catalogo = [{"id": nome, "nome": nome.title(), "estoque": 30} for nome in
                 ("tomate", "cenoura", "cebola", "alface", "batata", "couve")]

@@ -6,6 +6,13 @@ o pedido; o produtor gerencia o estoque, separa os produtos e conclui a entrega.
 O projeto usa React 19 + Vite 8 no frontend e FastAPI + SQLAlchemy + Alembic no backend. O banco pode
 ser SQLite para desenvolvimento, MySQL no Docker Compose ou PostgreSQL/Supabase em produção.
 
+## Flora do Vale — assistente de IA
+
+Acesse pelo botão **Falar com a Flora**. O módulo está em `backend/ia/` e a interface em
+`frontend/src/funcionalidades/assistente/`. Consulte a
+[arquitetura e o fluxograma](docs/ia/arquitetura.md), a
+[configuração](docs/ia/configuracao.md) e os [cenários de teste](docs/ia/cenarios.md).
+
 ## Como rodar com Docker Compose
 
 Na raiz do projeto, crie o arquivo local de ambiente a partir do exemplo e preencha as senhas:

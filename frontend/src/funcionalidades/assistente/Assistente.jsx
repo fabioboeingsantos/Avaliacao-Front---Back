@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { chamarApi } from '../api'
+import { analisarPedido } from './api'
 import './Assistente.css'
 
 export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, produtos }) {
@@ -24,10 +24,7 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
     setResultado(null)
     requisicao.current = new AbortController()
     try {
-      const dados = await chamarApi('/assistente/analisar', {
-        method: 'POST', signal: requisicao.current.signal,
-        body: JSON.stringify({ mensagem }),
-      })
+      const dados = await analisarPedido(mensagem, requisicao.current.signal)
       setResultado(dados)
     } catch (falha) {
       if (falha.name !== 'AbortError') setErro(falha.message)
@@ -58,10 +55,11 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
   return (
     <dialog ref={dialogo} className="assistente-dialogo" onCancel={aoFechar} aria-labelledby="titulo-assistente">
       <header>
-        <div><p className="assistente-rotulo">Cesta do Vale</p><h2 id="titulo-assistente">Como posso ajudar?</h2></div>
-        <button type="button" onClick={aoFechar} aria-label="Fechar assistente">×</button>
+        <div><p className="assistente-rotulo">Cesta do Vale</p><h2 id="titulo-assistente">Flora do Vale</h2></div>
+        <button type="button" onClick={aoFechar} aria-label="Fechar conversa com a Flora">×</button>
       </header>
       {concluido ? <div role="status"><p>{consulta ? 'Consulta aberta.' : 'Operação confirmada com sucesso.'}</p><button onClick={aoFechar}>Continuar</button></div> : <>
+        <p>Olá! Sou a Flora, a assistente virtual do Cesta do Vale. Como posso ajudar?</p>
         <p>{perfil === 'produtor' ? 'Consulte uma cesta ou diga o que deseja separar.' : 'Conte como deseja sua cesta ou consulte um pedido anterior.'}</p>
         <form onSubmit={analisar}>
           <label htmlFor="mensagem-assistente">Seu pedido</label>
@@ -73,7 +71,7 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
         {ocupado && <p role="status">Processando a solicitação e as verificações.</p>}
         {erro && <p role="alert">{erro}</p>}
         {resultado && <section className="assistente-previa" aria-live="polite">
-          <small>{({ simulado: 'Demonstração simulada', kimi: 'Assistente Kimi', openrouter: 'Assistente OpenRouter' })[resultado.modo]} · QA {resultado.qa.status}</small>
+          <small>{({ simulado: 'Flora · Demonstração simulada', openrouter: 'Flora do Vale' })[resultado.modo]} · QA {resultado.qa.status}</small>
           <p>{resultado.mensagem}</p>
           {aprovado && proposta && <>
             {proposta.tamanho && <p>Cesta {proposta.tamanho === 'media' ? 'média' : proposta.tamanho} · {proposta.modo === 'pronta' ? 'pronta' : 'selecionável'}</p>}

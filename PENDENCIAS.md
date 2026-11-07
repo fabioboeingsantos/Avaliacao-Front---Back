@@ -8,7 +8,6 @@ Plataforma escolhida: **OpenRouter**. A integração com os agentes e o QA já e
 implementada. A chave foi validada e o modo OpenRouter ativado localmente. Os testes
 fictícios de pedido do assinante e separação do produtor passaram com QA aprovado,
 usando `nvidia/nemotron-3.5-super-vl:free`, JSON estrito e permissões explícitas.
-O Kimi continua como alternativa, mas a conta consultada estava com saldo zero.
 
 - [ ] Corrigir as falhas observadas no especialista e no QA da IA: tamanho ausente e cesta pequena
   com seis produtos foram aprovados pelo modelo e barrados somente pelo backend.
@@ -24,8 +23,8 @@ O Kimi continua como alternativa, mas a conta consultada estava com saldo zero.
 - [ ] Validar visualmente no navegador os dois perfis e testar o fluxo completo, da solicitação
   à confirmação e gravação, além da alternativa manual.
 
-Referências da implementação atual: [guia OpenRouter](docs/ASSISTENTE_OPENROUTER.md),
-[guia Kimi](docs/ASSISTENTE_KIMI.md) e
+Referências da implementação atual: [arquitetura e fluxograma](docs/ia/arquitetura.md),
+[guia OpenRouter](docs/ASSISTENTE_OPENROUTER.md) e
 [briefing de IA](docs/BRIEFING_IA.md).
 
 ## Validar no site

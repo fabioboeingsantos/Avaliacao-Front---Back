@@ -5,7 +5,7 @@ import os
 
 import httpx
 
-from servicos.provedor_ia import AssistenteIndisponivel
+from ia.provedores.contrato import AssistenteIndisponivel
 
 
 def _schema_estrito(schema):
