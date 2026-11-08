@@ -5,7 +5,7 @@ from repositorios import cesta as repositorio_de_cestas
 
 def carregar_catalogo(sessao):
     return [
-        {"id": item["id"], "nome": item["nome"], "estoque": item["estoque"]}
+        {"id": item["id"], "nome": item["nome"], "estoque": item["estoque"], "categoria": item["categoria"]}
         for item in repositorio_de_cestas.listar_produtos_disponiveis(sessao)
     ]
 

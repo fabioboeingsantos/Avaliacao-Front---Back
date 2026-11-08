@@ -45,6 +45,10 @@ def criar_tabelas() -> None:
     # Mantém bancos locais antigos compatíveis com as colunas adicionadas ao catálogo.
     colunas_produtos = {coluna["name"] for coluna in inspect(engine).get_columns("produtos")}
     preco_adicionado_agora = "preco_centavos" not in colunas_produtos
+    if "categoria" not in colunas_produtos:
+        with engine.begin() as conexao:
+            conexao.execute(text("ALTER TABLE produtos ADD COLUMN categoria VARCHAR(20) NOT NULL DEFAULT 'legumes'"))
+            conexao.execute(text("UPDATE produtos SET categoria = 'verduras' WHERE id IN ('alface', 'couve')"))
     if "estoque" not in colunas_produtos or "preco_centavos" not in colunas_produtos:
         # create_all não altera tabelas existentes; atualiza o banco local sem apagar dados.
         with engine.begin() as conexao:
@@ -88,7 +92,8 @@ def criar_tabelas() -> None:
     try:
         for produto_id, nome, preco_centavos in PRODUTOS_INICIAIS:
             if sessao.get(Produto, produto_id) is None:
-                sessao.add(Produto(id=produto_id, nome=nome, preco_centavos=preco_centavos))
+                sessao.add(Produto(id=produto_id, nome=nome, preco_centavos=preco_centavos,
+                                   categoria="verduras" if produto_id in {"alface", "couve"} else "legumes"))
             elif preco_adicionado_agora:
                 # Atualiza bancos antigos com os preços definidos para o catálogo.
                 sessao.get(Produto, produto_id).preco_centavos = preco_centavos

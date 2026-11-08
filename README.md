@@ -1,17 +1,24 @@
 # Cesta do Vale
 
-Sistema web para pedidos semanais de cestas de uma horta comunitária. A assinante monta e acompanha
-o pedido; o produtor gerencia o estoque, separa os produtos e conclui a entrega.
+Sistema web para pedidos semanais de cestas de uma horta comunitária. A assinante consulta o catálogo,
+monta e acompanha o pedido; o produtor gerencia produtos e estoque, separa os itens e conclui a entrega.
 
 O projeto usa React 19 + Vite 8 no frontend e FastAPI + SQLAlchemy + Alembic no backend. O banco pode
 ser SQLite para desenvolvimento, MySQL no Docker Compose ou PostgreSQL/Supabase em produção.
 
-## Flora do Vale — assistente de IA
+## Catálogo e Flora do Vale
 
-Acesse pelo botão **Falar com a Flora**. O módulo está em `backend/ia/` e a interface em
-`frontend/src/funcionalidades/assistente/`. Consulte a
-[arquitetura e o fluxograma](docs/ia/arquitetura.md), a
-[configuração](docs/ia/configuracao.md) e os [cenários de teste](docs/ia/cenarios.md).
+No painel da assinante, **Catálogo** exibe produtos disponíveis por categoria, busca e preço. O
+produtor pode adicionar produtos e atualizar categoria, estoque e preço. Produtos sem foto cadastrada
+recebem uma imagem ilustrativa identificada na tela.
+
+A **Flora** pode consultar o catálogo, recomendar ou preparar uma cesta para revisão e confirmação,
+e ajudar o produtor a consultar pedidos e separações. A conversa fica em memória enquanto a janela
+permanece aberta. Ela aceita digitação e, quando disponível no navegador, fala para texto e reprodução
+falada das respostas. O modo padrão `simulado` não chama um serviço externo; para usar OpenRouter, configure
+o backend conforme [configuração da IA](docs/ia/configuracao.md). Uma análise encaminhada ao OpenRouter
+usa três chamadas sequenciais e aceita somente modelos gratuitos compatíveis. Consulte [arquitetura e fluxo](docs/ia/arquitetura.md),
+[comportamento do catálogo](docs/ia/CONVERSA_E_CATALOGO.md) e [cenários de teste](docs/ia/cenarios.md).
 
 ## Como rodar com Docker Compose
 
@@ -100,6 +107,7 @@ python -m alembic stamp head
 O primeiro comando cria as tabelas e inclui os dois perfis de demonstração (`aline` e
 `vanderlei`) e os 12 produtos iniciais. O segundo registra a revisão atual somente depois
 que o esquema foi criado. Em um banco que já usa migrações, prefira `python -m alembic upgrade head`.
+O head do código atual é `20261107_0015`; essa revisão adiciona categorias ao catálogo.
 
 Com a API ligada, o frontend envia os pedidos concluídos e as separações para o banco configurado.
 O fluxo de demonstração é:
@@ -111,8 +119,10 @@ O fluxo de demonstração é:
 5. Abra a cesta em `A separação`, ajuste quantidades em `O fechamento` e salve o progresso ou encerre
    com faltantes. Depois, confirme o envio na lista de pedidos e confira o aviso como assinante.
 
-O estoque é reservado ao criar o pedido e devolvido quando uma cesta pendente é cancelada. As
-notificações de pedidos ficam persistidas no banco e aparecem no sino da aplicação. E-mail é usado
+O catálogo inicial contém 12 produtos. O produtor pode incluir outros, definir uma das categorias
+frutas, verduras ou legumes e ajustar estoque e preço. O estoque é reservado ao criar o pedido e
+devolvido quando uma cesta pendente é cancelada. As notificações de pedidos ficam persistidas no banco
+e aparecem no sino da aplicação. E-mail é usado
 para confirmação de conta e recuperação de senha; confirmação de e-mail é opcional para entrar. Não há
 envio de atualizações de pedidos por e-mail, SMS ou mensageria.
 
@@ -122,7 +132,7 @@ Os preços são calculados por unidade e não usam peso ou quilograma. O total d
 pela soma de `preço unitário × quantidade`; por isso, aumentar ou diminuir a quantidade atualiza o valor
 antes da conclusão.
 
-| Produto | Valor por unidade |
+| Produto inicial | Preço inicial por unidade |
 |---|---:|
 | Alface | R$ 1,50 |
 | Tomate | R$ 2,50 |
@@ -143,19 +153,24 @@ do pedido. O histórico preserva o preço unitário praticado no momento da cria
 Rotas disponíveis:
 
 - `GET /saude`: verifica se a API está online.
+- `GET /health`: verificação de disponibilidade usada pela hospedagem.
 - `POST /usuarios`: cadastra uma conta de assinante com e-mail e senha protegida.
-- `POST /autenticacao/login`: valida e-mail ou usuário e cria a sessão JWT em cookie `HttpOnly`, válida por pelo menos 24 horas.
+- `GET /usuarios/me` e `GET /usuarios/eu`: consultam os dados da conta autenticada.
+- `POST /autenticacao/login`: valida e-mail ou usuário e cria a sessão JWT em cookie `HttpOnly` (24 horas por padrão, configurável).
 - `POST /autenticacao/logout`: remove o cookie da sessão atual.
 - `POST /autenticacao/reenviar-confirmacao`: reenvia o link de confirmação do e-mail.
 - `POST /autenticacao/verificar-email`: confirma o e-mail por token de uso único.
 - `POST /autenticacao/solicitar-recuperacao`: solicita um link de recuperação por e-mail.
 - `POST /autenticacao/redefinir-senha`: altera a senha com token e revoga as sessões antigas.
+- `GET /produtos`: lista catálogo, categoria, estoque e preço unitário.
+- `POST /produtos`: adiciona um produto ao catálogo (produtor).
+- `PUT /produtos/{produto_id}/categoria`: atualiza a categoria (produtor).
+- `PUT /produtos/{produto_id}/estoque`: atualiza o estoque (produtor).
+- `PUT /produtos/{produto_id}/preco`: atualiza o preço unitário (produtor).
+- `POST /assistente/analisar`: analisa uma mensagem da Flora para o perfil autenticado.
 - `GET /notificacoes`: lista os avisos persistentes da conta autenticada.
 - `POST /notificacoes/lidas`: marca os avisos da conta como lidos.
 
-- `GET /produtos`: lista o catálogo e o estoque disponível para o usuário autenticado.
-- `PUT /produtos/{produto_id}/estoque`: permite ao produtor atualizar o estoque de um produto.
-- `PUT /produtos/{produto_id}/preco`: permite ao produtor atualizar o preço unitário de um produto.
 - `GET /cestas?assinante=aline&tamanho=pequena`: lista e filtra cestas.
 - `GET /cestas/{id}`: mostra uma cesta.
 - `POST /cestas`: cria uma cesta pendente.
@@ -164,19 +179,22 @@ Rotas disponíveis:
 - `GET /cestas/{id}/separacoes`: lista os produtos separados.
 - `POST /cestas/{id}/separacoes`: registra uma separação e aplica o limite.
 - `POST /cestas/{id}/separacoes/lote`: registra o lote de produtos atomicamente.
-- `POST /cestas/{id}/separacoes/concluir`: conclui a separação após validar todos os itens e inicia o prazo de sete dias para confirmação do recebimento.
+- `PUT /cestas/{id}/separacoes`: salva o progresso; conclui automaticamente quando todos os itens estão separados.
+- `POST /cestas/{id}/separacoes/concluir`: conclui a separação após validar todos os itens.
+- `POST /cestas/{id}/separacoes/reabrir`: reabre uma separação concluída para correção.
 - `POST /cestas/{id}/separacoes/encerrar-com-faltantes`: encerra com as quantidades disponíveis, devolve ao estoque o que faltou e ajusta o valor cobrado pelos preços unitários já congelados no pedido.
 - `POST /cestas/{id}/separacoes/desfazer`: desfaz atomicamente o último lote de separações.
 - `POST /cestas/{id}/entrega/confirmar`: permite à assinante confirmar o recebimento da cesta.
+- `POST /cestas/{id}/avaliacao`: registra uma avaliação de zero a cinco estrelas após a entrega.
 
 Confirmar o e-mail é opcional e não bloqueia o acesso. Com SMTP configurado, ficam disponíveis o envio
-de confirmação e a recuperação de senha. O SMTP temporário foi configurado e testado para a apresentação;
-após a apresentação, as credenciais temporárias devem ser revogadas e removidas das variáveis de ambiente.
-Veja [Autenticação por e-mail](docs/AUTENTICACAO_EMAIL.md).
+de confirmação e a recuperação de senha. Veja [Autenticação por e-mail](docs/AUTENTICACAO_EMAIL.md)
+para configurar o envio, as migrações e os testes do fluxo.
 
-As cestas usam as situações `Pendente`, `Em separação`, `Preparado para envio`, `Enviado`, `Cancelado` e `Entregue`. A assinante pode cancelar o pedido enquanto ele estiver pendente; depois que o produtor inicia a separação, o cancelamento não fica disponível. Quando todos os itens são separados, o status muda para `Preparado para envio`. Se faltar produto, o produtor pode encerrar com as quantidades reais; o total cai apenas pelo preço das unidades faltantes, e a tela do cliente destaca as faltas. O cliente aceita as quantidades e o valor ajustado ao confirmar o recebimento depois do envio. Preços unitários já gravados nos pedidos antigos são preservados. Para pedidos antigos sem snapshot de preço, a migração `20261104_0014` preenche somente campos nulos usando o mesmo preço de catálogo que era usado como fallback pela aplicação. O produtor pode marcar o pedido como `Enviado`, gerando uma notificação persistente para a assinante. A cesta passa a `Entregue` quando a assinante confirma o recebimento ou, sem confirmação, sete dias após o envio. A expiração é aplicada quando a cesta é consultada pela API. As revisões Alembic `20261104_0013` e `20261104_0014` estão em `backend/migracoes/versions/`; para bancos ainda não atualizados, execute `python -m alembic upgrade head` no diretório `backend`. O Supabase deste projeto já está na revisão `20261104_0014`, conferida por consulta ao banco. Os scripts SQL avulsos foram removidos a pedido.
+As cestas usam as situações `Pendente`, `Em separação`, `Preparado para envio`, `Enviado`, `Cancelado` e `Entregue`. A assinante pode cancelar o pedido enquanto ele estiver pendente; depois que o produtor inicia a separação, o cancelamento não fica disponível. Quando todos os itens são separados, o status muda para `Preparado para envio`. Se faltar produto, o produtor pode encerrar com as quantidades reais; o total cai pelo preço das unidades faltantes, e a tela do cliente destaca as faltas. O preço unitário fica gravado no pedido. O produtor pode marcar o pedido como `Enviado`, gerando uma notificação persistente para a assinante. A cesta passa a `Entregue` quando a assinante confirma o recebimento ou, sem confirmação, sete dias após o envio. A expiração é aplicada quando a cesta é consultada pela API. As revisões Alembic `20261104_0012` a `20261107_0015` estão em `backend/migracoes/versions/`; para bancos ainda não atualizados, confira a revisão aplicada e execute `python -m alembic upgrade head` no diretório `backend`. O head do código atual é `20261107_0015`; isso não confirma por si só a revisão instalada em um banco remoto.
 
-A sessão de login é mantida em cookie JWT `HttpOnly` por pelo menos 24 horas. Ao reabrir ou atualizar
+A sessão de login é mantida em cookie JWT `HttpOnly` por 24 horas por padrão; a validade pode ser
+configurada pelo ambiente. Ao reabrir ou atualizar
 a aplicação nesse período, o frontend valida o cookie em `/usuarios/me` e restaura o perfil. Navegar
 entre as telas não encerra a sessão.
 
@@ -194,9 +212,11 @@ python -m alembic upgrade head
 As migrações atualizam as contas, os estados das cestas e o estoque dos produtos, preservando os
 hashes Argon2 e registrando a data de conclusão da separação.
 
-O estado esperado do banco deste projeto após aplicar as migrações é `20261104_0014 (head)`, com as tabelas
-`usuarios`, `produtos`, `cestas`, `itens_cesta`, `separacoes` e `alembic_version`. As cestas
-são criadas durante o fluxo de demonstração; o carregamento inicial não cria pedidos.
+O head esperado após aplicar as migrações do código atual é `20261107_0015`. Além de `usuarios`,
+`produtos`, `cestas`, `itens_cesta`, `separacoes` e `alembic_version`, o esquema inclui `tokens_conta`
+e `notificacoes`, campos de avaliação nas cestas e a categoria dos produtos. Confira a revisão efetiva
+com `python -m alembic current` dentro de `backend`. As cestas são criadas durante a demonstração;
+o carregamento inicial não cria pedidos.
 
 ### Segurança do Supabase
 
@@ -260,7 +280,10 @@ A publicação usa dois projetos Vercel no mesmo repositório:
 | Tela | `frontend` | Build Vite publicado como site estático |
 
 Na API, configure `SUPABASE_DB_URL`, `SUPABASE_DB_PASSWORD`, `JWT_SECRET_KEY`,
-`JWT_COOKIE_SECURE=true` e `FRONTEND_URL` com o domínio final da tela. O Vercel detecta o
+`JWT_COOKIE_SECURE=true` e `FRONTEND_URL` com o domínio final da tela. Para ativar e-mail,
+configure também `EMAIL_FRONTEND_URL` e as variáveis SMTP descritas em
+[Autenticação por e-mail](docs/AUTENTICACAO_EMAIL.md). Para usar OpenRouter, configure as variáveis
+descritas em [configuração da IA](docs/ia/configuracao.md). O Vercel detecta o
 `app` FastAPI em `backend/main.py` e instala as dependências de `backend/requirements.txt`.
 
 Na tela, configure `VITE_URL_DA_API=/api`. O arquivo `frontend/vercel.json` encaminha `/api/*`

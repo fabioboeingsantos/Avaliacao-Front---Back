@@ -9,9 +9,34 @@ from ia.contexto import carregar_catalogo, carregar_cestas
 
 SITUACOES = ("Pendente", "Em separação", "Preparado para envio", "Enviado", "Aguardando recebimento", "Entregue", "Cancelado")
 
-
 def normalizar(texto):
     return "".join(c for c in unicodedata.normalize("NFD", texto.lower()) if unicodedata.category(c) != "Mn")
+
+
+def categorias_mencionadas(texto):
+    categorias = set()
+    for singular, plural in (("fruta", "frutas"), ("verdura", "verduras"), ("legume", "legumes")):
+        if re.search(rf"\b{singular}s?\b", texto):
+            categorias.add(plural)
+    if re.search(r"\bhortalicas?\b", texto):
+        categorias.update({"verduras", "legumes"})
+    return categorias
+
+
+def eh_consulta_catalogo(texto, perfil):
+    """Distingue uma consulta de uma instrução para montar ou editar a cesta."""
+    if re.search(r"\b(quero|monte|montar|crie|criar|recomend\w*|sug\w*|adicione|inclua|retire|tire|remova|troque|alter\w*|atualiz\w*)\b", texto):
+        return False
+    if "catalogo" in texto or re.fullmatch(r"(?:flora[, ]+)?(?:ver|mostre|mostrar|liste)\s+tudo[?.!]*", texto.strip()):
+        return True
+    consulta = re.search(r"\b(quais|que|tem|temos|voces|disponiveis?|disponibilidade|listar|liste|mostre|mostrar|ver)\b", texto)
+    if categorias_mencionadas(texto) and (consulta or len(texto.split()) <= 3):
+        return True
+    if re.search(r"\bo que (?:voces )?(?:tem|temos|vendem)\b", texto):
+        return True
+    if consulta and re.search(r"\b(produtos?|itens)\b", texto) and not re.search(r"\b(baixo|esgotad\w*|pedidos?|cestas?)\b", texto):
+        return True
+    return perfil == "assinante" and "estoque" in texto
 
 
 def responder(mensagem, perfil, sessao, usuario_id, modo):
@@ -25,8 +50,26 @@ def responder(mensagem, perfil, sessao, usuario_id, modo):
                 "qa": {"status": "aprovado" if status == "resposta" else "esclarecimento", "problemas": [], "duvidas": []},
                 "mensagem": conteudo}
 
+    if re.fullmatch(r"(?:oi|ola|bom dia|boa tarde|boa noite)(?:[,! ]+flora)?[!.? ]*", texto):
+        return resposta("Olá! Posso mostrar o catálogo completo, recomendar uma cesta ou consultar seus pedidos. Como posso ajudar?")
+    if re.fullmatch(r"(?:obrigad[oa]|valeu|muito obrigad[oa])[!. ]*", texto):
+        return resposta("Por nada! Se quiser, podemos continuar montando sua cesta.")
+
     resumo_estoque = ""
     consulta_conjunta = bool(re.search(r"\b(pendenc\w*|entreg\w*|pedidos?|cestas?|situac\w*|sistema)\b", texto))
+    if eh_consulta_catalogo(texto, perfil):
+        categorias = categorias_mencionadas(texto)
+        if re.search(r"\b(todo|toda|todos|todas|tudo|completo|completa)\b", texto):
+            categorias = set()
+        disponiveis = [p for p in carregar_catalogo(sessao) if p["estoque"] > 0
+                       and (not categorias or p.get("categoria") in categorias)]
+        linhas = []
+        for categoria in ("frutas", "verduras", "legumes"):
+            if categorias and categoria not in categorias:
+                continue
+            nomes = [p["nome"] for p in disponiveis if p.get("categoria") == categoria]
+            linhas.append(f"{categoria.capitalize()}: {', '.join(nomes) if nomes else 'nenhum produto disponível no momento'}.")
+        return resposta("Catálogo disponível para sua cesta:\n" + "\n".join(linhas))
     estoque = "estoque" in texto or (
         re.search(r"\bquant[oa]s?\b", texto) and re.search(r"\b(tenho|temos|disponiveis|disponivel)\b", texto)
         and not re.search(r"\b(pedidos?|cestas?)\b", texto)
@@ -36,9 +79,9 @@ def responder(mensagem, perfil, sessao, usuario_id, modo):
     if estoque:
         if perfil != "produtor":
             return resposta("A consulta de estoque é exclusiva do perfil produtor.")
+        catalogo = carregar_catalogo(sessao)
         if re.search(r"\b(atualiz\w*|alter\w*|ajust\w*|defin\w*|aument\w*|reduz\w*|adicione|remova|retire|baixe)\b", texto):
             return resposta("Para alterar quantidades, abra Gerenciar estoque e confira os valores antes de salvar.")
-        catalogo = carregar_catalogo(sessao)
         palavras = {p.rstrip("s") for p in re.findall(r"\w+", texto)}
         encontrados = [p for p in catalogo if set(normalizar(p["nome"]).split()).issubset(palavras)
                        or normalizar(p["id"]) in palavras]

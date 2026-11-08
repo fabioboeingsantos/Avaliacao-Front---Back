@@ -38,6 +38,7 @@ PERMISSOES_POR_GRUPO = {
         "notificacoes.marcar_lidas",
         "produtos.listar",
         "produtos.atualizar_estoque",
+        "produtos.criar",
         "produtos.atualizar_preco",
         "assistente.usar",
     },

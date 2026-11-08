@@ -1,4 +1,4 @@
-# Flora do Vale com OpenRouter
+# Flora com OpenRouter
 
 Arquitetura atual: [módulo de IA e fluxograma](ia/arquitetura.md).
 Código em `backend/ia/`; testes em `backend/tests/ia/`.

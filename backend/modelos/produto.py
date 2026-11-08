@@ -13,5 +13,6 @@ class Produto(Base):
 
     id: Mapped[str] = mapped_column(String(40), primary_key=True)
     nome: Mapped[str] = mapped_column(String(120), nullable=False)
+    categoria: Mapped[str] = mapped_column(String(20), nullable=False, default="legumes", server_default="legumes")
     estoque: Mapped[int] = mapped_column(Integer, nullable=False, default=20, server_default="20")
     preco_centavos: Mapped[int] = mapped_column(Integer, nullable=False, default=500, server_default="500")

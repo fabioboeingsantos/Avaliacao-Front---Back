@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
+import { imagemProduto } from '../utilitarios/imagemProduto'
 
 function criarQuantidadesAtuais(cesta) {
   if (!cesta) {
@@ -299,7 +300,7 @@ function TelaFechamento({
               >
                 <img
                   className="imagem-produto-fechamento"
-                  src={`/produtos/${produto.id}-editorial.png`}
+                  src={produto.imagem ?? imagemProduto(produto.id)}
                   alt=""
                 />
                 <strong className="nome-produto-fechamento">{produto.nome}</strong>

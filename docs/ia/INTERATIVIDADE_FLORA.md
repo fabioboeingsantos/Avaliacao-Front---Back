@@ -1,4 +1,4 @@
-# Flora do Vale — levantamento de interação inspirada no JARVIS
+# Flora — levantamento de interação inspirada no JARVIS
 
 Data: 07/11/2026. Pesquisa e proposta de comportamento; este documento não indica
 que voz, animação reativa ou memória já estejam implementadas na aplicação.
@@ -131,7 +131,7 @@ Não é necessário mudar o provedor dos agentes apenas para animar a interface.
 
 ## Arte criada para esta direção
 
-![Núcleo botânico da Flora do Vale](../../frontend/public/marca/flora-do-vale-nucleo-v1.png)
+![Núcleo botânico da Flora](../../frontend/public/marca/flora-do-vale-nucleo-v1.png)
 
 Arte original gerada com a ferramenta integrada de imagens, em PNG com fundo
 transparente. Caminho: `frontend/public/marca/flora-do-vale-nucleo-v1.png`.

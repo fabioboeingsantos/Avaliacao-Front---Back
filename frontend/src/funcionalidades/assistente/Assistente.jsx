@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { analisarPedido } from './api'
-import useRespostaFalada from './useRespostaFalada'
+import useRespostaFalada from './useAudioFlora'
 import './Assistente.css'
 
 export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, produtos }) {
   const dialogo = useRef(null)
   const [mensagem, setMensagem] = useState('')
   const [resultado, setResultado] = useState(null)
+  const [historico, setHistorico] = useState([])
+  const fimConversa = useRef(null)
   const [ocupado, setOcupado] = useState(false)
   const [erro, setErro] = useState('')
   const [concluido, setConcluido] = useState(false)
@@ -14,12 +16,16 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
   const suporteVoz = typeof window !== 'undefined' && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition)
   const [estadoVoz, setEstadoVoz] = useState('')
   const [audioAutomatico, setAudioAutomatico] = useState(false)
-  const { falar, parar, falando, suportaAudio, erroAudio } = useRespostaFalada()
+  const { falar, parar, falando, suportaAudio, erroAudio, carregandoAudio } = useRespostaFalada()
   const requisicao = useRef(null)
   const reconhecimento = useRef(null)
   const textoBaseVoz = useRef('')
   const textoFinalVoz = useRef('')
   const limiteEscuta = useRef(null)
+
+  useEffect(() => {
+    fimConversa.current?.scrollIntoView?.({ block: 'nearest' })
+  }, [historico, ocupado])
 
   useEffect(() => {
     dialogo.current.showModal()
@@ -58,8 +64,7 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
     motor.continuous = true
     motor.interimResults = true
     setErro('')
-    setResultado(null)
-    setEstadoVoz('Ouvindo. Fale seu pedido; selecione “Parar gravação” quando terminar.')
+    setEstadoVoz('Microfone ativo. Fale seu pedido; selecione “Parar gravação” quando terminar.')
     setOuvindo(true)
 
     motor.onresult = (evento) => {
@@ -71,7 +76,6 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
       }
       const transcrito = `${textoBaseVoz.current}${textoBaseVoz.current ? ' ' : ''}${textoFinalVoz.current}${parcial}`
       setMensagem(transcrito.trimStart().slice(0, 2000))
-      setResultado(null)
     }
     motor.onerror = (evento) => {
       const mensagens = {
@@ -112,11 +116,25 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
     setErro('')
     setResultado(null)
     requisicao.current = new AbortController()
+    const enviada = mensagem.trim()
+    const conversaAnterior = historico
+    setHistorico((atual) => [...atual, { papel: 'usuario', texto: enviada }])
+    setMensagem('')
     try {
-      const dados = await analisarPedido(mensagem, requisicao.current.signal)
+      const dados = await analisarPedido(enviada, requisicao.current.signal, conversaAnterior.slice(-100))
       setResultado(dados)
+      const detalhes = dados.proposta ? [
+        dados.proposta.tamanho ? `Cesta ${dados.proposta.tamanho === 'media' ? 'média' : dados.proposta.tamanho} · ${dados.proposta.modo === 'pronta' ? 'pronta' : 'selecionável'}.` : '',
+        dados.proposta.cesta_id ? `Pedido nº ${dados.proposta.cesta_id}.` : '',
+        ...(dados.proposta.produtos || []).map((item) => `${item.quantidade} × ${produtos.find((p) => p.id === item.produto_id)?.nome || item.produto_id}`),
+      ].filter(Boolean).join('\n') : ''
+      setHistorico((atual) => [...atual, { papel: 'flora', texto: [dados.mensagem, detalhes].filter(Boolean).join('\n') }])
     } catch (falha) {
-      if (falha.name !== 'AbortError') setErro(falha.message)
+      if (falha.name !== 'AbortError') {
+        setErro(falha.message)
+        setHistorico(conversaAnterior)
+        setMensagem(enviada)
+      }
     } finally {
       setOcupado(false)
     }
@@ -160,7 +178,7 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
       <header>
         <div className="identidade-flora-dialogo">
           <img className={`presenca-flora ${ouvindo || ocupado || falando ? 'presenca-flora-ativa' : ''}`} src="/marca/flora-do-vale-nucleo-v1.png" width="52" height="52" alt="" />
-          <div><p className="assistente-rotulo">Cesta do Vale</p><h2 id="titulo-assistente">Flora do Vale</h2></div>
+          <div><p className="assistente-rotulo">Cesta do Vale</p><h2 id="titulo-assistente">Flora</h2></div>
         </div>
         <button type="button" onClick={aoFechar} aria-label="Fechar conversa com a Flora">×</button>
       </header>
@@ -168,14 +186,37 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
         <label className="opcao-audio-flora"><input type="checkbox" checked={audioAutomatico} onChange={(evento) => setAudioAutomatico(evento.target.checked)} />Responder por áudio</label>
         {resultado && <button type="button" onClick={() => falando ? parar() : falar(textoResposta)} disabled={ocupado || ouvindo} aria-pressed={falando}>{falando ? 'Parar áudio' : 'Ouvir resposta'}</button>}
       </div> : <p className="estado-voz">A voz está indisponível neste navegador. As respostas aparecem em texto.</p>}
+      {carregandoAudio && <p className="estado-voz" role="status">Preparando áudio da Flora…</p>}
       {erroAudio && <p className="estado-voz" role="status">{erroAudio}</p>}
       {concluido ? <div role="status"><p>{textoConclusao}</p><button onClick={aoFechar}>Continuar</button></div> : <>
-        <p>Olá! Sou a Flora, a assistente virtual do Cesta do Vale. Como posso ajudar?</p>
-        <p>{perfil === 'produtor' ? 'Consulte estoque, pendências e entregas. Você também pode abrir uma cesta ou informar que já separou um pedido.' : 'Conte como deseja sua cesta ou consulte a situação e as pendências dos seus pedidos.'}</p>
+        <div className="flora-conversa" role="log" aria-label="Conversa com a Flora" aria-live="polite" aria-relevant="additions">
+          <div className="flora-mensagem flora-mensagem-flora">
+            <strong>Flora</strong>
+            <p>Olá! Como posso ajudar?</p>
+            <p>{perfil === 'produtor' ? 'Consulte o catálogo, estoque e pedidos ou me diga qual cesta deseja separar.' : 'Posso mostrar o catálogo completo, recomendar uma cesta ou consultar seus pedidos. O que você prefere?'}</p>
+          </div>
+          {historico.map((item, indice) => <div key={indice} className={`flora-mensagem flora-mensagem-${item.papel}`}>
+            <strong>{item.papel === 'usuario' ? 'Você' : 'Flora'}</strong>
+            <p className="resposta-texto-flora">{item.texto}</p>
+          </div>)}
+          {ocupado && <p role="status">Flora está respondendo…</p>}
+          <div ref={fimConversa} />
+        </div>
+        {resultado && aprovado && proposta && <section className="assistente-previa" aria-label="Revisar sugestão atual">
+          {proposta.concluir_separacao && <p className="aviso-confirmacao-separacao">Confira todos os itens antes de confirmar a separação completa.</p>}
+          <p>Você pode pedir ajustes na conversa ou confirmar esta sugestão.</p>
+          <button type="button" disabled={ocupado || ouvindo || Boolean(mensagem.trim())} onClick={confirmar}>{proposta.concluir_separacao ? 'Confirmar separação completa' : consulta ? 'Abrir consulta' : 'Confirmar operação'}</button>
+          <button type="button" disabled={ocupado} onClick={() => { setResultado(null); document.getElementById('mensagem-assistente')?.focus() }}>Ajustar sugestão</button>
+        </section>}
         <form onSubmit={analisar}>
-          <label htmlFor="mensagem-assistente">Seu pedido</label>
-          <textarea id="mensagem-assistente" value={mensagem} maxLength={2000} rows={4} required disabled={ocupado || ouvindo}
-            onChange={(evento) => { setMensagem(evento.target.value); setResultado(null) }}
+          <label htmlFor="mensagem-assistente">Sua mensagem</label>
+          <textarea id="mensagem-assistente" value={mensagem} maxLength={2000} rows={2} required disabled={ocupado || ouvindo}
+            onChange={(evento) => setMensagem(evento.target.value)}
+            onKeyDown={(evento) => {
+              if (evento.key !== 'Enter' || evento.shiftKey || evento.nativeEvent.isComposing || evento.keyCode === 229) return
+              evento.preventDefault()
+              if (!evento.repeat && !ocupado && !ouvindo && mensagem.trim()) evento.currentTarget.form?.requestSubmit()
+            }}
             placeholder={perfil === 'produtor' ? 'Flora, quantos tomates tenho no estoque? Ou: mostre as entregas pendentes.' : 'Quero uma cesta média com 2 tomates e 1 cenoura, sem cebola'} />
           <button type="button" className="botao-microfone" onClick={alternarMicrofone} disabled={ocupado || concluido} aria-pressed={ouvindo}>
             <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
@@ -184,25 +225,16 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
             </svg>
             {ouvindo ? 'Parar gravação' : 'Usar microfone'}
           </button>
+          {ouvindo && <div className="feedback-microfone" aria-hidden="true">
+            <span className="microfone-ativo-ponto" />
+            <span className="feedback-microfone-rotulo">Microfone ativo · captando voz</span>
+            <span className="onda-voz">{Array.from({ length: 15 }, (_, indice) => <i key={indice} />)}</span>
+          </div>}
           {!suporteVoz && <small className="estado-voz">A fala para texto pode não estar disponível neste navegador. A digitação continua disponível.</small>}
           {estadoVoz && <p className="estado-voz" role="status" aria-live="polite">{estadoVoz}</p>}
           <button type="submit" disabled={ocupado || ouvindo || !mensagem.trim()}>{ocupado ? 'Aguarde…' : 'Enviar mensagem'}</button>
         </form>
-        {ocupado && <p role="status">Processando a solicitação e as verificações.</p>}
         {erro && <p role="alert">{erro}</p>}
-        {resultado && <section className="assistente-previa" aria-live="polite">
-          <p className="resposta-texto-flora">{resultado.mensagem}</p>
-          {aprovado && proposta && <>
-            {proposta.concluir_separacao && <p className="aviso-confirmacao-separacao">Confirme que todos estes itens foram separados. Ao confirmar, a cesta será marcada como preparada para envio.</p>}
-            {proposta.tamanho && <p>Cesta {proposta.tamanho === 'media' ? 'média' : proposta.tamanho} · {proposta.modo === 'pronta' ? 'pronta' : 'selecionável'}</p>}
-            {proposta.cesta_id && <p>Cesta nº {proposta.cesta_id}</p>}
-            {proposta.produtos?.length > 0 && <ul>{proposta.produtos.map((item) => <li key={item.produto_id}>
-              {item.quantidade} × {produtos.find((p) => p.id === item.produto_id)?.nome || item.nome || item.produto_id}
-            </li>)}</ul>}
-            <button type="button" disabled={ocupado} onClick={confirmar}>{proposta.concluir_separacao ? 'Confirmar separação completa' : consulta ? 'Abrir consulta' : 'Confirmar operação'}</button>
-            <button type="button" disabled={ocupado} onClick={() => setResultado(null)}>Não aceitar / ajustar</button>
-          </>}
-        </section>}
         <button type="button" disabled={ocupado} onClick={() => aoManual(aprovado ? proposta : null)}>Continuar pelo fluxo manual</button>
       </>}
     </dialog>

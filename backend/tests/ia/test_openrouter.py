@@ -77,6 +77,20 @@ def test_modelos_separados_por_agente(cliente, monkeypatch):
     assert [c["model"] for c in capturas] == ["openrouter/free", "openrouter/free", "exemplo/qa:free"]
 
 
+def test_contexto_de_conversa_e_disponibilidade_chegam_aos_agentes(cliente, monkeypatch):
+    capturas = preparar(monkeypatch, respostas_padrao())
+    fazer_login(cliente, "aline", "aline123")
+    historico = [{"papel": "usuario", "texto": "Quero uma cesta com 2 tomates"},
+                 {"papel": "flora", "texto": "Qual tamanho você prefere?"}]
+    resposta = cliente.post('/assistente/analisar', json={"mensagem": "média", "historico": historico})
+    assert resposta.status_code == 200
+    for corpo in capturas:
+        contexto = json.loads(corpo['messages'][1]['content'])
+        assert contexto['historico_conversa'] == historico
+        assert all(p['estoque'] > 0 for p in contexto['catalogo_disponivel'])
+        assert all(p['categoria'] in {'frutas', 'verduras', 'legumes'} for p in contexto['catalogo_disponivel'])
+
+
 def test_agente_produtor(cliente, monkeypatch):
     capturas = preparar(monkeypatch, respostas_padrao(proposta={
         "tipo": "separacao", "cesta_id": 1, "produtos": [{"produto_id": "alface", "quantidade": 1}],

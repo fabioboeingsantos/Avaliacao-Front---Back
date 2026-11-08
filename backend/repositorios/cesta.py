@@ -189,6 +189,7 @@ def listar_produtos_disponiveis(sessao: Session) -> list[dict]:
         {
             "id": produto.id,
             "nome": produto.nome,
+            "categoria": produto.categoria,
             "estoque": produto.estoque,
             "preco_centavos": produto.preco_centavos,
         }
@@ -220,7 +221,8 @@ def atualizar_estoque(sessao: Session, produto_id: str, quantidade: int) -> dict
     produto.estoque = quantidade
     sessao.commit()
     sessao.refresh(produto)
-    return {"id": produto.id, "nome": produto.nome, "estoque": produto.estoque}
+    return {"id": produto.id, "nome": produto.nome, "estoque": produto.estoque,
+            "categoria": produto.categoria, "preco_unitario": produto.preco_centavos / 100}
 
 
 def atualizar_preco(sessao: Session, produto_id: str, preco_centavos: int) -> dict | None:
@@ -237,7 +239,18 @@ def atualizar_preco(sessao: Session, produto_id: str, preco_centavos: int) -> di
         "nome": produto.nome,
         "estoque": produto.estoque,
         "preco_unitario": produto.preco_centavos / 100,
+        "categoria": produto.categoria,
     }
+
+
+def atualizar_categoria(sessao: Session, produto_id: str, categoria: str) -> dict | None:
+    produto = sessao.get(Produto, produto_id)
+    if produto is None:
+        return None
+    produto.categoria = categoria
+    sessao.commit()
+    return {"id": produto.id, "nome": produto.nome, "categoria": produto.categoria,
+            "estoque": produto.estoque, "preco_unitario": produto.preco_centavos / 100}
 
 
 def devolver_estoque(sessao: Session, produtos: list[dict]) -> None:

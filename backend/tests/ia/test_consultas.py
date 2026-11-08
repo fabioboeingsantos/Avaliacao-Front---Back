@@ -88,10 +88,12 @@ def test_api_exige_login(cliente):
     assert resposta.status_code == 401
 
 
-def test_assinante_nao_recebe_estoque_nem_pedido_de_outra_conta(cliente):
+def test_assinante_recebe_catalogo_sem_quantidades_nem_pedido_de_outra_conta(cliente):
     fazer_login(cliente, "aline", "aline123")
     estoque = cliente.post("/assistente/analisar", json={"mensagem": "Estoque completo"}).json()
-    assert "exclusiva do perfil produtor" in estoque["mensagem"]
+    assert "Catálogo disponível" in estoque["mensagem"]
+    assert "unidades" not in estoque["mensagem"]
+    assert "20" not in estoque["mensagem"]
     resumo = cliente.post("/assistente/analisar", json={"mensagem": "Quantos pedidos eu tenho?"}).json()
     assert "1 pedido" in resumo["mensagem"]
     assert "#0002" not in resumo["mensagem"]

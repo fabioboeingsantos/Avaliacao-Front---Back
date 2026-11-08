@@ -6,7 +6,7 @@ from ia.fluxo import analisar_agentes
 
 
 @pytest.mark.parametrize("alteracoes", [
-    {"tamanho": None},
+    {"tamanho": None, "modo": "pronta"},
     {"produtos": [{"produto_id": "inventado", "quantidade": 1}]},
     {"produtos_excluidos": ["tomate"]},
     {"tipo": "separacao", "cesta_id": 99},

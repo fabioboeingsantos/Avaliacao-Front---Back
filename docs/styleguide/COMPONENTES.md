@@ -17,9 +17,10 @@
 
 Usado para a ação principal da tela, como confirmar um pedido ou separar um produto.
 
-- Fundo: `--cor-verde-horta`.
+- Fundo: gradiente de `--cor-verde-horta` para `--cor-verde-escuro`, com borda em `--cor-verde-escuro`.
 - Texto: `--cor-branco`.
-- Hover: `--cor-verde-escuro`.
+- Elevação: sombra suave em `--cor-verde-escuro`, com brilho interno discreto.
+- Hover: `--cor-verde-escuro`, sombra mais evidente e elevação de 1px.
 - Foco: contorno visível em `--cor-verde-escuro`.
 
 ### Secundário
@@ -28,7 +29,15 @@ Usado para ações alternativas, como voltar ou escolher outra opção.
 
 - Fundo: `--cor-branco`.
 - Texto e borda: `--cor-verde-escuro`.
-- Hover: `--cor-verde-claro`.
+- Hover: `--cor-verde-claro` com sombra suave em `--cor-verde-escuro`.
+
+### Interação dinâmica
+
+- Botões de ação usam cantos arredondados de 10px, transições suaves de cor e sombra e resposta visual ao passar o ponteiro.
+- Aplicar o efeito com os tokens de cor do tema ativo; não usar o azul escuro da imagem de referência, pois a paleta oficial da Cesta do Vale é verde.
+- Ações principais podem usar o gradiente e o brilho do primário. Ações secundárias preservam fundo claro e recebem elevação discreta no hover.
+- Todos os botões do sistema recebem resposta visual ao hover, com sombra baseada em `--cor-verde-escuro`. Controles compactos (tema, estrelas, quantidade, navegação e filtros) preservam dimensões e formas próprias, mantendo a mesma resposta de interação.
+- Em telas sensíveis a movimento reduzido, respeitar `prefers-reduced-motion`.
 
 ### Ação de destaque
 

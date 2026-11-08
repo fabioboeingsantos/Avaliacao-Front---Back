@@ -8,6 +8,8 @@ import TelaDetalhesCesta from './componentes/TelaDetalhesCesta'
 import TelaSeparacao from './componentes/TelaSeparacao'
 import TelaFechamento from './componentes/TelaFechamento'
 import SinoNotificacoes from './componentes/SinoNotificacoes'
+import CatalogoProdutos from './componentes/CatalogoProdutos'
+import { imagemProduto } from './utilitarios/imagemProduto'
 import Assistente from './funcionalidades/assistente/Assistente'
 import { chamarApi } from './api.js'
 import { formatarIdSolicitacao } from './utilitarios/identificadorPedido'
@@ -15,6 +17,7 @@ import './App.css'
 
 function TemaToggle({ tema, aoAlternar }) {
   const temaEscuro = tema === 'escuro'
+  const proximoTema = temaEscuro ? 'claro' : 'escuro'
 
   return (
     <button
@@ -22,11 +25,11 @@ function TemaToggle({ tema, aoAlternar }) {
       type="button"
       onClick={aoAlternar}
       aria-pressed={temaEscuro}
-      aria-label={`Ativar tema ${temaEscuro ? 'claro' : 'escuro'}`}
-      title={`Ativar tema ${temaEscuro ? 'claro' : 'escuro'}`}
+      aria-label={`Ativar tema ${proximoTema}`}
+      data-tooltip={`Tema ${proximoTema}`}
     >
-      <span aria-hidden="true">{temaEscuro ? '☀' : '☾'}</span>
-      {temaEscuro ? 'Tema claro' : 'Tema escuro'}
+      {temaEscuro ? <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" /></svg>
+        : <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z" /><path d="M16 3v4m-2-2h4" /></svg>}
     </button>
   )
 }
@@ -127,7 +130,7 @@ function adaptarCestaDaApi(cesta) {
       // O backend devolve o preço unitário congelado no momento do pedido.
       precoUnitario: produto.preco_unitario,
       subtotal: produto.subtotal,
-      imagem: `/produtos/${produto.id}-editorial.png`,
+      imagem: imagemProduto(produto.id),
     })),
     // O total vem calculado pelo backend para evitar confiar em valor enviado pelo navegador.
     valorTotal: cesta.valor_total,
@@ -142,10 +145,11 @@ function adaptarProdutoDaApi(produto) {
   return {
     id: produto.id,
     nome: produto.nome,
+    categoria: produto.categoria,
     estoque: produto.estoque,
     // O preço é unitário e não depende de peso ou quilograma.
     precoUnitario: produto.preco_unitario,
-    imagem: `/produtos/${produto.id}-editorial.png`,
+    imagem: imagemProduto(produto.id),
   }
 }
 
@@ -197,6 +201,9 @@ function App() {
   // Identifica qual fluxo deve ser apresentado depois do acesso de demonstração.
   const [perfilAtual, setPerfilAtual] = useState('')
   const [assistenteAberto, setAssistenteAberto] = useState(false)
+  const [catalogoAberto, setCatalogoAberto] = useState(false)
+  const [catalogoConsultando, setCatalogoConsultando] = useState(false)
+  const [erroCatalogo, setErroCatalogo] = useState('')
   const [revisaoFormulario, setRevisaoFormulario] = useState(0)
   // Controla a aba atual e mantém o pedido em revisão enquanto a pessoa confirma os dados.
   const [abaAtual, setAbaAtual] = useState('pedido')
@@ -256,6 +263,28 @@ function App() {
     } catch {
       setMensagemApi('Não foi possível carregar o catálogo e o estoque.')
     }
+  }
+
+  async function abrirCatalogo() {
+    setCatalogoAberto(true)
+    setCatalogoConsultando(true)
+    setErroCatalogo('')
+    try {
+      const produtos = await chamarApi('/produtos')
+      setProdutosDisponiveis(produtos.map(adaptarProdutoDaApi))
+      setCatalogoCarregado(true)
+    } catch (falha) {
+      setErroCatalogo(falha.message)
+    } finally {
+      setCatalogoConsultando(false)
+    }
+  }
+
+  async function adicionarProduto(dados) {
+    const produto = await chamarApi('/produtos', { method: 'POST', body: JSON.stringify(dados) })
+    const adaptado = adaptarProdutoDaApi(produto)
+    setProdutosDisponiveis((atuais) => [...atuais.filter((item) => item.id !== produto.id), adaptado])
+    return adaptado
   }
 
   // Inicia a sessão com o perfil validado pelo backend.
@@ -459,6 +488,7 @@ function App() {
   // Encerra a sessão no servidor antes de limpar o estado autenticado da tela.
   function limparSessaoLocal() {
     setAssistenteAberto(false)
+    setCatalogoAberto(false)
     setUsuarioAutenticado('')
     setPerfilAtual('')
     setPedidos([])
@@ -557,6 +587,19 @@ function App() {
     setPedidoEmRevisao(null)
     setAbaAtual('historico')
     return { sucesso: true }
+  }
+
+  async function atualizarCategoria(produtoId, categoria) {
+    try {
+      const produto = await chamarApi(`/produtos/${encodeURIComponent(produtoId)}/categoria`, {
+        method: 'PUT',
+        body: JSON.stringify({ categoria }),
+      })
+      setProdutosDisponiveis((atuais) => atuais.map((item) => item.id === produtoId ? adaptarProdutoDaApi(produto) : item))
+      return { sucesso: true }
+    } catch (erro) {
+      return { sucesso: false, erro: erro.message }
+    }
   }
 
   async function atualizarEstoque(produtoId, quantidade) {
@@ -1022,19 +1065,33 @@ function App() {
               aoSelecionarNotificacao={abrirDestinoDaNotificacao}
             />
             {controleTema}
+            {perfilAtual === 'assinante' && abaAtual !== 'pedido' && <button className="botao-menu-catalogo" type="button" aria-haspopup="dialog" onClick={abrirCatalogo}>Catálogo</button>}
           </div>
+          <div className={`apresentacao-flora${perfilAtual === 'produtor' ? ' apresentacao-flora-produtor' : ''}`}>
           <button
             type="button"
             className={`botao-flora${perfilAtual === 'produtor' ? ' botao-flora-produtor' : ''}`}
             onClick={() => setAssistenteAberto(true)}
-            aria-label="Abrir conversa com a Flora do Vale"
+            aria-label="Abrir conversa com a Flora"
             aria-haspopup="dialog"
-            title="Flora do Vale"
+            title="Flora"
           >
             <img src="/marca/flora-do-vale-nucleo-v1.png" alt="" width="44" height="44" />
-            <span className="rotulo-flora">Flora do Vale</span>
+            <span className="rotulo-flora">Flora</span>
             <span className="descricao-flora">Assistente virtual I.A</span>
           </button>
+          <ul className="capacidades-flora">
+            {perfilAtual === 'produtor' ? <>
+              <li>Consulte produtos e estoque.</li>
+              <li>Acompanhe pedidos e entregas.</li>
+              <li>Receba ajuda na separação das cestas.</li>
+            </> : <>
+              <li>Consulte os produtos disponíveis.</li>
+              <li>Peça sugestões e monte sua cesta.</li>
+              <li>Tire dúvidas digitando ou por voz.</li>
+            </>}
+          </ul>
+          </div>
           {erroLogout && (
             <p className="erro-sair-sessao" role="alert">
               {erroLogout}
@@ -1042,6 +1099,11 @@ function App() {
           )}
         </header>
         {conteudo}
+        {catalogoAberto && <CatalogoProdutos
+          perfil={perfilAtual} produtos={produtosDisponiveis}
+          carregando={catalogoConsultando} erro={erroCatalogo}
+          aoRecarregar={abrirCatalogo} aoFechar={() => setCatalogoAberto(false)} aoAdicionar={adicionarProduto}
+        />}
         {assistenteAberto && <Assistente
           key={usuarioAutenticado}
           perfil={perfilAtual} produtos={produtosDisponiveis}
@@ -1082,6 +1144,8 @@ function App() {
         aoMarcarEnviado={marcarPedidoEnviado}
         aoAtualizarEstoque={atualizarEstoque}
         aoAtualizarPreco={atualizarPreco}
+        aoAtualizarCategoria={atualizarCategoria}
+        aoAbrirCatalogo={abrirCatalogo}
         aoAvaliarCesta={avaliarCesta}
       />,
     )
@@ -1131,6 +1195,7 @@ function App() {
   return envolverAreaAutenticada(
     <TelaPedirCesta
       key={revisaoFormulario}
+      aoAbrirCatalogo={abrirCatalogo}
       usuario={formatarNomeUsuario(usuarioAutenticado)}
       produtosDisponiveis={produtosDisponiveis}
       catalogoCarregado={catalogoCarregado}

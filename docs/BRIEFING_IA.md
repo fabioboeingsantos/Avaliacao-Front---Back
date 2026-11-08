@@ -1,7 +1,7 @@
 # Briefing para revisão — Cesta do Vale
 
 > Organização atual do código e imagem do fluxo: [Arquitetura de IA](ia/arquitetura.md).
-> Nome público da assistente: **Flora do Vale**, acessada por **Falar com a Flora**.
+> Nome público da assistente: **Flora**, acessada por **Falar com a Flora**.
 
 > Rascunho para verificação. Este documento não substitui nem altera o briefing original.
 

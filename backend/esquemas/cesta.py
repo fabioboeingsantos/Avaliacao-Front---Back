@@ -5,8 +5,9 @@ negócio ficam no serviço, para que também possam ser reaproveitadas no futuro
 """
 
 from decimal import Decimal
+from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ProdutoDaCesta(BaseModel):
@@ -76,6 +77,23 @@ class AtualizarEstoque(BaseModel):
     """Quantidade disponível definida pelo produtor."""
 
     quantidade: int = Field(ge=0)
+
+
+class AtualizarCategoria(BaseModel):
+    categoria: Literal["frutas", "verduras", "legumes"]
+
+
+class NovoProduto(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    nome: str = Field(min_length=2, max_length=120)
+    categoria: Literal["frutas", "verduras", "legumes"]
+    estoque: int = Field(ge=0, strict=True)
+    preco_unitario: Decimal = Field(gt=0, max_digits=8, decimal_places=2)
+
+    @field_validator("nome", mode="before")
+    @classmethod
+    def normalizar_nome(cls, valor):
+        return " ".join(valor.split()) if isinstance(valor, str) else valor
 
 
 class AtualizarPreco(BaseModel):

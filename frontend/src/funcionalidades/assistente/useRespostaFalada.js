@@ -22,9 +22,21 @@ export default function useRespostaFalada() {
     const rodada = geracao.current
     const partes = texto.match(/.{1,220}(?:\s|$)|\S+/gs) || [texto]
     const vozes = window.speechSynthesis.getVoices()
-    const portugues = vozes.filter((voz) => voz.lang.toLowerCase().startsWith('pt'))
-    const voz = portugues.find((item) => item.localService && item.lang.toLowerCase() === 'pt-br')
-      || portugues.find((item) => item.lang.toLowerCase() === 'pt-br') || portugues[0]
+    const portuguesBrasil = vozes.filter((item) => item.lang.toLowerCase().replace('_', '-') === 'pt-br')
+    // A API não informa gênero; priorizamos nomes de vozes femininas comuns.
+    const nomeVozFeminina = /\b(maria|francisca|hélia|helia|luciana|fernanda|camila|gabriela|ana|joana|isabela|vitória|vitoria|helena|letícia|leticia|sofia|sophia|carolina|mariana)\b/i
+    const portuguesBrasilFeminina = portuguesBrasil.filter((item) => nomeVozFeminina.test(item.name))
+    const voz = portuguesBrasilFeminina.find((item) => item.localService)
+      || portuguesBrasilFeminina[0]
+      || portuguesBrasil.find((item) => item.localService)
+      || portuguesBrasil[0]
+
+    // Não substituir pt-BR por pt-PT ou por outro idioma se faltar uma voz brasileira.
+    if (!voz) {
+      setFalando(false)
+      setErroAudio('Não há uma voz em português do Brasil disponível neste dispositivo. Instale uma voz pt-BR e tente novamente.')
+      return
+    }
 
     function proxima(indice) {
       if (geracao.current !== rodada) return
@@ -35,7 +47,7 @@ export default function useRespostaFalada() {
       }
       const fala = new SpeechSynthesisUtterance(partes[indice])
       fala.lang = 'pt-BR'
-      fala.rate = 1
+      fala.rate = 1.08
       if (voz) fala.voice = voz
       fala.onend = () => proxima(indice + 1)
       fala.onerror = (evento) => {

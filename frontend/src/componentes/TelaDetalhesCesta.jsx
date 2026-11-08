@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
+import { imagemProduto } from '../utilitarios/imagemProduto'
 import AvaliacaoEstrelas from './AvaliacaoEstrelas'
 
 const formatarMoeda = (valor) =>
@@ -195,7 +196,7 @@ function TelaDetalhesCesta({
 
               return (
                 <li className="item-detalhes-cesta cartao-detalhe-produto" key={produto.id}>
-                  <img className="imagem-produto-detalhe" src={produto.imagem ?? `/produtos/${produto.id}-editorial.png`} alt="" />
+                  <img className="imagem-produto-detalhe" src={produto.imagem ?? imagemProduto(produto.id)} alt="" />
                   <div>
                     <strong>{produto.nome}</strong>
                     <span>{produto.quantidade} pedido(s) · {quantidadeSeparada} separado(s){pedidoEncerradoComFaltantes ? ` · ${quantidadeFaltante} faltante(s)` : ''}</span>
@@ -227,7 +228,7 @@ function TelaDetalhesCesta({
 
                 return (
                   <li className="item-detalhes-cesta cartao-detalhe-produto" key={produto.id}>
-                    <img className="imagem-produto-detalhe" src={produto.imagem ?? `/produtos/${produto.id}-editorial.png`} alt="" />
+                    <img className="imagem-produto-detalhe" src={produto.imagem ?? imagemProduto(produto.id)} alt="" />
                     <div>
                       <strong>{produto.nome}</strong>
                       <span>Produto separado pelo produtor</span>

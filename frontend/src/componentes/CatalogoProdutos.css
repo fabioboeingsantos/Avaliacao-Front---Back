@@ -1,0 +1,71 @@
+.catalogo-dialogo { width: min(1160px, calc(100% - 32px)); max-width: none; max-height: 92dvh; padding: 0; border: 0; border-radius: 18px; overflow: auto; color: #243a2d; background: #f8f5ed; box-shadow: 0 28px 100px #0006; }
+.catalogo-dialogo::backdrop { background: #101b15b8; backdrop-filter: blur(5px); }
+.catalogo-dialogo button { cursor: pointer; font: inherit; min-height: 42px; }
+.catalogo-dialogo button:disabled { opacity: .6; cursor: wait; }
+.catalogo-dialogo :focus-visible { outline: 3px solid #bd7b2d; outline-offset: 3px; }
+.catalogo-barra { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 28px; background: #17251e; color: #fffdf5; }
+.catalogo-barra > span { font-size: .68rem; letter-spacing: .16em; }
+.catalogo-fechar { display: flex; align-items: center; gap: 14px; padding: 5px 12px; border: 1px solid #718174; border-radius: 8px; background: transparent; color: inherit; }
+.catalogo-fechar span { font-size: 1.5rem; }
+.catalogo-editorial { display: grid; grid-template-columns: 40% 60%; aspect-ratio: 16 / 9; background: #18231d; color: #fffdf5; }
+.catalogo-introducao { padding: clamp(20px, 3vw, 40px); z-index: 1; }
+.catalogo-sobretitulo { margin: 0 0 10px; font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
+.catalogo-introducao > .catalogo-sobretitulo { color: #e2bd84; }
+.catalogo-introducao h2 { margin: 0 0 26px; color: #fffdf5; font-family: Arial, sans-serif; font-size: clamp(2rem, 3.9vw, 3.7rem); line-height: 1.03; letter-spacing: -.05em; }
+.catalogo-introducao h2 > span { color: #dc9e4c; }
+.catalogo-conceitos { display: grid; gap: clamp(10px, 1.5vw, 22px); list-style: none; padding: 0; margin: 0; }
+.catalogo-conceitos li { display: flex; align-items: center; gap: 14px; }
+.catalogo-conceitos svg { width: 26px; height: 26px; flex-shrink: 0; }
+.catalogo-conceitos p { margin: 0; padding-left: 14px; border-left: 1px solid #77837a; font-size: clamp(.8rem, 1.12vw, .96rem); line-height: 1.5; color: #e2e6df; }
+.catalogo-conceitos strong { color: white; }
+.catalogo-paisagem { position: relative; display: flex; align-items: flex-end; padding: 40px; background: linear-gradient(90deg, #18231d 0%, #18231d12 25%), linear-gradient(0deg, #102c1ac7, transparent 65%), url('/imagens/feira-comunitaria-capa.webp') 55% center / cover; }
+.catalogo-paisagem > p { margin: 0; color: #fffdf5; font: 500 clamp(1.6rem, 3.3vw, 3rem)/1.15 Georgia, serif; text-shadow: 0 2px 14px #0008; }
+.catalogo-paisagem em { color: #edd5ac; }
+.catalogo-conteudo { padding: 32px; }
+.catalogo-titulo-selecao { display: flex; gap: 20px; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.catalogo-titulo-selecao .catalogo-sobretitulo { color: #7b603a; }
+.catalogo-titulo-selecao h3 { margin: 0; font: 500 clamp(1.5rem, 2.8vw, 2.2rem)/1.2 Georgia, serif; }
+.catalogo-acao-principal { padding: 10px 18px; border: 1px solid #245139; border-radius: 8px; background: #245139; color: white; white-space: nowrap; }
+.catalogo-ferramentas { display: flex; align-items: end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.catalogo-filtros { display: flex; gap: 8px; flex-wrap: wrap; }
+.catalogo-filtros button { padding: 8px 18px; border: 1px solid var(--cor-borda); border-radius: 99px; background: var(--cor-branco); color: var(--cor-verde-escuro); transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
+.catalogo-filtros button[aria-pressed=true] { background: var(--cor-verde-horta); border-color: var(--cor-verde-escuro); color: var(--cor-branco); }
+.catalogo-busca { display: grid; gap: 6px; font-size: .8rem; }
+.catalogo-busca input, .catalogo-formulario input, .catalogo-formulario select { min-height: 44px; width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid #aebcaa; border-radius: 8px; font: inherit; background: #fffdf8; color: #243a2d; }
+.catalogo-contagem { margin: 22px 0 14px; font-size: .8rem; color: #52624f; }
+.catalogo-grade { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+.catalogo-produto { min-width: 0; border-radius: 12px; overflow: hidden; background: #fffdf8; border: 1px solid #e0e4d8; }
+.catalogo-foto { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #e8ecdf; }
+.catalogo-foto img { width: 100%; height: 100%; object-fit: cover; }
+.catalogo-foto > span { position: absolute; top: 12px; left: 12px; padding: 5px 10px; border-radius: 99px; background: #fffdf5ec; font-size: .7rem; color: #34513c; }
+.catalogo-imagem-ilustrativa { position: absolute; bottom: 10px; left: 10px; padding: 4px 8px; background: #fffdf5ec; border-radius: 5px; color: #34513c; font-size: .65rem; }
+.catalogo-dados { padding: 16px; }
+.catalogo-dados h4 { margin: 0 0 8px; font-size: 1.05rem; overflow-wrap: anywhere; }
+.catalogo-dados p { margin: 0; font-weight: 700; }
+.catalogo-dados p > span { font-size: .75rem; font-weight: 400; color: #52624f; }
+.catalogo-dados small { display: block; margin-top: 10px; color: #52624f; }
+.catalogo-formulario { padding: 22px; margin: 0 0 26px; border: 1px solid #afbea6; border-radius: 12px; background: #edf1e6; }
+.catalogo-formulario h4 { margin: 0 0 18px; font-size: 1.1rem; }
+.catalogo-formulario fieldset { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 0; margin: 0; border: 0; }
+.catalogo-formulario label { display: grid; gap: 6px; font-size: .85rem; }
+.catalogo-formulario .catalogo-campo-nome { grid-column: 1 / -1; }
+.catalogo-acoes-formulario { display: flex; gap: 12px; margin-top: 20px; }
+.catalogo-acoes-formulario > button:not(.catalogo-acao-principal) { border: 1px solid var(--cor-verde-horta); padding: 8px 16px; background: var(--cor-branco); border-radius: 10px; color: var(--cor-verde-escuro); }
+.catalogo-sucesso { padding: 14px; background: #e1edda; border-radius: 8px; }
+.catalogo-vazio { padding: 40px 20px; text-align: center; border: 1px dashed #afbea6; border-radius: 12px; }
+.catalogo-vazio h4 { margin: 0 0 10px; }
+.botao-menu-catalogo { border: 1px solid var(--cor-verde-horta); border-radius: 10px; padding: 9px 16px; background: var(--cor-branco); color: var(--cor-verde-escuro); font: inherit; cursor: pointer; min-height: 42px; transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
+@media (max-width: 900px) { .catalogo-editorial { aspect-ratio: auto; } .catalogo-grade { grid-template-columns: repeat(3, minmax(0, 1fr)); } .catalogo-conceitos p { font-size: .85rem; } }
+@media (max-width: 650px) {
+  .catalogo-dialogo { width: calc(100% - 20px); max-height: 94dvh; }
+  .catalogo-barra { padding: 10px 16px; } .catalogo-barra > span { font-size: .6rem; letter-spacing: .07em; }
+  .catalogo-editorial { grid-template-columns: 1fr; }
+  .catalogo-introducao { padding: 24px; } .catalogo-introducao h2 { font-size: 2.5rem; margin-bottom: 22px; }
+  .catalogo-conceitos { gap: 14px; } .catalogo-conceitos p { font-size: .87rem; }
+  .catalogo-paisagem { min-height: 220px; padding: 24px; background-position: center; }
+  .catalogo-paisagem > p { font-size: 1.8rem; }
+  .catalogo-conteudo { padding: 24px 16px; } .catalogo-titulo-selecao { align-items: flex-start; flex-direction: column; }
+  .catalogo-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } .catalogo-dados { padding: 12px; }
+  .catalogo-filtros { gap: 6px; } .catalogo-filtros button { padding: 8px 12px; }
+  .catalogo-busca { width: 100%; } .catalogo-formulario { padding: 16px; } .catalogo-formulario fieldset { grid-template-columns: 1fr; }
+}

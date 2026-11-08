@@ -99,6 +99,7 @@ function TelaPedirCesta({
   usuario,
   aoFinalizar,
   aoAbrirHistorico,
+  aoAbrirCatalogo,
   produtosDisponiveis = [],
   catalogoCarregado,
   pedidoInicial = null,
@@ -123,9 +124,9 @@ function TelaPedirCesta({
   })
   const [rascunhosQuantidades, setRascunhosQuantidades] = useState({})
   const [erro, setErro] = useState('')
-  const produtosCatalogo = catalogoProdutos.map((produto) => ({
+  const produtosCatalogo = produtosDisponiveis.map((produto) => ({
+    ...catalogoProdutos.find((item) => item.id === produto.id),
     ...produto,
-    ...(produtosDisponiveis.find((item) => item.id === produto.id) ?? { estoque: 0 }),
   }))
 
   // Informa que a repetição usa o catálogo e os preços atuais antes da confirmação.
@@ -281,6 +282,7 @@ function TelaPedirCesta({
       </header>
 
       <section className="introducao-pedido" aria-labelledby="titulo-pedido">
+        <button className="botao-menu-catalogo catalogo-acima-saudacao" type="button" aria-haspopup="dialog" onClick={aoAbrirCatalogo}>Catálogo</button>
         <p className="texto-saudacao">Olá, {usuario}</p>
         <h1 id="titulo-pedido">Peça sua cesta da semana</h1>
         <p>

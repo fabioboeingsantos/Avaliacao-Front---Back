@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Escolher a voz da Flora</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #24302a; background: #f7f5ef; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px 16px; }
+    main { max-width: 760px; margin: auto; }
+    h1, h2 { color: #1f4d2e; }
+    h1 { margin-bottom: 8px; }
+    p { line-height: 1.6; }
+    section { margin-top: 20px; padding: 20px; background: white; border: 1px solid #cbd5cc; border-radius: 12px; }
+    h2 { margin: 0 0 8px; font-size: 1.2rem; }
+    section p { margin: 0 0 16px; }
+    audio { display: block; width: 100%; }
+    a { display: inline-block; margin-top: 12px; color: #2f6b3b; }
+    a:focus-visible, audio:focus-visible { outline: 3px solid #1f4d2e; outline-offset: 4px; }
+    .erro { color: #b42318; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Escolha a voz da Flora</h1>
+    <p>Toque no botão de reprodução de cada opção. As três vozes são femininas e falam português brasileiro. Depois, me diga qual número você prefere.</p>
+    <section aria-labelledby="voz-1">
+      <h2 id="voz-1">1 · Aoede</h2>
+      <p>Amostra oficial de voz.</p>
+      <audio controls preload="metadata" aria-label="Ouvir opção 1, Aoede"><source src="./Aoede.wav" type="audio/wav">Seu navegador não oferece reprodução de áudio.</audio>
+      <a href="./Aoede.wav" download>Baixar a opção 1 para ouvir</a>
+      <p class="erro" role="status" hidden>Não foi possível reproduzir. Use o link para baixar a amostra e abri-la no seu player de áudio.</p>
+    </section>
+    <section aria-labelledby="voz-2">
+      <h2 id="voz-2">2 · Kore</h2>
+      <p>Amostra oficial de voz.</p>
+      <audio controls preload="metadata" aria-label="Ouvir opção 2, Kore"><source src="./Kore.wav" type="audio/wav">Seu navegador não oferece reprodução de áudio.</audio>
+      <a href="./Kore.wav" download>Baixar a opção 2 para ouvir</a>
+      <p class="erro" role="status" hidden>Não foi possível reproduzir. Use o link para baixar a amostra e abri-la no seu player de áudio.</p>
+    </section>
+    <section aria-labelledby="voz-3">
+      <h2 id="voz-3">3 · Zephyr</h2>
+      <p>Amostra oficial de voz.</p>
+      <audio controls preload="metadata" aria-label="Ouvir opção 3, Zephyr"><source src="./Zephyr.wav" type="audio/wav">Seu navegador não oferece reprodução de áudio.</audio>
+      <a href="./Zephyr.wav" download>Baixar a opção 3 para ouvir</a>
+      <p class="erro" role="status" hidden>Não foi possível reproduzir. Use o link para baixar a amostra e abri-la no seu player de áudio.</p>
+    </section>
+    <p>Estas são amostras de comparação do Google Cloud. A voz escolhida será configurada na Flora após sua aprovação.</p>
+  </main>
+  <script>
+    const players = [...document.querySelectorAll('audio')];
+    for (const player of players) {
+      player.addEventListener('play', () => {
+        for (const other of players) if (other !== player) other.pause();
+      });
+      player.addEventListener('error', () => { player.closest('section').querySelector('.erro').hidden = false; });
+      player.querySelector('source').addEventListener('error', () => { player.closest('section').querySelector('.erro').hidden = false; });
+    }
+  </script>
+</body>
+</html>

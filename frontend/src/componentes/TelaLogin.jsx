@@ -260,9 +260,6 @@ function TelaLogin({ aoEntrar, aoCadastrar, mensagemSistema, modoInicial = 'entr
           </form>
 
           <nav className="acoes-login" aria-label="Ações de acesso">
-            <button type="button" disabled={carregando} onClick={() => trocarModo('reenviar')}>
-              Reenviar confirmação
-            </button>
             {modo === 'entrar' && (
               <>
                 <button type="button" onClick={() => trocarModo('cadastro')}>

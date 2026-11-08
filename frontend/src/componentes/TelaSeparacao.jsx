@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
 import { formatarQuantidade, obterNumeroDaQuantidade } from '../utilitarios/formatarQuantidade'
+import { imagemProduto } from '../utilitarios/imagemProduto'
 import AvaliacaoEstrelas from './AvaliacaoEstrelas'
 import FiltroSituacao from './FiltroSituacao'
 
 // Esta é a tela principal do produtor, com as cestas filtradas para a separação da semana.
-function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnviado, aoAtualizarEstoque, aoAtualizarPreco, aoAvaliarCesta, modo = 'separacao', aoAbrirEstoque, aoAbrirEntregas, aoVoltarSeparacao }) {
+function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnviado, aoAtualizarEstoque, aoAtualizarPreco, aoAtualizarCategoria, aoAbrirCatalogo, aoAvaliarCesta, modo = 'separacao', aoAbrirEstoque, aoAbrirEntregas, aoVoltarSeparacao }) {
   const [filtroTamanho, setFiltroTamanho] = useState('todos')
   const [rascunhosEstoque, setRascunhosEstoque] = useState({})
   const [estoqueSalvando, setEstoqueSalvando] = useState('')
@@ -14,6 +15,15 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
   const [rascunhosPrecos, setRascunhosPrecos] = useState({})
   const [precoSalvando, setPrecoSalvando] = useState('')
   const [mensagensPrecos, setMensagensPrecos] = useState({})
+  const [categoriasSalvando, setCategoriasSalvando] = useState({})
+  const [mensagensCategorias, setMensagensCategorias] = useState({})
+
+  async function salvarCategoria(produto, categoria) {
+    setCategoriasSalvando((atuais) => ({ ...atuais, [produto.id]: true }))
+    const resultado = await aoAtualizarCategoria(produto.id, categoria)
+    setMensagensCategorias((atuais) => ({ ...atuais, [produto.id]: resultado.sucesso ? 'Categoria atualizada.' : resultado.erro }))
+    setCategoriasSalvando((atuais) => ({ ...atuais, [produto.id]: false }))
+  }
   const [envioSalvando, setEnvioSalvando] = useState(null)
   const [mensagensEnvio, setMensagensEnvio] = useState({})
   // Mostra o fluxo inteiro para o produtor conseguir continuar do preparado ao enviado.
@@ -156,6 +166,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
 
         <div className="cabecalho-acoes">
           <nav className="abas-pedido" aria-label="Navegação do produtor">
+            <button className="aba-navegacao" type="button" aria-haspopup="dialog" onClick={aoAbrirCatalogo}>Catálogo</button>
             <button
               className={`aba-navegacao ${modo === 'separacao' ? 'aba-ativa' : ''}`}
               type="button"
@@ -291,6 +302,16 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
               <img src={produto.imagem} alt="" />
               <div className="dados-estoque-produtor">
                 <strong>{produto.nome}</strong>
+                <label>
+                  <span>Categoria</span>
+                  <select value={produto.categoria || 'legumes'} disabled={categoriasSalvando[produto.id]}
+                    onChange={(evento) => salvarCategoria(produto, evento.target.value)}>
+                    <option value="frutas">Frutas</option>
+                    <option value="verduras">Verduras</option>
+                    <option value="legumes">Legumes</option>
+                  </select>
+                </label>
+                {mensagensCategorias[produto.id] && <small role="status">{mensagensCategorias[produto.id]}</small>}
                 {produto.estoque <= 10 && (
                   <span className={produto.estoque === 0 ? 'aviso-estoque esgotado' : 'aviso-estoque'}>
                     {produto.estoque === 0 ? 'Esgotado' : `Estoque baixo: ${formatarQuantidade(produto.estoque)} unidade(s)`}
@@ -385,7 +406,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
                     <img
                       className="miniatura-produto-cesta"
                       key={produto.id}
-                      src={produto.imagem ?? `/produtos/${produto.id}-editorial.png`}
+                      src={produto.imagem ?? imagemProduto(produto.id)}
                       alt={produto.nome}
                       title={produto.nome}
                     />
@@ -406,7 +427,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
                         <li className="produto-cesta" key={produto.id}>
                           <img
                             className="imagem-produto-cesta"
-                            src={produto.imagem ?? `/produtos/${produto.id}-editorial.png`}
+                            src={produto.imagem ?? imagemProduto(produto.id)}
                             alt=""
                           />
                           <span className="nome-produto-cesta">{produto.nome}</span>

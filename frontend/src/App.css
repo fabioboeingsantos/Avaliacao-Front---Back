@@ -5,21 +5,22 @@
  */
 .controle-tema {
   position: fixed;
-  z-index: 10;
-  top: 16px;
-  right: 16px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 40px;
-  padding: 8px 12px;
-  border: 2px solid var(--cor-borda);
-  border-radius: 999px;
+  z-index: 2000;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  display: grid;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--cor-borda);
+  border-radius: 50%;
   color: var(--cor-texto-escuro);
   background: var(--cor-branco);
   box-shadow: 0 4px 12px color-mix(in srgb, var(--cor-verde-escuro) 12%, transparent);
-  font-size: var(--texto-rotulo);
-  font-weight: var(--peso-semi);
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .controle-tema:hover {
@@ -27,10 +28,39 @@
   background: var(--cor-verde-claro);
 }
 
-.controle-tema span {
+.controle-tema svg {
+  width: 22px;
+  height: 22px;
   color: var(--cor-amarelo-colheita);
-  font-size: 1.1rem;
-  line-height: 1;
+}
+
+.controle-tema::after {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 7px;
+  color: var(--cor-texto-escuro);
+  background: var(--cor-branco);
+  box-shadow: 0 5px 18px #0002;
+  content: attr(data-tooltip);
+  font-size: .78rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-3px);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+}
+
+.controle-tema:hover::after,
+.controle-tema:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 .pagina-pedido {
@@ -60,8 +90,6 @@
   align-items: center;
   gap: 10px;
 }
-
-.acoes-iniciais .controle-tema { position: static; }
 
 .botao-entrar-inicial,
 .botao-criar-conta-inicial {
@@ -226,7 +254,9 @@
 
 .botao-visibilidade {
   position: absolute;
-  top: 50%;
+  top: 0;
+  bottom: 0;
+  margin-block: auto;
   right: 6px;
   display: grid;
   width: 36px;
@@ -238,7 +268,7 @@
   color: var(--cor-verde-escuro);
   background: transparent;
   cursor: pointer;
-  transform: translateY(-50%);
+  transform: none;
 }
 
 .botao-visibilidade:hover {
@@ -262,7 +292,14 @@
   margin-top: 20px;
 }
 
+.catalogo-acima-saudacao {
+  margin-bottom: 16px;
+}
+
 .acoes-login button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 44px;
   padding: 0;
   border: 0;
   color: var(--cor-verde-escuro);
@@ -289,7 +326,8 @@
   justify-items: end;
   gap: 8px;
   margin: 0 auto;
-  padding: 12px 16px 0;
+  /* Reserva a área do controle de tema fixo para a sessão não ficar por baixo dele. */
+  padding: 12px 72px 0 16px;
   color: var(--cor-texto-escuro);
   font-size: var(--texto-rotulo);
 }
@@ -300,8 +338,11 @@
   min-width: 0;
   max-width: 100%;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
+  margin-inline-start: auto;
+  text-align: right;
 }
 
 .identidade-sessao > span {
@@ -324,10 +365,6 @@
   order: -1;
 }
 
-.barra-sessao .controle-tema {
-  position: static;
-}
-
 .acoes-sessao > * {
   flex-shrink: 0;
   max-width: 100%;
@@ -337,14 +374,31 @@
   position: relative;
 }
 
-/* A arte identifica o acesso à Flora sem ocupar espaço com um rótulo no cabeçalho. */
+.apresentacao-flora {
+  display: flex;
+  grid-row: 2;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+  justify-self: start;
+  margin-inline-start: clamp(0px, 5.3vw, 64px);
+}
+
+.capacidades-flora {
+  margin: 0;
+  padding-inline-start: 20px;
+  color: var(--cor-texto-escuro);
+  font-size: .875rem;
+  line-height: 1.6;
+}
+
 .botao-flora {
   display: flex;
   grid-row: 2;
   justify-self: start;
-  margin-inline-start: clamp(0px, 5.3vw, 64px);
-  width: 112px;
-  min-height: 88px;
+  flex-shrink: 0;
+  width: 128px;
+  min-height: 104px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -358,14 +412,14 @@
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
-.botao-flora-produtor {
+.apresentacao-flora-produtor {
   margin-inline-start: -14px;
 }
 
 .botao-flora img {
   display: block;
-  width: 42px;
-  height: 42px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
   pointer-events: none;
 }
@@ -652,7 +706,8 @@
   font-size: 0.8rem;
 }
 
-.dados-estoque-produtor input {
+.dados-estoque-produtor input,
+.dados-estoque-produtor select {
   width: 100%;
   min-height: 40px;
   padding: 7px 9px;
@@ -1090,19 +1145,23 @@
 .botao {
   min-height: 48px;
   padding: 12px 20px;
-  border: 2px solid transparent;
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
   font-weight: var(--peso-semi);
-  transition: background-color 160ms ease, border-color 160ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
 .botao-primario {
   color: var(--cor-branco);
-  background: var(--cor-verde-horta);
+  border-color: var(--cor-verde-escuro);
+  background: linear-gradient(135deg, var(--cor-verde-horta), var(--cor-verde-escuro));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--cor-verde-escuro) 28%, transparent), inset 0 1px 0 color-mix(in srgb, var(--cor-branco) 18%, transparent);
 }
 
 .botao-primario:hover {
   background: var(--cor-verde-escuro);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--cor-verde-escuro) 42%, transparent), 0 0 0 2px color-mix(in srgb, var(--cor-verde-horta) 22%, transparent);
+  transform: translateY(-1px);
 }
 
 .botao-secundario {
@@ -1115,6 +1174,70 @@
 .botao-secundario[aria-pressed='true'] {
   color: var(--cor-verde-escuro);
   background: var(--cor-verde-claro);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--cor-verde-escuro) 18%, transparent);
+}
+
+/* Interação padrão inspirada no botão dinâmico do guia; controles compactos
+   mantêm seu desenho próprio, mas todos os botões de ação recebem resposta. */
+button {
+  transition-property: box-shadow;
+  transition-duration: 160ms;
+  transition-timing-function: ease;
+}
+
+button:hover:not(:disabled) {
+  box-shadow: 0 5px 15px color-mix(in srgb, var(--cor-verde-escuro) 24%, transparent);
+}
+
+button:disabled {
+  box-shadow: none;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .botao,
+  button {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto;
+  }
+
+  .botao-primario:hover {
+    transform: none;
+  }
+}
+
+/* Acabamento dinâmico compartilhado: alcança também botões legados que ainda
+   não usam as classes .botao-primario/.botao-secundario. */
+button:not(.controle-tema):not(.botao-estrela):not(.botao-zero-estrelas):not(.botao-quantidade-fechamento):not(.botao-completar-produto):not(.botao-flora):not(.fechar-dialogo-fundo) {
+  min-height: 40px;
+  border: 1px solid var(--cor-verde-escuro);
+  border-radius: 10px;
+  color: var(--cor-branco);
+  background: linear-gradient(135deg, var(--cor-verde-horta), var(--cor-verde-escuro));
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--cor-verde-escuro) 24%, transparent), inset 0 1px 0 color-mix(in srgb, var(--cor-branco) 15%, transparent);
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+button:not(.controle-tema):not(.botao-visibilidade):not(.botao-estrela):not(.botao-zero-estrelas):not(.botao-quantidade-fechamento):not(.botao-completar-produto):not(.botao-flora):not(.fechar-dialogo-fundo):hover:not(:disabled) {
+  border-color: var(--cor-verde-escuro);
+  color: var(--cor-branco);
+  background: var(--cor-verde-escuro);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--cor-verde-escuro) 38%, transparent), 0 0 0 2px color-mix(in srgb, var(--cor-verde-horta) 20%, transparent);
+  transform: translateY(-1px);
+}
+
+button:not(.controle-tema):not(.botao-estrela):not(.botao-zero-estrelas):not(.botao-quantidade-fechamento):not(.botao-completar-produto):not(.botao-flora):not(.fechar-dialogo-fundo):disabled {
+  box-shadow: none;
+  transform: none;
+  opacity: .65;
+}
+
+/* O controle de senha permanece centralizado em todos os estados. */
+button.botao-visibilidade,
+button.botao-visibilidade:hover:not(:disabled),
+button.botao-visibilidade:active,
+button.botao-visibilidade:disabled {
+  transform: none;
 }
 
 .resumo-cestas {
@@ -2425,7 +2548,7 @@
     width: 100%;
     justify-items: stretch;
     gap: 8px;
-    padding: 10px 14px 0;
+    padding: 10px 68px 0 14px;
   }
 
   .identidade-sessao {
@@ -2437,22 +2560,19 @@
 
   .acoes-sessao {
     width: 100%;
-    justify-content: center;
+    justify-content: flex-end;
     flex-wrap: wrap;
     gap: 8px;
   }
 
-  .botao-flora {
+  .apresentacao-flora {
     justify-self: start;
-    margin-inline-start: clamp(0px, 5.3vw, 64px);
-  }
-
-  .botao-flora-produtor {
     margin-inline-start: 0;
+    gap: 12px;
   }
 
-  .barra-sessao .controle-tema {
-    min-height: 40px;
+  .apresentacao-flora-produtor {
+    margin-inline-start: 0;
   }
 
   /* Ancora o painel ao cabeçalho para ele não escapar pela lateral da tela. */
@@ -2482,7 +2602,6 @@
     gap: 8px;
   }
 
-  .acoes-iniciais .controle-tema,
   .botao-entrar-inicial {
     min-height: 42px;
     padding: 7px 12px;
@@ -2595,7 +2714,6 @@
 
 @media (max-width: 380px) {
   .acoes-iniciais { right: 10px; gap: 6px; }
-  .acoes-iniciais .controle-tema,
   .botao-entrar-inicial { padding: 6px 9px; }
   .lista-produtos-editavel,
   .grade-produtos,

@@ -12,13 +12,53 @@
 .assistente-dialogo textarea { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #9dafa2; border-radius: 10px; font: inherit; color: inherit; background: inherit; resize: vertical; }
 .assistente-dialogo .botao-microfone { display: inline-flex; align-items: center; justify-self: start; gap: 8px; margin: 0; }
 .botao-microfone svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
-.assistente-dialogo .botao-microfone[aria-pressed="true"] { border-color: #a33b2b; color: #8a2e23; background: #fff1ed; }
+.assistente-dialogo .botao-microfone[aria-pressed="true"] { border-color: var(--cor-verde-escuro); color: var(--cor-branco); background: var(--cor-verde-escuro); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-verde-horta) 24%, transparent); }
+.feedback-microfone { display: flex; grid-column: 1 / -1; min-height: 42px; align-items: center; gap: 9px; padding: 8px 12px; border: 1px solid var(--cor-verde-horta); border-radius: 10px; color: var(--cor-verde-escuro); background: var(--cor-verde-claro); }
+.microfone-ativo-ponto { width: 9px; height: 9px; flex: 0 0 auto; border-radius: 50%; background: var(--cor-terracota); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-terracota) 18%, transparent); animation: pulso-microfone 1.2s ease-in-out infinite; }
+.feedback-microfone-rotulo { font-size: .82rem; font-weight: 650; white-space: nowrap; }
+.onda-voz { display: flex; height: 24px; flex: 1; align-items: center; justify-content: flex-end; gap: 3px; overflow: hidden; }
+.onda-voz i { width: 3px; height: 8px; flex: 0 0 auto; border-radius: 99px; background: var(--cor-verde-horta); transform-origin: center; animation: onda-microfone 720ms ease-in-out infinite alternate; }
+.onda-voz i:nth-child(4n + 1) { height: 12px; }
+.onda-voz i:nth-child(4n + 2) { height: 20px; }
+.onda-voz i:nth-child(4n + 3) { height: 15px; }
+.onda-voz i:nth-child(1) { animation-delay: -90ms; }
+.onda-voz i:nth-child(2) { animation-delay: -210ms; }
+.onda-voz i:nth-child(3) { animation-delay: -330ms; }
+.onda-voz i:nth-child(4) { animation-delay: -450ms; }
+.onda-voz i:nth-child(5) { animation-delay: -570ms; }
+.onda-voz i:nth-child(6) { animation-delay: -150ms; }
+.onda-voz i:nth-child(7) { animation-delay: -270ms; }
+.onda-voz i:nth-child(8) { animation-delay: -390ms; }
+.onda-voz i:nth-child(9) { animation-delay: -510ms; }
+.onda-voz i:nth-child(10) { animation-delay: -630ms; }
+.onda-voz i:nth-child(11) { animation-delay: -180ms; }
+.onda-voz i:nth-child(12) { animation-delay: -300ms; }
+.onda-voz i:nth-child(13) { animation-delay: -420ms; }
+.onda-voz i:nth-child(14) { animation-delay: -540ms; }
+.onda-voz i:nth-child(15) { animation-delay: -660ms; }
+@keyframes onda-microfone { to { transform: scaleY(.38); opacity: .65; } }
+@keyframes pulso-microfone { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--cor-terracota) 14%, transparent); } }
 .estado-voz { margin: 0; font-size: .85rem; line-height: 1.4; }
-.assistente-dialogo button { min-height: 40px; padding: 8px 14px; margin: 6px 6px 6px 0; border: 1px solid #688472; border-radius: 10px; background: transparent; color: inherit; cursor: pointer; font: inherit; }
-.assistente-dialogo button[type=submit], .assistente-previa button:first-of-type { background: #1f4d2e; color: white; }
+.assistente-dialogo button { min-height: 40px; padding: 8px 14px; margin: 6px 6px 6px 0; border: 1px solid var(--cor-verde-horta); border-radius: 10px; background: var(--cor-branco); color: var(--cor-verde-escuro); cursor: pointer; font: inherit; transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
+.assistente-dialogo button[type=submit], .assistente-previa button:first-of-type { border-color: var(--cor-verde-escuro); background: linear-gradient(135deg, var(--cor-verde-horta), var(--cor-verde-escuro)); color: var(--cor-branco); box-shadow: 0 4px 12px color-mix(in srgb, var(--cor-verde-escuro) 28%, transparent); }
 .assistente-dialogo button:disabled { opacity: .6; cursor: wait; }
 .assistente-dialogo :focus-visible { outline: 3px solid #93b856; outline-offset: 3px; }
 .assistente-previa { margin: 16px 0; padding: 14px; border: 1px solid #9dafa2; border-radius: 12px; }
+.flora-conversa { display: flex; flex-direction: column; gap: 12px; max-height: 38dvh; overflow-y: auto; margin: 16px 0; padding: 4px; }
+.flora-mensagem { max-width: 92%; padding: 12px 14px; border: 1px solid #9dafa2; border-radius: 14px; overflow-wrap: anywhere; }
+.flora-mensagem p { margin: 6px 0 0; line-height: 1.5; }
+.flora-mensagem strong { font-size: .8rem; }
+.flora-mensagem-usuario { align-self: flex-end; background: #1f4d2e; color: white; }
+.flora-mensagem-flora { align-self: flex-start; background: var(--cor-verde-claro); }
+@media (min-height: 700px) {
+  .assistente-dialogo[open] { display: flex; flex-direction: column; box-sizing: border-box; height: min(850px, 90dvh); max-height: 90dvh; overflow: hidden; }
+  .assistente-dialogo > header, .assistente-dialogo > form, .assistente-dialogo > button, .assistente-dialogo > .controles-audio-flora, .assistente-dialogo > .assistente-previa { flex-shrink: 0; }
+  .flora-conversa { flex: 1; min-height: 70px; max-height: none; margin: 10px 0; }
+  .assistente-dialogo .assistente-previa { margin: 6px 0; padding: 8px; }
+  .assistente-dialogo .assistente-previa p { margin: 2px 0 6px; }
+  .assistente-dialogo form { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .assistente-dialogo form > label, .assistente-dialogo form > textarea, .assistente-dialogo form > small, .assistente-dialogo form > p { grid-column: 1 / -1; }
+}
 .aviso-confirmacao-separacao { padding: 10px; border-radius: 8px; background: var(--cor-verde-claro); }
 .resposta-texto-flora { white-space: pre-line; overflow-wrap: anywhere; }
 .controles-audio-flora, .identidade-flora-dialogo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -27,4 +67,4 @@
 .presenca-flora { width: 52px; height: 52px; object-fit: contain; border-radius: 50%; }
 .presenca-flora-ativa { animation: presenca-flora 1.6s ease-in-out infinite; }
 @keyframes presenca-flora { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--cor-verde-horta) 20%, transparent); } }
-@media (prefers-reduced-motion: reduce) { .presenca-flora-ativa { animation: none; outline: 2px solid var(--cor-verde-horta); } }
+@media (prefers-reduced-motion: reduce) { .presenca-flora-ativa, .microfone-ativo-ponto, .onda-voz i { animation: none; } .presenca-flora-ativa { outline: 2px solid var(--cor-verde-horta); } }

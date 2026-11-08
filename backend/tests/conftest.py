@@ -78,7 +78,8 @@ def cliente(monkeypatch) -> Generator[TestClient, None, None]:
                 email_verificado=True,
             ),
             *[
-                Produto(id=produto_id, nome=produto_id.title())
+                Produto(id=produto_id, nome=produto_id.title(),
+                        categoria="verduras" if produto_id in {"alface", "couve"} else "legumes")
                 for produto_id in (
                     "alface",
                     "tomate",

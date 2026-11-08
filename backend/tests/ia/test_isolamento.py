@@ -8,9 +8,9 @@ def test_simulado_recebe_somente_cestas_da_conta(cliente, monkeypatch):
     original = simulado.analisar
     capturas = []
 
-    def analisar(mensagem, perfil, catalogo, cestas):
+    def analisar(mensagem, perfil, catalogo, cestas, historico=None):
         capturas.extend(cestas)
-        return original(mensagem, perfil, catalogo, cestas)
+        return original(mensagem, perfil, catalogo, cestas, historico=historico)
 
     monkeypatch.setenv("ASSISTENTE_MODO", "simulado")
     monkeypatch.setattr(simulado, "analisar", analisar)

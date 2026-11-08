@@ -1,6 +1,6 @@
-# Flora do Vale — arquitetura da assistente de IA
+# Flora — arquitetura da assistente de IA
 
-Nome público: **Flora do Vale**. O botão de acesso é **Falar com a Flora**.
+Nome público: **Flora**. O botão de acesso é **Falar com a Flora**.
 A apresentação é: “Olá! Sou a Flora, a assistente virtual do Cesta do Vale.
 Como posso ajudar?”. Os nomes técnicos de arquivos e endpoints permanecem `assistente`.
 

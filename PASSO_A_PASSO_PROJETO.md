@@ -3,6 +3,8 @@
 ## 1. Visão geral
 
 O **Cesta do Vale** é um sistema para gerenciar pedidos semanais de cestas de uma horta comunitária.
+Além dos pedidos e do estoque, a versão atual inclui catálogo por categoria, avaliação dos pedidos e a Flora,
+assistente que consulta produtos e apoia os fluxos de assinante e produtor.
 
 O sistema possui dois perfis principais:
 
@@ -18,6 +20,7 @@ O fluxo principal é:
 5. Vanderlei visualiza as cestas e registra os produtos separados.
 6. Vanderlei salva o progresso da separação. Quando todos os itens forem separados, a cesta fica preparada para envio; se houver faltantes, pode encerrar com as quantidades disponíveis. Nesse caso, o valor é recalculado com os preços unitários congelados no pedido e os faltantes ficam destacados.
 7. Na lista de pedidos, Vanderlei confirma o envio. Aline recebe uma notificação persistente com o estado real da separação e, se houver faltantes, com a quantidade recebida e o valor ajustado. Aline confere e confirma o recebimento; sem confirmação, a cesta passa para entregue sete dias após o envio.
+8. A assinante também pode consultar o catálogo por categoria e conversar com a Flora para consultar produtos, pedir uma recomendação ou preparar uma cesta para revisar antes de confirmar.
 
 ## 2. Tecnologias utilizadas
 
@@ -28,6 +31,8 @@ O fluxo principal é:
 - **JavaScript com JSX:** linguagem dos componentes.
 - **CSS puro:** estilização e responsividade.
 - **Fetch API:** comunicação com o backend.
+- **Catálogo:** busca e filtros por frutas, verduras e legumes; o produtor pode cadastrar itens e editar categoria, estoque e preço.
+- **Flora:** assistente com modo simulado local ou integração opcional com OpenRouter. Aceita texto e, quando o navegador oferece suporte, fala para texto; as respostas podem ser ouvidas pela síntese de voz do navegador.
 - **Notificações internas:** a API armazena avisos de pedido no banco, e a interface atualiza e exibe esses avisos no sino; há cache local no navegador.
 - **Oxlint:** verificação de qualidade do código.
 
@@ -48,6 +53,9 @@ O fluxo principal é:
 - **SQLite:** fallback local quando nenhuma URL PostgreSQL/MySQL é configurada.
 - **PostgreSQL/Supabase:** banco compartilhado atualmente configurado no `.env`.
 - **MySQL:** opção para ambientes locais via Docker Compose.
+
+O head das migrações no código atual é `20261107_0015`, que adiciona categorias aos produtos. Isso
+indica a revisão disponível no repositório, não a revisão atualmente aplicada a um banco remoto.
 
 ## 3. Estrutura do projeto
 
@@ -232,8 +240,9 @@ Antes de escrever código, documentar:
 - o que ficará fora do escopo.
 
 O sistema permite confirmar o recebimento da cesta, controlar o estoque por unidades e exibir
-notificações internas no navegador. Não inclui pagamento, estoque em quilos, troca de produtos ou
-avisos externos por e-mail, SMS ou mensagem.
+notificações internas no navegador. E-mail é usado para confirmar a conta e recuperar a senha; o
+sistema não envia notificações de pedidos por e-mail, SMS ou mensageria. Pagamentos, estoque em quilos
+e substituição de produtos também ficam fora do escopo atual.
 
 ### Etapa 2 — Criar o frontend
 
@@ -275,7 +284,9 @@ Criar os modelos para:
 - produtos;
 - cestas;
 - itens da cesta;
-- separações.
+- separações;
+- notificações e tokens de confirmação/recuperação;
+- avaliações da assinante e do produtor nos pedidos.
 
 Em seguida, criar as tabelas e inserir dados iniciais:
 
@@ -319,6 +330,7 @@ Rotas atuais:
 | Método | Caminho | Finalidade |
 |---|---|---|
 | `GET` | `/saude` | Verificar se a API está funcionando |
+| `GET` | `/health` | Verificação de disponibilidade usada pela hospedagem |
 | `POST` | `/usuarios` | Cadastrar conta de assinante |
 | `GET` | `/usuarios/me`, `/usuarios/eu` | Consultar a conta autenticada |
 | `POST` | `/autenticacao/login` | Validar o acesso e iniciar uma sessão |
@@ -328,8 +340,11 @@ Rotas atuais:
 | `POST` | `/autenticacao/solicitar-recuperacao` | Solicitar recuperação de senha por e-mail |
 | `POST` | `/autenticacao/redefinir-senha` | Redefinir a senha com token de uso único |
 | `GET` | `/produtos` | Listar o catálogo, o estoque e o preço unitário disponível |
+| `POST` | `/produtos` | Adicionar um produto ao catálogo (produtor) |
+| `PUT` | `/produtos/{produto_id}/categoria` | Atualizar a categoria do produto (produtor) |
 | `PUT` | `/produtos/{produto_id}/estoque` | Permitir ao produtor atualizar o estoque de um produto |
 | `PUT` | `/produtos/{produto_id}/preco` | Permitir ao produtor atualizar o preço unitário de um produto |
+| `POST` | `/assistente/analisar` | Analisar mensagem enviada à Flora pelo perfil autenticado |
 | `GET` | `/cestas` | Listar cestas; assinantes veem somente as próprias |
 | `GET` | `/cestas/{id}` | Consultar uma cesta dentro do escopo do usuário |
 | `POST` | `/cestas` | Criar uma cesta pendente para a conta autenticada |
@@ -340,9 +355,11 @@ Rotas atuais:
 | `POST` | `/cestas/{id}/enviar` | Marcar como enviado e criar uma notificação para a pessoa assinante |
 | `POST` | `/cestas/{id}/separacoes` | Registrar uma separação |
 | `POST` | `/cestas/{id}/separacoes/lote` | Registrar várias separações atomicamente |
+| `POST` | `/cestas/{id}/separacoes/encerrar-com-faltantes` | Encerrar com as quantidades disponíveis e recalcular o valor |
 | `POST` | `/cestas/{id}/separacoes/desfazer` | Desfazer quantidades separadas antes de concluir |
 | `POST` | `/cestas/{id}/separacoes/concluir` | Concluir após separar todos os itens |
 | `POST` | `/cestas/{id}/entrega/confirmar` | Confirmar o recebimento da própria cesta |
+| `POST` | `/cestas/{id}/avaliacao` | Avaliar de zero a cinco estrelas após a entrega |
 | `GET` | `/notificacoes` | Listar notificações persistidas da conta autenticada |
 | `POST` | `/notificacoes/lidas` | Marcar notificações como lidas |
 
@@ -377,8 +394,11 @@ O frontend:
 
 - envia login e cadastro à API;
 - busca as cestas permitidas para a conta;
-- carrega o catálogo e o estoque disponível antes de montar a cesta;
+- carrega o catálogo por categorias e o estoque disponível antes de montar a cesta;
+- oferece ao produtor cadastro de produtos e edição de categoria, estoque e preço;
 - exibe preço unitário, subtotal por produto e total atualizado conforme a quantidade muda;
+- abre a Flora para consultas ou propostas de pedido; a proposta precisa ser revisada e confirmada;
+- usa reconhecimento de voz do navegador quando disponível e permite ouvir a resposta com síntese de voz;
 - persiste pedidos concluídos, separações e confirmação de recebimento;
 - permite cancelar pedidos pendentes, com confirmação da pessoa usuária;
 - permite ao produtor atualizar o estoque e receber notificações internas sobre mudanças nos pedidos;
@@ -395,10 +415,16 @@ Depois do login:
 - o perfil `produtor` também acessa o gerenciamento do estoque.
 
 O backend valida a conta ativa e o grupo em cada operação protegida. A sessão é enviada em cookie
-JWT `HttpOnly` com validade mínima de 24 horas; ao reabrir a aplicação, o frontend consulta
+JWT `HttpOnly` com validade padrão de 24 horas, configurável pelo ambiente; ao reabrir a aplicação, o frontend consulta
 `/usuarios/me` para restaurar a sessão ainda válida. As senhas são armazenadas com hash Argon2. As
 permissões ficam centralizadas na matriz de grupos, e os serviços validam as regras de negócio
 específicas.
+
+O cadastro valida o formato do e-mail. Com SMTP configurado, envia um link de confirmação de uso
+único (24 horas) e oferece recuperação de senha (link de 30 minutos). No comportamento atual, a
+confirmação é opcional e não bloqueia o login. Para exigir comprovação do endereço antes de liberar
+acesso, é necessário alterar a regra de login no backend; o envio de um link, por si só, não torna
+essa exigência obrigatória. Veja [Autenticação por e-mail](docs/AUTENTICACAO_EMAIL.md).
 
 Na tela de fechamento, o produtor ajusta as quantidades e pode salvar o progresso enquanto trabalha.
 Também pode encerrar com faltantes e ajustar o valor quando não houver estoque suficiente. Ao concluir,
@@ -426,6 +452,11 @@ Fluxo de teste recomendado (use contas e pedidos de demonstração; não altere 
     separação parcial, itens faltantes e valor ajustado, sem dizer que todos os itens foram separados.
 12. Confirme o recebimento como assinante. Verifique **Entregue** e que o total reduzido permanece no
     histórico. O preço do pedido deve continuar igual mesmo se o produtor alterar o preço atual do catálogo.
+13. Abra o catálogo, filtre por categoria e pesquise um produto. Como produtor, cadastre um item de
+    demonstração e confira que categoria, preço e estoque aparecem corretamente.
+14. Abra a Flora, faça uma consulta fictícia ao catálogo ou peça uma proposta de cesta. Revise a
+    composição; confirme somente se quiser criar um pedido. Se a OpenRouter estiver ativa, lembre-se
+    de que cada análise usa três chamadas ao provedor; o modo `simulado` funciona sem chave externa.
 
 ### Etapa 10 — Preparar a publicação
 
@@ -486,15 +517,20 @@ npm.cmd run dev -- --host 0.0.0.0
 Descubra o IPv4 do computador com `ipconfig` e abra no celular `http://IP_DO_COMPUTADOR:5173`.
 Mantenha o backend em execução e permita a porta no firewall caso o Windows solicite.
 
-## Migrações Supabase para preços e faltantes
+## Migrações do banco
 
-As revisões Alembic `20261104_0013` e `20261104_0014` estão em
-`backend/migracoes/versions/`. Para bancos que ainda não receberam essas alterações, execute
-`python -m alembic upgrade head` no diretório `backend`, com a conexão apontando para o banco correto.
-A migração 0014 preserva os preços unitários já registrados e preenche somente snapshots nulos
-com o preço de catálogo usado anteriormente como fallback. O Supabase deste projeto já está na
-revisão `20261104_0014`, conferida por consulta ao banco. Os arquivos SQL avulsos foram removidos
-a pedido; as revisões Alembic mantêm o histórico.
+As revisões Alembic ficam em `backend/migracoes/versions/`. O head do código atual é `20261107_0015`;
+além dos preços congelados nos pedidos e das notificações, essa revisão adiciona categorias aos
+produtos existentes. Para conferir a revisão aplicada e atualizar um banco, entre na pasta `backend`
+com a conexão configurada para o destino correto:
+
+```powershell
+python -m alembic current
+python -m alembic upgrade head
+```
+
+Faça backup antes de atualizar um banco de produção. A versão do código não comprova qual revisão
+está instalada no Supabase ou em outro banco remoto; confira o ambiente de destino antes do deploy.
 
 ## 9. Melhorias futuras
 
