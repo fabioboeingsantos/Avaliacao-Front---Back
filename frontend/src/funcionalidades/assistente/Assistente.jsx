@@ -22,6 +22,7 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
   const textoBaseVoz = useRef('')
   const textoFinalVoz = useRef('')
   const limiteEscuta = useRef(null)
+  const comandoConfirmacaoExecutado = useRef(false)
 
   useEffect(() => {
     fimConversa.current?.scrollIntoView?.({ block: 'nearest' })
@@ -58,6 +59,8 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
 
     const motor = new APIReconhecimento()
     reconhecimento.current = motor
+    const modoConfirmacaoVoz = resultado?.status === 'proposta' && resultado?.qa.status === 'aprovado' && !mensagem.trim()
+    comandoConfirmacaoExecutado.current = false
     textoBaseVoz.current = mensagem.trim()
     textoFinalVoz.current = ''
     motor.lang = 'pt-BR'
@@ -66,6 +69,7 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
     setErro('')
     setEstadoVoz('Microfone ativo. Fale seu pedido; selecione “Parar gravação” quando terminar.')
     setOuvindo(true)
+    if (modoConfirmacaoVoz) setEstadoVoz('Microfone ativo. Diga “confirmar operação” para confirmar a sugestão.')
 
     motor.onresult = (evento) => {
       let parcial = ''
@@ -73,6 +77,18 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
         const trecho = evento.results[indice][0].transcript
         if (evento.results[indice].isFinal) textoFinalVoz.current += `${trecho} `
         else parcial += trecho
+      }
+      if (modoConfirmacaoVoz && textoFinalVoz.current.trim()) {
+        const comando = textoFinalVoz.current.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z\s]/g, ' ').trim().replace(/\s+/g, ' ')
+        if (comando === 'confirmar operacao' && !comandoConfirmacaoExecutado.current) {
+          comandoConfirmacaoExecutado.current = true
+          clearTimeout(limiteEscuta.current)
+          motor.stop()
+          setEstadoVoz('Comando reconhecido. Confirmando operação…')
+          confirmar(true)
+          return
+        }
+        return
       }
       const transcrito = `${textoBaseVoz.current}${textoBaseVoz.current ? ' ' : ''}${textoFinalVoz.current}${parcial}`
       setMensagem(transcrito.trimStart().slice(0, 2000))
@@ -90,6 +106,10 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
     motor.onend = () => {
       clearTimeout(limiteEscuta.current)
       setOuvindo(false)
+      if (modoConfirmacaoVoz && !comandoConfirmacaoExecutado.current) {
+        setEstadoVoz('Comando não reconhecido. Tente dizer “confirmar operação” novamente.')
+        return
+      }
       setEstadoVoz((atual) => atual.startsWith('Ouvindo.')
         ? (textoFinalVoz.current.trim() ? 'Transcrição concluída. Revise o texto antes de analisar o pedido.' : 'A escuta foi encerrada. Você pode tentar novamente ou digitar o pedido.')
         : atual)
@@ -140,8 +160,8 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
     }
   }
 
-  async function confirmar() {
-    if (ocupado || ouvindo || concluido || resultado?.qa.status !== 'aprovado') return
+  async function confirmar(porVoz = false) {
+    if (ocupado || (ouvindo && !porVoz) || concluido || resultado?.qa.status !== 'aprovado') return
     parar()
     setOcupado(true)
     setErro('')
@@ -217,7 +237,7 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
               evento.preventDefault()
               if (!evento.repeat && !ocupado && !ouvindo && mensagem.trim()) evento.currentTarget.form?.requestSubmit()
             }}
-            placeholder={perfil === 'produtor' ? 'Flora, quantos tomates tenho no estoque? Ou: mostre as entregas pendentes.' : 'Quero uma cesta média com 2 tomates e 1 cenoura, sem cebola'} />
+            placeholder={perfil === 'produtor' ? 'Flora, quantos tomates tenho no estoque? Ou: mostre as entregas pendentes.' : 'Quero 2 tomates e 1 cenoura, sem cebola'} />
           <button type="button" className="botao-microfone" onClick={alternarMicrofone} disabled={ocupado || concluido} aria-pressed={ouvindo}>
             <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
               <rect x="9" y="2.5" width="6" height="12" rx="3" />
@@ -232,7 +252,6 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
           </div>}
           {!suporteVoz && <small className="estado-voz">A fala para texto pode não estar disponível neste navegador. A digitação continua disponível.</small>}
           {estadoVoz && <p className="estado-voz" role="status" aria-live="polite">{estadoVoz}</p>}
-          <button type="submit" disabled={ocupado || ouvindo || !mensagem.trim()}>{ocupado ? 'Aguarde…' : 'Enviar mensagem'}</button>
         </form>
         {erro && <p role="alert">{erro}</p>}
         <button type="button" disabled={ocupado} onClick={() => aoManual(aprovado ? proposta : null)}>Continuar pelo fluxo manual</button>

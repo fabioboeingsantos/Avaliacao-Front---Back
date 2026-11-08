@@ -37,6 +37,9 @@ function TelaHistoricoPedidos({
 }) {
   const [pedidoCancelando, setPedidoCancelando] = useState(null)
   const [erroCancelamento, setErroCancelamento] = useState('')
+  const pedidosOrdenados = [...pedidos].sort((pedidoA, pedidoB) =>
+    Number(pedidoB.situacao === 'Pendente') - Number(pedidoA.situacao === 'Pendente'),
+  )
 
   async function cancelarPedido(pedido) {
     if (!window.confirm('Deseja cancelar este pedido? Essa ação não poderá ser desfeita.')) {
@@ -95,7 +98,7 @@ function TelaHistoricoPedidos({
         </section>
       ) : (
         <section className="lista-historico" aria-label="Pedidos registrados">
-          {pedidos.map((pedido) => (
+          {pedidosOrdenados.map((pedido) => (
             <details className="cartao-historico" key={pedido.id}>
               <summary className="resumo-pedido-recolhido">
               <div className="cabecalho-historico">
