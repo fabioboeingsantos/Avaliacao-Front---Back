@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { analisarPedido } from './api'
+import OrbeFlora from './OrbeFlora'
 import useRespostaFalada from './useAudioFlora'
 import './Assistente.css'
 
@@ -14,9 +15,12 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
   const [concluido, setConcluido] = useState(false)
   const [ouvindo, setOuvindo] = useState(false)
   const suporteVoz = typeof window !== 'undefined' && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition)
+  const emTesteAutomatizado = typeof window !== 'undefined' && Boolean(window.__floraTeste)
   const [estadoVoz, setEstadoVoz] = useState('')
-  const [audioAutomatico, setAudioAutomatico] = useState(false)
+  const [audioAutomatico, setAudioAutomatico] = useState(!emTesteAutomatizado)
+  const [pulsoAtividade, setPulsoAtividade] = useState(0)
   const { falar, parar, falando, suportaAudio, erroAudio, carregandoAudio } = useRespostaFalada()
+  const saudacaoInicialFeita = useRef(false)
   const requisicao = useRef(null)
   const reconhecimento = useRef(null)
   const textoBaseVoz = useRef('')
@@ -78,6 +82,7 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
         if (evento.results[indice].isFinal) textoFinalVoz.current += `${trecho} `
         else parcial += trecho
       }
+      setPulsoAtividade((atual) => atual + 1)
       if (modoConfirmacaoVoz && textoFinalVoz.current.trim()) {
         const comando = textoFinalVoz.current.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z\s]/g, ' ').trim().replace(/\s+/g, ' ')
         if (comando === 'confirmar operacao' && !comandoConfirmacaoExecutado.current) {
@@ -127,22 +132,22 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
     }
   }
 
-  async function analisar(evento) {
-    evento.preventDefault()
-    if (!mensagem.trim() || ocupado) return
+  async function enviarMensagemTexto(textoParaEnviar) {
+    const enviada = (textoParaEnviar ?? mensagem).trim()
+    if (!enviada || ocupado) return
     parar()
     if (ouvindo) reconhecimento.current?.stop()
     setOcupado(true)
     setErro('')
     setResultado(null)
     requisicao.current = new AbortController()
-    const enviada = mensagem.trim()
     const conversaAnterior = historico
     setHistorico((atual) => [...atual, { papel: 'usuario', texto: enviada }])
     setMensagem('')
     try {
       const dados = await analisarPedido(enviada, requisicao.current.signal, conversaAnterior.slice(-100))
       setResultado(dados)
+      setPulsoAtividade((atual) => atual + 1)
       const detalhes = dados.proposta ? [
         dados.proposta.tamanho ? `Cesta ${dados.proposta.tamanho === 'media' ? 'média' : dados.proposta.tamanho} · ${dados.proposta.modo === 'pronta' ? 'pronta' : 'selecionável'}.` : '',
         dados.proposta.cesta_id ? `Pedido nº ${dados.proposta.cesta_id}.` : '',
@@ -158,6 +163,11 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
     } finally {
       setOcupado(false)
     }
+  }
+
+  async function analisar(evento) {
+    evento.preventDefault()
+    await enviarMensagemTexto(mensagem)
   }
 
   async function confirmar(porVoz = false) {
@@ -188,13 +198,30 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
     proposta?.concluir_separacao ? 'Confira todos os itens antes de confirmar a separação completa.' : '',
   ].filter(Boolean).join(' ')
 
+  const textoBoasVindas = perfil === 'produtor'
+    ? 'Olá! Que alegria ter você por aqui no Cesta do Vale! Eu sou a Flora e estou pronta para apoiar o seu dia na horta. Posso consultar o catálogo, o estoque e os pedidos, ou ajudar na separação das cestas. Fique à vontade para usar o microfone ou digitar sua mensagem!'
+    : 'Olá! Que alegria ter você aqui no Cesta do Vale! Eu sou a Flora e estou pronta para ajudar com todo carinho. Posso mostrar o catálogo completo, recomendar uma cesta fresquinha ou consultar seus pedidos. Fique à vontade para usar o microfone ou digitar o que você prefere!'
+
+  useEffect(() => {
+    if (emTesteAutomatizado || !suportaAudio) return undefined
+    const timerSaudacao = setTimeout(() => {
+      if (!saudacaoInicialFeita.current) {
+        saudacaoInicialFeita.current = true
+        falar(textoBoasVindas)
+      }
+    }, 50)
+    return () => clearTimeout(timerSaudacao)
+  }, [emTesteAutomatizado, suportaAudio, falar, textoBoasVindas])
+
   useEffect(() => {
     if (audioAutomatico && resultado && textoResposta) falar(textoResposta)
-    return parar
+    return () => {
+      if (resultado) parar()
+    }
   }, [audioAutomatico, resultado, textoResposta, falar, parar])
 
   return (
-    <dialog ref={dialogo} className="assistente-dialogo" onCancel={aoFechar} aria-labelledby="titulo-assistente">
+    <dialog ref={dialogo} className="assistente-dialogo assistente-dialogo-dinamico" onCancel={aoFechar} aria-labelledby="titulo-assistente">
       <header>
         <div className="identidade-flora-dialogo">
           <img className={`presenca-flora ${ouvindo || ocupado || falando ? 'presenca-flora-ativa' : ''}`} src="/marca/flora-do-vale-nucleo-v1.png" width="52" height="52" alt="" />
@@ -204,16 +231,34 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
       </header>
       {suportaAudio ? <div className="controles-audio-flora">
         <label className="opcao-audio-flora"><input type="checkbox" checked={audioAutomatico} onChange={(evento) => setAudioAutomatico(evento.target.checked)} />Responder por áudio</label>
-        {resultado && <button type="button" onClick={() => falando ? parar() : falar(textoResposta)} disabled={ocupado || ouvindo} aria-pressed={falando}>{falando ? 'Parar áudio' : 'Ouvir resposta'}</button>}
+        {(resultado || falando) && <button type="button" onClick={() => falando ? parar() : falar(resultado ? textoResposta : textoBoasVindas)} disabled={ocupado || ouvindo} aria-pressed={falando}>{falando ? 'Parar áudio' : 'Ouvir resposta'}</button>}
       </div> : <p className="estado-voz">A voz está indisponível neste navegador. As respostas aparecem em texto.</p>}
       {carregandoAudio && <p className="estado-voz" role="status">Preparando áudio da Flora…</p>}
       {erroAudio && <p className="estado-voz" role="status">{erroAudio}</p>}
+      {!concluido && (
+        <OrbeFlora
+          ouvindo={ouvindo}
+          ocupado={ocupado}
+          falando={falando}
+          carregandoAudio={carregandoAudio}
+          aprovado={aprovado}
+          pulsoAtividade={pulsoAtividade}
+          mensagemDigitada={mensagem}
+          resultado={resultado}
+          estadoVoz={estadoVoz}
+          perfil={perfil}
+          produtos={produtos}
+          aoClicarOrbe={alternarMicrofone}
+          aoExecutarAcaoRapida={(comando) => enviarMensagemTexto(comando)}
+          aoFluxoManual={() => aoManual(aprovado ? proposta : null)}
+        />
+      )}
       {concluido ? <div role="status"><p>{textoConclusao}</p><button onClick={aoFechar}>Continuar</button></div> : <>
         <div className="flora-conversa" role="log" aria-label="Conversa com a Flora" aria-live="polite" aria-relevant="additions">
           <div className="flora-mensagem flora-mensagem-flora">
             <strong>Flora</strong>
-            <p>Olá! Como posso ajudar?</p>
-            <p>{perfil === 'produtor' ? 'Consulte o catálogo, estoque e pedidos ou me diga qual cesta deseja separar.' : 'Posso mostrar o catálogo completo, recomendar uma cesta ou consultar seus pedidos. O que você prefere?'}</p>
+            <p>{perfil === 'produtor' ? 'Olá! Que alegria ter você por aqui no Cesta do Vale! Eu sou a Flora e estou pronta para apoiar o seu dia na horta.' : 'Olá! Que alegria ter você aqui no Cesta do Vale! Eu sou a Flora e estou pronta para ajudar com todo carinho.'}</p>
+            <p>{perfil === 'produtor' ? 'Posso consultar o catálogo, o estoque e os pedidos, ou ajudar na separação das cestas. Fique à vontade para usar o microfone ou digitar sua mensagem!' : 'Posso mostrar o catálogo completo, recomendar uma cesta fresquinha ou consultar seus pedidos. Fique à vontade para usar o microfone ou digitar o que você prefere!'}</p>
           </div>
           {historico.map((item, indice) => <div key={indice} className={`flora-mensagem flora-mensagem-${item.papel}`}>
             <strong>{item.papel === 'usuario' ? 'Você' : 'Flora'}</strong>
@@ -231,30 +276,24 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
         <form onSubmit={analisar}>
           <label htmlFor="mensagem-assistente">Sua mensagem</label>
           <textarea id="mensagem-assistente" value={mensagem} maxLength={2000} rows={2} required disabled={ocupado || ouvindo}
-            onChange={(evento) => setMensagem(evento.target.value)}
+            onChange={(evento) => {
+              setMensagem(evento.target.value)
+              setPulsoAtividade((atual) => atual + 1)
+            }}
             onKeyDown={(evento) => {
               if (evento.key !== 'Enter' || evento.shiftKey || evento.nativeEvent.isComposing || evento.keyCode === 229) return
               evento.preventDefault()
               if (!evento.repeat && !ocupado && !ouvindo && mensagem.trim()) evento.currentTarget.form?.requestSubmit()
             }}
             placeholder={perfil === 'produtor' ? 'Flora, quantos tomates tenho no estoque? Ou: mostre as entregas pendentes.' : 'Quero 2 tomates e 1 cenoura, sem cebola'} />
-          <button type="button" className="botao-microfone" onClick={alternarMicrofone} disabled={ocupado || concluido} aria-pressed={ouvindo}>
-            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
-              <rect x="9" y="2.5" width="6" height="12" rx="3" />
-              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3.5M8.5 21.5h7" />
-            </svg>
-            {ouvindo ? 'Parar gravação' : 'Usar microfone'}
-          </button>
           {ouvindo && <div className="feedback-microfone" aria-hidden="true">
             <span className="microfone-ativo-ponto" />
             <span className="feedback-microfone-rotulo">Microfone ativo · captando voz</span>
             <span className="onda-voz">{Array.from({ length: 15 }, (_, indice) => <i key={indice} />)}</span>
           </div>}
           {!suporteVoz && <small className="estado-voz">A fala para texto pode não estar disponível neste navegador. A digitação continua disponível.</small>}
-          {estadoVoz && <p className="estado-voz" role="status" aria-live="polite">{estadoVoz}</p>}
         </form>
         {erro && <p role="alert">{erro}</p>}
-        <button type="button" disabled={ocupado} onClick={() => aoManual(aprovado ? proposta : null)}>Continuar pelo fluxo manual</button>
       </>}
     </dialog>
   )

@@ -112,22 +112,16 @@ explicam essa distinção e como permitir correções mantendo contexto.
 
 ```text
 frontend/src/funcionalidades/assistente/
-├── Assistente.jsx             # Janela e conversa já existentes
-├── FloraVisual.jsx            # Proposto: arte, halos e estado visual
-├── useSessaoVoz.js            # Proposto: escuta, transcrição, reprodução e interrupção
-├── VisualizadorAudio.jsx      # Proposto: intensidade/frequências reais
-└── api.js                     # Endpoint de análise já existente
-
-backend/ia/
-├── servico.py                 # Caso de uso existente
-├── fluxo.py                   # Intérprete, especialista, QA e validação existentes
-└── conversas/                 # Proposto: contexto persistente por conta
+├── Assistente.jsx             # Janela, histórico e envio manual por texto ou microfone
+├── OrbeFlora.jsx              # Orbe HUD reativo com 24 bandas radiais, anéis e onda polar
+├── useAudioFlora.js           # Síntese neural Aoede (MP3) + controle de reprodução
+├── useRespostaFalada.js       # SpeechSynthesis quando configurado como provedor
+└── api.js                     # Endpoints de análise e síntese de voz
 ```
 
-Organizar primeiro os estados; depois conectar microfone/transcrição e reprodução;
-então adicionar continuidade da conversa e interrupção por voz. Uma solução de
-fala em tempo real deve ser escolhida conforme compatibilidade, latência e custo.
-Não é necessário mudar o provedor dos agentes apenas para animar a interface.
+A evolução para conversa de voz em tempo real foi descartada para manter o custo
+e a complexidade adequados ao sistema. A Flora mantém o envio manual, o histórico
+da conversa e a voz já configurada. Não foram adicionados serviços de voz em tempo real.
 
 ## Arte criada para esta direção
 
@@ -142,12 +136,9 @@ Referências internas usadas para direção visual: `frontend/public/marca/logo-
 o detalhamento fotográfico de folhas e a luz quente, com um núcleo em verde e dourado.
 Os halos devem ser renderizados por código para reagirem à interação.
 
-Status: fala para texto no modal da Flora foi implementada com a API de reconhecimento
-de voz do navegador, mediante clique explícito. O navegador controla a permissão e
-seu serviço pode processar o áudio externamente. O frontend envia somente o texto
-revisado ao backend; o Cesta do Vale não grava nem envia arquivos de áudio. A
-disponibilidade varia conforme navegador e dispositivo. Respostas faladas agora usam
-SpeechSynthesis, com opção explícita e controles de reprodução/parada. O indicador
-visual acompanha os estados de escuta, processamento e reprodução; não representa um
-espectro de áudio real. Conversa contínua e memória ainda não foram implementadas.
-Nenhum teste foi executado para essas alterações, conforme orientação do usuário.
+Status:
+
+- **Assistente Flora:** digitação e microfone iniciado por clique, com revisão manual antes do envio e comando por voz `"confirmar operação"` após aprovação da proposta. Não há envio por silêncio nem retomada automática da escuta.
+- **Voz:** saudação ao abrir e respostas faladas, com opção de desativar o áudio e controle para interromper a reprodução. A síntese usa o provedor já configurado e pode gerar consumo no Google.
+- **Orbe visual (`OrbeFlora.jsx`):** anéis em SVG, onda polar e 24 bandas com animação ilustrativa conforme o estado da conversa e os eventos de interação. Não representa um espectro medido do áudio.
+- **Ações rápidas:** sugestões por perfil, acréscimo de produtos da proposta e acesso ao fluxo manual.

@@ -4,13 +4,18 @@
   color: var(--cor-texto-escuro); background: var(--cor-creme-natural);
   box-shadow: 0 20px 80px #0004;
 }
+.assistente-dialogo-dinamico {
+  width: min(520px, calc(100% - 24px));
+}
 .assistente-dialogo::backdrop { background: #14271e99; }
 .assistente-dialogo header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .assistente-dialogo h2 { margin: 4px 0 12px; font-size: 1.5rem; }
 .assistente-rotulo { margin: 0; font-size: .8rem; }
 .assistente-dialogo form { display: grid; gap: 10px; }
 .assistente-dialogo textarea { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #9dafa2; border-radius: 10px; font: inherit; color: inherit; background: inherit; resize: vertical; }
-.assistente-dialogo .botao-microfone { display: inline-flex; align-items: center; justify-self: start; gap: 8px; margin: 0; }
+.assistente-dialogo .botao-microfone { display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin: 0; flex: 0 0 auto; white-space: nowrap; }
+.acoes-rodape-assistente { display: flex; grid-column: 1 / -1; align-items: center; gap: 8px; }
+.assistente-dialogo .botao-fluxo-manual { flex: 1 1 auto; margin: 0; }
 .botao-microfone svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .assistente-dialogo .botao-microfone[aria-pressed="true"] { border-color: var(--cor-verde-escuro); color: var(--cor-branco); background: var(--cor-verde-escuro); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-verde-horta) 24%, transparent); }
 .feedback-microfone { display: flex; grid-column: 1 / -1; min-height: 42px; align-items: center; gap: 9px; padding: 8px 12px; border: 1px solid var(--cor-verde-horta); border-radius: 10px; color: var(--cor-verde-escuro); background: var(--cor-verde-claro); }
@@ -50,15 +55,6 @@
 .flora-mensagem strong { font-size: .8rem; }
 .flora-mensagem-usuario { align-self: flex-end; background: #1f4d2e; color: white; }
 .flora-mensagem-flora { align-self: flex-start; background: var(--cor-verde-claro); }
-@media (min-height: 700px) {
-  .assistente-dialogo[open] { display: flex; flex-direction: column; box-sizing: border-box; height: min(850px, 90dvh); max-height: 90dvh; overflow: hidden; }
-  .assistente-dialogo > header, .assistente-dialogo > form, .assistente-dialogo > button, .assistente-dialogo > .controles-audio-flora, .assistente-dialogo > .assistente-previa { flex-shrink: 0; }
-  .flora-conversa { flex: 1; min-height: 70px; max-height: none; margin: 10px 0; }
-  .assistente-dialogo .assistente-previa { margin: 6px 0; padding: 8px; }
-  .assistente-dialogo .assistente-previa p { margin: 2px 0 6px; }
-  .assistente-dialogo form { grid-template-columns: 1fr 1fr; gap: 6px; }
-  .assistente-dialogo form > label, .assistente-dialogo form > textarea, .assistente-dialogo form > small, .assistente-dialogo form > p { grid-column: 1 / -1; }
-}
 .aviso-confirmacao-separacao { padding: 10px; border-radius: 8px; background: var(--cor-verde-claro); }
 .resposta-texto-flora { white-space: pre-line; overflow-wrap: anywhere; }
 .controles-audio-flora, .identidade-flora-dialogo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -67,4 +63,354 @@
 .presenca-flora { width: 52px; height: 52px; object-fit: contain; border-radius: 50%; }
 .presenca-flora-ativa { animation: presenca-flora 1.6s ease-in-out infinite; }
 @keyframes presenca-flora { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--cor-verde-horta) 20%, transparent); } }
-@media (prefers-reduced-motion: reduce) { .presenca-flora-ativa, .microfone-ativo-ponto, .onda-voz i { animation: none; } .presenca-flora-ativa { outline: 2px solid var(--cor-verde-horta); } }
+
+/* ==========================================================================
+   Janela HUD Reativa F.L.O.R.A. (Painel de Interação e Informações)
+   ========================================================================== */
+.hud-flora-container {
+  position: relative;
+  color: var(--cor-verde-horta);
+}
+
+.hud-modo-dinamico-ativo {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--cor-amarelo-colheita) 55%, var(--cor-verde-horta));
+  border-radius: 16px;
+  color: #8edc91;
+  background:
+    radial-gradient(circle at 22% 50%, rgb(230 162 60 / 18%), transparent 58%),
+    radial-gradient(circle at 80% 20%, rgb(47 107 59 / 32%), transparent 65%),
+    linear-gradient(145deg, #102419, #183524 60%, #12291c);
+  box-shadow:
+    inset 0 0 28px rgb(230 162 60 / 10%),
+    0 8px 24px rgb(16 36 25 / 26%);
+}
+
+.hud-flora-cabecalho-telemetria {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #f3c56d;
+}
+
+.hud-acoes-topo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-left: auto;
+  gap: 6px;
+}
+
+.hud-telemetria-indicador {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.hud-telemetria-ponto {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #8edc91;
+  box-shadow: 0 0 8px #8edc91;
+}
+
+.hud-estado-ouvindo .hud-telemetria-ponto {
+  background: #f08a68;
+  box-shadow: 0 0 10px #f08a68;
+  animation: pulso-microfone 1s ease-in-out infinite;
+}
+
+.hud-estado-processando .hud-telemetria-ponto {
+  background: #f3c56d;
+  box-shadow: 0 0 12px #f3c56d;
+}
+
+.hud-estado-falando .hud-telemetria-ponto {
+  background: #ffd27b;
+  box-shadow: 0 0 14px #ffd27b;
+}
+
+.hud-telemetria-nivel {
+  padding: 2px 7px;
+  border: 1px solid rgb(243 197 109 / 40%);
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+  color: #e7f0e8;
+  background: rgb(255 255 255 / 6%);
+}
+
+.hud-modo-dinamico-ativo .hud-flora-palco {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.orbe-flora-coluna {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.hud-modo-dinamico-ativo .orbe-flora-envoltorio {
+  position: relative;
+  display: grid;
+  width: 112px;
+  height: 112px;
+  flex-shrink: 0;
+  place-items: center;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 50%;
+  transition: transform 160ms ease;
+}
+
+.hud-modo-dinamico-ativo .orbe-flora-envoltorio:hover {
+  transform: scale(1.06);
+}
+
+.orbe-flora-legenda-clique {
+  font-size: .66rem;
+  font-weight: 600;
+  color: #ffd27b;
+  opacity: .88;
+  text-align: center;
+}
+
+.assistente-dialogo .hud-botao-pulso-topo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  margin: 0;
+  padding: 4px 10px;
+  border: 1px solid rgb(243 197 109 / 55%);
+  border-radius: 999px;
+  color: #fffdf5;
+  background: rgb(255 255 255 / 10%);
+  font-size: .72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.assistente-dialogo .hud-botao-pulso-topo svg {
+  width: 15px;
+  height: 15px;
+}
+
+.assistente-dialogo .hud-botao-pulso-topo:hover:not(:disabled) {
+  background: rgb(243 197 109 / 25%);
+  border-color: #ffd27b;
+}
+
+.assistente-dialogo .hud-botao-pulso-topo[aria-pressed="true"] {
+  border-color: #ffd27b;
+  color: #102419;
+  background: #ffd27b;
+}
+
+.orbe-flora-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.orbe-flora-nucleo {
+  position: relative;
+  z-index: 1;
+  width: 46px;
+  height: 46px;
+  transform: scale(calc(1 + var(--nivel-audio, 0) * 0.12));
+  filter: drop-shadow(0 0 calc(5px + var(--nivel-audio, 0) * 10px) rgb(230 162 60 / 60%));
+}
+
+.anel-flora {
+  transform-origin: 100px 100px;
+}
+
+.anel-flora-externo {
+  animation: giro-flora-horario 28s linear infinite;
+}
+
+.anel-flora-medio {
+  animation: giro-flora-antihorario 20s linear infinite;
+}
+
+.anel-flora-interno {
+  animation: giro-flora-horario 15s linear infinite;
+}
+
+.hud-estado-processando .anel-flora-externo {
+  animation-duration: 10s;
+}
+
+.hud-estado-processando .anel-flora-medio {
+  animation-duration: 7s;
+}
+
+.hud-estado-processando .anel-flora-interno {
+  animation-duration: 5s;
+}
+
+.hud-estado-falando .anel-flora-medio,
+.hud-estado-ouvindo .anel-flora-medio {
+  animation-duration: 12s;
+}
+
+@keyframes giro-flora-horario {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes giro-flora-antihorario {
+  to { transform: rotate(-360deg); }
+}
+
+.hud-flora-painel-status {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 7px;
+}
+
+.hud-flora-instrucao {
+  margin: 0;
+  color: #f7f5ef;
+  font-size: .86rem;
+  line-height: 1.4;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.hud-resumo-cesta {
+  display: inline-block;
+  justify-self: start;
+  padding: 2px 8px;
+  border-radius: 6px;
+  color: #ffd27b;
+  background: rgb(255 210 123 / 12%);
+  font-size: .76rem;
+  font-weight: 600;
+}
+
+.hud-cesta-flora {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.assistente-dialogo .hud-chip-produto {
+  display: inline-flex;
+  min-height: 28px;
+  margin: 0;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px 3px 4px;
+  border: 1px solid rgb(243 197 109 / 45%);
+  border-radius: 999px;
+  color: #fffdf5;
+  background: rgb(255 255 255 / 10%);
+  font-size: .76rem;
+}
+
+.assistente-dialogo .hud-chip-interativo:hover:not(:disabled) {
+  border-color: #ffd27b;
+  background: rgb(243 197 109 / 22%);
+  transform: translateY(-1px);
+}
+
+.hud-chip-mais {
+  margin-left: 2px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  color: #102419;
+  background: #ffd27b;
+  font-size: .66rem;
+  font-weight: 700;
+}
+
+.hud-acoes-sugestoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.assistente-dialogo .hud-chip-sugestao {
+  min-height: 28px;
+  margin: 0;
+  padding: 4px 10px;
+  border: 1px solid rgb(142 220 145 / 42%);
+  border-radius: 999px;
+  color: #e7f0e8;
+  background: rgb(47 107 59 / 35%);
+  font-size: .74rem;
+  font-weight: 600;
+}
+
+.assistente-dialogo .hud-chip-sugestao:hover:not(:disabled) {
+  border-color: #ffd27b;
+  color: #fffdf5;
+  background: rgb(230 162 60 / 28%);
+  transform: translateY(-1px);
+}
+
+.hud-chip-produto img {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.hud-chip-produto strong {
+  color: #ffd27b;
+}
+
+@media (max-width: 480px) {
+  .hud-modo-dinamico-ativo .hud-flora-palco {
+    flex-direction: column;
+    text-align: center;
+  }
+  .hud-resumo-cesta {
+    justify-self: center;
+  }
+  .hud-cesta-flora {
+    justify-content: center;
+  }
+}
+
+@media (min-height: 700px) {
+  .assistente-dialogo[open] { display: flex; flex-direction: column; box-sizing: border-box; height: min(850px, 90dvh); max-height: 90dvh; overflow: hidden; }
+  .assistente-dialogo > header, .assistente-dialogo > form, .assistente-dialogo > button, .assistente-dialogo > .controles-audio-flora, .assistente-dialogo > .assistente-previa, .assistente-dialogo > .hud-flora-container { flex-shrink: 0; }
+  .flora-conversa { flex: 1; min-height: 70px; max-height: none; margin: 10px 0; }
+  .assistente-dialogo .assistente-previa { margin: 6px 0; padding: 8px; }
+  .assistente-dialogo .assistente-previa p { margin: 2px 0 6px; }
+  .assistente-dialogo form { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .assistente-dialogo form > label, .assistente-dialogo form > textarea, .assistente-dialogo form > small, .assistente-dialogo form > p { grid-column: 1 / -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .presenca-flora-ativa,
+  .microfone-ativo-ponto,
+  .onda-voz i {
+    animation: none;
+  }
+  .presenca-flora-ativa {
+    outline: 2px solid var(--cor-verde-horta);
+  }
+}
