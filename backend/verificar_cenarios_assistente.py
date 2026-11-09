@@ -1,4 +1,4 @@
-"""Três cenários fictícios na API OpenRouter (até nove chamadas gratuitas).
+"""Quatro cenários fictícios na API OpenRouter (cesta pronta, selecionável, limite e separação).
 
 Não acessa o banco da aplicação e não grava pedidos. Executar da raiz do projeto:
 python backend/verificar_cenarios_assistente.py
@@ -23,8 +23,8 @@ def main():
         resposta.raise_for_status()
         restante = resposta.json().get("data", {}).get("free_model_daily_requests", {}).get("remaining")
         print(json.dumps({"chamadas_restantes_antes": restante}), flush=True)
-        if isinstance(restante, (int, float)) and restante < 9:
-            print("Cota insuficiente para completar os três cenários; nenhuma geração iniciada.")
+        if isinstance(restante, (int, float)) and restante < 12:
+            print("Cota insuficiente para completar os quatro cenários; nenhuma geração iniciada.")
             return 1
     except (httpx.HTTPError, ValueError, TypeError):
         print("Não foi possível consultar a cota; nenhuma geração iniciada.")
@@ -46,7 +46,8 @@ def main():
         "separacoes": [{"produto_id": "tomate", "quantidade": 1}],
     }
     casos = [
-        ("tamanho_ausente", "assinante", "Quero 2 tomates e 1 cenoura, sem cebola.", []),
+        ("cesta_pronta_sem_tamanho", "assinante", "Quero pedir uma cesta pronta.", []),
+        ("cesta_selecionavel_automatica", "assinante", "Quero 2 tomates e 1 cenoura, sem cebola.", []),
         ("limite_excedido", "assinante", "Quero uma cesta pequena selecionável com 1 tomate, 1 cenoura, 1 cebola, 1 alface, 1 batata e 1 couve. Quero manter esses seis produtos.", []),
         ("cesta_enviada", "produtor", "Separe mais 1 tomate na cesta 901.", [cesta_enviada]),
     ]
@@ -67,18 +68,26 @@ def main():
             sem_confirmacao = resultado["proposta"] is None and resultado["status"] != "proposta"
             especialista = etapas.get(perfil, {})
             qa_modelo = etapas.get("qa", {})
-            pergunta = especialista.get("pergunta") or ""
-            if identificador == "tamanho_ausente":
+            pergunta = especialista.get("pergunta") or (resultado["qa"]["duvidas"][0] if resultado["qa"]["duvidas"] else "")
+            if identificador == "cesta_pronta_sem_tamanho":
                 passou = sem_confirmacao and bool(pergunta) and pergunta.count("?") <= 1 and "tamanho" in pergunta.lower()
+                qa_adequado = qa_modelo.get("status") == "esclarecimento" and bool(qa_modelo.get("duvidas"))
+            elif identificador == "cesta_selecionavel_automatica":
+                proposta_final = resultado.get("proposta") or {}
+                itens = {p["produto_id"]: p["quantidade"] for p in proposta_final.get("produtos", [])}
+                passou = (
+                    resultado["status"] == "proposta"
+                    and proposta_final.get("modo") == "selecionavel"
+                    and proposta_final.get("tamanho") == "pequena"
+                    and itens == {"tomate": 2, "cenoura": 1}
+                    and "cebola" in proposta_final.get("produtos_excluidos", [])
+                )
+                qa_adequado = qa_modelo.get("status") == "aprovado"
             elif identificador == "limite_excedido":
                 passou = sem_confirmacao and len(etapas) == 3
-            else:
-                passou = sem_confirmacao and resultado["qa"]["status"] == "bloqueado"
-            if identificador == "tamanho_ausente":
-                qa_adequado = qa_modelo.get("status") == "esclarecimento" and bool(qa_modelo.get("duvidas"))
-            elif identificador == "limite_excedido":
                 qa_adequado = qa_modelo.get("status") in {"esclarecimento", "bloqueado"} and bool(qa_modelo.get("problemas") or qa_modelo.get("duvidas"))
             else:
+                passou = sem_confirmacao and resultado["qa"]["status"] == "bloqueado"
                 qa_adequado = qa_modelo.get("status") == "bloqueado"
             aprovados_sistema += int(passou)
             aprovados_qa += int(qa_adequado)
@@ -91,8 +100,9 @@ def main():
             }, ensure_ascii=True), flush=True)
         except AssistenteIndisponivel as erro:
             print(json.dumps({"cenario": identificador, "passou": False, "erro": str(erro)}, ensure_ascii=True), flush=True)
-    print(json.dumps({"sistema_aprovado": aprovados_sistema, "qa_ia_aprovado": aprovados_qa, "total": 3}), flush=True)
-    return 0 if aprovados_sistema == aprovados_qa == 3 else 1
+    total = len(casos)
+    print(json.dumps({"sistema_aprovado": aprovados_sistema, "qa_ia_aprovado": aprovados_qa, "total": total}), flush=True)
+    return 0 if aprovados_sistema == aprovados_qa == total else 1
 
 
 if __name__ == "__main__":

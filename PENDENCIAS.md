@@ -9,10 +9,11 @@ implementada. A chave foi validada e o modo OpenRouter ativado localmente. Os te
 fictícios de pedido do assinante e separação do produtor passaram com QA aprovado,
 usando `nvidia/nemotron-3.5-super-vl:free`, JSON estrito e permissões explícitas.
 
-- [ ] Corrigir as falhas observadas no especialista e no QA da IA: tamanho ausente e cesta pequena
-  com seis produtos foram aprovados pelo modelo e barrados somente pelo backend.
-- [ ] Preservar os motivos específicos do QA quando a validação local recebe proposta nula.
-- [ ] Reexecutar os três cenários negativos após os ajustes e ampliar a validação real.
+- [x] Corrigir as falhas observadas no especialista e no QA da IA: tamanho ausente em cesta pronta,
+  cálculo automático na cesta selecionável e bloqueio de cesta pequena com seis produtos.
+- [x] Preservar os motivos específicos do QA quando a validação local recebe proposta nula.
+- [ ] Reexecutar os quatro cenários (`cesta_pronta_sem_tamanho`, `cesta_selecionavel_automatica`,
+  `limite_excedido` e `cesta_enviada`) na OpenRouter quando a chave estiver ativa no `.env`.
   Evidências: [testes OpenRouter](docs/TESTES_ASSISTENTE_OPENROUTER.md).
   Falhas do provedor e regras de bloqueio já possuem testes automatizados com transporte local.
 - [ ] Implementar conversa contínua, mantendo contexto e fazendo uma pergunta por vez.

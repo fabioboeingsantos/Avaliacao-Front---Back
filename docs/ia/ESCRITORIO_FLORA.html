@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cesta do Vale | Escritório dos Agentes da Flora</title>
+  <style>
+    :root {
+      --verde: #1f4d2e;
+      --verde-medio: #285f3c;
+      --verde-claro: #dcebd2;
+      --terracota: #a84f35;
+      --terracota-claro: #f7e3da;
+      --amarelo: #c87d12;
+      --amarelo-claro: #fef4e2;
+      --azul: #2f6b8a;
+      --azul-claro: #e6f1f7;
+      --roxo: #5c3d8a;
+      --roxo-claro: #efeaf7;
+      --erro: #b42318;
+      --erro-claro: #fdeae8;
+      --creme: #f7f4eb;
+      --branco: #fffdf8;
+      --texto: #183027;
+      --muted: #5d6b62;
+      --linha: #d5ded1;
+      --sombra: 0 12px 32px rgba(24, 48, 39, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      color: var(--texto);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 8% 0%, #e3efdd, transparent 34%),
+        radial-gradient(circle at 100% 85%, #f0ded2, transparent 30%),
+        #eef1eb;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 18px;
+      gap: 10px;
+      user-select: none;
+    }
+
+    /* 1. TOPBAR */
+    .topbar {
+      background: var(--branco);
+      border: 1px solid var(--linha);
+      border-radius: 16px;
+      padding: 10px 16px;
+      box-shadow: var(--sombra);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .topbar-row1 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .eyebrow-badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--verde-claro);
+      color: var(--verde);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .title-main {
+      font-size: clamp(1rem, 1.5vw, 1.3rem);
+      font-weight: 850;
+      color: var(--verde);
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle-code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.74rem;
+      color: var(--muted);
+      background: #edf2eb;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .persona-switch {
+      display: inline-flex;
+      background: #eef2ec;
+      border: 1px solid var(--linha);
+      border-radius: 10px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .btn-persona {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-persona.active-assinante {
+      background: var(--verde);
+      color: #fff;
+    }
+
+    .btn-persona.active-produtor {
+      background: var(--terracota);
+      color: #fff;
+    }
+
+    .step-counter {
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: var(--verde-claro);
+      color: var(--verde);
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+
+    .btn-nav {
+      border: 1px solid var(--linha);
+      background: var(--creme);
+      color: var(--texto);
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-nav:hover {
+      background: var(--verde-claro);
+      border-color: var(--verde);
+    }
+
+    .btn-nav.primary {
+      background: var(--verde);
+      color: #fff;
+      border-color: var(--verde);
+    }
+
+    .btn-nav.play {
+      background: var(--amarelo-claro);
+      color: var(--amarelo);
+      border-color: #eed19c;
+    }
+
+    .topbar-row2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-top: 6px;
+      border-top: 1px solid #e7ede4;
+    }
+
+    .input-box {
+      display: flex;
+      gap: 6px;
+      width: 42%;
+      min-width: 310px;
+      flex-shrink: 0;
+    }
+
+    .input-box input {
+      flex: 1;
+      padding: 7px 12px;
+      border: 1px solid var(--linha);
+      border-radius: 9px;
+      background: var(--creme);
+      color: var(--texto);
+      font-size: 0.82rem;
+      outline: none;
+    }
+
+    .input-box input:focus {
+      border-color: var(--verde);
+      background: #fff;
+    }
+
+    .btn-executar {
+      padding: 7px 14px;
+      border: 0;
+      border-radius: 9px;
+      background: var(--verde);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 750;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .scenarios-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      flex: 1;
+    }
+
+    .scenarios-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .btn-scenario {
+      padding: 5px 10px;
+      border: 1px solid var(--linha);
+      border-radius: 999px;
+      background: var(--creme);
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 650;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .btn-scenario:hover {
+      border-color: var(--verde);
+      color: var(--verde);
+    }
+
+    .btn-scenario.active {
+      background: var(--verde-claro);
+      border-color: var(--verde);
+      color: var(--verde);
+      font-weight: 800;
+    }
+
+    /* 2. ÁREA PRINCIPAL */
+    .workspace-grid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 12px;
+    }
+
+    .canvas-card {
+      position: relative;
+      background: #25392d;
+      border: 1px solid var(--linha);
+      border-radius: 16px;
+      box-shadow: var(--sombra);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+    }
+
+    canvas {
+      display: block;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .canvas-hint {
+      position: absolute;
+      left: 12px;
+      bottom: 10px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.45);
+      color: #eef6ec;
+      font-size: 0.72rem;
+      pointer-events: none;
+    }
+
+    /* Painel Lateral */
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .card {
+      background: var(--branco);
+      border: 1px solid var(--linha);
+      border-radius: 16px;
+      padding: 12px 14px;
+      box-shadow: var(--sombra);
+    }
+
+    .card-title {
+      font-size: 0.7rem;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--terracota);
+      margin-bottom: 8px;
+    }
+
+    .foco-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .foco-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid var(--linha);
+      background: var(--creme);
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .foco-nome {
+      font-size: 1.05rem;
+      font-weight: 850;
+      color: var(--verde);
+    }
+
+    .foco-papel {
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .badge-pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 800;
+    }
+
+    .pill-green { background: var(--verde-claro); color: var(--verde); }
+    .pill-amber { background: var(--amarelo-claro); color: var(--amarelo); }
+    .pill-red { background: var(--erro-claro); color: var(--erro); }
+    .pill-gray { background: #e6ebe7; color: #6c7a70; }
+
+    .foco-action {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #b7d6ad;
+      background: #f1f8ee;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    .foco-json {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #1a2821;
+      color: #e6f4ea;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.72rem;
+      line-height: 1.45;
+      max-height: 120px;
+      overflow: auto;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+
+    .team-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px;
+      border: 1px solid var(--linha);
+      border-radius: 8px;
+      background: var(--creme);
+      font-size: 0.72rem;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .team-btn:hover { border-color: var(--verde); }
+    .team-btn.active { border-color: var(--verde); background: var(--verde-claro); font-weight: 750; }
+
+    .feed-card {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feed-list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .feed-row {
+      display: grid;
+      grid-template-columns: 38px 20px 1fr;
+      gap: 4px;
+      font-size: 0.74rem;
+      line-height: 1.35;
+    }
+
+    .feed-row time {
+      color: var(--muted);
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.68rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-row1">
+      <div class="brand-group">
+        <span class="eyebrow-badge">Cesta do Vale · Flora</span>
+        <h1 class="title-main">Escritório dos Agentes de IA</h1>
+        <span class="subtitle-code">backend/ia/fluxo.py</span>
+      </div>
+
+      <div class="controls-group">
+        <div class="persona-switch">
+          <button id="btn-assinante" class="btn-persona active-assinante" onclick="definirPerfil('assinante')">
+            👩‍🌾 Assinante (Aline)
+          </button>
+          <button id="btn-produtor" class="btn-persona" onclick="definirPerfil('produtor')">
+            🚜 Produtor (Vanderlei)
+          </button>
+        </div>
+
+        <span id="step-status" class="step-counter">▶ Rodando</span>
+        <button id="btn-pausa" class="btn-nav play" onclick="alternarPausa()">⏸ Pausar</button>
+        <button id="btn-vel" class="btn-nav" onclick="alternarVelocidade()">Vel 1×</button>
+        <button class="btn-nav primary" onclick="repetir()">↺ Repetir</button>
+      </div>
+    </div>
+
+    <div class="topbar-row2">
+      <div class="input-box">
+        <input id="input-msg" type="text" placeholder="Digite uma solicitação e pressione Enter..." onkeydown="if(event.key === 'Enter') enviarLivre()" />
+        <button class="btn-executar" onclick="enviarLivre()">▶ Simular</button>
+      </div>
+
+      <div class="scenarios-bar">
+        <span class="scenarios-label">Cenários da Apresentação:</span>
+        <div id="cenarios-container" style="display:flex; gap:6px;"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- WORKSPACE -->
+  <main class="workspace-grid">
+    <!-- CANVAS DO ESCRITÓRIO -->
+    <section class="canvas-card" id="canvas-wrapper">
+      <canvas id="stage"></canvas>
+      <div class="canvas-hint">Clique em qualquer mesa/agente para inspecionar no painel · Espaço pausa/continua · R repete</div>
+    </section>
+
+    <!-- PAINEL LATERAL -->
+    <aside class="side-panel">
+      <!-- Agente em Foco -->
+      <div class="card">
+        <div class="card-title">Agente em Foco</div>
+        <div class="foco-header">
+          <div id="foco-avatar" class="foco-avatar">🤖</div>
+          <div style="min-width: 0;">
+            <div id="foco-nome" class="foco-nome">-</div>
+            <div id="foco-papel" class="foco-papel">-</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:6px; align-items:center; margin-top:8px;">
+          <span id="foco-pill" class="badge-pill pill-gray">aguardando</span>
+          <span id="foco-file" class="subtitle-code">-</span>
+        </div>
+        <div id="foco-action" class="foco-action">-</div>
+        <pre id="foco-json" class="foco-json">{}</pre>
+      </div>
+
+      <!-- Equipe -->
+      <div class="card">
+        <div class="card-title">Quem é quem no escritório</div>
+        <div id="team-grid" class="team-grid"></div>
+      </div>
+
+      <!-- Feed -->
+      <div class="card feed-card">
+        <div class="card-title">Feed de Eventos em Tempo Real</div>
+        <div id="feed-list" class="feed-list"></div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    /* =========================================================================
+       ESCRITÓRIO DOS AGENTES DA FLORA (Versão 2.0 Corrigida e Reestilizada)
+       Proporções exatas, sem sobreposição de textos, móveis no lugar certo,
+       personagens detalhados com sombra e pacote que viaja entre mesas.
+       ========================================================================= */
+
+    const W = 960;
+    const H = 540;
+    const DPR = 2;
+    const CORREDOR_Y = 265;
+
+    const canvas = document.getElementById("stage");
+    const ctx = canvas.getContext("2d");
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+
+    // Planta das Salas (Corrigidas para caber perfeitamente sem vazar)
+    const SALAS = {
+      interprete: { x: 24, y: 20, w: 220, h: 215, nome: "🧭 Intérprete", subtitulo: "ia/agentes/interprete.py", cor: "#e3e8f8", topo: true },
+      assinante:  { x: 256, y: 20, w: 220, h: 215, nome: "👩‍🌾 Esp. Assinante", subtitulo: "ia/agentes/assinante.py", cor: "#e2eedb", topo: true },
+      produtor:   { x: 488, y: 20, w: 220, h: 215, nome: "🚜 Esp. Produtor", subtitulo: "ia/agentes/produtor.py", cor: "#f5e6d6", topo: true },
+      qa:         { x: 720, y: 20, w: 216, h: 215, nome: "🕵️ Revisão QA", subtitulo: "ia/agentes/qa.py", cor: "#ece4f4", topo: true },
+      recepcao:   { x: 24, y: 295, w: 220, h: 225, nome: "🌱 Recepção da Flora", subtitulo: "ia/servico.py · fluxo.py", cor: "#ede5d2", topo: false },
+      consultas:  { x: 256, y: 295, w: 220, h: 225, nome: "⚡ Consultas Rápidas", subtitulo: "ia/consultas.py", cor: "#dfeaf2", topo: false },
+      copa:       { x: 488, y: 295, w: 220, h: 225, nome: "☕ Copa & Descanso", subtitulo: "sala de convivência", cor: "#f2e4d8", topo: false },
+      cofre:      { x: 720, y: 295, w: 216, h: 225, nome: "🛡️ Trava Local Python", subtitulo: "ia/validacao.py", cor: "#e2e6ea", topo: false },
+    };
+
+    const portaX = (s) => s.x + s.w / 2;
+    const portaY = (s) => (s.topo ? s.y + s.h : s.y);
+
+    const PONTO_ELEVADOR = { x: 206, y: 382 };
+    const PONTO_TELA = { x: 145, y: 440 };
+    const COPA_SEATS = [
+      { x: 575, y: 432 }, { x: 625, y: 432 },
+      { x: 575, y: 488 }, { x: 625, y: 488 },
+      { x: 672, y: 460 }, { x: 532, y: 460 }
+    ];
+
+    // Personagens com os nomes reais dos agentes no código e a Flora na Recepção
+    const ATORES_DEF = {
+      usuario:   { nome: "Aline", papel: "Você — Usuária", sala: "recepcao", casa: { x: 75, y: 448 }, pele: "#e8b48f", cabelo: "#3b2416", longo: true, roupa: "#2f6b3b", emoji: "👩‍🌾", arquivo: "Assistente.jsx", semMesa: true },
+      rota:      { nome: "Flora", papel: "Assistente & Orquestradora", sala: "recepcao", casa: { x: 178, y: 448 }, pele: "#f2c6a0", cabelo: "#2c5e3b", longo: true, roupa: "#285f3c", flor: true, emoji: "🌱", arquivo: "ia/servico.py · fluxo.py" },
+      consultas: { nome: "Consultas", papel: "Roteador sem IA (Banco)", sala: "consultas", casa: { x: 366, y: 425 }, pele: "#f0c6a0", cabelo: "#8b3a1e", longo: true, roupa: "#3e8fb8", emoji: "⚡", arquivo: "ia/consultas.py" },
+      interprete:{ nome: "Intérprete", papel: "Agente Intérprete (1ª IA)", sala: "interprete", casa: { x: 134, y: 135 }, pele: "#c98e66", cabelo: "#2a1a10", roupa: "#3d4f9a", emoji: "🧭", arquivo: "ia/agentes/interprete.py" },
+      assinante: { nome: "Ag. Assinante", papel: "Especialista Assinante (2ª IA)", sala: "assinante", casa: { x: 366, y: 135 }, pele: "#f2c9a5", cabelo: "#d9a441", longo: true, roupa: "#4f8c50", emoji: "🧺", arquivo: "ia/agentes/assinante.py" },
+      produtor:  { nome: "Ag. Produtor", papel: "Especialista Produtor (2ª IA)", sala: "produtor", casa: { x: 598, y: 135 }, pele: "#b97c55", cabelo: "#3a2a1a", roupa: "#c87850", chapeu: "#d9b45a", emoji: "🚜", arquivo: "ia/agentes/produtor.py" },
+      qa:        { nome: "Ag. QA", papel: "Revisora de QA (3ª IA)", sala: "qa", casa: { x: 828, y: 135 }, pele: "#8d5a3b", cabelo: "#141414", longo: true, roupa: "#6a4a9a", emoji: "🕵️‍♀️", arquivo: "ia/agentes/qa.py" },
+      validador: { nome: "Validador", papel: "Validador Determinístico", sala: "cofre", casa: { x: 828, y: 425 }, robo: true, emoji: "🛡️", arquivo: "ia/validacao.py" }
+    };
+
+    const ATORES = {};
+    for (const [k, v] of Object.entries(ATORES_DEF)) {
+      ATORES[k] = { ...v, chave: k, x: v.casa.x, y: v.casa.y, caminho: [], aoChegar: null, balao: null, trabalhando: false, cafe: false, mao: false, festa: 0, info: null };
+    }
+
+    const LOOK_USUARIOS = {
+      assinante: { nome: "Aline", papel: "Você — Assinante", pele: "#e8b48f", cabelo: "#3b2416", longo: true, roupa: "#2f6b3b", chapeu: null, emoji: "👩‍🌾" },
+      produtor:  { nome: "Vanderlei", papel: "Você — Produtor", pele: "#c98e66", cabelo: "#707070", longo: false, roupa: "#a84f35", chapeu: "#d9b45a", emoji: "🚜" }
+    };
+
+    // Cenários fiéis ao sistema
+    const CENARIOS = {
+      assinante: [
+        {
+          id: "a1", label: "🛒 Montar cesta (3 itens)", tipo: "agentes", resultado: "proposta", status: "proposta",
+          mensagem: "Quero montar uma cesta com 2 tomates, 1 alface e 3 cenouras",
+          falas: {
+            rota: "🔐 JWT OK · Assinante Aline",
+            consultas: "⚡ Criação de pedido → Chama agentes",
+            interprete: "🧭 Intenção: novo pedido (3 produtos)",
+            especialista: "🧺 3 itens = tamanho pequena",
+            qa: "✅ Bate com o catálogo e limites",
+            validador: "🛡️ Validação Python aprovada!"
+          },
+          json: {
+            rota: { perfil: "assinante", permissoes: ["consulta_cestas", "pedido_cesta"] },
+            consultas: { eh_consulta: false, decisao: "Encaminhar para ia/fluxo.py" },
+            interprete: { intencao: "Cesta selecionavel com 2 tomates, 1 alface, 3 cenouras", fora_do_escopo: false },
+            especialista: { proposta: { tipo: "pedido_cesta", tamanho: "pequena", modo: "selecionavel", produtos: [{ produto_id: "tomate", quantidade: 2 }, { produto_id: "alface", quantidade: 1 }, { produto_id: "cenoura", quantidade: 3 }] } },
+            qa: { status: "aprovado", problemas: [] },
+            validador: { erros: [], status_final: "proposta" }
+          },
+          final: "Confira a proposta antes de continuar. [Confirmar Pedido]"
+        },
+        {
+          id: "a2", label: "📋 Consultar frutas (Atalho)", tipo: "atalho", status: "resposta",
+          mensagem: "Quais frutas vocês têm disponíveis hoje?",
+          falas: { rota: "🔐 JWT OK · Assinante", consultas: "🗄️ Leitura pura! Busco no banco sem IA" },
+          json: {
+            rota: { perfil: "assinante" },
+            consultas: { status: "resposta", categoria: "frutas", chamadas_ia: 0, mensagem: "Banana, Laranja, Maçã, Mamão." }
+          },
+          final: "Catálogo disponível: Banana, Laranja, Maçã e Mamão."
+        },
+        {
+          id: "a3", label: "❓ Cesta pronta sem tamanho", tipo: "agentes", resultado: "esclarecimento", status: "esclarecimento",
+          mensagem: "Quero pedir uma cesta pronta para esta semana",
+          falas: {
+            rota: "🔐 JWT OK · Assinante",
+            consultas: "⚡ Criação de pedido → Chama agentes",
+            interprete: "🧭 Cesta pronta… sem tamanho",
+            especialista: "❓ Falta tamanho! Proposta: null",
+            qa: "⚠️ Dúvida legítima aprovada",
+            validador: "⏸️ Aguardando esclarecimento"
+          },
+          json: {
+            rota: { perfil: "assinante" },
+            consultas: { retorno: null },
+            interprete: { intencao: "Cesta pronta sem tamanho", fora_do_escopo: false },
+            especialista: { proposta: null, pergunta: "Qual tamanho você prefere: pequena, média ou grande?" },
+            qa: { status: "esclarecimento", duvidas: ["Qual tamanho você prefere?"] },
+            validador: { status_final: "esclarecimento" }
+          },
+          final: "Qual tamanho de cesta pronta você prefere: pequena, média ou grande?"
+        },
+        {
+          id: "a4", label: "🚫 Assunto fora do escopo", tipo: "agentes", resultado: "escopo", status: "fora_do_escopo",
+          mensagem: "Flora, me dá uma receita de bolo de chocolate?",
+          falas: {
+            rota: "🔐 JWT OK · Assinante",
+            consultas: "⚡ Encaminhado para análise semântica",
+            interprete: "🚨 Fora do escopo do sistema!",
+            especialista: "🙅 Proposta nula",
+            qa: "⛔ Bloqueado",
+            validador: "🛑 Retorna mensagem padrão"
+          },
+          json: {
+            rota: { perfil: "assinante" },
+            consultas: { retorno: null },
+            interprete: { intencao: "Receita culinária", fora_do_escopo: true },
+            especialista: { proposta: null },
+            qa: { status: "bloqueado", problemas: ["Fora do escopo."] },
+            validador: { status_final: "fora_do_escopo" }
+          },
+          final: "Posso ajudar com pedidos e separação de cestas."
+        }
+      ],
+      produtor: [
+        {
+          id: "p1", label: "✅ Concluir separação #12", tipo: "agentes", resultado: "proposta", status: "proposta",
+          mensagem: "Já separei e conferi todos os itens da cesta 12",
+          falas: {
+            rota: "🔐 JWT OK · Produtor Vanderlei",
+            consultas: "⚡ 'separei' altera dados → IA",
+            interprete: "🧭 Concluir separação da cesta 12",
+            especialista: "🚜 concluir_separacao: true (todos itens)",
+            qa: "✅ Conferido com a cesta #12",
+            validador: "🛡️ Quantidades idênticas ao pedido!"
+          },
+          json: {
+            rota: { perfil: "produtor", cesta_12: { situacao: "Em separação" } },
+            consultas: { requer_confirmacao: true },
+            interprete: { intencao: "Concluir cesta 12", fora_do_escopo: false },
+            especialista: { proposta: { tipo: "separacao", cesta_id: 12, concluir_separacao: true, produtos: [{ produto_id: "tomate", quantidade: 2 }, { produto_id: "alface", quantidade: 1 }] } },
+            qa: { status: "aprovado" },
+            validador: { erros: [], status_final: "proposta" }
+          },
+          final: "Confira a proposta antes de continuar. [Confirmar Separação]"
+        },
+        {
+          id: "p2", label: "📦 Estoque baixo (Atalho)", tipo: "atalho", status: "resposta",
+          mensagem: "Quais produtos estão com estoque baixo?",
+          falas: { rota: "🔐 JWT OK · Produtor", consultas: "🗄️ Consulta rápida: estoque <= 10 direto no banco" },
+          json: {
+            rota: { perfil: "produtor" },
+            consultas: { status: "resposta", filtro: "estoque <= 10", resultado: "Couve: 6 un. · Beterraba: 4 un." }
+          },
+          final: "Estoque baixo no momento: Couve (6 un.) e Beterraba (4 un.)."
+        },
+        {
+          id: "p3", label: "🛑 Separar acima do pedido", tipo: "agentes", resultado: "validacao", status: "bloqueado",
+          mensagem: "Separei 9 tomates na cesta 12",
+          falas: {
+            rota: "🔐 JWT OK · Produtor",
+            consultas: "⚡ 'separei' altera dados → IA",
+            interprete: "🧭 Lançar 9 tomates na cesta 12",
+            especialista: "🚜 Proposta montada: 9 un.",
+            qa: "🤔 Segue para validação de regras",
+            validador: "🛑 9 > 2 pedidos! BLOQUEADO"
+          },
+          json: {
+            rota: { perfil: "produtor", pedido_real: { tomate: 2 } },
+            consultas: { retorno: null },
+            interprete: { intencao: "Separar 9 tomates na #12", fora_do_escopo: false },
+            especialista: { proposta: { tipo: "separacao", cesta_id: 12, produtos: [{ produto_id: "tomate", quantidade: 9 }] } },
+            qa: { observacao: "Validação em Python tem palavra final" },
+            validador: { erros: ["A separação excede o que falta na cesta."], status_final: "esclarecimento (bloqueado)" }
+          },
+          final: "A separação excede o que falta na cesta ou contém produto não solicitado."
+        }
+      ]
+    };
+
+    let perfil = "assinante";
+    let cenarioAtual = null;
+    let execucaoId = 0;
+    let pausado = false;
+    let velocidade = 1;
+    let tempoSim = 0;
+    let inicioTempo = 0;
+    let pacoteDono = null;
+    let focoKey = "usuario";
+    const alarmes = {};
+    let confetes = [];
+    let proximaFofoca = 0;
+    const telaInfo = { texto: "Aguardando uma solicitação...", status: null };
+
+    const esperar = (ms, id) => new Promise((resolve, reject) => {
+      const alvo = tempoSim + ms;
+      function check() {
+        if (id !== execucaoId) return reject(new Error("cancelado"));
+        if (tempoSim >= alvo) return resolve();
+        requestAnimationFrame(check);
+      }
+      check();
+    });
+
+    function getSalaDePonto(p) {
+      for (const [k, s] of Object.entries(SALAS)) {
+        if (p.x >= s.x && p.x <= s.x + s.w && p.y >= s.y && p.y <= s.y + s.h) return k;
+      }
+      return null;
+    }
+
+    function andarAte(ator, destino) {
+      const destSala = getSalaDePonto(destino) || ator.sala;
+      const oSala = SALAS[ator.sala];
+      const dSala = SALAS[destSala];
+      if (destSala === ator.sala) {
+        ator.caminho = [{ ...destino }];
+      } else {
+        ator.caminho = [
+          { x: portaX(oSala), y: portaY(oSala) },
+          { x: portaX(oSala), y: CORREDOR_Y },
+          { x: portaX(dSala), y: CORREDOR_Y },
+          { x: portaX(dSala), y: portaY(dSala) },
+          { ...destino }
+        ];
+      }
+      ator.sala = destSala;
+      ator.cafe = false;
+      return new Promise((res) => { ator.aoChegar = res; });
+    }
+
+    async function falar(ator, txt, ms, id) {
+      ator.balao = { texto: txt, t: ms };
+      await esperar(ms, id);
+    }
+
+    async function trabalhar(ator, txt, ms, id) {
+      ator.trabalhando = true;
+      ator.balao = { texto: txt, t: ms + 300 };
+      try {
+        await esperar(ms, id);
+      } finally {
+        ator.trabalhando = false;
+      }
+    }
+
+    async function entregar(origem, destino, id) {
+      pacoteDono = origem.chave;
+      feedLog("📦", `${origem.nome} entrega o pacote para ${destino.nome}`);
+      await andarAte(origem, { x: destino.casa.x + 36, y: destino.casa.y + 4 });
+      if (id !== execucaoId) throw new Error("cancelado");
+      pacoteDono = destino.chave;
+      origem.balao = { texto: "📦 Aqui está!", t: 800 };
+      andarAte(origem, { ...origem.casa });
+      await esperar(450, id);
+    }
+
+    async function entregarParaTela(ator, id) {
+      pacoteDono = ator.chave;
+      feedLog("🌱", `${ator.nome} devolve o resultado para a Flora na Recepção`);
+      await andarAte(ator, PONTO_TELA);
+      if (id !== execucaoId) throw new Error("cancelado");
+      pacoteDono = "rota";
+      ator.balao = { texto: "📦 Pronto, Flora!", t: 800 };
+      andarAte(ator, { ...ator.casa });
+      await esperar(400, id);
+    }
+
+    function descansarNaCopa(ator, index, frase, id) {
+      ator.balao = { texto: frase, t: 1600 };
+      esperar(200 * index, id)
+        .then(() => andarAte(ator, COPA_SEATS[index % COPA_SEATS.length]))
+        .then(() => { if (id === execucaoId) ator.cafe = true; })
+        .catch(() => {});
+    }
+
+    function dispararAlarme(sala, ms) { alarmes[sala] = ms; }
+
+    function soltarConfete() {
+      const cores = ["#f2c14e", "#e4572e", "#4f8c50", "#3e8fb8", "#a84f35", "#ffffff"];
+      for (let i = 0; i < 80; i++) {
+        confetes.push({
+          x: 40 + Math.random() * 200, y: 300 + Math.random() * 20,
+          vx: (Math.random() - 0.5) * 45, vy: 20 + Math.random() * 65,
+          cor: cores[i % cores.length], vida: 2500 + Math.random() * 1000
+        });
+      }
+    }
+
+    // Painel Lateral de Inspeção
+    function focarAgente(k, acao, json, status) {
+      const a = ATORES[k];
+      a.info = { acao, json, status };
+      focoKey = k;
+      renderizarPainelFoco();
+    }
+
+    function renderizarPainelFoco() {
+      const a = ATORES[focoKey];
+      const info = a.info || { acao: "Aguardando próxima solicitação.", json: {}, status: "aguardando" };
+      document.getElementById("foco-avatar").textContent = a.emoji;
+      document.getElementById("foco-nome").textContent = a.nome;
+      document.getElementById("foco-papel").textContent = a.papel;
+      document.getElementById("foco-file").textContent = a.arquivo;
+      const pill = document.getElementById("foco-pill");
+      pill.textContent = info.status;
+      pill.className = `badge-pill ${
+        ["aprovado", "proposta", "resposta", "trabalhando"].includes(info.status) ? "pill-green" :
+        ["esclarecimento", "na copa"].includes(info.status) ? "pill-amber" :
+        ["bloqueado", "fora_do_escopo"].includes(info.status) ? "pill-red" : "pill-gray"
+      }`;
+      document.getElementById("foco-action").textContent = info.acao;
+      document.getElementById("foco-json").textContent = JSON.stringify(info.json, null, 2);
+
+      document.querySelectorAll(".team-btn").forEach(el => {
+        el.classList.toggle("active", el.dataset.chave === focoKey);
+      });
+    }
+
+    function renderizarEquipe() {
+      const c = document.getElementById("team-grid");
+      c.innerHTML = "";
+      for (const a of Object.values(ATORES)) {
+        const btn = document.createElement("button");
+        btn.className = "team-btn";
+        btn.dataset.chave = a.chave;
+        btn.innerHTML = `<span>${a.emoji}</span><span><b>${a.nome}</b> · ${a.papel.split(" ")[0]}</span>`;
+        btn.onclick = () => { focoKey = a.chave; renderizarPainelFoco(); };
+        c.appendChild(btn);
+      }
+    }
+
+    function feedLog(icon, msg) {
+      const s = Math.max(0, Math.floor((tempoSim - inicioTempo) / 1000));
+      const row = document.createElement("div");
+      row.className = "feed-row";
+      row.innerHTML = `<time>${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}</time><span>${icon}</span><span></span>`;
+      row.lastChild.textContent = msg;
+      const list = document.getElementById("feed-list");
+      list.appendChild(row);
+      list.scrollTop = list.scrollHeight;
+    }
+
+    function setStatusGeral(txt) { document.getElementById("step-status").textContent = txt; }
+
+    function resetarCena() {
+      execucaoId++;
+      Object.assign(ATORES.usuario, LOOK_USUARIOS[perfil]);
+      for (const a of Object.values(ATORES)) {
+        a.x = a.casa.x; a.y = a.casa.y; a.sala = ATORES_DEF[a.chave].sala;
+        a.caminho = []; a.aoChegar = null; a.balao = null;
+        a.trabalhando = false; a.cafe = false; a.mao = false; a.festa = 0; a.info = null;
+      }
+      ATORES.usuario.x = PONTO_ELEVADOR.x; ATOORES_Y = PONTO_ELEVADOR.y;
+      pacoteDono = null;
+      confetes = [];
+      for (const k of Object.keys(alarmes)) delete alarmes[k];
+      telaInfo.texto = "Aguardando uma solicitação...";
+      telaInfo.status = null;
+      inicioTempo = tempoSim;
+      document.getElementById("feed-list").innerHTML = "";
+      return execucaoId;
+    }
+
+    async function rodarCenario(c) {
+      cenarioAtual = c;
+      document.getElementById("input-msg").value = c.mensagem;
+      renderizarBotoesCenarios();
+      const id = resetarCena();
+      const U = ATORES.usuario, R = ATORES.rota, C = ATORES.consultas, I = ATORES.interprete, Q = ATORES.qa, V = ATORES.validador;
+      const E = ATORES[perfil];
+      const outro = ATORES[perfil === "assinante" ? "produtor" : "assinante"];
+      setStatusGeral("▶ Em Execução");
+
+      try {
+        if (c.tipo === "atalho") {
+          [I, ATORES.assinante, ATORES.produtor, Q, V].forEach((a, idx) => {
+            descansarNaCopa(a, idx, idx === 0 ? "☕ Folga: 0 tokens gastos!" : "☕", id);
+            a.info = { acao: "Não acionado: ia/consultas.py respondeu direto com dados do banco.", json: { acionado: false }, status: "na copa" };
+          });
+        } else {
+          descansarNaCopa(outro, 0, "Não sou desse perfil ☕", id);
+          outro.info = { acao: `Não acionado: perfil ativo é '${perfil}'.`, json: { motivo: "perfil diferente" }, status: "na copa" };
+        }
+
+        // 1. Usuário chega
+        focarAgente("usuario", `Enviou POST /assistente/analisar: "${c.mensagem}"`, { mensagem: c.mensagem }, "trabalhando");
+        feedLog(U.emoji, `${U.nome} chegou pelo elevador e pediu: "${c.mensagem}"`);
+        await andarAte(U, { ...U.casa });
+        await falar(U, "💬 " + c.mensagem, 2400, id);
+
+        // 2. Rota
+        focarAgente("rota", "Valida JWT, permissão 'assistente.usar' e carrega contexto.", c.json.rota, "trabalhando");
+        feedLog("🔐", `${R.nome} conferiu credenciais: ${c.falas.rota}`);
+        await trabalhar(R, c.falas.rota, 1800, id);
+        await entregar(R, C, id);
+
+        // 3. Consultas
+        focarAgente("consultas", c.tipo === "atalho" ? "Detectou leitura direta: busca no banco sem modelo." : "É ordem de cesta/alteração: chama IA.", c.json.consultas, "trabalhando");
+        feedLog("⚡", `${C.nome}: ${c.falas.consultas}`);
+        await trabalhar(C, c.falas.consultas, 1900, id);
+
+        if (c.tipo === "atalho") {
+          await entregarParaTela(C, id);
+          await finalizarResultado(c, id);
+          return;
+        }
+
+        await entregar(C, I, id);
+
+        // 4. Intérprete
+        focarAgente("interprete", "Resume intenção sem inventar dados e checa fora_do_escopo.", c.json.interprete, c.resultado === "escopo" ? "fora_do_escopo" : "aprovado");
+        feedLog("🧭", `${I.nome}: ${c.falas.interprete}`);
+        if (c.resultado === "escopo") dispararAlarme("interprete", 3800);
+        await trabalhar(I, c.falas.interprete, 2100, id);
+        await entregar(I, E, id);
+
+        // 5. Especialista
+        const stEsp = c.resultado === "escopo" ? "bloqueado" : c.resultado === "esclarecimento" ? "esclarecimento" : "aprovado";
+        focarAgente(perfil, `Perfil '${perfil}' ativado: monta PropostaAgente estruturada.`, c.json.especialista, stEsp);
+        feedLog(E.emoji, `${E.nome}: ${c.falas.especialista}`);
+        await trabalhar(E, c.falas.especialista, 2200, id);
+        await entregar(E, Q, id);
+
+        // 6. QA
+        const stQa = c.resultado === "proposta" || c.resultado === "validacao" ? "aprovado" : c.resultado === "esclarecimento" ? "esclarecimento" : "bloqueado";
+        focarAgente("qa", "Audita a proposta contra a mensagem original e catálogo. Não executa gravações.", c.json.qa, stQa);
+        feedLog("🕵️", `${Q.nome}: ${c.falas.qa}`);
+        await trabalhar(Q, c.falas.qa, 1900, id);
+        await entregar(Q, V, id);
+
+        // 7. Validação Python
+        const bloqueado = c.resultado === "validacao" || c.resultado === "escopo";
+        focarAgente("validador", "Trava em código Python: estoques, limites e regras de segurança.", c.json.validador, bloqueado ? "bloqueado" : c.resultado === "esclarecimento" ? "esclarecimento" : "aprovado");
+        feedLog("🤖", `${V.nome}: ${c.falas.validador}`);
+        if (bloqueado) dispararAlarme("cofre", 3800);
+        await trabalhar(V, c.falas.validador, 2000, id);
+        await entregarParaTela(V, id);
+        await finalizarResultado(c, id);
+
+      } catch (err) {}
+    }
+
+    async function finalizarResultado(c, id) {
+      const F = ATORES.rota;
+      const U = ATORES.usuario;
+      telaInfo.texto = c.final;
+      telaInfo.status = c.status;
+
+      // Flora apresenta o resultado final antes do usuário reagir
+      focarAgente("rota", `Flora consolidou o fluxo e entregou a resposta final (${c.status}): "${c.final}"`, { status: c.status, mensagem: c.final }, c.status);
+      feedLog("🌱", `Flora respondeu para ${U.nome}: "${c.final}"`);
+      await trabalhar(F, "🌱 " + c.final, 2000, id);
+      pacoteDono = null;
+
+      focarAgente("usuario", `${U.nome} recebeu na tela: "${c.final}"`, { status: c.status, mensagem: c.final }, c.status);
+      if (c.status === "proposta") {
+        soltarConfete();
+        U.festa = 2400;
+        F.festa = 2400;
+        feedLog("🎉", "Prévia pronta: usuária confirma antes de gravar.");
+        await falar(U, "🎉 Proposta aprovada! Confirmando ✅", 2300, id);
+      } else if (c.status === "resposta") {
+        feedLog("💬", "Resposta rápida direto do banco sem gastar IA.");
+        await falar(U, "👍 Obrigada, Flora!", 2000, id);
+      } else if (c.status === "esclarecimento") {
+        U.mao = true;
+        feedLog("✋", "A Flora fez uma pergunta: precisa de você.");
+        await falar(U, "✋ Vou informar o tamanho!", 2400, id);
+      } else {
+        dispararAlarme("recepcao", 2600);
+        feedLog("🛑", "Bloqueado pelas travas de segurança.");
+        await falar(U, "😅 Entendi, bloqueado pelas regras.", 2200, id);
+      }
+      setStatusGeral("✓ Concluído");
+    }
+
+    function renderizarBotoesCenarios() {
+      const box = document.getElementById("cenarios-container");
+      box.innerHTML = "";
+      for (const c of CENARIOS[perfil]) {
+        const btn = document.createElement("button");
+        btn.className = `btn-scenario ${cenarioAtual && cenarioAtual.id === c.id ? "active" : ""}`;
+        btn.textContent = c.label;
+        btn.onclick = () => rodarCenario(c);
+        box.appendChild(btn);
+      }
+    }
+
+    function definirPerfil(p) {
+      perfil = p;
+      document.getElementById("btn-assinante").className = `btn-persona ${p === "assinante" ? "active-assinante" : ""}`;
+      document.getElementById("btn-produtor").className = `btn-persona ${p === "produtor" ? "active-produtor" : ""}`;
+      rodarCenario(CENARIOS[p][0]);
+    }
+
+    function enviarLivre() {
+      const txt = document.getElementById("input-msg").value.trim();
+      if (!txt) return;
+      const n = txt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+      // 1. Pergunta sobre tamanhos de cestas disponíveis
+      if (/\b(tamanho|tamanhos)\b/.test(n) && /\b(cesta|cestas|tem|temos|disponive\w*|opc\w*)\b/.test(n)) {
+        const cTamanho = {
+          id: "tamanhos",
+          label: "📏 Tamanhos de Cesta",
+          tipo: "atalho",
+          status: "resposta",
+          mensagem: txt,
+          falas: {
+            rota: `🔐 JWT OK · Perfil ${perfil}`,
+            consultas: "🗄️ Regra do sistema: Pequena (5), Média (8) e Grande (12)!"
+          },
+          json: {
+            rota: { perfil: perfil },
+            consultas: {
+              status: "resposta",
+              tamanhos: { pequena: 5, media: 8, grande: 12 },
+              mensagem: "Tamanhos disponíveis: Pequena (até 5 produtos), Média (até 8) e Grande (até 12)."
+            }
+          },
+          final: "Tamanhos: Pequena (até 5 produtos), Média (até 8) e Grande (até 12)."
+        };
+        rodarCenario(cTamanho);
+        return;
+      }
+
+      const fora = /\b(receita|bolo|tempo|clima|futebol|piada|politica|carro|filme)\b/.test(n);
+      const acao = /\b(quero|monte|montar|crie|criar|pedir|separei|separar|conclui|adicione)\b/.test(n);
+      const leitura = /\b(quais|quantos|quantas|estoque|catalogo|frutas|verduras|legumes|pendentes|pendencias|situacao|status)\b/.test(n);
+      const lista = CENARIOS[perfil];
+      let base = fora ? CENARIOS.assinante[3] : (leitura && !acao) ? lista[1] : lista[0];
+      const c = JSON.parse(JSON.stringify(base));
+      c.id = "custom";
+      c.mensagem = txt;
+      c.falas.rota = `🔐 JWT OK · Perfil ${perfil}`;
+      if (c.json.interprete) c.json.interprete.intencao = `Interpretação: "${txt}"`;
+      if (perfil === "assinante" && leitura && !acao && n.includes("estoque")) {
+        c.falas.consultas = "🗄️ Assinante pediu estoque → converto p/ catálogo s/ quantidades!";
+        c.json.consultas = {
+          regra: "ia/consultas.py (linha 39): return perfil == 'assinante' and 'estoque' in texto",
+          status: "resposta",
+          exibe_quantidades_internas: false,
+          mensagem: "Catálogo disponível para sua cesta:\nFrutas: Banana, Laranja, Maçã, Mamão."
+        };
+        c.final = "Catálogo disponível (sem exibir quantidades): Frutas, Verduras e Legumes.";
+      }
+      rodarCenario(c);
+    }
+
+    function repetir() { if (cenarioAtual) rodarCenario(cenarioAtual); }
+
+    function alternarPausa() {
+      pausado = !pausado;
+      document.getElementById("btn-pausa").textContent = pausado ? "▶ Continuar" : "⏸ Pausar";
+      setStatusGeral(pausado ? "⏸ Pausado" : "▶ Em Execução");
+    }
+
+    function alternarVelocidade() {
+      velocidade = velocidade === 1 ? 2 : velocidade === 2 ? 3 : 1;
+      document.getElementById("btn-vel").textContent = `Vel ${velocidade}×`;
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (document.activeElement.tagName === "INPUT") return;
+      if (e.key === " ") { e.preventDefault(); alternarPausa(); }
+      if (e.key.toLowerCase() === "r") repetir();
+    });
+
+    canvas.addEventListener("click", (e) => {
+      const r = canvas.getBoundingClientRect();
+      const x = ((e.clientX - r.left) * W) / r.width;
+      const y = ((e.clientY - r.top) * H) / r.height;
+      const alvo = Object.values(ATORES).find(a => Math.abs(a.x - x) < 20 && y > a.y - 45 && y < a.y + 10);
+      if (alvo) { focoKey = alvo.chave; renderizarPainelFoco(); }
+    });
+
+    // Loop de Atualização
+    function update(dt) {
+      if (pausado) return;
+      const step = dt * velocidade;
+      tempoSim += step;
+
+      for (const a of Object.values(ATORES)) {
+        if (a.caminho.length) {
+          const p = a.caminho[0];
+          const dx = p.x - a.x;
+          const dy = p.y - a.y;
+          const dist = Math.hypot(dx, dy);
+          const spd = (115 * step) / 1000;
+          if (dist <= spd) {
+            a.x = p.x; a.y = p.y;
+            a.caminho.shift();
+            if (!a.caminho.length && a.aoChegar) { const fn = a.aoChegar; a.aoChegar = null; fn(); }
+          } else {
+            a.x += (dx / dist) * spd;
+            a.y += (dy / dist) * spd;
+          }
+        }
+        if (a.balao) { a.balao.t -= step; if (a.balao.t <= 0) a.balao = null; }
+        if (a.festa > 0) a.festa -= step;
+      }
+
+      for (const k of Object.keys(alarmes)) {
+        alarmes[k] -= step; if (alarmes[k] <= 0) delete alarmes[k];
+      }
+
+      confetes.forEach(c => {
+        c.x += (c.vx * step) / 1000; c.y += (c.vy * step) / 1000;
+        c.vy += (45 * step) / 1000; c.vida -= step;
+      });
+      confetes = confetes.filter(c => c.vida > 0 && c.y < 525);
+
+      if (tempoSim > proximaFofoca) {
+        proximaFofoca = tempoSim + 2600;
+        const ociosos = Object.values(ATORES).filter(a => a.cafe && !a.balao && !a.caminho.length);
+        if (ociosos.length) {
+          const falas = ["☕ Cafezinho orgânico?", "0 tokens gastos hoje!", "Viram o QA? Rigoroso!", "Hoje tá tranquilo!", "Bora uma água?"];
+          const a = ociosos[Math.floor(Math.random() * ociosos.length)];
+          a.balao = { texto: falas[Math.floor(Math.random() * falas.length)], t: 1800 };
+        }
+      }
+    }
+
+    // DESENHO GRÁFICO (Canvas 2D com estética refinada)
+    function rRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function drawFloor() {
+      // Gramado exterior
+      ctx.fillStyle = "#87ae73";
+      ctx.fillRect(0, 0, W, H);
+      // Prédio Base
+      ctx.fillStyle = "#dcd3c1";
+      ctx.fillRect(14, 12, 932, 516);
+      // Corredor Central Limpo
+      ctx.fillStyle = "#d4c9b3";
+      ctx.fillRect(16, 235, 928, 60);
+      // Linhas suaves de piso
+      ctx.fillStyle = "rgba(0,0,0,0.04)";
+      for (let x = 24; x < 940; x += 36) ctx.fillRect(x, CORREDOR_Y - 1, 18, 2);
+    }
+
+    function drawSala(k) {
+      const s = SALAS[k];
+      // Piso da sala
+      ctx.fillStyle = s.cor;
+      ctx.fillRect(s.x, s.y, s.w, s.h);
+
+      // Grade sutil do piso
+      ctx.strokeStyle = "rgba(0,0,0,0.035)";
+      ctx.lineWidth = 1;
+      for (let x = s.x + 22; x < s.x + s.w; x += 22) {
+        ctx.beginPath(); ctx.moveTo(x + 0.5, s.y); ctx.lineTo(x + 0.5, s.y + s.h); ctx.stroke();
+      }
+      for (let y = s.y + 22; y < s.y + s.h; y += 22) {
+        ctx.beginPath(); ctx.moveTo(s.x, y + 0.5); ctx.lineTo(s.x + s.w, y + 0.5); ctx.stroke();
+      }
+
+      // Paredes sólidas com porta no meio
+      const paredeCor = "#543f31";
+      const px = portaX(s);
+      const vao = 26;
+
+      const drawHWall = (y, hasDoor) => {
+        if (hasDoor) {
+          ctx.fillStyle = paredeCor;
+          ctx.fillRect(s.x - 2, y - 3, px - vao - s.x + 2, 6);
+          ctx.fillRect(px + vao, y - 3, s.x + s.w - px - vao + 2, 6);
+        } else {
+          ctx.fillStyle = paredeCor;
+          ctx.fillRect(s.x - 2, y - 3, s.w + 4, 6);
+        }
+      };
+
+      drawHWall(s.y, !s.topo);
+      drawHWall(s.y + s.h, s.topo);
+      ctx.fillStyle = paredeCor;
+      ctx.fillRect(s.x - 3, s.y, 6, s.h);
+      ctx.fillRect(s.x + s.w - 3, s.y, 6, s.h);
+
+      // Efeito de Alarme (Giroflex vermelho)
+      if (alarmes[k]) {
+        const pulse = 0.14 + 0.12 * Math.sin(tempoSim / 110);
+        ctx.fillStyle = `rgba(215, 35, 35, ${pulse})`;
+        ctx.fillRect(s.x + 3, s.y + 3, s.w - 6, s.h - 6);
+        const on = Math.floor(tempoSim / 200) % 2 === 0;
+        [[s.x + 14, s.y + 14], [s.x + s.w - 14, s.y + 14]].forEach(([gx, gy], i) => {
+          ctx.fillStyle = (on ? i === 0 : i === 1) ? "#ff3322" : "#771109";
+          ctx.beginPath(); ctx.arc(gx, gy, 6, 0, Math.PI * 2); ctx.fill();
+        });
+      }
+
+      // Plaquinha elegante da sala (NO TOPO, SEM COBRIR MÓVEIS!)
+      ctx.font = "bold 11px system-ui, sans-serif";
+      const tw = ctx.measureText(s.nome).width + 16;
+      ctx.fillStyle = "rgba(255, 253, 248, 0.94)";
+      ctx.shadowColor = "rgba(0,0,0,0.08)";
+      ctx.shadowBlur = 6;
+      rRect(s.x + (alarmes[k] ? 28 : 10), s.y + 8, tw, 20, 6);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = "#1f4d2e";
+      ctx.fillText(s.nome, s.x + (alarmes[k] ? 36 : 18), s.y + 22);
+    }
+
+    function drawPlant(x, y) {
+      ctx.fillStyle = "#915034";
+      ctx.fillRect(x - 5, y - 8, 10, 8);
+      ctx.fillStyle = "#337b3f";
+      ctx.beginPath(); ctx.arc(x, y - 14, 8, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#489e56";
+      ctx.beginPath(); ctx.arc(x - 2, y - 16, 5, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function drawFixedFurniture() {
+      // 1. RECEPÇÃO: Tela da Flora com suporte no chão (SEM SOBREPOR NADA)
+      const stColor = { proposta: "#38b056", resposta: "#38b056", esclarecimento: "#e09f30", fora_do_escopo: "#e03e30", bloqueado: "#e03e30" };
+      // Monitor grande de recepção
+      ctx.fillStyle = "#1a251e";
+      ctx.fillRect(36, 335, 148, 64);
+      ctx.fillStyle = "#0a1711";
+      ctx.fillRect(40, 339, 140, 56);
+      ctx.fillStyle = stColor[telaInfo.status] || "#2b3d32";
+      ctx.fillRect(36, 399, 148, 4);
+      // Pedestal
+      ctx.fillStyle = "#3a4a40";
+      ctx.fillRect(104, 403, 12, 10);
+      ctx.fillRect(94, 413, 32, 3);
+
+      ctx.font = "bold 9.5px system-ui, sans-serif";
+      ctx.fillStyle = "#7ee896";
+      ctx.fillText("🌱 TELA DA FLORA", 48, 352);
+      ctx.font = "9.5px system-ui, sans-serif";
+      ctx.fillStyle = "#f0f8f2";
+      wrapText(telaInfo.texto, 126).slice(0, 3).forEach((line, i) => {
+        ctx.fillText(line, 48, 367 + i * 11);
+      });
+
+      // Elevador
+      ctx.fillStyle = "#8a969c";
+      ctx.fillRect(190, 330, 46, 56);
+      ctx.fillStyle = "#b4bec2";
+      ctx.fillRect(194, 335, 18, 51);
+      ctx.fillRect(214, 335, 18, 51);
+      ctx.fillStyle = "#5d676b";
+      ctx.fillRect(212, 335, 2, 51);
+      ctx.font = "bold 9px system-ui"; ctx.fillStyle = "#f2c14e"; ctx.fillText("▲▼", 206, 326);
+      drawPlant(232, 508);
+
+      // 2. CONSULTAS: Estante de Banco de Dados com Prateleiras
+      ctx.fillStyle = "#6d4e39";
+      ctx.fillRect(268, 332, 94, 38);
+      // Arquivos coloridos
+      const bookColors = ["#d94d36", "#2d7b9d", "#dca130", "#3d8544", "#9b4532", "#663b92", "#d94d36", "#2d7b9d", "#3d8544"];
+      bookColors.forEach((bc, i) => {
+        ctx.fillStyle = bc;
+        ctx.fillRect(272 + i * 10, 336, 7, 14);
+        ctx.fillRect(272 + i * 10, 353, 7, 14);
+      });
+      // Plaquinha na estante
+      ctx.fillStyle = "rgba(255,255,255,0.85)";
+      ctx.fillRect(366, 336, 88, 16);
+      ctx.font = "bold 8.5px system-ui"; ctx.fillStyle = "#2b3b44";
+      ctx.fillText("BANCO SQL / CACHE", 370, 348);
+      drawPlant(466, 508);
+
+      // 3. COPA: Cafeteira & Balcão de Lanches
+      ctx.fillStyle = "#222";
+      ctx.fillRect(500, 332, 28, 36);
+      ctx.fillStyle = "#555";
+      ctx.fillRect(506, 340, 16, 8);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(511, 354, 6, 8);
+      // LED da cafeteira
+      ctx.fillStyle = Math.floor(tempoSim / 350) % 2 ? "#e03e30" : "#55110d";
+      ctx.fillRect(519, 335, 4, 3);
+
+      // Balcão de apoio
+      ctx.fillStyle = "#af967c";
+      ctx.fillRect(534, 334, 86, 22);
+      ctx.fillStyle = "#8faebe";
+      ctx.fillRect(544, 339, 18, 12);
+      ctx.font = "10px system-ui"; ctx.fillStyle = "#fff"; ctx.fillText("💧", 546, 349);
+      drawPlant(696, 340);
+
+      // 4. COFRE: Servidores Racks com LEDs piscando
+      [736, 764, 792].forEach((rx, i) => {
+        ctx.fillStyle = "#2d343a";
+        ctx.fillRect(rx, 332, 24, 62);
+        for (let j = 0; j < 6; j++) {
+          const on = (Math.floor(tempoSim / 170) + i * 3 + j) % 4 !== 0;
+          ctx.fillStyle = alarmes.cofre ? "#ff2222" : on ? "#4ce87c" : "#1a3b23";
+          ctx.fillRect(rx + 4, 338 + j * 9, 3, 3);
+          ctx.fillStyle = "#4a535a";
+          ctx.fillRect(rx + 10, 339 + j * 9, 10, 1);
+        }
+      });
+
+      // Plantinhas nos cantos
+      [[234, 210], [466, 210], [698, 210], [926, 210]].forEach(([px, py]) => drawPlant(px, py));
+    }
+
+    function wrapText(text, maxWidth) {
+      const words = text.split(" ");
+      const lines = [];
+      let current = "";
+      for (const w of words) {
+        const test = current ? `${current} ${w}` : w;
+        if (ctx.measureText(test).width > maxWidth && current) {
+          lines.push(current);
+          current = w;
+        } else {
+          current = test;
+        }
+      }
+      if (current) lines.push(current);
+      return lines;
+    }
+
+    function drawDesk(a) {
+      const { x, y } = a.casa;
+      const deskColor = a.robo ? "#434b52" : a.chave === "rota" ? "#6d5c46" : "#7c5237";
+      const topColor = a.robo ? "#58626b" : "#9c6843";
+
+      // Tampo da mesa com chanfro
+      ctx.fillStyle = deskColor;
+      ctx.fillRect(x - 30, y - 6, 60, 16);
+      ctx.fillStyle = topColor;
+      ctx.fillRect(x - 30, y - 6, 60, 4);
+      // Pés da mesa
+      ctx.fillStyle = "#462e1e";
+      ctx.fillRect(x - 26, y + 10, 4, 8);
+      ctx.fillRect(x + 22, y + 10, 4, 8);
+
+      // Computador com tela ligada
+      ctx.fillStyle = "#1e2830";
+      ctx.fillRect(x + 10, y - 22, 20, 15);
+      const ligado = a.trabalhando;
+      ctx.fillStyle = ligado ? "#6be0ff" : "#2f3e48";
+      ctx.fillRect(x + 12, y - 20, 16, 11);
+      if (ligado) {
+        ctx.fillStyle = "#125068";
+        for (let i = 0; i < 3; i++) {
+          const tw = 4 + ((Math.floor(tempoSim / 140) + i * 5) % 9);
+          ctx.fillRect(x + 13, y - 19 + i * 3, tw, 1);
+        }
+      }
+      // Suporte da tela
+      ctx.fillStyle = "#1e2830";
+      ctx.fillRect(x + 18, y - 7, 4, 2);
+
+      // Pacote 📦 na mesa enquanto o agente processa
+      if (pacoteDono === a.chave && !a.caminho.length) {
+        ctx.font = "16px 'Segoe UI Emoji', sans-serif";
+        ctx.fillText("📦", x - 26, y + 6);
+      }
+    }
+
+    function drawCharacter(a) {
+      const x = Math.round(a.x);
+      let y = Math.round(a.y);
+      const walking = a.caminho.length > 0;
+      const frame = walking ? Math.floor(tempoSim / 130) % 2 : 0;
+      if (a.trabalhando && !walking) y -= Math.floor(tempoSim / 200) % 2;
+      if (a.festa > 0) y -= Math.round(Math.abs(Math.sin(tempoSim / 110)) * 6);
+
+      // Sombra projetada
+      ctx.fillStyle = "rgba(0,0,0,0.18)";
+      ctx.beginPath();
+      ctx.ellipse(x, Math.round(a.y) + 2, 11, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Indicador de Foco
+      if (focoKey === a.chave) {
+        ctx.strokeStyle = "#e8b835";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(x, Math.round(a.y) + 2, 15, 6, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      if (a.robo) {
+        // Valdo Robô
+        ctx.fillStyle = "#4a535b";
+        ctx.fillRect(x - 4, y - 8, 3, 8);
+        ctx.fillRect(x + 1, y - 8, 3, 8);
+        ctx.fillStyle = "#8d99a2";
+        ctx.fillRect(x - 8, y - 22, 16, 15);
+        ctx.fillStyle = "#5d6770";
+        ctx.fillRect(x - 5, y - 18, 10, 4);
+        ctx.fillStyle = "#b0bcc4";
+        ctx.fillRect(x - 7, y - 36, 14, 13);
+        ctx.fillStyle = alarmes.cofre ? "#ff4433" : "#4ce8ff";
+        ctx.fillRect(x - 5, y - 32, 10, 4);
+        // Antena
+        ctx.fillStyle = "#4a535b";
+        ctx.fillRect(x - 1, y - 41, 2, 5);
+        ctx.fillStyle = Math.floor(tempoSim / 280) % 2 ? (alarmes.cofre ? "#ff2222" : "#3be875") : "#1b3323";
+        ctx.fillRect(x - 2, y - 44, 4, 3);
+      } else {
+        // Personagens Humanos
+        // Pernas
+        ctx.fillStyle = a.calca || "#333d45";
+        ctx.fillRect(x - 5, y - 10, 4, frame ? 8 : 10);
+        ctx.fillRect(x + 1, y - 10, 4, frame ? 10 : 8);
+        // Torso / Roupa
+        ctx.fillStyle = a.roupa;
+        ctx.fillRect(x - 7, y - 23, 14, 14);
+
+        if (a.mao) {
+          // Mão levantada pedindo atenção
+          ctx.fillRect(x - 10, y - 22, 3, 10);
+          ctx.fillRect(x + 7, y - 38, 3, 16);
+          ctx.fillStyle = a.pele;
+          ctx.fillRect(x + 7, y - 41, 3, 3);
+        } else {
+          // Braços normais
+          const arm = a.trabalhando ? Math.floor(tempoSim / 150) % 2 : 0;
+          ctx.fillRect(x - 10, y - 22, 3, 10 - arm);
+          ctx.fillRect(x + 7, y - 22, 3, 9 + arm);
+          ctx.fillStyle = a.pele;
+          ctx.fillRect(x - 10, y - 12 - arm, 3, 2);
+          ctx.fillRect(x + 7, y - 13 + arm, 3, 2);
+        }
+
+        // Cabeça
+        ctx.fillStyle = a.pele;
+        ctx.fillRect(x - 6, y - 35, 12, 12);
+        // Cabelo
+        ctx.fillStyle = a.cabelo;
+        ctx.fillRect(x - 6, y - 37, 12, 4);
+        ctx.fillRect(x - 7, y - 36, 2, a.longo ? 14 : 6);
+        ctx.fillRect(x + 5, y - 36, 2, a.longo ? 14 : 6);
+        if (a.chapeu) {
+          ctx.fillStyle = a.chapeu;
+          ctx.fillRect(x - 10, y - 37, 20, 3);
+          ctx.fillRect(x - 6, y - 42, 12, 5);
+        }
+        if (a.flor) {
+          // Broto verde / florzinha no cabelo da Flora
+          ctx.fillStyle = "#4ce87c";
+          ctx.fillRect(x - 1, y - 42, 2, 5);
+          ctx.fillRect(x - 4, y - 43, 3, 2);
+          ctx.fillRect(x + 1, y - 44, 3, 2);
+        }
+        // Olhinhos
+        ctx.fillStyle = "#111";
+        ctx.fillRect(x - 3, y - 30, 2, 2);
+        ctx.fillRect(x + 1, y - 30, 2, 2);
+      }
+
+      // Pacote sendo carregado durante a caminhada
+      if (pacoteDono === a.chave && walking) {
+        ctx.font = "15px 'Segoe UI Emoji', sans-serif";
+        ctx.fillText("📦", x + 5, y - 36);
+      }
+      if (a.mao) {
+        ctx.font = "bold 13px system-ui";
+        ctx.fillStyle = Math.floor(tempoSim / 280) % 2 ? "#e4572e" : "#f2c14e";
+        ctx.fillText("!", x + 12, y - 38);
+      }
+
+      // Posição vertical da etiqueta de nome:
+      // Se tiver sentado na mesa (sem estar andando), coloca a etiqueta NO TOPO da cabeça do agente
+      // Se estiver andando livremente, mantém flutuando acima da cabeça com clareza
+      ctx.font = "bold 9.5px system-ui, sans-serif";
+      const nw = ctx.measureText(a.nome).width + 10;
+      const labelY = (a.semMesa || walking) ? (y - 50) : (y - 52);
+
+      // Sombra e fundo da etiqueta flutuante
+      ctx.fillStyle = (focoKey === a.chave) ? "#1f4d2e" : "rgba(24, 48, 39, 0.88)";
+      rRect(x - nw / 2, labelY, nw, 14, 4);
+      ctx.fill();
+
+      // Borda de destaque para o agente ativo
+      if (focoKey === a.chave) {
+        ctx.strokeStyle = "#e8b835";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = (focoKey === a.chave) ? "#f2d37c" : "#ffffff";
+      ctx.fillText(a.nome, x - nw / 2 + 5, labelY + 10.5);
+    }
+
+    function drawBubble(a) {
+      if (!a.balao) return;
+      ctx.font = "bold 11px system-ui, 'Segoe UI Emoji', sans-serif";
+      let txt = a.balao.texto;
+      while (ctx.measureText(txt).width > 220 && txt.length > 4) txt = txt.slice(0, -2);
+      if (txt !== a.balao.texto) txt = txt.trimEnd() + "…";
+
+      const bw = ctx.measureText(txt).width + 16;
+      const bx = Math.min(Math.max(a.x - bw / 2, 8), W - bw - 8);
+      const by = a.y - (a.robo ? 84 : 80);
+
+      ctx.fillStyle = "#fffdf8";
+      ctx.strokeStyle = "#1b3323";
+      ctx.lineWidth = 1.5;
+      rRect(bx, by, bw, 22, 7);
+      ctx.fill();
+      ctx.stroke();
+
+      // Biquinho do balão
+      ctx.beginPath();
+      ctx.moveTo(a.x - 4, by + 21);
+      ctx.lineTo(a.x, by + 27);
+      ctx.lineTo(a.x + 4, by + 21);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(a.x - 4, by + 22);
+      ctx.lineTo(a.x, by + 27);
+      ctx.lineTo(a.x + 4, by + 22);
+      ctx.stroke();
+
+      ctx.fillStyle = "#142c1e";
+      ctx.fillText(txt, bx + 8, by + 15);
+    }
+
+    function render() {
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      drawFloor();
+      Object.keys(SALAS).forEach(drawSala);
+      drawFixedFurniture();
+
+      // Ordem de profundidade (algoritmo do pintor)
+      const renderables = [];
+      Object.values(ATORES).forEach(a => {
+        renderables.push({ y: a.y, draw: () => drawCharacter(a) });
+        if (!a.semMesa) renderables.push({ y: a.casa.y + 1, draw: () => drawDesk(a) });
+      });
+
+      // Mesa de café da Copa
+      renderables.push({
+        y: 462,
+        draw: () => {
+          ctx.fillStyle = "#9b6843";
+          ctx.fillRect(555, 440, 96, 26);
+          ctx.fillStyle = "#b87f55";
+          ctx.fillRect(555, 440, 96, 4);
+          ctx.font = "12px 'Segoe UI Emoji'";
+          ctx.fillText("☕", 575, 458);
+          ctx.fillText("☕", 620, 458);
+        }
+      });
+
+      renderables.sort((p, q) => p.y - q.y).forEach(o => o.draw());
+
+      // Confetes
+      confetes.forEach(c => {
+        ctx.fillStyle = c.cor;
+        ctx.fillRect(c.x, c.y, 3, 3);
+      });
+
+      // Balões de fala por cima de tudo
+      Object.values(ATORES).forEach(drawBubble);
+
+      // Cortina de Pausa
+      if (pausado) {
+        ctx.fillStyle = "rgba(20, 42, 32, 0.4)";
+        ctx.fillRect(0, 0, W, H);
+        ctx.font = "bold 26px system-ui";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText("⏸ PAUSADO", W / 2 - 75, H / 2);
+      }
+    }
+
+    function resizeStage() {
+      const wrap = document.getElementById("canvas-wrapper").getBoundingClientRect();
+      const scale = Math.min((wrap.width - 16) / W, (wrap.height - 16) / H);
+      canvas.style.width = `${Math.floor(W * scale)}px`;
+      canvas.style.height = `${Math.floor(H * scale)}px`;
+    }
+    window.addEventListener("resize", resizeStage);
+
+    let lastTime = performance.now();
+    function loop(now) {
+      const dt = Math.min(now - lastTime, 50);
+      lastTime = now;
+      update(dt);
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    renderizarEquipe();
+    resizeStage();
+    requestAnimationFrame(loop);
+    definirPerfil("assinante");
+  </script>
+</body>
+</html>

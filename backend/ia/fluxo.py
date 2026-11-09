@@ -2,8 +2,8 @@
 
 from ia.agentes import assinante, produtor
 from ia.agentes.interprete import interpretar
-from ia.agentes.qa import revisar
-from ia.contratos import ResultadoQA, ItemProposta
+from ia.agentes.qa import consolidar_qa, normalizar_texto, revisar, tamanho_explicito_mensagem
+from ia.contratos import ItemProposta
 from ia.validacao import OPERACOES_POR_PERFIL, validar_proposta
 from servicos.cesta import LIMITES_POR_TAMANHO
 
@@ -30,18 +30,20 @@ def analisar_agentes(mensagem, perfil, catalogo, cestas, *, chamar_agente, modo,
             quantidades[item.produto_id] = quantidades.get(item.produto_id, 0) + item.quantidade
         if all(q <= 10 for q in quantidades.values()):
             proposta.produtos = [ItemProposta(produto_id=p, quantidade=q) for p, q in quantidades.items()]
-        if quantidades:
-            proposta.tamanho = next((nome for nome, limite in LIMITES_POR_TAMANHO.items() if len(quantidades) <= limite), "grande")
+        tamanho_msg = tamanho_explicito_mensagem(mensagem)
+        if tamanho_msg and len(quantidades) > LIMITES_POR_TAMANHO[tamanho_msg]:
+            proposta.tamanho = tamanho_msg
+        elif quantidades and (not proposta.tamanho or len(quantidades) <= LIMITES_POR_TAMANHO[proposta.tamanho]):
+            proposta.tamanho = next(
+                (nome for nome, limite in LIMITES_POR_TAMANHO.items() if len(quantidades) <= limite), "grande"
+            )
+            if especialista.pergunta and "tamanho" in normalizar_texto(especialista.pergunta):
+                especialista.pergunta = None
     contexto["resposta_especialista"] = especialista.model_dump()
     qa = revisar(contexto, chamar_agente)
     erros = validar_proposta(especialista.proposta, perfil, catalogo, cestas)
-    if erros:
-        qa = ResultadoQA(status="bloqueado", problemas=erros)
-    if especialista.pergunta and qa.status == "aprovado":
-        qa = ResultadoQA(status="esclarecimento", duvidas=[especialista.pergunta])
-    if interpretacao.fora_do_escopo:
-        qa = ResultadoQA(status="bloqueado", problemas=["Posso ajudar com pedidos e separação de cestas."])
-    aprovado = qa.status == "aprovado" and especialista.proposta is not None
+    qa = consolidar_qa(qa, contexto, especialista.proposta, erros)
+    aprovado = qa.status == "aprovado" and especialista.proposta is not None and not erros
     return {
         "modo": modo, "agente": perfil,
         "status": "fora_do_escopo" if interpretacao.fora_do_escopo else "proposta" if aprovado else "esclarecimento",

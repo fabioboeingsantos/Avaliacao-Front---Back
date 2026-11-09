@@ -35,6 +35,7 @@ def _qa_assinante(proposta: dict) -> dict:
         duvidas.append("Qual tamanho de cesta você deseja: pequena, média ou grande?")
     elif len(produtos) > LIMITES[tamanho]:
         problemas.append(f"A cesta {tamanho} aceita até {LIMITES[tamanho]} produtos diferentes.")
+        duvidas.append(f"Você prefere mudar o tamanho da cesta ou manter até {LIMITES[tamanho]} produtos?")
     for produto in produtos:
         if produto["quantidade"] < 1:
             problemas.append(f"Informe ao menos uma unidade de {produto['nome']} ou peça para retirar o produto.")
@@ -112,7 +113,7 @@ def _analisar_assinante(mensagem: str, catalogo: list[dict], cestas=None, histor
         if modo == "pronta" and tamanho:
             from ia.validacao import COMPOSICAO_PRONTA
             itens = {p: 1 for p in COMPOSICAO_PRONTA[:LIMITES[tamanho]]}
-    if modo == "selecionavel" and itens:
+    if modo == "selecionavel" and itens and (not tamanho or len(itens) <= LIMITES[tamanho]):
         tamanho = next((nome for nome, limite in LIMITES.items() if len(itens) <= limite), "grande")
     produtos_por_id = {p["id"]: p for p in catalogo}
     # O catálogo é lido novamente a cada turno; sugestões anteriores não
@@ -177,7 +178,10 @@ def _analisar_produtor(mensagem: str, cestas: list[dict]) -> dict:
     qa = {"status": "aprovado", "problemas": [], "duvidas": []}
     if proposta["operacao"] == "preparar_separacao" and cesta is None:
         qa = {"status": "esclarecimento", "problemas": [], "duvidas": ["Qual é o número da cesta que você deseja separar?"]}
-    if cesta and cesta["situacao"] in {"Enviado", "Entregue", "Cancelado"} and proposta["operacao"] == "preparar_separacao":
+    if cesta and (
+        cesta["situacao"] in {"Enviado", "Entregue", "Cancelado", "Preparado para envio"}
+        or cesta.get("separacao_concluida_em")
+    ) and proposta["operacao"] == "preparar_separacao":
         qa = {"status": "bloqueado", "problemas": [f"A cesta está com situação {cesta['situacao']} e não pode receber nova separação."], "duvidas": []}
     return {"status": "proposta" if qa["status"] == "aprovado" else "esclarecimento", "proposta": proposta, "qa": qa}
 
