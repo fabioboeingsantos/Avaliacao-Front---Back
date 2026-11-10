@@ -16,10 +16,12 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 def obter_url_banco() -> URL:
     """Monta a URL do banco a partir das chaves do ambiente."""
 
-    # O Supabase fornece uma URL PostgreSQL completa. Mantemos a montagem
-    # por partes abaixo para preservar o modo local com SQLite e MySQL.
+    # O Supabase fornece uma URL PostgreSQL completa. Quando BANCO_DRIVER foi
+    # explicitamente definido como sqlite, o ambiente local deve manter o
+    # SQLite mesmo que as variáveis do Supabase continuem no .env.
+    driver_configurado = os.getenv("BANCO_DRIVER")
     url_externa = os.getenv("SUPABASE_DB_URL") or os.getenv("DATABASE_URL")
-    if url_externa:
+    if url_externa and driver_configurado != "sqlite":
         url = make_url(url_externa)
         senha_separada = os.getenv("SUPABASE_DB_PASSWORD")
         if senha_separada:
@@ -29,7 +31,7 @@ def obter_url_banco() -> URL:
             url = url.set(drivername="postgresql+psycopg")
         return url
 
-    driver = os.getenv("BANCO_DRIVER", "sqlite")
+    driver = driver_configurado or "sqlite"
     database = os.getenv("BANCO_NOME", "./cesta_do_vale.db")
 
     if driver.startswith("sqlite"):

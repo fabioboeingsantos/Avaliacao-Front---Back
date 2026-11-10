@@ -1,90 +1,106 @@
-# Acesso ao servidor local
+# Acesso local rápido
 
-Este guia inicia a API e o frontend em dois terminais do PowerShell. O banco local usa SQLite. Estes passos são apenas para desenvolvimento e não fazem deploy.
+Este é o roteiro principal para iniciar o projeto localmente. Ele foi pensado para que a leitura deste arquivo seja suficiente para testar a aplicação sem nova investigação.
 
-No arquivo `.env` da raiz, use `FRONTEND_URL=http://localhost:5173,http://127.0.0.1:5173` para permitir o acesso do Vite à API. Os endereços da porta `8080` são para o Docker Compose.
+## Início rápido
 
-## Preparação inicial
-
-Execute os comandos a partir da raiz do projeto:
+Abra um PowerShell na raiz do projeto:
 
 ```powershell
-cd C:\Users\fabio\Desktop\Avaliacao-Front---Back
+$raiz = 'C:\Users\fabio\Desktop\Avaliacao Front - Back'
+Set-Location $raiz
 ```
 
-### Python e dependências da API
+### 1. Inicie a API
 
-Confira se o Python 3.12 está instalado:
+O ambiente `.supabase-venv` já contém as dependências completas usadas pela API neste computador:
 
 ```powershell
-py -3.12 --version
+$python = Join-Path $raiz '.supabase-venv\Scripts\python.exe'
+Start-Process -FilePath $python `
+  -ArgumentList '-m','uvicorn','main:app','--host','127.0.0.1','--port','8000' `
+  -WorkingDirectory (Join-Path $raiz 'backend') `
+  -WindowStyle Hidden
 ```
 
-Se o launcher disser que não há runtime instalado, instale-o uma vez:
+### 2. Inicie o frontend
 
 ```powershell
-py install 3.12
+Start-Process -FilePath 'npm.cmd' `
+  -ArgumentList 'run','dev','--','--host','127.0.0.1' `
+  -WorkingDirectory (Join-Path $raiz 'frontend')
 ```
 
-Crie o ambiente e instale as dependências (uma vez, ou quando `requirements.txt` mudar):
+Abra:
+
+- Aplicação: <http://localhost:5173>
+- API: <http://127.0.0.1:8000>
+- Documentação da API: <http://127.0.0.1:8000/docs>
+
+## Verificação rápida
+
+A rota `/saude` confirma somente que a API está ligada. Para verificar o banco de verdade, execute:
 
 ```powershell
-py -3.12 -m venv backend\.venv
-backend\.venv\Scripts\python.exe -m pip install --upgrade pip
-backend\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+Set-Location (Join-Path $raiz 'backend')
+& (Join-Path $raiz '.supabase-venv\Scripts\python.exe') -c "from banco import engine; from sqlalchemy import text; c=engine.connect(); print(c.execute(text('SELECT 1')).scalar()); c.close()"
 ```
 
-### Node e dependências do frontend
+O resultado esperado é `1`. Se aparecer `password authentication failed`, a API está ligada, mas a senha do Supabase no `.env` está incorreta ou expirada.
 
-Configure o endereço local da API em `frontend/.env.local` (uma vez):
+## Banco usado pelo ambiente
+
+O arquivo `.env` fica na raiz do projeto. A regra atual é:
+
+1. Se `BANCO_DRIVER=sqlite` estiver definido, a API usa SQLite local, mesmo que variáveis do Supabase existam.
+2. Se `BANCO_DRIVER` não estiver definido e `SUPABASE_DB_URL` existir, a API usa Supabase/PostgreSQL.
+3. Para desenvolvimento sem banco remoto, mantenha esta configuração:
+
+```env
+SUPABASE_DB_URL=
+SUPABASE_DB_PASSWORD=
+BANCO_DRIVER=sqlite
+BANCO_NOME=./cesta_do_vale.db
+```
+
+Depois de alterar o `.env`, reinicie a API. Não publique a senha do Supabase nem a inclua em commits.
+
+## Configuração inicial
+
+Se o ambiente Python ainda não existir, crie-o e instale as dependências:
+
+```powershell
+py -3.12 -m venv .supabase-venv
+.supabase-venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+Para o frontend:
+
+```powershell
+Set-Location (Join-Path $raiz 'frontend')
+npm.cmd install
+```
+
+Se necessário, crie `frontend/.env.local` com:
 
 ```env
 VITE_URL_DA_API=http://127.0.0.1:8000
 ```
-
-Instale as dependências do frontend uma vez, dentro da pasta `frontend`:
-
-```powershell
-cd C:\Users\fabio\Desktop\Avaliacao-Front---Back\frontend
-npm install
-```
-
-## Iniciar a API
-
-Abra o primeiro terminal do PowerShell:
-
-```powershell
-cd C:\Users\fabio\Desktop\Avaliacao-Front---Back\backend
-.\.venv\Scripts\Activate.ps1
-$env:JWT_SECRET_KEY = "chave-local-de-desenvolvimento-com-mais-de-32-caracteres"
-python criar_tabelas.py
-python -m fastapi dev main.py
-```
-
-Confirme que o prompt mostra `(.venv)`. Se a ativação falhar, pare e confira se a etapa de preparação criou `backend\.venv`. Deixe o terminal da API aberto.
-
-- API: `http://127.0.0.1:8000`
-- Saúde da API: `http://127.0.0.1:8000/saude`
-- Documentação interativa: `http://127.0.0.1:8000/docs`
-
-A rota `/` não tem uma página inicial e pode mostrar `{"detail":"Not Found"}`; isso não significa que a API esteja desligada.
-
-## Iniciar o frontend
-
-Abra um segundo terminal do PowerShell. O comando precisa ser executado dentro de `frontend`, onde está o `package.json`:
-
-```powershell
-cd C:\Users\fabio\Desktop\Avaliacao-Front---Back\frontend
-npm run dev
-```
-
-Abra o endereço informado pelo Vite, normalmente `http://localhost:5173`. Se aparecer erro `ENOENT` procurando `package.json` na raiz, entre na pasta `frontend` e tente novamente.
 
 ## Contas de demonstração
 
 - Assinante: usuário `aline`, senha `aline123`.
 - Produtor: usuário `vanderlei`, senha `vanderlei123`.
 
-## Encerrar
+## Parar os servidores
 
-Pressione `Ctrl+C` em cada terminal. A chave JWT definida com `$env:` vale somente para o terminal atual. Os dados do SQLite permanecem no arquivo local do banco.
+Para fechar os processos iniciados em segundo plano:
+
+```powershell
+Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
+  Where-Object { $_.LocalPort -in 5173,8000 } |
+  Select-Object -ExpandProperty OwningProcess -Unique |
+  Stop-Process -Force
+```
+
+Se preferir acompanhar os logs, inicie `uvicorn` e `npm.cmd run dev` diretamente em dois terminais e encerre cada um com `Ctrl+C`.
