@@ -1,0 +1,6 @@
+docs/
+CRIACAO_NOVO_SISTEMA/
+**/venv/
+**/.venv/
+**/node_modules/
+**/.env

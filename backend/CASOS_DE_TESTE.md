@@ -16,7 +16,7 @@ Validar as funcionalidades implementadas a partir da aula de autenticação:
 - Backend: FastAPI, SQLAlchemy e PyJWT.
 - Frontend: React + Vite.
 - Banco dos testes automatizados: SQLite temporário.
-- Banco da aplicação: configurado pelo `backend/.env`.
+- Banco da aplicação: configurado pelo `.env` da raiz e pelas variáveis do processo.
 - Comando da suíte automatizada:
 
 ```powershell
@@ -24,11 +24,16 @@ cd backend
 pytest -q
 ```
 
-Resultado atual:
+Resultado histórico da etapa original de autenticação (não representa a suíte completa atual):
 
 ```text
 11 passed
 ```
+
+Na revisão de 10/11/2026, a suíte não pôde iniciar porque `backend/.venv` aponta para um
+Python 3.12 ausente. Há testes adicionais de catálogo, recuperação, notificações, IA e voz
+em `backend/tests`. Consulte a [análise atual](../docs/ANALISE_SISTEMA.md) antes de usar
+os resultados históricos como evidência.
 
 Smoke test integrado executado em 19/10/2026:
 
@@ -78,6 +83,7 @@ Os casos estão implementados em:
 - o login é validado pelo backend;
 - o backend cria um cookie JWT `HttpOnly`;
 - as chamadas seguintes enviam o cookie automaticamente;
+- o login também retorna `access_token`; o frontend o mantém em `sessionStorage` e envia Bearer;
 - nenhum usuário é autenticado se a API estiver desligada.
 
 ### CT-M02 — Criação de cesta pelo assinante
@@ -154,6 +160,8 @@ O incremento é considerado aprovado quando:
 - Teste end-to-end no navegador.
 - Teste de renovação de sessão.
 - Teste de logout com invalidação no servidor.
-- Teste de recuperação de senha.
+- Reexecutar os testes de recuperação de senha já implementados em `tests/test_recuperacao.py`.
 - Teste de expiração e remoção do cookie `HttpOnly` no logout.
-- Teste de pipeline CI executando testes e build automaticamente.
+- Conferir a execução da CI já implementada em `.github/workflows/ci.yml` (pytest, lint e build).
+- Validar a cadeia completa de migrações, além dos testes que criam tabelas diretamente.
+- Validar transições concorrentes de pedidos e efeitos sobre estoque/notificações.

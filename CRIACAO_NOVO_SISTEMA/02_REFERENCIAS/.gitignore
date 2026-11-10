@@ -1,0 +1,16 @@
+backend/.env
+backend/.venv/
+.venv-tests/
+backend/venv/
+backend/*.db
+.imagegen-venv/
+__pycache__/
+.pytest_cache/
+node_modules/
+dist/
+.uv-cache/
+.uv-python/
+tmp/
+/.env
+.vercel
+.env*

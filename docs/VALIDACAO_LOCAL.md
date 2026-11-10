@@ -1,5 +1,17 @@
 # Validação local
 
+## Revisão de 10/11/2026
+
+- `npm.cmd run lint`, em `frontend`: aprovado.
+- `npm.cmd run build`, em `frontend`: aprovado (Vite 8.3.1, 41 módulos).
+- Pytest: não iniciou; o ambiente `backend/.venv` aponta para Python 3.12 ausente.
+  O Python alternativo disponível não possui as dependências da API.
+- Docker, navegador, Supabase, publicação e serviços externos: não testados nesta revisão.
+- README e documentação auxiliar atualizados a partir da inspeção do código.
+
+Veja a [análise do sistema](ANALISE_SISTEMA.md) para achados, prioridades e verificações restantes.
+Os resultados abaixo são registros históricos, não validações da revisão atual.
+
 ## Execução de 28/10/2026
 
 Este registro é histórico. Depois dessa execução, a migração `20261029_0008_estoque_produtos`

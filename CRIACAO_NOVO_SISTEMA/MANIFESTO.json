@@ -1,0 +1,292 @@
+﻿{
+    "data":  "2026-11-10",
+    "projeto_origem":  "Cesta do Vale",
+    "tipo":  "copia documental sem sincronizacao automatica",
+    "arquivos":  [
+                     {
+                         "origem":  ".dockerignore",
+                         "copia":  "02_REFERENCIAS/.dockerignore",
+                         "sha256":  "717dd70d1df745ec6049f4bc6d077592c8ef7430c04143918d0d378404d0237d"
+                     },
+                     {
+                         "origem":  ".env.exemplo",
+                         "copia":  "02_REFERENCIAS/.env.exemplo",
+                         "sha256":  "c7f2b8ec2cfa0ccc75cc225b90eb4959d198983ba63f783b4d20681c105eb548"
+                     },
+                     {
+                         "origem":  ".github/workflows/ci.yml",
+                         "copia":  "02_REFERENCIAS/.github/workflows/ci.yml",
+                         "sha256":  "339a2b54afdc7ac30bb03fd19b15cac340e8a523b2241cb06d839d1176881267"
+                     },
+                     {
+                         "origem":  ".gitignore",
+                         "copia":  "02_REFERENCIAS/.gitignore",
+                         "sha256":  "959f3f30ad5c72a1b9791a0d1bf62112b7e17b8902f3c7e3b01ddc43d411263e"
+                     },
+                     {
+                         "origem":  "ACESSO_LOCAL.md",
+                         "copia":  "02_REFERENCIAS/ACESSO_LOCAL.md",
+                         "sha256":  "56c13a191a1c3d7692626aca11e523c6ca4aae03e9d0e7e30e2c712eb00cbafb"
+                     },
+                     {
+                         "origem":  "backend/.dockerignore",
+                         "copia":  "02_REFERENCIAS/backend/.dockerignore",
+                         "sha256":  "cae4c21247ecd14c92ca9dfe43fe4a108331c8460481e5e55d3138b5e0d6b42a"
+                     },
+                     {
+                         "origem":  "backend/alembic.ini",
+                         "copia":  "02_REFERENCIAS/backend/alembic.ini",
+                         "sha256":  "4ec50bc10450dbf9029f2eeb08802963ce7bcbcd2646f268d3b60064bb8b847a"
+                     },
+                     {
+                         "origem":  "backend/CASOS_DE_TESTE.md",
+                         "copia":  "02_REFERENCIAS/backend/CASOS_DE_TESTE.md",
+                         "sha256":  "2b3da478ed571cbe54177773859373423e8d7b8d86db99b0f2bdd989c5231e0a"
+                     },
+                     {
+                         "origem":  "backend/Dockerfile",
+                         "copia":  "02_REFERENCIAS/backend/Dockerfile",
+                         "sha256":  "b77470073ce59bbda52cbf1ffbc043eda66d247a99a1f6a93bf5a9c94ae2cb0c"
+                     },
+                     {
+                         "origem":  "backend/ia/prompts/assinante.md",
+                         "copia":  "02_REFERENCIAS/backend/ia/prompts/assinante.md",
+                         "sha256":  "108e48f134bacf9c3b1d8c4b0d99ff7b1259ca35f0e1e8ed7ab9fec7c521368f"
+                     },
+                     {
+                         "origem":  "backend/ia/prompts/base.md",
+                         "copia":  "02_REFERENCIAS/backend/ia/prompts/base.md",
+                         "sha256":  "f13e82fd16227102673b947df7fa2fe0ccee0657db79dbd28ed03d8412aed8a6"
+                     },
+                     {
+                         "origem":  "backend/ia/prompts/interprete.md",
+                         "copia":  "02_REFERENCIAS/backend/ia/prompts/interprete.md",
+                         "sha256":  "6278eda0da77b493ede983491c919d3b5b0f81ed1de9555caa278d2a4125ae87"
+                     },
+                     {
+                         "origem":  "backend/ia/prompts/produtor.md",
+                         "copia":  "02_REFERENCIAS/backend/ia/prompts/produtor.md",
+                         "sha256":  "e360a41c549973f31a62cc8e196231c5ed552e03947a73aacd7c58b473011d50"
+                     },
+                     {
+                         "origem":  "backend/ia/prompts/qa.md",
+                         "copia":  "02_REFERENCIAS/backend/ia/prompts/qa.md",
+                         "sha256":  "afbc31ddc52827ddd132e491a6a1919ab76c317560c6b413328095b656312adc"
+                     },
+                     {
+                         "origem":  "backend/requirements.txt",
+                         "copia":  "02_REFERENCIAS/backend/requirements.txt",
+                         "sha256":  "688c7a861ca268843e442141cf64ae56218a6440245a5db3579fb9b9d9424333"
+                     },
+                     {
+                         "origem":  "backend/requirements-dev.txt",
+                         "copia":  "02_REFERENCIAS/backend/requirements-dev.txt",
+                         "sha256":  "6a54636b7069494822de5a5af4956db727e0aa833ca597188f8209975258c46a"
+                     },
+                     {
+                         "origem":  "Caddyfile",
+                         "copia":  "02_REFERENCIAS/Caddyfile",
+                         "sha256":  "0cadc8a14af699a0dc747a1b932c0808a9d49f3055409f4e70013c9e9bccc627"
+                     },
+                     {
+                         "origem":  "docker-compose.yml",
+                         "copia":  "02_REFERENCIAS/docker-compose.yml",
+                         "sha256":  "3ef85d89b2602ed25647a794856fd347bee3ac653d89190ebb02806175040eb9"
+                     },
+                     {
+                         "origem":  "docs/ANALISE_SISTEMA.md",
+                         "copia":  "02_REFERENCIAS/docs/ANALISE_SISTEMA.md",
+                         "sha256":  "e143628c87dfeff8b77b9670f1a89d94d94c436bd6ec89a65606982a85b3f827"
+                     },
+                     {
+                         "origem":  "docs/ASSISTENTE_OPENROUTER.md",
+                         "copia":  "02_REFERENCIAS/docs/ASSISTENTE_OPENROUTER.md",
+                         "sha256":  "1492d9a1fdc7d9394f0aa71e5b8296fd989845ee8713dc86cb7ed78d91c6aaa7"
+                     },
+                     {
+                         "origem":  "docs/AUTENTICACAO_EMAIL.md",
+                         "copia":  "02_REFERENCIAS/docs/AUTENTICACAO_EMAIL.md",
+                         "sha256":  "ea40d661b7cfb1406b2df11cb05e28140ba364c31f35e57ac29cf2f7d295b13e"
+                     },
+                     {
+                         "origem":  "docs/banco-de-dados.md",
+                         "copia":  "02_REFERENCIAS/docs/banco-de-dados.md",
+                         "sha256":  "10a1e56d778debe35cf3fb7e5b9bbf6b96ce9f21fb69a3e67578f3c40f624849"
+                     },
+                     {
+                         "origem":  "docs/BRIEFING.md",
+                         "copia":  "02_REFERENCIAS/docs/BRIEFING.md",
+                         "sha256":  "dd608a0dcf233fffd454a69d2f2b9902a203d93a62331ed73e87bc35dacd9560"
+                     },
+                     {
+                         "origem":  "docs/BRIEFING_IA.md",
+                         "copia":  "02_REFERENCIAS/docs/BRIEFING_IA.md",
+                         "sha256":  "ed28d092aa43acebf71d93a9294da4132af05578b53bb567b23e8b9a934eb24b"
+                     },
+                     {
+                         "origem":  "docs/CARTILHA.md",
+                         "copia":  "02_REFERENCIAS/docs/CARTILHA.md",
+                         "sha256":  "c56bea2721a96060236a455a4bf31381686082a5a87890782a1104c892ecefc4"
+                     },
+                     {
+                         "origem":  "docs/DIAGRAMA_GRUPOS.html",
+                         "copia":  "02_REFERENCIAS/docs/DIAGRAMA_GRUPOS.html",
+                         "sha256":  "57e3a682ab8913c6f0d69b0cc305d6774274ea70b8b956e0ae73e62daa487024"
+                     },
+                     {
+                         "origem":  "docs/FLUXOS.md",
+                         "copia":  "02_REFERENCIAS/docs/FLUXOS.md",
+                         "sha256":  "3af5aba5c47838a55e723912a40b11c28eef142f1df9510dec18fc7175306d8c"
+                     },
+                     {
+                         "origem":  "docs/ia.md",
+                         "copia":  "02_REFERENCIAS/docs/ia.md",
+                         "sha256":  "49e1e00ff8710d527643530a0b9a43832784d968ced43b70df245fa7a1b1d943"
+                     },
+                     {
+                         "origem":  "docs/ia/arquitetura.md",
+                         "copia":  "02_REFERENCIAS/docs/ia/arquitetura.md",
+                         "sha256":  "0d54d5d492c9acc8fa14520464b80d0f6172907a3f1c220b0fd53283b172804a"
+                     },
+                     {
+                         "origem":  "docs/ia/cenarios.md",
+                         "copia":  "02_REFERENCIAS/docs/ia/cenarios.md",
+                         "sha256":  "c3fde192bd7b9d327b73f04b127b41ce5c0a67c10a871c15d363f363a9610c4b"
+                     },
+                     {
+                         "origem":  "docs/ia/configuracao.md",
+                         "copia":  "02_REFERENCIAS/docs/ia/configuracao.md",
+                         "sha256":  "e6760bde955aa5eacffc9ac6f054102351f9da878247db4aa93c08eaffec7ccf"
+                     },
+                     {
+                         "origem":  "docs/ia/CONVERSA_E_CATALOGO.md",
+                         "copia":  "02_REFERENCIAS/docs/ia/CONVERSA_E_CATALOGO.md",
+                         "sha256":  "1b341494d98b59c79a66e25bf13b66616300689510472f3affc99aac44cf8444"
+                     },
+                     {
+                         "origem":  "docs/ia/ESCRITORIO_FLORA.html",
+                         "copia":  "02_REFERENCIAS/docs/ia/ESCRITORIO_FLORA.html",
+                         "sha256":  "e315f343bd6ef95efc18abcc7e9aee9bae22301a9cb09dd12fd262fa83b64072"
+                     },
+                     {
+                         "origem":  "docs/ia/FLUXO_AGENTES.html",
+                         "copia":  "02_REFERENCIAS/docs/ia/FLUXO_AGENTES.html",
+                         "sha256":  "df8792ac7c8447a59a66e9bf6d3693013411a7001ab64c75223ef199132db99e"
+                     },
+                     {
+                         "origem":  "docs/ia/fluxo-assistente.mmd",
+                         "copia":  "02_REFERENCIAS/docs/ia/fluxo-assistente.mmd",
+                         "sha256":  "f8bfdb72c89292f45158e5b7457a95e19d2efcb52774da422397de2aa7ee5be2"
+                     },
+                     {
+                         "origem":  "docs/ia/fluxo-assistente.svg",
+                         "copia":  "02_REFERENCIAS/docs/ia/fluxo-assistente.svg",
+                         "sha256":  "add215d353d32a39d03e9fa42b4589bd27bb911bf5c4e3379f3fd9c9de44fa83"
+                     },
+                     {
+                         "origem":  "docs/ia/INTERATIVIDADE_FLORA.md",
+                         "copia":  "02_REFERENCIAS/docs/ia/INTERATIVIDADE_FLORA.md",
+                         "sha256":  "f1f2e5c1e7d86f77b9ad0417196bcac4d53f9692344c3c1555fa9a4657725aa7"
+                     },
+                     {
+                         "origem":  "docs/ia/PROMPT_FLORA.md",
+                         "copia":  "02_REFERENCIAS/docs/ia/PROMPT_FLORA.md",
+                         "sha256":  "d2ea5b1bee5c1eb550152587eb056f4617ceb4820f3400ef52da026f48363661"
+                     },
+                     {
+                         "origem":  "docs/ia/RELATORIO_TESTES_2026-11-07.md",
+                         "copia":  "02_REFERENCIAS/docs/ia/RELATORIO_TESTES_2026-11-07.md",
+                         "sha256":  "c76277bc62134c3f22e1487eef845954e827b979189a3c4cde140f8aa6799fe8"
+                     },
+                     {
+                         "origem":  "docs/ia/VOZ_FLORA.md",
+                         "copia":  "02_REFERENCIAS/docs/ia/VOZ_FLORA.md",
+                         "sha256":  "bd9c574591be0259bdc91e7aa9ec079c44440fc2b20fbb9ce49ff48518864aab"
+                     },
+                     {
+                         "origem":  "docs/PRD.md",
+                         "copia":  "02_REFERENCIAS/docs/PRD.md",
+                         "sha256":  "07b4ab0a34f8a4e3c1fd7d9b81371343c5a4dbb032b5f65722c05def5374cfeb"
+                     },
+                     {
+                         "origem":  "docs/styleguide/COMPONENTES.md",
+                         "copia":  "02_REFERENCIAS/docs/styleguide/COMPONENTES.md",
+                         "sha256":  "877627b677e19f7987620d204934745c156ffd8c035e349ac8657fb7a8922c54"
+                     },
+                     {
+                         "origem":  "docs/styleguide/CORES.md",
+                         "copia":  "02_REFERENCIAS/docs/styleguide/CORES.md",
+                         "sha256":  "9386b0764402c8023b891aeb8585232f67c59ed209e6231fd16330316baae58d"
+                     },
+                     {
+                         "origem":  "docs/styleguide/TIPOGRAFIA.md",
+                         "copia":  "02_REFERENCIAS/docs/styleguide/TIPOGRAFIA.md",
+                         "sha256":  "fd96cbb5f9836997c1955e7e54c3ee8e64c7d56ab67f4f5e3153010a2117c982"
+                     },
+                     {
+                         "origem":  "docs/TDR.md",
+                         "copia":  "02_REFERENCIAS/docs/TDR.md",
+                         "sha256":  "afc31bbf65ef2b95a9e94ecf8909fc7f143561b278cb152ef6aaa2bec3da4776"
+                     },
+                     {
+                         "origem":  "docs/TESTES_ASSISTENTE_OPENROUTER.md",
+                         "copia":  "02_REFERENCIAS/docs/TESTES_ASSISTENTE_OPENROUTER.md",
+                         "sha256":  "a6c686671fe5985482ce687f7c48d895afd3611c9ec0da390e473d6267a3231b"
+                     },
+                     {
+                         "origem":  "docs/VALIDACAO_LOCAL.md",
+                         "copia":  "02_REFERENCIAS/docs/VALIDACAO_LOCAL.md",
+                         "sha256":  "084c933a7fbbea769c3d93a4d9988d957cb2508a00b2833983fd75af0b71ad3f"
+                     },
+                     {
+                         "origem":  "frontend/.dockerignore",
+                         "copia":  "02_REFERENCIAS/frontend/.dockerignore",
+                         "sha256":  "cdde29c09d88cb374c9cdd67948630a4489432dd9474a1cb4400e06e1bf4417c"
+                     },
+                     {
+                         "origem":  "frontend/Dockerfile",
+                         "copia":  "02_REFERENCIAS/frontend/Dockerfile",
+                         "sha256":  "2406e945001924ca1683063e8b7472bb3c19dd9fcd46b5b79200780e7f890dd9"
+                     },
+                     {
+                         "origem":  "frontend/package.json",
+                         "copia":  "02_REFERENCIAS/frontend/package.json",
+                         "sha256":  "72492e17d61460c98abf07cfd888ca9a723287e77c237ab7efbddcc4be236eca"
+                     },
+                     {
+                         "origem":  "frontend/package-lock.json",
+                         "copia":  "02_REFERENCIAS/frontend/package-lock.json",
+                         "sha256":  "f0a599391f5f33ca285048dd32704e9ed990939a82a12eb5c45770eda169f8ab"
+                     },
+                     {
+                         "origem":  "frontend/README.md",
+                         "copia":  "02_REFERENCIAS/frontend/README.md",
+                         "sha256":  "6eac8498250732efd3d6f11f9203c053efd611ab713c78c7f6408cd2980cace9"
+                     },
+                     {
+                         "origem":  "frontend/vercel.json",
+                         "copia":  "02_REFERENCIAS/frontend/vercel.json",
+                         "sha256":  "7ccab70ad2270d7cbbae7b96cd0dc8b07510bc5f855e61d1bc330eb1001cfa0b"
+                     },
+                     {
+                         "origem":  "frontend/vite.config.js",
+                         "copia":  "02_REFERENCIAS/frontend/vite.config.js",
+                         "sha256":  "42d15758a91bb37ce031eb1155ce6a5c0a5a9f39b3b6a975937c9635028624ca"
+                     },
+                     {
+                         "origem":  "PASSO_A_PASSO_PROJETO.md",
+                         "copia":  "02_REFERENCIAS/PASSO_A_PASSO_PROJETO.md",
+                         "sha256":  "6e370783f540c23d6634d2377a818e2d5bcbc9ca4435d82d9580167d89f64306"
+                     },
+                     {
+                         "origem":  "PENDENCIAS.md",
+                         "copia":  "02_REFERENCIAS/PENDENCIAS.md",
+                         "sha256":  "e101f107a1c98430b1d5ca508316f254a72528cd6df5fd33172a42df9601ae66"
+                     },
+                     {
+                         "origem":  "README.md",
+                         "copia":  "02_REFERENCIAS/README.md",
+                         "sha256":  "114fda867e543cdbdbc8f096e71f5ae3309d5fd79f79dcd9c2e1842f88c51eb4"
+                     }
+                 ]
+}
