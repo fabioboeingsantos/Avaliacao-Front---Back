@@ -39,22 +39,22 @@ Abra:
 
 ## Verificação rápida
 
-A rota `/saude` confirma somente que a API está ligada. Para verificar o banco de verdade, execute:
+A rota `/health` confirma somente que a API está ligada. Para verificar o banco de verdade, execute:
 
 ```powershell
 Set-Location (Join-Path $raiz 'backend')
 & (Join-Path $raiz '.supabase-venv\Scripts\python.exe') -c "from banco import engine; from sqlalchemy import text; c=engine.connect(); print(c.execute(text('SELECT 1')).scalar()); c.close()"
 ```
 
-O resultado esperado é `1`. Se aparecer `password authentication failed`, a API está ligada, mas a senha do Supabase no `.env` está incorreta ou expirada.
+O resultado esperado é `1`. Se aparecer `password authentication failed`, a API está ligada, mas a senha do Supabase no `.env` está incorreta ou desatualizada. Atualize `SUPABASE_DB_PASSWORD` com a senha atual do projeto Supabase e reinicie a API antes de tentar acessar contas.
 
 ## Banco usado pelo ambiente
 
 O arquivo `.env` fica na raiz do projeto. A regra atual é:
 
 1. Se `BANCO_DRIVER=sqlite` estiver definido, a API usa SQLite local, mesmo que variáveis do Supabase existam.
-2. Se `BANCO_DRIVER` não estiver definido e `SUPABASE_DB_URL` existir, a API usa Supabase/PostgreSQL.
-3. Para desenvolvimento sem banco remoto, mantenha esta configuração:
+2. Se `SUPABASE_DB_URL` existir e `BANCO_DRIVER` for diferente de `sqlite` (por exemplo, `postgresql`), a API usa Supabase/PostgreSQL.
+3. Para desenvolvimento sem banco remoto, mantenha esta configuração. Neste computador, `BANCO_DRIVER=postgresql` seleciona o Supabase; o acesso às contas depende de `SUPABASE_DB_PASSWORD` estar atualizada:
 
 ```env
 SUPABASE_DB_URL=
@@ -88,6 +88,8 @@ VITE_URL_DA_API=http://127.0.0.1:8000
 ```
 
 ## Contas de demonstração
+
+As contas abaixo só existem nos bancos que foram preparados com esses dados. Elas não são criadas automaticamente ao iniciar a API; confirme que estão cadastradas no Supabase antes de tentar entrar.
 
 - Assinante: usuário `aline`, senha `aline123`.
 - Produtor: usuário `vanderlei`, senha `vanderlei123`.

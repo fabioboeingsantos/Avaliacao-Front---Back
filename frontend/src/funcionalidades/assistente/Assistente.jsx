@@ -224,7 +224,7 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
     <dialog ref={dialogo} className="assistente-dialogo assistente-dialogo-dinamico" onCancel={aoFechar} aria-labelledby="titulo-assistente">
       <header>
         <div className="identidade-flora-dialogo">
-          <img className={`presenca-flora ${ouvindo || ocupado || falando ? 'presenca-flora-ativa' : ''}`} src="/marca/flora-do-vale-nucleo-v1.png" width="52" height="52" alt="" />
+          <img className="presenca-flora" src="/marca/flora-do-vale-nucleo-v1.png" width="52" height="52" alt="" aria-hidden="true" />
           <div><p className="assistente-rotulo">Cesta do Vale</p><h2 id="titulo-assistente">Flora</h2></div>
         </div>
         <button type="button" onClick={aoFechar} aria-label="Fechar conversa com a Flora">×</button>
@@ -286,6 +286,13 @@ export default function Assistente({ perfil, aoFechar, aoConfirmar, aoManual, pr
               if (!evento.repeat && !ocupado && !ouvindo && mensagem.trim()) evento.currentTarget.form?.requestSubmit()
             }}
             placeholder={perfil === 'produtor' ? 'Flora, quantos tomates tenho no estoque? Ou: mostre as entregas pendentes.' : 'Quero 2 tomates e 1 cenoura, sem cebola'} />
+          <button type="button" className="botao-microfone" onClick={alternarMicrofone} disabled={ocupado || concluido} aria-pressed={ouvindo}>
+            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+              <rect x="9" y="2.5" width="6" height="12" rx="3" />
+              <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3.5M8.5 21.5h7" />
+            </svg>
+            {ouvindo ? 'Parar gravação' : 'Usar microfone'}
+          </button>
           {ouvindo && <div className="feedback-microfone" aria-hidden="true">
             <span className="microfone-ativo-ponto" />
             <span className="feedback-microfone-rotulo">Microfone ativo · captando voz</span>

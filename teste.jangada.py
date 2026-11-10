@@ -1,0 +1,44 @@
+import os
+from pathlib import Path
+
+from jangada_ai import LLM
+
+arquivo_env = Path(__file__).resolve().parent / ".env"
+if arquivo_env.exists():
+    for linha in arquivo_env.read_text(encoding="utf-8-sig").splitlines():
+        linha = linha.strip()
+        if not linha or linha.startswith("#") or "=" not in linha:
+            continue
+        nome, valor = linha.split("=", 1)
+        valor = valor.strip().strip("\"'")
+        os.environ.setdefault(nome.strip(), valor)
+
+chave = os.getenv("OPENROUTER_API_KEY", "").strip()
+modelo = os.getenv("OPENROUTER_MODEL", "").strip()
+if not chave:
+    raise SystemExit("Preencha OPENROUTER_API_KEY no arquivo .env para executar o teste.")
+if not modelo:
+    raise SystemExit("Preencha OPENROUTER_MODEL no arquivo .env com um modelo disponível no OpenRouter.")
+
+# O provedor e o modelo são os dois primeiros argumentos.
+llm = LLM("openrouter", modelo, api_key=chave)
+print(f"Chat iniciado com {modelo}. Digite 'sair' para encerrar.\n")
+
+while True:
+    try:
+        mensagem = input("Você: ").strip()
+    except (EOFError, KeyboardInterrupt):
+        print("\nChat encerrado.")
+        break
+
+    if mensagem.lower() in {"sair", "退出", "exit", "quit"}:
+        print("Chat encerrado.")
+        break
+    if not mensagem:
+        continue
+
+    try:
+        resposta = llm.complete(mensagem)
+        print(f"Assistente: {resposta.text}\n")
+    except Exception as erro:
+        print(f"Falha ao consultar o OpenRouter: {erro}\n")
