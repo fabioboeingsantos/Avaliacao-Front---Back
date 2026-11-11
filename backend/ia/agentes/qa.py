@@ -1,4 +1,4 @@
-"""Agente de QA: audita propostas e contexto sem executar operações."""
+"""QA - Quality Assurance (Garantia da Qualidade): audita propostas e contexto."""
 
 import re
 import unicodedata

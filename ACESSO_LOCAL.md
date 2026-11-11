@@ -94,6 +94,10 @@ As contas abaixo só existem nos bancos que foram preparados com esses dados. El
 - Assinante: usuário `aline`, senha `aline123`.
 - Produtor: usuário `vanderlei`, senha `vanderlei123`.
 
+## Chat de terminal com Jangada
+
+Na raiz do projeto, execute `py -3.13 chat_jangada.py` para abrir o chat de teste pelo terminal. O script usa `OPENROUTER_API_KEY` e `OPENROUTER_MODEL` do `.env`; digite `sair` para encerrar. Esse chat é um utilitário de teste independente da aplicação web. O agente de revisão da Flora está em `backend/ia/agentes/qa.py`, onde QA significa *Quality Assurance* (garantia da qualidade). O exemplo de fallback OpenRouter/Gemini no chat está comentado e não é executado.
+
 ## Parar os servidores
 
 Para fechar os processos iniciados em segundo plano:

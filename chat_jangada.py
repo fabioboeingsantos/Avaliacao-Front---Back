@@ -1,3 +1,5 @@
+"""Chat interativo no terminal usando Jangada e OpenRouter."""
+
 import os
 from pathlib import Path
 
@@ -19,6 +21,33 @@ if not chave:
     raise SystemExit("Preencha OPENROUTER_API_KEY no arquivo .env para executar o teste.")
 if not modelo:
     raise SystemExit("Preencha OPENROUTER_MODEL no arquivo .env com um modelo disponível no OpenRouter.")
+
+# Sugestão de uso futuro: OpenRouter principal com Gemini como reserva (fallback).
+# Exemplo desativado: todas as linhas abaixo são comentários.
+# Requer as quatro variáveis no ambiente e os SDKs dos dois provedores.
+# Para integrar ao chat, substituir a criação de llm abaixo pela configuração
+# principal/reserva, mantendo a chamada complete dentro do loop de mensagens.
+#
+# import os
+# from jangada_ai import LLM
+#
+# principal = LLM(
+#     "openrouter",
+#     os.environ["OPENROUTER_MODEL"],
+#     api_key=os.environ["OPENROUTER_API_KEY"],
+#     max_retries=1,
+# )
+#
+# reserva = LLM(
+#     "gemini",
+#     os.environ["GEMINI_MODEL"],
+#     api_key=os.environ["GEMINI_API_KEY"],
+#     max_retries=1,
+# )
+#
+# llm = principal.with_fallback(reserva)
+# resposta = llm.complete("Explique em uma frase o que é uma API.")
+# print(resposta.text)
 
 # O provedor e o modelo são os dois primeiros argumentos.
 llm = LLM("openrouter", modelo, api_key=chave)

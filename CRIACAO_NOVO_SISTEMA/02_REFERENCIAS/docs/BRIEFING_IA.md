@@ -340,7 +340,7 @@ Para atender aos dois tipos de usuário, fica registrada a seguinte divisão ini
 2. **Agente especialista do tipo de usuário:** trabalha com as regras de linguagem e o fluxo do
    assinante ou do produtor. Ele prepara uma proposta de consulta ou operação adequada ao tipo de
    usuário autenticado.
-3. **Agente QA:** recebe a solicitação original e a proposta final, verifica se tudo está coerente,
+3. **QA - Quality Assurance (Garantia da Qualidade):** recebe a solicitação original e a proposta final, verifica se tudo está coerente,
    se os dados necessários estão presentes e se a operação respeita as regras fornecidas pelo backend.
    Ele deve aprovar, pedir esclarecimento ou bloquear a proposta.
 
@@ -357,7 +357,7 @@ depois dos testes, desde que a etapa QA continue sendo preservada.
   expressas em linguagem natural.
 - **Agente do produtor:** atende consulta, inspeção, separação, encerramento e envio, respeitando a
   situação atual da cesta.
-- **Agente QA comum:** revisa o resultado produzido por qualquer um dos dois agentes especializados.
+- **QA - Quality Assurance compartilhado:** revisa o resultado produzido por qualquer um dos dois agentes especializados.
 
 Os agentes especializados poderão utilizar o mesmo modelo e provedor, mas terão instruções, contexto,
 permissões e formatos de resposta diferentes. O sistema não deverá confiar somente na resposta do

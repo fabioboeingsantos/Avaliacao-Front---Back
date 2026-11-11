@@ -35,7 +35,7 @@ Cada solicitação usa três chamadas independentes, em sequência:
 
 1. Intérprete: identifica a intenção.
 2. Especialista: usa o fluxo do assinante ou do produtor conforme o login.
-3. QA: confere a proposta antes da prévia de confirmação.
+3. QA - Quality Assurance (Garantia da Qualidade): confere a proposta antes da prévia de confirmação.
 
 O QA não grava dados. O backend ainda valida os produtos, as quantidades, o perfil
 e a situação da cesta. A gravação exige confirmação explícita no fluxo existente.

@@ -119,7 +119,7 @@ flowchart TD
     E -->|Sim| F[Perguntar e salvar estado]
     F --> G[Nova resposta do usuário]
     G --> C
-    E -->|Não| H[Revisão QA]
+    E -->|Não| H[QA - Quality Assurance]
     H --> I[Prévia para confirmação]
     I --> J[Backend revalida e executa]
 ```
