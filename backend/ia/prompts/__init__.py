@@ -11,4 +11,8 @@ def obter_instrucao(papel: str) -> str:
     pasta = Path(__file__).resolve().parent
     base = (pasta / "base.md").read_text(encoding="utf-8").strip()
     especifica = (pasta / f"{papel}.md").read_text(encoding="utf-8").strip()
-    return f"{base} {especifica}"
+    partes = [base, especifica]
+    if papel == "assinante":
+        skill = pasta / "skills" / "montar-ajustar-cesta.md"
+        partes.append(skill.read_text(encoding="utf-8").strip())
+    return "\n\n".join(partes)

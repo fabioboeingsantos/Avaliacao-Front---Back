@@ -451,6 +451,7 @@ Endereços de referência da publicação (disponibilidade não verificada nesta
 - `docs/`: cartilha, briefing, marca e styleguide.
 - `frontend/`: aplicação React com o fluxo de pedido da assinante.
 - `backend/`: API organizada em rotas, serviços, repositórios e esquemas.
+- `skills/`: catálogo de skills internas da Flora. A [skill de montagem e ajuste de cesta](skills/montar-ajustar-cesta/SKILL.md) referencia as instruções operacionais incluídas no pacote do backend.
 
 ## Limites atuais
 

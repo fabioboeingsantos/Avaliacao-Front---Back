@@ -466,9 +466,25 @@
 .flora-coluna-chat .flora-enviar { margin-left: 0; width: 100%; }
 .flora-coluna-chat .flora-alternativa { font-size: .72rem; }
 @media (max-width: 760px) {
-  .flora-espaco-trabalho { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
-  .flora-coluna-chat { border-left: 0; border-top: 1px solid var(--cor-borda); overflow-y: auto; }
+  .flora-espaco-trabalho { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .flora-area-resultados { padding: 14px 12px; }
+  .flora-coluna-chat { border-left: 0; border-top: 1px solid var(--cor-borda); overflow: visible; }
+  .flora-coluna-chat .flora-rodape { flex: 0 0 auto; padding: 10px 12px max(10px, env(safe-area-inset-bottom)); }
   .flora-coluna-chat .flora-compositor-acoes { flex-direction: row; }
-  .flora-coluna-chat .flora-compositor textarea { min-height: 90px; }
+  .flora-coluna-chat .flora-compositor textarea { min-height: 68px; max-height: 100px; resize: vertical; }
   .flora-coluna-chat .flora-enviar { width: auto; margin-left: auto; }
+}
+
+@media (max-width: 520px) {
+  .assistente-dialogo.flora-pagina-assistente,
+  .assistente-dialogo.flora-pagina-assistente[open] {
+    height: calc(var(--flora-altura-janela, 100dvh) - 142px);
+    min-height: min(360px, calc(var(--flora-altura-janela, 100dvh) - 158px));
+  }
+
+  .flora-area-resultados { padding: 12px 10px; }
+  .flora-coluna-chat .flora-rodape { padding-inline: 10px; }
+  .flora-coluna-chat .flora-compositor textarea { min-height: 60px; max-height: 88px; padding: 9px 10px; }
+  .flora-coluna-chat .flora-compositor-acoes > button { min-height: 40px; }
+  .flora-itens-proposta { grid-template-columns: 1fr; gap: 8px; }
 }
