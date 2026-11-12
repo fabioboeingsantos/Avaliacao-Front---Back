@@ -1,0 +1,180 @@
+.flora-orbe {
+  --flora-orbe-tamanho: 64px;
+  --flora-orbe-verde: #7ef08b;
+  --flora-orbe-dourado: #ffd27b;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--flora-orbe-tamanho);
+  height: var(--flora-orbe-tamanho);
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: var(--flora-orbe-dourado);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--flora-orbe-dourado) 38%, transparent) 0%,
+    color-mix(in srgb, var(--flora-orbe-verde) 22%, transparent) 48%,
+    transparent 74%
+  );
+  box-shadow:
+    0 0 calc(14px + var(--flora-orbe-nivel, .28) * 26px) color-mix(in srgb, var(--flora-orbe-dourado) 38%, transparent),
+    inset 0 0 calc(10px + var(--flora-orbe-nivel, .28) * 18px) color-mix(in srgb, var(--flora-orbe-verde) 28%, transparent);
+  pointer-events: none;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.flora-orbe-interativo {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.flora-orbe-interativo:hover {
+  transform: scale(1.05);
+}
+
+.flora-orbe > img {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 52%;
+  height: 52%;
+  object-fit: contain;
+  transform: scale(calc(1 + var(--flora-orbe-nivel, .28) * .22));
+  filter:
+    brightness(1.12)
+    contrast(1.06)
+    drop-shadow(0 0 calc(5px + var(--flora-orbe-nivel, .28) * 12px) color-mix(in srgb, var(--flora-orbe-dourado) 85%, transparent))
+    drop-shadow(0 0 calc(10px + var(--flora-orbe-nivel, .28) * 18px) color-mix(in srgb, var(--flora-orbe-verde) 55%, transparent));
+  transition: transform 90ms linear, filter 120ms ease;
+}
+
+.flora-orbe-aneis {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  stroke: currentColor;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--flora-orbe-dourado) 42%, transparent));
+}
+
+.flora-anel-externo,
+.flora-anel-medio,
+.flora-anel-interno {
+  transform-origin: 120px 120px;
+}
+
+.flora-anel-externo {
+  animation: flora-orbe-giro 16s linear infinite;
+}
+
+.flora-anel-medio {
+  color: var(--flora-orbe-verde);
+  stroke: currentColor;
+  animation: flora-orbe-giro 11s linear infinite reverse;
+}
+
+.flora-anel-interno {
+  color: var(--flora-orbe-dourado);
+  stroke: currentColor;
+  animation: flora-orbe-giro 8s linear infinite;
+}
+
+.flora-orbe-onda {
+  stroke: var(--flora-orbe-dourado);
+  opacity: .92;
+}
+
+.flora-orbe-onda-secundaria {
+  stroke: var(--flora-orbe-verde);
+  opacity: .75;
+}
+
+.flora-orbe-bandas {
+  opacity: .96;
+}
+
+.flora-orbe-nucleo-anel {
+  stroke: var(--flora-orbe-dourado);
+  opacity: .95;
+}
+
+.flora-orbe-nucleo-anel-interno {
+  stroke: var(--flora-orbe-verde);
+  opacity: .85;
+  transform-origin: 120px 120px;
+  animation: flora-orbe-giro 10s linear infinite reverse;
+}
+
+.flora-orbe-processando .flora-anel-externo { animation-duration: 6s; }
+.flora-orbe-processando .flora-anel-medio { animation-duration: 4.2s; }
+.flora-orbe-processando .flora-anel-interno { animation-duration: 3s; }
+
+.flora-orbe-ouvindo {
+  --flora-orbe-verde: #ff946e;
+  --flora-orbe-dourado: #ffd875;
+}
+.flora-orbe-ouvindo .flora-anel-externo { animation-duration: 8s; }
+.flora-orbe-ouvindo .flora-anel-medio { animation-duration: 5.5s; }
+.flora-orbe-ouvindo .flora-anel-interno { animation-duration: 4s; }
+
+.flora-orbe-falando,
+.flora-orbe-respondendo {
+  --flora-orbe-verde: #7aff9e;
+  --flora-orbe-dourado: #ffe082;
+}
+.flora-orbe-falando .flora-anel-externo,
+.flora-orbe-respondendo .flora-anel-externo { animation-duration: 9s; }
+.flora-orbe-falando .flora-anel-medio,
+.flora-orbe-respondendo .flora-anel-medio { animation-duration: 6s; }
+.flora-orbe-falando .flora-anel-interno,
+.flora-orbe-respondendo .flora-anel-interno { animation-duration: 4.5s; }
+
+.flora-orbe-sincronizando .flora-anel-externo { animation-duration: 10s; }
+.flora-orbe-sincronizando .flora-anel-medio { animation-duration: 7s; }
+
+.flora-orbe[data-pausado='true'] * {
+  animation-play-state: paused;
+}
+
+.flora-cabecalho .flora-orbe {
+  --flora-orbe-tamanho: 124px;
+  --flora-orbe-verde: #84f596;
+  --flora-orbe-dourado: #ffd470;
+}
+
+.flora-pagina-assistente .flora-cabecalho .flora-orbe {
+  --flora-orbe-tamanho: 136px;
+}
+
+.flora-cabecalho .flora-orbe-ouvindo {
+  --flora-orbe-verde: #ff946e;
+  --flora-orbe-dourado: #ffe082;
+}
+
+.botao-flora:hover .flora-anel-externo,
+.botao-flora:focus-visible .flora-anel-externo {
+  animation-duration: 8s;
+}
+
+.botao-flora:hover .flora-anel-medio,
+.botao-flora:focus-visible .flora-anel-medio {
+  animation-duration: 5.5s;
+}
+
+@keyframes flora-orbe-giro {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+  .flora-cabecalho .flora-orbe,
+  .flora-pagina-assistente .flora-cabecalho .flora-orbe {
+    --flora-orbe-tamanho: 92px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flora-anel-externo { animation-duration: 55s; }
+  .flora-anel-medio { animation-duration: 45s; }
+  .flora-anel-interno { animation-duration: 40s; }
+}

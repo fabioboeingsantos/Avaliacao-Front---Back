@@ -112,8 +112,8 @@ explicam essa distinção e como permitir correções mantendo contexto.
 
 ```text
 frontend/src/funcionalidades/assistente/
-├── Assistente.jsx             # Janela, histórico e envio manual por texto ou microfone
-├── OrbeFlora.jsx              # Orbe HUD reativo com 24 bandas radiais, anéis e onda polar
+├── Assistente.jsx             # Janela, cabeçalho HUD e envio manual por texto ou microfone
+├── OrbeFlora.jsx              # Orbe HUD estilo JARVIS com 36 bandas, partículas, 3 anéis e ondas polares
 ├── useAudioFlora.js           # Síntese neural Aoede (MP3) + controle de reprodução
 ├── useRespostaFalada.js       # SpeechSynthesis quando configurado como provedor
 └── api.js                     # Endpoints de análise e síntese de voz
@@ -138,7 +138,10 @@ Os halos devem ser renderizados por código para reagirem à interação.
 
 Status:
 
-- **Assistente Flora:** digitação e microfone iniciado por clique, com revisão manual antes do envio e comando por voz `"confirmar operação"` após aprovação da proposta. Não há envio por silêncio nem retomada automática da escuta.
-- **Voz:** saudação ao abrir e respostas faladas, com opção de desativar o áudio e controle para interromper a reprodução. A síntese usa o provedor já configurado e pode gerar consumo no Google.
-- **Orbe visual (`OrbeFlora.jsx`):** anéis em SVG, onda polar e 24 bandas com animação ilustrativa conforme o estado da conversa e os eventos de interação. Não representa um espectro medido do áudio.
-- **Ações rápidas:** sugestões por perfil, acréscimo de produtos da proposta e acesso ao fluxo manual.
+- **Assistente Flora:** digitação ou um único botão para iniciar/parar o microfone. A transcrição pode ser revisada e enviada manualmente; propostas aprovadas são confirmadas pelo botão explícito. Não há envio por silêncio nem retomada automática da escuta.
+- **Voz:** respostas faladas somente quando solicitadas pelo botão “Ouvir resposta”; a reprodução pode ser interrompida. A síntese usa o provedor já configurado e pode gerar consumo no Google.
+- **Painel:** cabeçalho HUD com orbe em destaque, selo de telemetria, ondas reativas, nome e fechar; apresentação única; sugestões iniciais por perfil; histórico central; microfone, transcrição e envio no rodapé. A altura acompanha a janela visível, incluindo o teclado do celular.
+- **Orbe visual (`OrbeFlora.jsx`):** três anéis concêntricos em SVG com marcações angulares, ondas polares duplas, partículas orbitais e 36 bandas harmônicas bidirecionais inspiradas no JARVIS; 86 px no botão de abertura e 124–136 px no cabeçalho da Flora (92 px em telas estreitas). A animação reage em tempo real à digitação, cliques, escuta por microfone, análise e reprodução de voz, respeitando preferência por movimento reduzido. Clicar no orbe também permite iniciar/parar o microfone.
+- **Resultados:** catálogo com preços unitários, estoque do produtor, pedidos com situação/semana/total e prévias de cesta com subtotais e total estimado. Os dados de consulta vêm do backend com o acesso da conta autenticada; o preço final é conferido na confirmação.
+- **Controle:** fechar visível, interrupção de análise, áudio opcional por resposta e rascunho restaurado em falhas. Cestas e separações exigem confirmação explícita. Propostas anteriores ficam sem ação de confirmação.
+- **Validação de uso:** pendente com o usuário; roteiro em `docs/ia/TESTE_UX_FLORA.md`.

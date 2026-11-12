@@ -345,6 +345,12 @@
   padding-right: 48px;
 }
 
+/* O Edge adiciona seu próprio botão de revelação em campos password.
+   A tela já fornece esse controle em .botao-visibilidade. */
+.campo-senha input::-ms-reveal {
+  display: none;
+}
+
 .botao-visibilidade {
   position: absolute;
   top: 0;
@@ -490,49 +496,47 @@
   grid-row: 2;
   justify-self: start;
   flex-shrink: 0;
-  width: 128px;
-  min-height: 104px;
+  width: 144px;
+  min-height: 124px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px;
-  padding: 5px 7px;
-  border: 1px solid var(--cor-borda);
-  border-radius: 16px;
-  background: radial-gradient(circle, var(--cor-verde-claro), var(--cor-creme-natural));
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--cor-verde-horta) 16%, transparent);
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--cor-amarelo-colheita) 45%, var(--cor-borda));
+  border-radius: 18px;
+  background: radial-gradient(circle at 50% 42%, var(--cor-verde-claro), var(--cor-creme-natural));
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--cor-verde-horta) 22%, transparent);
   cursor: pointer;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
 .apresentacao-flora-produtor {
   margin-inline-start: -14px;
 }
 
-.botao-flora img {
-  display: block;
-  width: 56px;
-  height: 56px;
-  object-fit: contain;
-  pointer-events: none;
+.botao-flora .flora-orbe {
+  --flora-orbe-tamanho: 86px;
+  margin-bottom: 3px;
 }
 
 .rotulo-flora {
   color: var(--cor-verde-escuro);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
   line-height: 1.15;
 }
 
 .descricao-flora {
   color: var(--cor-texto-escuro);
-  font-size: 0.62rem;
+  font-size: 0.65rem;
   line-height: 1.15;
 }
 
 .botao-flora:hover {
-  border-color: var(--cor-verde-horta);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-amarelo-colheita) 28%, transparent);
+  border-color: var(--cor-amarelo-colheita);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-amarelo-colheita) 32%, transparent), 0 8px 22px color-mix(in srgb, var(--cor-verde-horta) 28%, transparent);
+  transform: translateY(-1px);
 }
 
 .botao-flora:focus-visible {
@@ -1301,7 +1305,7 @@ button:disabled {
 
 /* Acabamento dinâmico compartilhado: alcança também botões legados que ainda
    não usam as classes .botao-primario/.botao-secundario. */
-button:not(.controle-tema):not(.botao-estrela):not(.botao-zero-estrelas):not(.botao-quantidade-fechamento):not(.botao-completar-produto):not(.botao-flora):not(.fechar-dialogo-fundo) {
+button:not(:where(.assistente-dialogo *)):not(.controle-tema):not(.botao-estrela):not(.botao-zero-estrelas):not(.botao-quantidade-fechamento):not(.botao-completar-produto):not(.botao-flora):not(.fechar-dialogo-fundo) {
   min-height: 40px;
   border: 1px solid var(--cor-verde-escuro);
   border-radius: 10px;
@@ -1311,7 +1315,7 @@ button:not(.controle-tema):not(.botao-estrela):not(.botao-zero-estrelas):not(.bo
   transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
-button:not(.controle-tema):not(.botao-visibilidade):not(.botao-estrela):not(.botao-zero-estrelas):not(.botao-quantidade-fechamento):not(.botao-completar-produto):not(.botao-flora):not(.fechar-dialogo-fundo):hover:not(:disabled) {
+button:not(:where(.assistente-dialogo *)):not(.controle-tema):not(.botao-visibilidade):not(.botao-estrela):not(.botao-zero-estrelas):not(.botao-quantidade-fechamento):not(.botao-completar-produto):not(.botao-flora):not(.fechar-dialogo-fundo):hover:not(:disabled) {
   border-color: var(--cor-verde-escuro);
   color: var(--cor-branco);
   background: var(--cor-verde-escuro);
@@ -1319,7 +1323,7 @@ button:not(.controle-tema):not(.botao-visibilidade):not(.botao-estrela):not(.bot
   transform: translateY(-1px);
 }
 
-button:not(.controle-tema):not(.botao-estrela):not(.botao-zero-estrelas):not(.botao-quantidade-fechamento):not(.botao-completar-produto):not(.botao-flora):not(.fechar-dialogo-fundo):disabled {
+button:not(:where(.assistente-dialogo *)):not(.controle-tema):not(.botao-estrela):not(.botao-zero-estrelas):not(.botao-quantidade-fechamento):not(.botao-completar-produto):not(.botao-flora):not(.fechar-dialogo-fundo):disabled {
   box-shadow: none;
   transform: none;
   opacity: .65;

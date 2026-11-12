@@ -1,112 +1,142 @@
-# Acesso local rápido
+# Acesso ao servidor local
 
-Este é o roteiro principal para iniciar o projeto localmente. Ele foi pensado para que a leitura deste arquivo seja suficiente para testar a aplicação sem nova investigação.
+Este guia inicia a API e o frontend localmente pelo PowerShell. A configuração atual usa o banco PostgreSQL do Supabase, definido no `.env` da raiz. Estes passos são apenas para desenvolvimento e não fazem deploy.
 
-## Início rápido
+Em 12/11/2026, o Python 3.12.10 foi restaurado, as dependências existentes da API carregaram corretamente, a API respondeu em `/health`, o frontend respondeu com HTTP 200 e a conexão com o Supabase foi confirmada com `SELECT 1`. Os serviços foram iniciados em segundo plano, conforme a seção abaixo.
 
-Abra um PowerShell na raiz do projeto:
+No arquivo `.env` da raiz, use `FRONTEND_URL=http://localhost:5173,http://127.0.0.1:5173` para permitir o acesso do Vite à API. Os endereços da porta `8080` são para o Docker Compose.
 
-```powershell
-$raiz = 'C:\Users\fabio\Desktop\Avaliacao Front - Back'
-Set-Location $raiz
-```
+## Preparação inicial
 
-### 1. Inicie a API
-
-O ambiente `.supabase-venv` já contém as dependências completas usadas pela API neste computador:
+Execute os comandos a partir da raiz do projeto:
 
 ```powershell
-$python = Join-Path $raiz '.supabase-venv\Scripts\python.exe'
-Start-Process -FilePath $python `
-  -ArgumentList '-m','uvicorn','main:app','--host','127.0.0.1','--port','8000' `
-  -WorkingDirectory (Join-Path $raiz 'backend') `
-  -WindowStyle Hidden
+cd C:\Users\fabio\Desktop\Avaliacao-Front---Back
 ```
 
-### 2. Inicie o frontend
+### Python e dependências da API
+
+Confira o Python pelo caminho usado nesta máquina, sem depender do launcher `py` ou do `PATH`:
 
 ```powershell
-Start-Process -FilePath 'npm.cmd' `
-  -ArgumentList 'run','dev','--','--host','127.0.0.1' `
-  -WorkingDirectory (Join-Path $raiz 'frontend')
+$pythonLocal = Join-Path $env:LOCALAPPDATA 'Programs\Python\Python312\python.exe'
+& $pythonLocal --version
 ```
 
-Abra:
-
-- Aplicação: <http://localhost:5173>
-- API: <http://127.0.0.1:8000>
-- Documentação da API: <http://127.0.0.1:8000/docs>
-
-## Verificação rápida
-
-A rota `/health` confirma somente que a API está ligada. Para verificar o banco de verdade, execute:
+Para instalar o Python 3.12:
 
 ```powershell
-Set-Location (Join-Path $raiz 'backend')
-& (Join-Path $raiz '.supabase-venv\Scripts\python.exe') -c "from banco import engine; from sqlalchemy import text; c=engine.connect(); print(c.execute(text('SELECT 1')).scalar()); c.close()"
+winget install --id Python.Python.3.12 --exact --scope user --accept-package-agreements --accept-source-agreements
 ```
 
-O resultado esperado é `1`. Se aparecer `password authentication failed`, a API está ligada, mas a senha do Supabase no `.env` está incorreta ou desatualizada. Atualize `SUPABASE_DB_PASSWORD` com a senha atual do projeto Supabase e reinicie a API antes de tentar acessar contas.
-
-## Banco usado pelo ambiente
-
-O arquivo `.env` fica na raiz do projeto. A regra atual é:
-
-1. Se `BANCO_DRIVER=sqlite` estiver definido, a API usa SQLite local, mesmo que variáveis do Supabase existam.
-2. Se `SUPABASE_DB_URL` existir e `BANCO_DRIVER` for diferente de `sqlite` (por exemplo, `postgresql`), a API usa Supabase/PostgreSQL.
-3. Para desenvolvimento sem banco remoto, mantenha esta configuração. Neste computador, `BANCO_DRIVER=postgresql` seleciona o Supabase; o acesso às contas depende de `SUPABASE_DB_PASSWORD` estar atualizada:
-
-```env
-SUPABASE_DB_URL=
-SUPABASE_DB_PASSWORD=
-BANCO_DRIVER=sqlite
-BANCO_NOME=./cesta_do_vale.db
-```
-
-Depois de alterar o `.env`, reinicie a API. Não publique a senha do Supabase nem a inclua em commits.
-
-## Configuração inicial
-
-Se o ambiente Python ainda não existir, crie-o e instale as dependências:
+Se o ambiente virtual mostrar `No Python at ...`, a instalação base pode estar ausente ou inacessível. Nesta máquina, `winget repair` não ofereceu reparo; a reinstalação abaixo restaurou o Python 3.12.10 e permitiu reutilizar o ambiente virtual existente:
 
 ```powershell
-py -3.12 -m venv .supabase-venv
-.supabase-venv\Scripts\python.exe -m pip install -r requirements.txt
+winget install --id Python.Python.3.12 --exact --scope user --force --accept-package-agreements --accept-source-agreements
+& $pythonLocal --version
+& .\backend\.venv\Scripts\python.exe --version
 ```
 
-Para o frontend:
+Se ocorrer `Acesso negado` em uma sessão restrita de automação, execute com a autorização de acesso necessária. Isso, por si só, não comprova que o Python está ausente.
+
+Crie o ambiente e instale as dependências (uma vez, ou quando `requirements.txt` mudar):
 
 ```powershell
-Set-Location (Join-Path $raiz 'frontend')
-npm.cmd install
+& $pythonLocal -m venv backend\.venv
+backend\.venv\Scripts\python.exe -m pip install --upgrade pip
+backend\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
 ```
 
-Se necessário, crie `frontend/.env.local` com:
+### Node e dependências do frontend
+
+Configure o endereço local da API em `frontend/.env.local` (uma vez):
 
 ```env
 VITE_URL_DA_API=http://127.0.0.1:8000
 ```
 
-## Contas de demonstração
+Instale as dependências do frontend uma vez, dentro da pasta `frontend`:
 
-As contas abaixo só existem nos bancos que foram preparados com esses dados. Elas não são criadas automaticamente ao iniciar a API; confirme que estão cadastradas no Supabase antes de tentar entrar.
+```powershell
+cd C:\Users\fabio\Desktop\Avaliacao-Front---Back\frontend
+npm install
+```
+
+## Configuração do banco e autenticação
+
+A API carrega automaticamente o `.env` da raiz. `SUPABASE_DB_URL` tem prioridade sobre `DATABASE_URL` e sobre `BANCO_DRIVER`/`BANCO_NOME`. Assim, ter `BANCO_DRIVER=sqlite` no arquivo não ativa o SQLite enquanto uma URL externa estiver preenchida.
+
+Mantenha a URL em `SUPABASE_DB_URL` e a senha em `SUPABASE_DB_PASSWORD`, sem copiá-las para a documentação. Para o banco remoto, preserve `sslmode=require` na URL. A chave `JWT_SECRET_KEY` também deve estar no `.env`, com pelo menos 32 caracteres. A inicialização abaixo usa essas configurações existentes.
+
+Para optar pelo SQLite, deixe `SUPABASE_DB_URL` e `DATABASE_URL` vazias e configure `BANCO_DRIVER=sqlite` e `BANCO_NOME=./cesta_do_vale.db`. Com a API iniciada dentro de `backend`, esse arquivo fica em `backend/cesta_do_vale.db`.
+
+## Iniciar a API em um terminal
+
+Abra o primeiro terminal do PowerShell:
+
+```powershell
+cd C:\Users\fabio\Desktop\Avaliacao-Front---Back\backend
+& .\.venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000
+```
+
+O executável do ambiente virtual é chamado diretamente; não é necessário ativá-lo. Deixe o terminal da API aberto. Não é necessário executar `criar_tabelas.py` para iniciar a API usando o banco já configurado.
+
+- API: `http://127.0.0.1:8000`
+- Saúde da API: `http://127.0.0.1:8000/health`
+- Documentação interativa: `http://127.0.0.1:8000/docs`
+
+A rota `/` não tem uma página inicial e pode mostrar `{"detail":"Not Found"}`; isso não significa que a API esteja desligada.
+
+## Iniciar o frontend
+
+Abra um segundo terminal do PowerShell. O comando precisa ser executado dentro de `frontend`, onde está o `package.json`:
+
+```powershell
+cd C:\Users\fabio\Desktop\Avaliacao-Front---Back\frontend
+npm.cmd run dev -- --host 127.0.0.1 --port 5173
+```
+
+Abra o endereço informado pelo Vite, normalmente `http://localhost:5173`. Se aparecer erro `ENOENT` procurando `package.json` na raiz, entre na pasta `frontend` e tente novamente.
+
+## Iniciar em segundo plano
+
+Este foi o modo usado na última inicialização. Execute na raiz do projeto, somente se as portas `8000` e `5173` estiverem livres:
+
+```powershell
+$projeto = (Get-Location).Path
+New-Item -ItemType Directory -Path (Join-Path $projeto 'tmp') -Force | Out-Null
+Start-Process -FilePath (Join-Path $projeto 'backend\.venv\Scripts\python.exe') -ArgumentList '-m','uvicorn','main:app','--host','127.0.0.1','--port','8000' -WorkingDirectory (Join-Path $projeto 'backend') -WindowStyle Hidden -RedirectStandardOutput (Join-Path $projeto 'tmp\api-local.log') -RedirectStandardError (Join-Path $projeto 'tmp\api-local.err')
+Start-Process -FilePath 'C:\Program Files\nodejs\node.exe' -ArgumentList 'node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','5173' -WorkingDirectory (Join-Path $projeto 'frontend') -WindowStyle Hidden -RedirectStandardOutput (Join-Path $projeto 'tmp\frontend-local.log') -RedirectStandardError (Join-Path $projeto 'tmp\frontend-local.err')
+```
+
+Após alguns segundos, confira os serviços:
+
+```powershell
+(Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:8000/health').Content
+(Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:5173').StatusCode
+```
+
+O resultado esperado é `status: ok` na API e `200` no frontend. A rota `/health` confirma que a API está ligada; ela não verifica o banco. Para confirmar a conexão sem alterar dados, execute dentro de `backend`:
+
+```powershell
+& .\.venv\Scripts\python.exe -c "from configuracao import obter_url_banco; from sqlalchemy import create_engine, text; engine = create_engine(obter_url_banco()); conn = engine.connect(); print(conn.execute(text('SELECT 1')).scalar()); conn.close(); engine.dispose()"
+```
+
+O resultado esperado é `1`. Se aparecer `password authentication failed`, atualize `SUPABASE_DB_PASSWORD` com a senha atual do projeto Supabase e reinicie a API. Consulte `tmp/api-local.err` e `tmp/frontend-local.err` se os serviços não iniciarem. Evite compartilhar logs que contenham credenciais.
+
+## Contas de demonstração
 
 - Assinante: usuário `aline`, senha `aline123`.
 - Produtor: usuário `vanderlei`, senha `vanderlei123`.
 
-## Chat de terminal com Jangada
+Essas contas dependem dos dados cadastrados no banco selecionado. Sua existência no Supabase não foi verificada nesta inicialização.
 
-Na raiz do projeto, execute `py -3.13 chat_jangada.py` para abrir o chat de teste pelo terminal. O script usa `OPENROUTER_API_KEY` e `OPENROUTER_MODEL` do `.env`; digite `sair` para encerrar. Esse chat é um utilitário de teste independente da aplicação web. O agente de revisão da Flora está em `backend/ia/agentes/qa.py`, onde QA significa *Quality Assurance* (garantia da qualidade). O exemplo de fallback OpenRouter/Gemini no chat está comentado e não é executado.
+## Encerrar
 
-## Parar os servidores
-
-Para fechar os processos iniciados em segundo plano:
+Se iniciou em dois terminais, pressione `Ctrl+C` em cada um. Se iniciou em segundo plano, identifique os processos nas portas usadas:
 
 ```powershell
-Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
-  Where-Object { $_.LocalPort -in 5173,8000 } |
-  Select-Object -ExpandProperty OwningProcess -Unique |
-  Stop-Process -Force
+Get-NetTCPConnection -State Listen -LocalPort 8000,5173 | Select-Object LocalAddress,LocalPort,OwningProcess
 ```
 
-Se preferir acompanhar os logs, inicie `uvicorn` e `npm.cmd run dev` diretamente em dois terminais e encerre cada um com `Ctrl+C`.
+Confira o processo com `Get-Process -Id <OwningProcess>` e encerre somente o serviço desejado com `Stop-Process -Id <OwningProcess>`. Encerrar a API não apaga os dados do Supabase nem do SQLite.

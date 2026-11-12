@@ -22,10 +22,9 @@ Ela deve ser preenchida no ambiente do servidor, sem ser enviada pelo chat.
 Na hospedagem, configure as mesmas duas variáveis no ambiente do backend.
 Reinicie a API após configurar. A configuração não exige migrações de banco.
 
-Sem configurar `FLORA_VOZ_PROVEDOR`, o padrão permanece `navegador`.
-Para testar novamente a síntese anterior, use `FLORA_VOZ_PROVEDOR=navegador`.
-No modo Google, chave ausente ou falha do serviço produz mensagem de áudio
-indisponível e mantém a resposta escrita, sem trocar a voz escolhida.
+Sem configurar `FLORA_VOZ_PROVEDOR`, o padrão é `google`. Se a chave estiver
+ausente ou o serviço falhar, a interface mostra o motivo junto da resposta e
+mantém o texto disponível, sem trocar para a voz do navegador.
 
 ## Reprodução e consumo
 

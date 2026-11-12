@@ -41,10 +41,15 @@ usa três chamadas sequenciais e aceita somente modelos gratuitos compatíveis. 
 Consultas reconhecidas pelo backend podem ser respondidas localmente, sem chamar o OpenRouter.
 O histórico enviado pela tela contém até 100 mensagens anteriores; fechar a conversa ou recarregar
 a página descarta esse histórico. Gravações são transcritas pelo reconhecimento de fala do navegador
-e podem ser revisadas antes de enviar. Uma proposta aprovada pode ser confirmada pelo botão ou pelo
-comando de voz explícito “confirmar operação”. A análise não grava pedidos por conta própria.
+e podem ser revisadas antes de enviar. Uma proposta aprovada é confirmada pelo botão explícito
+na prévia da conversa. As respostas faladas são reproduzidas somente quando solicitadas.
+A análise não grava pedidos por conta própria.
 
-A reprodução usa a voz pt-BR do navegador por padrão. Opcionalmente, o backend pode gerar MP3 com
+O painel da Flora reúne conversa, catálogo com preços, pedidos com situação e semana, e prévias
+de cesta com quantidades e total estimado. Microfone e envio ficam juntos no rodapé. As sugestões
+de início desaparecem após a primeira mensagem. Consulte o [roteiro de teste de UX](docs/ia/TESTE_UX_FLORA.md).
+
+Ao solicitar áudio, a reprodução usa a voz pt-BR do navegador por padrão. Opcionalmente, o backend pode gerar MP3 com
 Google Cloud Text-to-Speech, voz `pt-BR-Chirp3-HD-Aoede`, configurando `FLORA_VOZ_PROVEDOR=google`
 e `GOOGLE_TTS_API_KEY`. Esse serviço é independente dos modelos gratuitos de texto e exige configuração
 de faturamento. Veja [voz da Flora](docs/ia/VOZ_FLORA.md). A chave fica somente no backend.

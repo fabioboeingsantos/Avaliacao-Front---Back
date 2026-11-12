@@ -11,6 +11,7 @@ import SinoNotificacoes from './componentes/SinoNotificacoes'
 import CatalogoProdutos from './componentes/CatalogoProdutos'
 import { imagemProduto } from './utilitarios/imagemProduto'
 import Assistente from './funcionalidades/assistente/Assistente'
+import OrbeFlora from './funcionalidades/assistente/OrbeFlora'
 import { chamarApi } from './api.js'
 import { formatarIdSolicitacao } from './utilitarios/identificadorPedido'
 import './App.css'
@@ -200,7 +201,7 @@ function App() {
   const [saindo, setSaindo] = useState(false)
   // Identifica qual fluxo deve ser apresentado depois do acesso de demonstração.
   const [perfilAtual, setPerfilAtual] = useState('')
-  const [assistenteAberto, setAssistenteAberto] = useState(false)
+  const [assistenteAberto, setAssistenteAberto] = useState(() => window.location.pathname === '/flora')
   const [catalogoAberto, setCatalogoAberto] = useState(false)
   const [catalogoConsultando, setCatalogoConsultando] = useState(false)
   const [erroCatalogo, setErroCatalogo] = useState('')
@@ -219,6 +220,32 @@ function App() {
   const [cestaEmDetalhes, setCestaEmDetalhes] = useState(null)
   // O aviso fica preparado para uma futura área visual de status da conexão.
   const [, setMensagemApi] = useState('')
+
+  useEffect(() => {
+    function sincronizarPaginaFlora() {
+      setAssistenteAberto(window.location.pathname === '/flora')
+    }
+    window.addEventListener('popstate', sincronizarPaginaFlora)
+    return () => window.removeEventListener('popstate', sincronizarPaginaFlora)
+  }, [])
+
+  function abrirPaginaFlora() {
+    if (window.location.pathname !== '/flora') {
+      window.history.pushState({ floraNavigation: true, origem: `${window.location.pathname}${window.location.search}` }, '', '/flora')
+    }
+    setAssistenteAberto(true)
+  }
+
+  function fecharPaginaFlora() {
+    if (window.location.pathname === '/flora') {
+      if (window.history.state?.floraNavigation) {
+        window.history.back()
+        return
+      }
+      window.history.replaceState({}, '', window.history.state?.origem || '/')
+    }
+    setAssistenteAberto(false)
+  }
 
   useEffect(() => {
     document.documentElement.dataset.tema = tema
@@ -487,6 +514,9 @@ function App() {
 
   // Encerra a sessão no servidor antes de limpar o estado autenticado da tela.
   function limparSessaoLocal() {
+    if (window.location.pathname === '/flora') {
+      window.history.replaceState({}, '', window.history.state?.origem || '/')
+    }
     setAssistenteAberto(false)
     setCatalogoAberto(false)
     setUsuarioAutenticado('')
@@ -1021,7 +1051,7 @@ function App() {
   }
 
   function continuarAssistenteManual(proposta) {
-    setAssistenteAberto(false)
+    fecharPaginaFlora()
     if (perfilAtual === 'assinante') {
       if (proposta?.tipo === 'pedido_cesta') {
         setPedidoParaRepetir({
@@ -1044,7 +1074,7 @@ function App() {
   function envolverAreaAutenticada(conteudo) {
     return (
       <>
-        <header className="barra-sessao">
+        <header className={`barra-sessao${assistenteAberto ? ' flora-pagina-aberta' : ''}`}>
           <div className="acoes-sessao">
             <div className="identidade-sessao">
               <span>
@@ -1071,12 +1101,11 @@ function App() {
           <button
             type="button"
             className={`botao-flora${perfilAtual === 'produtor' ? ' botao-flora-produtor' : ''}`}
-            onClick={() => setAssistenteAberto(true)}
+            onClick={abrirPaginaFlora}
             aria-label="Abrir conversa com a Flora"
-            aria-haspopup="dialog"
             title="Flora"
           >
-            <img src="/marca/flora-do-vale-nucleo-v1.png" alt="" width="44" height="44" />
+            <OrbeFlora pausado={assistenteAberto} />
             <span className="rotulo-flora">Flora</span>
             <span className="descricao-flora">Assistente virtual I.A</span>
           </button>
@@ -1098,18 +1127,17 @@ function App() {
             </p>
           )}
         </header>
-        {conteudo}
+        {assistenteAberto ? <Assistente
+          key={usuarioAutenticado}
+          perfil={perfilAtual} nomeUsuario={usuarioAutenticado} produtos={produtosDisponiveis} modoPagina
+          aoFechar={fecharPaginaFlora}
+          aoConfirmar={confirmarAssistente}
+          aoManual={continuarAssistenteManual}
+        /> : conteudo}
         {catalogoAberto && <CatalogoProdutos
           perfil={perfilAtual} produtos={produtosDisponiveis}
           carregando={catalogoConsultando} erro={erroCatalogo}
           aoRecarregar={abrirCatalogo} aoFechar={() => setCatalogoAberto(false)} aoAdicionar={adicionarProduto}
-        />}
-        {assistenteAberto && <Assistente
-          key={usuarioAutenticado}
-          perfil={perfilAtual} produtos={produtosDisponiveis}
-          aoFechar={() => setAssistenteAberto(false)}
-          aoConfirmar={confirmarAssistente}
-          aoManual={continuarAssistenteManual}
         />}
       </>
     )
