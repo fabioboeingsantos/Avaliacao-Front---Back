@@ -13,7 +13,7 @@ def itens_fora_catalogo(texto: str, catalogo: list[dict]) -> list[str]:
     termos_catalogo = {
         termo
         for produto in catalogo
-        for termo in unicodedata.normalize("NFD", produto["nome"].lower()).split()
+        for termo in unicodedata.normalize("NFD", (produto.get("nome") or produto["id"]).lower()).split()
     }
     termos_catalogo = {
         "".join(c for c in termo if unicodedata.category(c) != "Mn")
@@ -30,6 +30,8 @@ def itens_fora_catalogo(texto: str, catalogo: list[dict]) -> list[str]:
         "grande", "pronta", "pronto", "prontas", "prontos", "selecionavel", "selecionaveis",
         "cada", "und", "unidade", "unidades", "unid", "kg", "quilo", "quilos",
         "saber", "qual", "quais", "tem", "disponivel", "catalogo", "itens", "mostrar",
+        "sem", "nao", "produtos", "produto", "manter", "esses", "essas", "estes", "estas",
+        "dois", "duas", "tres", "quatro", "cinco", "seis", "sete", "oito", "nove", "dez",
     }
     marcadores = r"\b(?:quero|queria|inclua|incluir|adicione|adicionar|coloque|colocar|acrescente|acrescentar|monte|montar|com|troque|trocar|substitua|substituir)\b"
     candidatos = []

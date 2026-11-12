@@ -482,7 +482,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
           : digitando
             ? 'F.L.O.R.A. · RECEBENDO COMANDO'
             : aprovado
-              ? 'F.L.O.R.A. · PROPOSTA VALIDADA'
+              ? concluido ? 'F.L.O.R.A. · OPERAÇÃO CONCLUÍDA' : 'F.L.O.R.A. · PROPOSTA VALIDADA'
               : 'F.L.O.R.A. · NÚCLEO ONLINE'
 
   const statusInteracaoHud = falando
@@ -496,7 +496,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
           : digitando
             ? 'Sincronizando sua mensagem · Pressione Enter para enviar'
             : aprovado
-              ? 'Proposta pronta e conferida · Aguardando confirmação'
+              ? concluido ? textoConclusao : 'Proposta pronta e conferida · Aguardando confirmação'
               : respondendo
                 ? 'Sistemas sincronizados · Pronta para interagir'
                 : 'Interação por voz ou texto ativa · Escolha uma ação ou fale'
