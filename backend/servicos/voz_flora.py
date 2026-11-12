@@ -16,7 +16,7 @@ class VozIndisponivel(Exception):
 
 
 def sintetizar(texto: str) -> dict:
-    provedor = os.getenv("FLORA_VOZ_PROVEDOR", "navegador").strip().lower()
+    provedor = os.getenv("FLORA_VOZ_PROVEDOR", "google").strip().lower()
     if provedor == "navegador":
         return {"provedor": "navegador"}
     if provedor != "google":

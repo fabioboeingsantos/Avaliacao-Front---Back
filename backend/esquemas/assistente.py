@@ -26,6 +26,33 @@ class EntradaAssistente(BaseModel):
         return valor.strip()
 
 
+class ProdutoConsulta(BaseModel):
+    id: str
+    nome: str
+    categoria: str | None = None
+    estoque: int | None = None
+    preco_unitario: float | None = None
+    quantidade: int | None = None
+    quantidade_separada: int | None = None
+
+
+class PedidoConsulta(BaseModel):
+    id: int
+    situacao: str
+    semana: str | None = None
+    valor_total: float | None = None
+    produtos: list[ProdutoConsulta] = Field(default_factory=list)
+
+
+class VisualizacaoAssistente(BaseModel):
+    tipo: Literal["catalogo", "estoque", "pedidos"]
+    resumo: str
+    total: int
+    maximo_unidades: int | None = None
+    produtos: list[ProdutoConsulta] = Field(default_factory=list)
+    pedidos: list[PedidoConsulta] = Field(default_factory=list)
+
+
 class ResultadoAssistente(BaseModel):
     modo: Literal["simulado", "openrouter"]
     agente: Literal["assinante", "produtor"]
@@ -33,3 +60,4 @@ class ResultadoAssistente(BaseModel):
     proposta: dict | None = None
     qa: ResultadoQA
     mensagem: str
+    visualizacao: VisualizacaoAssistente | None = None

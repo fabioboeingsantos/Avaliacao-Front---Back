@@ -3,8 +3,9 @@
 import re
 import unicodedata
 
-from servicos.cesta import LIMITES_POR_TAMANHO as LIMITES
+from servicos.cesta import COMPOSICAO_CESTA_PRONTA, LIMITES_POR_TAMANHO as LIMITES
 from ia.consultas import categorias_mencionadas, eh_consulta_catalogo
+from ia.validacao import itens_fora_catalogo
 
 
 def _normalizar(texto: str) -> str:
@@ -56,6 +57,7 @@ def _analisar_assinante(mensagem: str, catalogo: list[dict], cestas=None, histor
     iniciou = False
     indisponiveis = set()
     mensagens = [h["texto"] for h in (historico or []) if h["papel"] == "usuario"] + [mensagem]
+    fora_catalogo = itens_fora_catalogo(mensagem, catalogo)
     for mensagem_turno in mensagens:
         texto = _normalizar(mensagem_turno)
         if eh_consulta_catalogo(texto, "assinante"):
@@ -89,8 +91,9 @@ def _analisar_assinante(mensagem: str, catalogo: list[dict], cestas=None, histor
                 indisponiveis.discard(produto_id)
                 modo = "selecionavel"
             else:
-                quantidades = re.findall(rf"\b(\d+)\s+(?:unidades?\s+de\s+)?{padrao}\b", texto)
-                por_produto = re.search(r"\b(\d+)\s+(?:unidades?\s+)?de cada\b", texto)
+                unidades = r"(?:unidades?|unid\.?|und\.?|un\.?)"
+                quantidades = re.findall(rf"\b(\d+)\s+(?:(?:{unidades})(?:\s+de)?\s+)?{padrao}\b", texto)
+                por_produto = re.search(rf"\b(\d+)\s+(?:{unidades}\s+)?de cada\b", texto)
                 quantidade = sum(map(int, quantidades)) if quantidades else int(por_produto.group(1)) if por_produto else 1
                 definir = re.search(r"\b(?:ajuste|altere|corrija|deixe|mude)\b", texto)
                 itens[produto_id] = quantidade if definir else itens.get(produto_id, 0) + quantidade
@@ -111,8 +114,7 @@ def _analisar_assinante(mensagem: str, catalogo: list[dict], cestas=None, histor
                     break
             iniciou = True
         if modo == "pronta" and tamanho:
-            from ia.validacao import COMPOSICAO_PRONTA
-            itens = {p: 1 for p in COMPOSICAO_PRONTA[:LIMITES[tamanho]]}
+            itens = {p: 1 for p in COMPOSICAO_CESTA_PRONTA[:LIMITES[tamanho]]}
     if modo == "selecionavel" and itens and (not tamanho or len(itens) <= LIMITES[tamanho]):
         tamanho = next((nome for nome, limite in LIMITES.items() if len(itens) <= limite), "grande")
     produtos_por_id = {p["id"]: p for p in catalogo}
@@ -131,6 +133,10 @@ def _analisar_assinante(mensagem: str, catalogo: list[dict], cestas=None, histor
         "produtos_excluidos": sorted(excluidos),
     }
     qa = _qa_assinante(proposta)
+    if fora_catalogo:
+        qa["status"] = "esclarecimento"
+        nomes = ", ".join(fora_catalogo)
+        qa["problemas"].insert(0, f"{nomes.capitalize()} não está{'ão' if len(fora_catalogo) > 1 else ''} no catálogo. Consulte os itens disponíveis e escolha outra opção.")
     if indisponiveis:
         qa["status"] = "esclarecimento"
         qa["problemas"].append("A composição precisa ser ajustada à disponibilidade atual. Consulte o catálogo para escolher uma alternativa.")
@@ -138,7 +144,7 @@ def _analisar_assinante(mensagem: str, catalogo: list[dict], cestas=None, histor
         qa["status"] = "esclarecimento"
         qa["duvidas"].append("Quais produtos você deseja incluir na cesta?")
     qa["duvidas"] = qa["duvidas"][:1]
-    return {"status": "proposta" if qa["status"] == "aprovado" else "esclarecimento", "proposta": proposta, "qa": qa}
+    return {"status": "proposta" if qa["status"] == "aprovado" else "esclarecimento", "proposta": None if fora_catalogo else proposta, "qa": qa}
 
 
 def _analisar_produtor(mensagem: str, cestas: list[dict]) -> dict:

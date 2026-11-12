@@ -26,6 +26,22 @@ LIMITES_POR_TAMANHO = {
     "grande": 12,
 }
 LIMITE_UNIDADES_POR_PRODUTO = 10
+COMPOSICAO_CESTA_PRONTA = (
+    "alface", "tomate", "cenoura", "batata", "cebola", "couve", "beterraba",
+    "abobrinha", "chuchu", "pimentao", "pepino", "mandioca",
+)
+
+
+def regras_publicas_cesta() -> dict:
+    """Regras estáveis compartilhadas com os agentes e com o cliente da IA."""
+    return {
+        "limites": LIMITES_POR_TAMANHO.copy(),
+        "maximo_unidades": LIMITE_UNIDADES_POR_PRODUTO,
+        "composicao_pronta": {
+            tamanho: list(COMPOSICAO_CESTA_PRONTA[:limite])
+            for tamanho, limite in LIMITES_POR_TAMANHO.items()
+        },
+    }
 
 
 def normalizar_tamanho(tamanho: str) -> str:

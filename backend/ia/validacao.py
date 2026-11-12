@@ -1,9 +1,50 @@
 """Validação determinística das propostas, independente do modelo."""
 
-from servicos.cesta import LIMITES_POR_TAMANHO
+import re
+import unicodedata
+
+from servicos.cesta import COMPOSICAO_CESTA_PRONTA, LIMITES_POR_TAMANHO
 
 
-COMPOSICAO_PRONTA = ["alface", "tomate", "cenoura", "batata", "cebola", "couve", "beterraba", "abobrinha", "chuchu", "pimentao", "pepino", "mandioca"]
+def itens_fora_catalogo(texto: str, catalogo: list[dict]) -> list[str]:
+    """Detecta termos de produtos pedidos explicitamente e ausentes do catálogo."""
+    normalizado = unicodedata.normalize("NFD", texto.lower())
+    normalizado = "".join(c for c in normalizado if unicodedata.category(c) != "Mn")
+    termos_catalogo = {
+        termo
+        for produto in catalogo
+        for termo in unicodedata.normalize("NFD", produto["nome"].lower()).split()
+    }
+    termos_catalogo = {
+        "".join(c for c in termo if unicodedata.category(c) != "Mn")
+        for termo in termos_catalogo
+    }
+    termos_catalogo |= {termo + "s" for termo in termos_catalogo if termo.endswith(("a", "e", "o", "l"))}
+    termos_catalogo |= {termo[:-2] + "oes" for termo in termos_catalogo if termo.endswith("ao")}
+    stopwords = {
+        "a", "o", "as", "os", "um", "uma", "de", "do", "da", "dos", "das", "e", "ou",
+        "quero", "queria", "inclua", "incluir", "adicione", "adicionar", "coloque", "colocar",
+        "acrescente", "acrescentar", "mais", "para", "na", "no", "cesta", "pedido", "altere",
+        "alterar", "mude", "mudar", "troque", "trocar", "substitua", "substituir", "monte",
+        "montar", "com", "por", "favor", "agora", "pequena", "pequeno", "media", "medio",
+        "grande", "pronta", "pronto", "prontas", "prontos", "selecionavel", "selecionaveis",
+        "cada", "und", "unidade", "unidades", "unid", "kg", "quilo", "quilos",
+        "saber", "qual", "quais", "tem", "disponivel", "catalogo", "itens", "mostrar",
+    }
+    marcadores = r"\b(?:quero|queria|inclua|incluir|adicione|adicionar|coloque|colocar|acrescente|acrescentar|monte|montar|com|troque|trocar|substitua|substituir)\b"
+    candidatos = []
+    ocorrencias = list(re.finditer(marcadores, normalizado))
+    trechos = [normalizado[ocorrencia.end(): ocorrencias[i + 1].start() if i + 1 < len(ocorrencias) else len(normalizado)]
+               for i, ocorrencia in enumerate(ocorrencias)]
+    for trecho in trechos:
+        for palavra in re.findall(r"[a-z0-9]+", trecho):
+            if palavra in stopwords or palavra in termos_catalogo or palavra.isdigit():
+                continue
+            if palavra not in candidatos:
+                candidatos.append(palavra)
+    return candidatos
+
+
 OPERACOES_POR_PERFIL = {
     "assinante": {"pedido_cesta", "consulta_cestas"},
     "produtor": {"consulta_cestas", "separacao"},
@@ -32,7 +73,7 @@ def validar_proposta(proposta, perfil, catalogo, cestas):
         elif len(ids) > LIMITES_POR_TAMANHO[p.tamanho]:
             erros.append("A quantidade de produtos diferentes excede o tamanho da cesta.")
         if p.modo == "pronta" and p.tamanho:
-            esperados = set(COMPOSICAO_PRONTA[:LIMITES_POR_TAMANHO[p.tamanho]])
+            esperados = set(COMPOSICAO_CESTA_PRONTA[:LIMITES_POR_TAMANHO[p.tamanho]])
             if set(ids) != esperados or any(item.quantidade != 1 for item in p.produtos):
                 erros.append("A composição não corresponde à cesta pronta. Use uma cesta selecionável para personalizar.")
         if any(item.quantidade > produtos.get(item.produto_id, {}).get("estoque", 0) for item in p.produtos):

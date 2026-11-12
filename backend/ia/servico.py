@@ -5,15 +5,28 @@ import os
 from ia.contexto import carregar_catalogo, carregar_cestas
 from ia.consultas import responder
 from ia.fluxo import analisar_agentes
+from ia.intencoes import desistiu_da_montagem, eh_saudacao_curta
 from ia.provedores import openrouter, simulado
 from ia.provedores.contrato import AssistenteIndisponivel, ChamarAgente
 
 
-def analisar(mensagem: str, perfil: str, sessao, usuario_id: int | None = None, historico=None) -> dict:
+def analisar(mensagem: str, perfil: str, sessao, usuario_id: int | None = None, historico=None,
+             nome_usuario: str | None = None) -> dict:
     modo = os.getenv("ASSISTENTE_MODO", "simulado").strip().lower()
     if modo not in {"simulado", "openrouter"}:
         raise AssistenteIndisponivel("ASSISTENTE_MODO deve ser simulado ou openrouter.")
-    consulta = responder(mensagem, perfil, sessao, usuario_id, modo)
+    if eh_saudacao_curta(mensagem):
+        return responder(mensagem, perfil, sessao, usuario_id, modo, nome_usuario=nome_usuario)
+    if perfil == "assinante" and desistiu_da_montagem(mensagem, historico):
+        return {
+            "modo": modo,
+            "agente": perfil,
+            "status": "cancelado",
+            "proposta": None,
+            "qa": {"status": "bloqueado", "problemas": [], "duvidas": []},
+            "mensagem": "Tudo bem. Encerrei a montagem da cesta por aqui. Se quiser retomar, é só me chamar.",
+        }
+    consulta = responder(mensagem, perfil, sessao, usuario_id, modo, nome_usuario=nome_usuario)
     if consulta is not None:
         return consulta
     catalogo = carregar_catalogo(sessao)

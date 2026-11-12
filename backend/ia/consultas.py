@@ -5,6 +5,8 @@ import unicodedata
 from collections import Counter
 
 from ia.contexto import carregar_catalogo, carregar_cestas
+from ia.intencoes import eh_saudacao_curta, pergunta_tamanhos_cesta
+from servicos.cesta import LIMITE_UNIDADES_POR_PRODUTO, LIMITES_POR_TAMANHO
 
 
 SITUACOES = ("Pendente", "Em separação", "Preparado para envio", "Enviado", "Aguardando recebimento", "Entregue", "Cancelado")
@@ -39,21 +41,53 @@ def eh_consulta_catalogo(texto, perfil):
     return perfil == "assinante" and "estoque" in texto
 
 
-def responder(mensagem, perfil, sessao, usuario_id, modo):
+def responder(mensagem, perfil, sessao, usuario_id, modo, nome_usuario=None):
     """Retorna None para comandos que pertencem ao fluxo de propostas."""
     if perfil not in {"produtor", "assinante"} or usuario_id is None:
         raise ValueError("A consulta exige uma conta autenticada.")
     texto = normalizar(mensagem)
 
-    def resposta(conteudo, status="resposta"):
+    def resposta(conteudo, status="resposta", visualizacao=None):
         return {"modo": modo, "agente": perfil, "status": status, "proposta": None,
                 "qa": {"status": "aprovado" if status == "resposta" else "esclarecimento", "problemas": [], "duvidas": []},
-                "mensagem": conteudo}
+                "mensagem": conteudo, "visualizacao": visualizacao}
 
-    if re.fullmatch(r"(?:oi|ola|bom dia|boa tarde|boa noite)(?:[,! ]+flora)?[!.? ]*", texto):
-        return resposta("Olá! Posso mostrar o catálogo completo, recomendar uma cesta ou consultar seus pedidos. Como posso ajudar?")
+    def primeiro_nome(nome):
+        partes = re.sub(r"[._-]+", " ", (nome or "").strip()).split()
+        return f"{partes[0][0].upper()}{partes[0][1:]}" if partes else ""
+
+    def pedidos_visuais(cestas, detalhar=False):
+        nomes = {p["id"]: p["nome"] for p in carregar_catalogo(sessao)} if detalhar else {}
+        pedidos = []
+        for cesta in sorted(cestas, key=lambda c: c["id"], reverse=True)[:30]:
+            separados = {p["produto_id"]: p["quantidade"] for p in cesta["separacoes"]}
+            pedidos.append({
+                "id": cesta["id"], "situacao": cesta["situacao"],
+                "semana": cesta.get("semana"), "valor_total": cesta.get("valor_total"),
+                "produtos": [{"id": p["id"], "nome": nomes.get(p["id"], p["id"]),
+                              "quantidade": p["quantidade"], "quantidade_separada": separados.get(p["id"], 0)}
+                             for p in cesta["produtos"]] if detalhar else [],
+            })
+        total = len(cestas)
+        resumo = (f"Encontrei {total} {'pedido' if total == 1 else 'pedidos'}."
+                  if total else "Não encontrei pedidos para esta consulta.")
+        return {"tipo": "pedidos", "resumo": resumo, "total": total, "pedidos": pedidos}
+
+    if eh_saudacao_curta(mensagem):
+        nome = primeiro_nome(nome_usuario)
+        saudacao = f"Olá, {nome}!" if nome else "Olá!"
+        return resposta(f"{saudacao} Posso mostrar o catálogo completo, recomendar uma cesta ou consultar seus pedidos. Como posso ajudar?")
     if re.fullmatch(r"(?:obrigad[oa]|valeu|muito obrigad[oa])[!. ]*", texto):
         return resposta("Por nada! Se quiser, podemos continuar montando sua cesta.")
+
+    if pergunta_tamanhos_cesta(texto):
+        pequena = LIMITES_POR_TAMANHO["pequena"]
+        media = LIMITES_POR_TAMANHO["media"]
+        grande = LIMITES_POR_TAMANHO["grande"]
+        return resposta(
+            f"Temos cestas pequenas (até {pequena} produtos), médias (até {media}) "
+            f"e grandes (até {grande} produtos diferentes)."
+        )
 
     resumo_estoque = ""
     consulta_conjunta = bool(re.search(r"\b(pendenc\w*|entreg\w*|pedidos?|cestas?|situac\w*|sistema)\b", texto))
@@ -69,7 +103,10 @@ def responder(mensagem, perfil, sessao, usuario_id, modo):
                 continue
             nomes = [p["nome"] for p in disponiveis if p.get("categoria") == categoria]
             linhas.append(f"{categoria.capitalize()}: {', '.join(nomes) if nomes else 'nenhum produto disponível no momento'}.")
-        return resposta("Catálogo disponível para sua cesta:\n" + "\n".join(linhas))
+        return resposta("Catálogo disponível para sua cesta:\n" + "\n".join(linhas), visualizacao={
+            "tipo": "catalogo", "resumo": "Escolha os produtos para sua cesta." if disponiveis else "Nenhum produto disponível para esta consulta.",
+            "total": len(disponiveis), "maximo_unidades": LIMITE_UNIDADES_POR_PRODUTO, "produtos": disponiveis,
+        })
     estoque = "estoque" in texto or (
         re.search(r"\bquant[oa]s?\b", texto) and re.search(r"\b(tenho|temos|disponiveis|disponivel)\b", texto)
         and not re.search(r"\b(pedidos?|cestas?)\b", texto)
@@ -106,7 +143,10 @@ def responder(mensagem, perfil, sessao, usuario_id, modo):
         linhas = [f"{p['nome']}: {p['estoque']} {'unidade disponível' if p['estoque'] == 1 else 'unidades disponíveis'}." for p in selecionados]
         resumo_estoque = "Estoque disponível no momento da consulta:\n" + "\n".join(linhas)
         if not consulta_conjunta:
-            return resposta(resumo_estoque)
+            return resposta(resumo_estoque, visualizacao={
+                "tipo": "estoque", "resumo": "Estoque disponível no momento da consulta.",
+                "total": len(selecionados), "produtos": selecionados,
+            })
 
     # Ordens de gravação e abertura continuam no fluxo com prévia e confirmação.
     if re.search(r"\b(?:quero|monte|montar|crie|criar|pedir|comprar|faca)\s+(?:(?:uma|a|minha|nova)\s+)*cesta\b", texto):
@@ -134,7 +174,8 @@ def responder(mensagem, perfil, sessao, usuario_id, modo):
         nomes = {p["id"]: p["nome"] for p in carregar_catalogo(sessao)}
         separados = {p["produto_id"]: p["quantidade"] for p in cesta["separacoes"]}
         itens = [f"{nomes.get(p['id'], p['id'])}: {separados.get(p['id'], 0)} de {p['quantidade']} {'unidade separada' if p['quantidade'] == 1 else 'unidades separadas'}." for p in cesta["produtos"]]
-        return resposta(f"Pedido #{cesta['id']:04d}: {cesta['situacao']}.\n" + "\n".join(itens) + ("\n\n" + resumo_estoque if resumo_estoque else ""))
+        return resposta(f"Pedido #{cesta['id']:04d}: {cesta['situacao']}.\n" + "\n".join(itens) + ("\n\n" + resumo_estoque if resumo_estoque else ""),
+                        visualizacao=pedidos_visuais([cesta], detalhar=True) if not resumo_estoque else None)
 
     filtros = set()
     if "pendenc" in texto:
@@ -170,4 +211,5 @@ def responder(mensagem, perfil, sessao, usuario_id, modo):
     detalhes = [f"Pedido #{c['id']:04d}: {c['situacao']}." for c in selecionadas[:30]]
     if len(selecionadas) > 30:
         detalhes.append(f"Exibindo 30 de {len(selecionadas)} pedidos. Consulte um número de pedido para ver os detalhes.")
-    return resposta(f"Encontrei {len(selecionadas)} {'pedido' if len(selecionadas) == 1 else 'pedidos'} {escopo} nos registros cadastrados.\n" + "\n".join(linhas + detalhes) + ("\n\n" + resumo_estoque if resumo_estoque else ""))
+    return resposta(f"Encontrei {len(selecionadas)} {'pedido' if len(selecionadas) == 1 else 'pedidos'} {escopo} nos registros cadastrados.\n" + "\n".join(linhas + detalhes) + ("\n\n" + resumo_estoque if resumo_estoque else ""),
+                    visualizacao=pedidos_visuais(selecionadas) if not resumo_estoque else None)

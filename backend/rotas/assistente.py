@@ -44,6 +44,7 @@ def analisar_mensagem(
 
     try:
         return analisar(dados.mensagem, usuario.perfil, sessao, usuario_id=usuario.id,
+                        nome_usuario=usuario.usuario,
                         historico=[item.model_dump() for item in dados.historico])
     except AssistenteIndisponivel as erro:
         raise HTTPException(status_code=503, detail=str(erro)) from None

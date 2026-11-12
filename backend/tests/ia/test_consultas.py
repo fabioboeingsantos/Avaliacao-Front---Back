@@ -29,6 +29,26 @@ def perguntar(texto, perfil="produtor"):
     return consultas.responder(texto, perfil, None, 1, "simulado")
 
 
+@pytest.mark.parametrize("texto", [
+    "quais tamanhos de cesta voce tem",
+    "Quais são as opções de tamanho das cestas?",
+    "Qual tamanho de cesta está disponível?",
+    "Quais tamanhos vocês oferecem?",
+])
+def test_pergunta_tamanhos_responde_regras_sem_consultar_pedidos(dados_consulta, monkeypatch, texto):
+    def nao_consultar_pedidos(*args, **kwargs):
+        pytest.fail("Pergunta sobre tamanhos não deve consultar os pedidos da conta")
+    monkeypatch.setattr(consultas, "carregar_cestas", nao_consultar_pedidos)
+
+    resultado = perguntar(texto, perfil="assinante")
+
+    assert resultado["status"] == "resposta"
+    assert resultado["proposta"] is None
+    assert "pequenas (até 5 produtos)" in resultado["mensagem"]
+    assert "médias (até 8)" in resultado["mensagem"]
+    assert "grandes (até 12 produtos diferentes)" in resultado["mensagem"]
+
+
 @pytest.mark.parametrize("texto,esperado,ausente", [
     ("Flora me diga quantos tomates eu tenho no estoque", "Tomate: 17", "Alface:"),
     ("Quantos tomates tenho?", "Tomate: 17", "Alface:"),

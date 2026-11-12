@@ -4,6 +4,7 @@ import re
 import unicodedata
 
 from ia.contratos import PropostaAgente, ResultadoQA
+from ia.intencoes import pergunta_tamanhos_cesta
 from ia.prompts import obter_instrucao
 from ia.validacao import validar_proposta
 from servicos.cesta import LIMITES_POR_TAMANHO
@@ -44,6 +45,10 @@ def auditar_contexto(contexto: dict) -> dict:
     impedimentos = []
     erros_validacao = []
     duvida_sugerida = pergunta
+
+    if (perfil == "assinante" and pergunta_tamanhos_cesta(mensagem) and proposta
+            and proposta.tipo == "pedido_cesta"):
+        impedimentos.append("A mensagem pergunta sobre tamanhos de cesta; responda aos tamanhos disponÃ­veis sem criar um pedido.")
 
     if interpretacao.get("fora_do_escopo"):
         impedimentos.append("Posso ajudar com pedidos e separação de cestas.")

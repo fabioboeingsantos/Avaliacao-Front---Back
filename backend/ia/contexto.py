@@ -5,7 +5,8 @@ from repositorios import cesta as repositorio_de_cestas
 
 def carregar_catalogo(sessao):
     return [
-        {"id": item["id"], "nome": item["nome"], "estoque": item["estoque"], "categoria": item["categoria"]}
+        {"id": item["id"], "nome": item["nome"], "estoque": item["estoque"], "categoria": item["categoria"],
+         "preco_unitario": item["preco_centavos"] / 100}
         for item in repositorio_de_cestas.listar_produtos_disponiveis(sessao)
     ]
 
@@ -22,7 +23,7 @@ def carregar_cestas(sessao, perfil, usuario_id, limite=20):
         historico = historico[-limite:]
     return [
         {campo: cesta[campo] for campo in (
-            "id", "tamanho", "modo", "situacao", "separacao_concluida_em", "separacoes",
+            "id", "tamanho", "modo", "situacao", "semana", "valor_total", "separacao_concluida_em", "separacoes",
         )} | {"produtos": [{"id": p["id"], "quantidade": p["quantidade"]} for p in cesta["produtos"]]}
         for cesta in historico
     ]
