@@ -473,3 +473,4 @@ Endereços de referência da publicação (disponibilidade não verificada nesta
 - `Apresentacao/BACKLOG_APRESENTACAO.md`: backlog separado entre concluído, validação e evolução.
 - `Apresentacao/personas/`: imagens e cenas usadas exclusivamente na apresentação.
 - `PENDENCIAS.md`: lista central de atividades para depois da entrega.
+- [PLANOS_FUTUROS.md](PLANOS_FUTUROS.md): proposta de avaliação do Jev para classificação de intenção e revisão semântica da Flora.
