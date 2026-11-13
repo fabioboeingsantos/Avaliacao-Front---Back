@@ -8,6 +8,7 @@ from esquemas.assistente import EntradaAssistente, ResultadoAssistente
 from modelos.usuario import Usuario
 from rotas.autenticacao import exigir_permissao
 from ia.servico import analisar
+from ia.pedido_cesta import EntradaPropostaCesta, ResultadoPropostaCesta, propor_cesta
 from ia.provedores.contrato import AssistenteIndisponivel
 from esquemas.voz import EntradaVoz
 from servicos.voz_flora import sintetizar, VozIndisponivel
@@ -15,6 +16,25 @@ from limites_autenticacao import limitador
 
 
 router = APIRouter(prefix="/assistente", tags=["Assistente"])
+
+
+# Expor uma proposta autenticada sem chamar rotas que criam ou alteram cestas.
+@router.post("/pedido", response_model=ResultadoPropostaCesta)
+def propor_pedido_de_cesta(
+    dados: EntradaPropostaCesta,
+    sessao: Session = Depends(obter_sessao),
+    usuario: Usuario = Depends(exigir_permissao("assistente.usar")),
+):
+    """Gerar uma proposta para assinantes sem gravar a cesta."""
+    if usuario.perfil != "assinante":
+        raise HTTPException(status_code=403, detail="Esta função está disponível para assinantes.")
+    try:
+        return propor_cesta(dados.mensagem, sessao)
+    except AssistenteIndisponivel:
+        raise HTTPException(
+            status_code=503,
+            detail="A IA está indisponível agora. Tente novamente ou monte a cesta manualmente.",
+        ) from None
 
 
 @router.post("/voz")

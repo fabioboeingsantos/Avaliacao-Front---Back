@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
     let json = []
     if (path.endsWith('/usuarios/me')) json = { usuario: 'aline', perfil: 'assinante' }
     if (path.endsWith('/produtos')) json = [produto]
-    if (path.endsWith('/assistente/analisar')) {
+    if (path.endsWith('/assistente/analisar') || path.endsWith('/assistente/pedido')) {
       const mensagem = route.request().postDataJSON().mensagem
       json = /catálogo/i.test(mensagem)
         ? { status: 'consulta', visualizacao: { tipo: 'catalogo', resumo: 'Escolha os produtos.', produtos: [produto], maximo_unidades: 5 } }
@@ -23,6 +23,8 @@ test.beforeEach(async ({ page }) => {
 })
 
 async function pedirCesta(page) {
+  await page.getByRole('button', { name: /Montar cesta/ }).click()
+  await page.getByRole('button', { name: /Cesta selecionável/ }).click()
   await page.getByLabel('Sua mensagem', { exact: true }).fill('Quero 2 alfaces')
   await page.getByRole('button', { name: 'Enviar', exact: true }).click()
   await expect(page.getByRole('button', { name: 'Confirmar cesta', exact: true })).toBeVisible()

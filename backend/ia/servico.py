@@ -6,7 +6,7 @@ from ia.contexto import carregar_catalogo, carregar_cestas
 from ia.consultas import responder
 from ia.fluxo import analisar_agentes
 from ia.intencoes import desistiu_da_montagem, eh_saudacao_curta
-from ia.provedores import openrouter, simulado
+from ia.provedores import jangada_fallback, openrouter, simulado
 from ia.provedores.contrato import AssistenteIndisponivel, ChamarAgente
 
 
@@ -34,6 +34,18 @@ def analisar(mensagem: str, perfil: str, sessao, usuario_id: int | None = None, 
     cestas = carregar_cestas(sessao, perfil, usuario_id, limite=5 if perfil == "assinante" else 20)
     if modo == "simulado":
         return simulado.analisar(mensagem, perfil, catalogo, cestas, historico=historico)
-    chamar_agente: ChamarAgente = openrouter.chamar_agente
+    provedor_padrao = os.getenv("IA_PROVEDOR_PADRAO", "openrouter").strip().lower()
+
+    # Resolve cada etapa do fluxo pelo provedor indicado para o seu papel.
+    provedores = {"openrouter": jangada_fallback}
+
+    def chamar_agente(papel, instrucao, contexto_agente, contrato):
+        provedor = os.getenv(f"IA_PROVEDOR_{papel.upper()}", "").strip().lower() or provedor_padrao
+        adaptador = provedores.get(provedor)
+        if adaptador is None:
+            raise AssistenteIndisponivel("Configure IA_PROVEDOR como openrouter.")
+        return adaptador.chamar_agente(papel, instrucao, contexto_agente, contrato)
+
+    chamar_agente: ChamarAgente = chamar_agente
     return analisar_agentes(mensagem, perfil, catalogo, cestas,
                             chamar_agente=chamar_agente, modo=modo, historico=historico)

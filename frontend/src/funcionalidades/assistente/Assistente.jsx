@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { analisarPedido } from './api'
+import { analisarPedido, proporCesta } from './api'
 import OrbeFlora from './OrbeFlora'
 import { PreviaProposta, VisualizacaoResultado } from './ResultadosFlora'
 import { textoDoResultado } from './dadosResultados'
@@ -58,6 +58,8 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
   const [estadoVoz, setEstadoVoz] = useState('')
   const [audioMensagem, setAudioMensagem] = useState(null)
   const [etapaMontagem, setEtapaMontagem] = useState(null)
+  // Manter as mensagens do fluxo iniciado em Montar cesta na rota específica da proposta.
+  const [modoPropostaCesta, setModoPropostaCesta] = useState(false)
   const [escolhendoProdutos, setEscolhendoProdutos] = useState(false)
   const [selecoesCatalogo, setSelecoesCatalogo] = useState({})
   const [pulso, setPulso] = useState(0)
@@ -179,6 +181,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
   }
 
   function iniciarCestaSelecionavel() {
+    setModoPropostaCesta(true)
     selecoesCatalogoRef.current = {}
     textoBaseSelecaoRef.current = null
     setSelecoesCatalogo({})
@@ -193,6 +196,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
   }
 
   function iniciarMontagem() {
+    setModoPropostaCesta(true)
     setEtapaMontagem('modo')
     acionarPulso(true)
     requestAnimationFrame(() => dialogo.current?.querySelector('.flora-inicio')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }))
@@ -340,7 +344,10 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
     setMensagem('')
     try {
       const contexto = conversaAnterior.slice(-100).map(({ papel, texto: conteudo }) => ({ papel, texto: conteudo.slice(0, 4000) }))
-      const dados = await analisarPedido(enviada, controle.signal, contexto)
+      // Separar a proposta de cesta do chat geral para preservar consultas e tarefas do produtor.
+      const dados = modoPropostaCesta && perfil === 'assinante'
+        ? await proporCesta(enviada, controle.signal)
+        : await analisarPedido(enviada, controle.signal, contexto)
       if (!montado.current) return
       if (controle.signal.aborted) throw new DOMException('Resposta interrompida', 'AbortError')
       const id = ++proximoId.current
@@ -454,6 +461,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
 
   function continuarSemAssistente() {
     parar()
+    setModoPropostaCesta(false)
     aoManual(aprovado && !concluido ? proposta : null)
   }
 
@@ -576,7 +584,10 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
       {concluido && <p className="flora-sucesso" role="status">{textoConclusao}</p>}
     </div>
       {resultado?.visualizacao && <VisualizacaoResultado key={resultado.id} dados={resultado.visualizacao} perfil={perfil} desabilitado={ocupado || ouvindo || concluido} selecoes={selecoesCatalogo} aoAlterarProduto={alterarProdutoCatalogo} aoAbrirPedido={abrirPedido} />}
-      {detalheAberto && aprovado && proposta && <PreviaProposta proposta={proposta} produtos={produtos} atual={true} confirmado={concluido} ocupado={ocupado} ouvindo={ouvindo} rascunho={Boolean(mensagem.trim())} aoConfirmar={confirmar} aoCancelar={cancelarProposta} aoAjustar={() => preencherMensagem(proposta.tipo === 'pedido_cesta' ? 'Altere a cesta: ' : `Na separação do pedido ${proposta.cesta_id}, altere: `)} />}
+      {detalheAberto && aprovado && proposta && <PreviaProposta proposta={proposta} produtos={produtos} atual={true} confirmado={concluido} ocupado={ocupado} ouvindo={ouvindo} rascunho={Boolean(mensagem.trim())} aoConfirmar={confirmar} aoCancelar={cancelarProposta} aoAjustar={() => {
+        if (modoPropostaCesta) continuarSemAssistente()
+        else preencherMensagem(proposta.tipo === 'pedido_cesta' ? 'Altere a cesta: ' : `Na separação do pedido ${proposta.cesta_id}, altere: `)
+      }} />}
       {erro && <div className="flora-retorno flora-retorno-erro" role="alert"><p>{erro}</p>{mensagem.trim() && !ocupado && <button className="flora-botao-discreto" type="button" onClick={() => enviarMensagemTexto()}>Tentar novamente</button>}</div>}
       {aviso && <p className="flora-retorno" role="status">{aviso}</p>}
       {concluido && <button className="flora-botao-primario flora-continuar" type="button" onClick={fechar}>{perfil === 'assinante' ? 'Continuar nos meus pedidos' : 'Continuar nos pedidos'}</button>}

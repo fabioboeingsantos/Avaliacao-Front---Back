@@ -11,6 +11,8 @@ from sqlalchemy import URL, make_url
 # ``backend``. Usar um caminho explícito evita que a configuração dependa do
 # diretório a partir do qual a API ou o Alembic são iniciados.
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+# Também aceita segredos do backend; valores já definidos na raiz ou no ambiente têm prioridade.
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 
 def obter_url_banco() -> URL:

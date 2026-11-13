@@ -25,8 +25,10 @@ def preparar(monkeypatch, respostas):
     monkeypatch.setenv("ASSISTENTE_MODO", "openrouter")
     monkeypatch.setenv("OPENROUTER_API_KEY", "chave-ficticia-openrouter")
     monkeypatch.setenv("OPENROUTER_MODEL", "openrouter/free")
+    monkeypatch.setenv("IA_MODELO_PADRAO", "")
     for papel in ("INTERPRETE", "ASSINANTE", "PRODUTOR", "QA"):
         monkeypatch.setenv(f"OPENROUTER_MODEL_{papel}", "")
+        monkeypatch.setenv(f"IA_MODELO_{papel}", "")
     capturas = []
     cliente_original = httpx.Client
 
@@ -71,10 +73,13 @@ def test_tres_chamadas_gratuitas_e_isolamento(cliente, monkeypatch):
 
 def test_modelos_separados_por_agente(cliente, monkeypatch):
     capturas = preparar(monkeypatch, respostas_padrao())
-    monkeypatch.setenv("OPENROUTER_MODEL_QA", "exemplo/qa:free")
+    monkeypatch.setenv("IA_MODELO_PADRAO", "exemplo/padrao:free")
+    monkeypatch.setenv("IA_MODELO_INTERPRETE", "exemplo/interprete:free")
+    monkeypatch.setenv("OPENROUTER_MODEL_QA", "exemplo/qa-legado:free")
+    monkeypatch.setenv("IA_MODELO_QA", "exemplo/qa:free")
     fazer_login(cliente, "aline", "aline123")
     assert cliente.post("/assistente/analisar", json={"mensagem": "Uma cesta média"}).status_code == 200
-    assert [c["model"] for c in capturas] == ["openrouter/free", "openrouter/free", "exemplo/qa:free"]
+    assert [c["model"] for c in capturas] == ["exemplo/interprete:free", "exemplo/padrao:free", "exemplo/qa:free"]
 
 
 def test_contexto_de_conversa_e_disponibilidade_chegam_aos_agentes(cliente, monkeypatch):
@@ -132,6 +137,9 @@ def test_sem_chave_nao_chama_provedor(cliente, monkeypatch):
 
 
 def test_modelo_pago_bloqueado_sem_chamada(monkeypatch):
+    monkeypatch.setenv("IA_MODELO_PADRAO", "")
+    monkeypatch.setenv("IA_MODELO_INTERPRETE", "")
+    monkeypatch.setenv("OPENROUTER_MODEL_INTERPRETE", "")
     capturas = preparar(monkeypatch, [])
     monkeypatch.setenv("OPENROUTER_MODEL", "exemplo/modelo-pago")
     with pytest.raises(AssistenteIndisponivel, match=":free"):

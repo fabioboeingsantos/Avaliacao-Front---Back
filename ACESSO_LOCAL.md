@@ -131,6 +131,37 @@ O resultado esperado é `1`. Se aparecer `password authentication failed`, atual
 
 Essas contas dependem dos dados cadastrados no banco selecionado. Sua existência no Supabase não foi verificada nesta inicialização.
 
+## Chat de teste no terminal com fallback Jangada
+
+O chat de terminal demonstra OpenRouter como principal e Gemini como reserva. Configure as quatro variáveis (`OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `GEMINI_API_KEY` e `GEMINI_MODEL`) no `.env` da raiz. Para instalar os extras dos dois provedores no ambiente virtual usado no terminal:
+
+```powershell
+# Instala os adaptadores Gemini e OpenRouter (que usa o extra openai) no ambiente do projeto.
+uv pip install --python .\.imagegen-venv\Scripts\python.exe "jangada-ai[gemini,openai]"
+```
+
+Para iniciar o chat no modo normal, execute na raiz do projeto:
+
+```powershell
+# Inicia o chat; a Jangada tenta OpenRouter e passa ao Gemini em falhas elegíveis.
+python .\chat_jangada.py
+```
+
+Para uma demonstração controlada em sala, simule uma conexão recusada antes de alcançar a OpenRouter. A resposta deve identificar `gemini` como provedor e imprimir que o fallback foi acionado:
+
+```powershell
+# Define a variável somente para este terminal PowerShell.
+$env:JANGADA_DEMO_FORCAR_FALLBACK = "1"
+# Inicia a demonstração; digite uma mensagem e depois 'sair'.
+python .\chat_jangada.py
+# Remove a variável depois de encerrar o chat para voltar ao modo normal.
+Remove-Item Env:JANGADA_DEMO_FORCAR_FALLBACK
+```
+
+Execute cada comando separadamente, pressionando Enter e aguardando o resultado. O modo forçado redireciona a conexão do adaptador para uma porta local sem serviço; a falha de conexão aciona o fallback e a chamada ao Gemini é real, podendo consumir cota. O modo normal também usa o Gemini automaticamente se o OpenRouter falhar com um erro elegível, como 429, timeout, conexão, 404 ou 5xx. Falhas de autenticação (401/403) e requisições inválidas (400) não acionam fallback por padrão.
+
+Essa demonstração é um utilitário de terminal e não ativa fallback no backend do site. O fluxo, as limitações e o roteiro estão em [docs/ia/FALLBACK_JANGADA.md](docs/ia/FALLBACK_JANGADA.md). O agente de revisão da Flora está em `backend/ia/agentes/qa.py`, onde QA significa *Quality Assurance* (garantia da qualidade).
+
 ## Encerrar
 
 Se iniciou em dois terminais, pressione `Ctrl+C` em cada um. Se iniciou em segundo plano, identifique os processos nas portas usadas:

@@ -6,6 +6,7 @@ import os
 import httpx
 
 from ia.provedores.contrato import AssistenteIndisponivel
+from ia.provedores.esquema import schema_estrito
 
 
 def _schema_estrito(schema):
@@ -22,8 +23,15 @@ def _schema_estrito(schema):
 
 
 def obter_modelo(papel):
-    modelo = (os.getenv(f"OPENROUTER_MODEL_{papel.upper()}") or
-              os.getenv("OPENROUTER_MODEL") or "openrouter/free").strip()
+    sufixo = papel.upper()
+    # Configurações por papel prevalecem sobre o padrão, inclusive em instalações antigas.
+    modelo = (
+        os.getenv(f"IA_MODELO_{sufixo}", "").strip()
+        or os.getenv(f"OPENROUTER_MODEL_{sufixo}", "").strip()
+        or os.getenv("IA_MODELO_PADRAO", "").strip()
+        or os.getenv("OPENROUTER_MODEL", "").strip()
+        or "openrouter/free"
+    )
     if modelo != "openrouter/free" and not modelo.endswith(":free"):
         raise AssistenteIndisponivel("Configure openrouter/free ou um modelo terminado em :free para este projeto.")
     return modelo
@@ -47,7 +55,7 @@ def chamar_agente(papel, instrucao, contexto, contrato):
         ],
         "response_format": {"type": "json_schema", "json_schema": {
             "name": f"agente_{papel}", "strict": True,
-            "schema": _schema_estrito(contrato.model_json_schema()),
+            "schema": schema_estrito(contrato.model_json_schema()),
         }},
         "max_tokens": tokens,
         "reasoning": {"enabled": False},

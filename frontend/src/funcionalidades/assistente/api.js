@@ -13,3 +13,10 @@ export function analisarPedido(mensagem, signal, historico = []) {
     body: JSON.stringify({ mensagem, historico }),
   })
 }
+
+// Enviar somente a mensagem da cesta para a funcionalidade sem contexto de conversa.
+export function proporCesta(mensagem, signal) {
+  return chamarApi('/assistente/pedido', {
+    method: 'POST', signal, body: JSON.stringify({ mensagem }),
+  })
+}
