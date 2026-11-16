@@ -111,7 +111,7 @@ def test_repetir_composicao_apresenta_tres_pedidos_mais_recentes(monkeypatch):
     monkeypatch.setattr(consultas, "listar_cestas", lambda sessao, usuario_id: cestas)
 
     mensagem, status, pedidos, acao = consultas.atendimento_assinante(
-        "Como repito meu último pedido?", None, 42,
+        consultas.normalizar("Como repito meu último pedido?"), None, 42,
     )
 
     # Confirmar que os três pedidos recentes chegam à tela como alternativas de repetição.
