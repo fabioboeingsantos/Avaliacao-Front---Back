@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cesta do Vale | Apresentação 02 — Flora</title>
+    <style>
+      * { box-sizing:border-box; }
+      body { margin:0; background:#101412; font-family:Arial,sans-serif; }
+      h2,h3,p { margin:0; }
+      .deck { min-height:100svh; }
+      .slide {
+        display:none; position:relative; width:100%; overflow:hidden; color:#f5f1e8;
+        border:1cm solid #000;
+      }
+      .slide.active { display:block; }
+      .slide::after {
+        content:attr(data-number) " / " attr(data-total);
+        position:absolute; inset:0; z-index:2; pointer-events:none;
+        display:flex; align-items:end; justify-content:end;
+        padding:0 1.25rem .25rem;
+        color:#e6d6c3; font-size:.75rem; font-weight:700; letter-spacing:.14em;
+        text-shadow:0 1px 4px #000;
+      }
+      .cover-slide {
+        height:100svh; padding:20px clamp(22px,5vw,78px);
+        background:#17251b url('cenarios/feira-comunitaria-capa.png') center/cover;
+      }
+      .cover-slide.active { display:grid; place-items:center; }
+      .cover-slide::before {
+        content:""; position:absolute; inset:0;
+        background:linear-gradient(90deg,#0a140d57,#0a140d0f 70%),linear-gradient(0deg,#0a140d29,transparent 45%);
+      }
+      .cover-identity {
+        position:relative; width:min(1120px,100%); display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(10px,2vw,28px);
+      }
+      .cover-card {
+        position:relative; padding:clamp(20px,4vh,36px) clamp(20px,4vw,42px);
+        display:flex; flex-direction:column; justify-content:center;
+        border:1.5px solid #f5912feb; border-radius:30px; background:#fff8e61f;
+        box-shadow:0 0 28px #f28b2238,0 22px 60px #0002;
+        backdrop-filter:blur(3px) saturate(1.06); text-align:center;
+      }
+      .cover-card::before {
+        content:""; position:absolute; top:0; left:15%; right:15%; height:3px; border-radius:0 0 8px 8px;
+        background:linear-gradient(90deg,transparent,#f0b35e,transparent); box-shadow:0 0 18px #f0b35ebf;
+      }
+      .cover-brand img {
+        display:block; width:min(220px,100%); height:min(160px,25svh); margin:0 auto 2px; padding:8px 18px;
+        object-fit:contain; background:radial-gradient(ellipse,#ffe8b52e,transparent 76%);
+        filter:drop-shadow(0 12px 20px #0005) drop-shadow(0 0 12px #efab4638);
+      }
+      .cover-card :is(h1,h2) {
+        margin:0; color:#fffdf5; font-size:clamp(2.25rem,5vw,4.8rem); font-weight:900;
+        letter-spacing:-.075em; line-height:.9; text-shadow:0 3px 16px #000b;
+      }
+      .cover-flora {
+        display:block; width:min(74%,360px); height:min(26svh,250px); margin:0 auto;
+        object-fit:contain; filter:drop-shadow(0 8px 18px #0008);
+      }
+      .cover-flora-card h2 { margin-top:8px; font-size:clamp(2rem,4vw,3.75rem); }
+      @media screen and (max-height:520px) {
+        .cover-slide { padding-block:16px; }
+        .cover-card { padding:12px; }
+        .cover-brand h1 { font-size:min(5vw,9svh); }
+        .cover-flora-card h2 { font-size:min(4vw,7svh); }
+      }
+      @media screen and (max-width:600px) {
+        .cover-card { padding:12px 8px; }
+        .cover-card :is(h1,h2) { font-size:clamp(1.25rem,6vw,2rem); }
+        .cover-card img { height:clamp(72px,22vw,132px); padding:0; }
+      }
+      .infographic-scene { position:absolute; inset:0; background-size:cover; background-position:center; }
+      .infographic-scene::after { content:""; position:absolute; inset:0; }
+      .infographic-panel { position:relative; z-index:1; height:100%; display:flex; flex-direction:column; justify-content:center; }
+      .infographic-panel h2 { color:#fffaf0; letter-spacing:-.06em; }
+      @media print {
+        @page { size:320mm 180mm; margin:0; }
+        .deck { display:block; padding:0; }
+        .slide { display:block; width:100%; break-after:page; print-color-adjust:exact; }
+        .slide:last-child { break-after:auto; }
+      }
+      .deck > .flora-slide {
+        padding:0; height:100svh;
+        background:#101412; container-type:inline-size;
+      }
+      .flora-slide .infographic-scene { background-position:72% center; }
+      .flora-slide .infographic-scene::after {
+        background:linear-gradient(90deg,#101412 0%,#101412 35%,#101412ec 40%,#10141256 54%,transparent 69%),
+          linear-gradient(0deg,#101412ad,transparent 35%);
+      }
+      .flora-slide .flora-panel {
+        width:42%; padding:3.25cqw 2.15cqw 3.25cqw 4.35cqw;
+      }
+      .flora-panel h2 { font-size:min(4.32cqw,8svh); margin:0.6cqw 0 1.6cqw; line-height:1; }
+      .flora-steps { list-style:none; margin:0; padding:0; display:grid; gap:.26cqw; }
+      .flora-step {
+        display:grid; grid-template-columns:2.4cqw 1fr; gap:.84cqw; align-items:center;
+        width:100%; border:0; padding:.52cqw .54cqw; text-align:left; background:transparent;
+        color:#e0e4df; font:inherit; font-size:min(1.46cqw,2.65svh); line-height:1.25; cursor:pointer;
+      }
+      .flora-step svg { width:1.65cqw; fill:none; stroke:#fff; stroke-width:1.55; stroke-linecap:round; stroke-linejoin:round; }
+      .flora-step span { border-left:1px solid #78897d; padding-left:.84cqw; }
+      .flora-step strong { color:#fff; }
+      .flora-step:hover, .flora-step[aria-pressed="true"] { background:#ffffff12; }
+      .flora-step[aria-pressed="true"] span { border-color:#efbd8b; }
+      .flora-step:focus-visible { outline:2px solid #efbd8b; outline-offset:1px; }
+      .flora-demo {
+        position:absolute; z-index:1; left:55%; right:4.35%; bottom:8%; padding:1.25cqw 1.6cqw;
+        background:#131b16f5; border-left:3px solid #efbd8b; box-shadow:0 12px 32px #0004;
+      }
+      .flora-demo h3 { color:#fffaf0; font-size:min(2.1cqw,4.5svh); }
+      .flora-demo p { color:#e0e4df; font-size:min(1.44cqw,2.85svh); margin-top:.48cqw; }
+      .flora-video {
+        position:absolute; width:min(41%,105svh); right:4.35%; top:50%; transform:translateY(-65%);
+        aspect-ratio:2/1; object-fit:cover; border:1px solid #efbd8b80; border-radius:12px;
+        background:#101412; box-shadow:0 12px 32px #0006; pointer-events:none;
+      }
+      .office-slide { height:100svh; background:#17251b; }
+      .office-slide::after { content:none; }
+      .office-slide iframe { display:block; width:100%; height:100%; border:0; }
+      .qr-slide {
+        height:100svh; padding:0;
+        background:#101412 url('cenarios/qr-acesso-fundo.png') center/100% 100% no-repeat;
+      }
+      .qr-slide::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg,#0a140d55 0%,#0a140d2e 42%,transparent 67%); }
+      .qr-slide h2 {
+        position:absolute; left:3%; top:50%; width:54%; margin:0; transform:translateY(-50%);
+        color:#fffdf5; font-size:clamp(1rem,3.1vw,3.6rem); font-weight:900; line-height:1;
+        letter-spacing:-.055em; text-align:center; text-shadow:0 3px 14px #000e;
+      }
+      .qr-slide p { position:absolute; left:3%; top:59%; width:54%; margin:0; color:#fff; font-size:clamp(1rem,2vw,2rem); font-weight:800; letter-spacing:.12em; text-align:center; text-shadow:0 2px 8px #000d; }
+      .qr-slide .landing-preview {
+        position:absolute; left:78.8%; top:67.5%; transform:translate(-50%,-50%);
+        width:27.2%; height:33.4%; object-fit:fill;
+        border:0; border-radius:4px;
+      }
+      @media screen and (max-width:700px) {
+        .qr-slide h2 { left:2%; width:54%; font-size:clamp(.7rem,3vw,1.5rem); }
+        .qr-slide p { left:2%; width:54%; top:58%; font-size:clamp(.65rem,2.5vw,1rem); }
+      }
+      @media screen and (max-width:700px) and (orientation:portrait) {
+        .deck > .flora-slide { height:auto; min-height:max(740px,100svh); padding-bottom:45px; }
+        .flora-slide .infographic-scene { background-position:70% center; }
+        .flora-slide .infographic-scene::after { background:linear-gradient(180deg,#101412 0%,#101412f5 45%,#10141235 82%,#101412c2); }
+        .flora-slide .flora-panel { width:100%; height:auto; min-height:0; padding:28px 22px; }
+        .flora-panel h2 { font-size:clamp(36px,8cqw,52px); margin:8px 0 16px; }
+        .flora-steps { gap:4px; }
+        .flora-step { font-size:15px; gap:7px; grid-template-columns:25px 1fr; padding:6px; }
+        .flora-step svg { width:20px; }
+        .flora-step span { padding-left:9px; }
+        .flora-demo { position:relative; inset:auto; margin:0 22px; padding:12px 14px; }
+        .flora-demo h3 { font-size:20px; }
+        .flora-demo p { font-size:14px; margin-top:4px; }
+        .flora-video { position:relative; display:block; width:min(74%,360px); inset:auto; margin:0 auto 18px; transform:none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="deck" aria-label="Apresentação 02 da Flora">
+      <section class="slide cover-slide" id="capa" aria-labelledby="capa-titulo">
+        <div class="cover-identity">
+          <div class="cover-card cover-brand">
+            <img src="cenarios/logo-cesta-do-vale-realista.png" alt="Cesta de palha com vegetais frescos" />
+            <h1 id="capa-titulo">Cesta do Vale</h1>
+          </div>
+          <div class="cover-card cover-flora-card">
+            <img class="cover-flora" src="cenarios/flora-nucleo.png" alt="" />
+            <h2>Flora</h2>
+          </div>
+        </div>
+      </section>
+      <section class="slide infographic-slide flora-slide" id="flora-aline" aria-labelledby="flora-aline-titulo">
+        <div class="infographic-scene" style="background-image:url('cenarios/aline-onibus.png')" aria-hidden="true"></div>
+        <div class="infographic-panel flora-panel">
+          <h2 id="flora-aline-titulo">Aline monta a cesta</h2>
+          <ul class="flora-steps" aria-label="Selecione um conceito para ver o exemplo">
+              <li>
+                <button class="flora-step" type="button" aria-pressed="true" aria-controls="flora-aline-demo"
+                  data-title="“Quero duas alfaces.”" data-detail="Aline pode digitar ou falar. A transcrição fica disponível para revisão.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8m-8 3h6"/></svg>
+                  <span><strong>Texto ou voz:</strong> Transcrição editável — revise antes de enviar.</span>
+                </button>
+              </li>
+              <li>
+                <button class="flora-step" type="button" aria-pressed="false" aria-controls="flora-aline-demo"
+                  data-title="2 × Alface" data-detail="R$ 3,00 no exemplo de cesta pequena.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18l-2 9H5zm4 0 4-6m6 6-4-6M9 13v3m6-3v3"/></svg>
+                  <span><strong>Prévia:</strong> Itens e preço — confira a composição.</span>
+                </button>
+              </li>
+              <li>
+                <button class="flora-step" type="button" aria-pressed="false" aria-controls="flora-aline-demo"
+                  data-title="2 → 1 alface" data-detail="Novo total de exemplo: R$ 1,50. Aline pode desfazer o ajuste.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 15 10-10 4 4-10 10H5zm8-8 4 4M12 20h8"/></svg>
+                  <span><strong>Ajuste no chat:</strong> “Só uma alface” — edite ou desfaça.</span>
+                </button>
+              </li>
+              <li>
+                <button class="flora-step" type="button" aria-pressed="false" aria-controls="flora-aline-demo"
+                  data-title="Alface indisponível" data-detail="Aline pode escolher uma alternativa disponível, como couve.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h15l-4-4m5 12H5l4 4"/></svg>
+                  <span><strong>Substituição:</strong> Item indisponível — escolha uma alternativa.</span>
+                </button>
+              </li>
+              <li>
+                <button class="flora-step" type="button" aria-pressed="false" aria-controls="flora-aline-demo"
+                  data-title="Pedido confirmado" data-detail="O sistema registra a cesta depois da confirmação.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
+                  <span><strong>Confirmação:</strong> Revisão de Aline — autoriza o pedido.</span>
+                </button>
+              </li>
+          </ul>
+        </div>
+        <div class="flora-demo" id="flora-aline-demo" aria-live="polite" aria-atomic="true">
+          <h3>“Quero duas alfaces.”</h3>
+          <p>Aline pode digitar ou falar. A transcrição fica disponível para revisão.</p>
+        </div>
+      </section>
+      <section class="slide infographic-slide flora-slide" id="flora-vanderlei" aria-labelledby="flora-vanderlei-titulo">
+        <div class="infographic-scene" style="background-image:url('cenarios/vanderlei-galpao.png')" aria-hidden="true"></div>
+        <div class="infographic-panel flora-panel">
+          <h2 id="flora-vanderlei-titulo">Vanderlei planeja a separação</h2>
+          <ul class="flora-steps" aria-label="Selecione um conceito para ver o exemplo">
+              <li>
+                <button class="flora-step" type="button" aria-pressed="true" aria-controls="flora-vanderlei-demo"
+                  data-title="“Quais cestas estão em separação?”" data-detail="A Flora consulta a situação registrada dos pedidos.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16H6zM9 8h6m-6 4h6m-6 4h4"/></svg>
+                  <span><strong>Pedidos:</strong> Situação das cestas — acompanhe a operação.</span>
+                </button>
+              </li>
+              <li>
+                <button class="flora-step" type="button" aria-pressed="false" aria-controls="flora-vanderlei-demo"
+                  data-title="Pendentes · Pequenas · Cenoura" data-detail="Exemplo: “Mostre as cestas pequenas pendentes com cenoura.”">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg>
+                  <span><strong>Filtros:</strong> Situação, tamanho e produto — combine critérios.</span>
+                </button>
+              </li>
+              <li>
+                <button class="flora-step" type="button" aria-pressed="false" aria-controls="flora-vanderlei-demo"
+                  data-title="“Qual é o estoque de cenoura?”" data-detail="A resposta usa o saldo registrado no catálogo.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zm0 5h16m-10 4h4"/></svg>
+                  <span><strong>Estoque:</strong> Saldo por produto — confira a disponibilidade.</span>
+                </button>
+              </li>
+              <li>
+                <button class="flora-step" type="button" aria-pressed="false" aria-controls="flora-vanderlei-demo"
+                  data-title="“Quanto falta separar esta semana?”" data-detail="Exemplo: 8 cenouras e 4 alfaces ainda por separar.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-9m0 4C4 16 4 11 4 7c5 0 8 3 8 7m0-2c0-6 3-8 8-9 0 5-3 9-8 9"/></svg>
+                  <span><strong>Colheita:</strong> Saldo a separar na semana — some por produto.</span>
+                </button>
+              </li>
+              <li>
+                <button class="flora-step" type="button" aria-pressed="false" aria-controls="flora-vanderlei-demo"
+                  data-title="Consultar cestas" data-detail="A tela de consulta abre com os critérios aplicados pela Flora.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18l-2 9H5zm4 0 4-6m6 6-4-6M9 13v3m6-3v3"/></svg>
+                  <span><strong>Lista de cestas:</strong> Abertura com filtros — vá direto aos pedidos.</span>
+                </button>
+              </li>
+          </ul>
+        </div>
+        <div class="flora-demo" id="flora-vanderlei-demo" aria-live="polite" aria-atomic="true">
+          <h3>“Quais cestas estão em separação?”</h3>
+          <p>A Flora consulta a situação registrada dos pedidos.</p>
+        </div>
+      </section>
+      <section class="slide infographic-slide flora-slide" id="flora-fluxo" aria-labelledby="flora-fluxo-titulo">
+        <div class="infographic-scene" style="background-image:url('cenarios/flora-escritorio.png')" aria-hidden="true"></div>
+        <div class="infographic-panel flora-panel">
+          <h2 id="flora-fluxo-titulo">Como a Flora cria o pedido</h2>
+          <ul class="flora-steps" aria-label="Selecione um conceito para ver o exemplo">
+              <li>
+                <button class="flora-step" type="button" aria-pressed="true" aria-controls="flora-fluxo-demo"
+                  data-title="Jangada → OpenRouter" data-detail="Gemini pode assumir como provedor alternativo, quando configurado.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h5v8H4zm11 0h5v8h-5zm-6 4h6"/></svg>
+                  <span><strong>Integração:</strong> Jangada e OpenRouter — conectam o modelo.</span>
+                </button>
+              </li>
+              <li>
+                <button class="flora-step" type="button" aria-pressed="false" aria-controls="flora-fluxo-demo"
+                  data-title="“Duas alfaces” → 2 × Alface" data-detail="O modelo organiza produto e quantidade em um formato que o sistema lê.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 7-5 5 5 5m8-10 5 5-5 5m-3-12-2 14"/></svg>
+                  <span><strong>Proposta:</strong> Resposta estruturada — organiza o pedido.</span>
+                </button>
+              </li>
+              <li>
+                <button class="flora-step" type="button" aria-pressed="false" aria-controls="flora-fluxo-demo"
+                  data-title="O backend confere a proposta" data-detail="A API aplica as regras da cesta e as permissões do perfil.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v6c0 4 4 7 7 9 3-2 7-5 7-9V6zm-3 9 2 2 4-4"/></svg>
+                  <span><strong>Validação:</strong> Catálogo, estoque e limites — regem a prévia.</span>
+                </button>
+              </li>
+              <li>
+                <button class="flora-step" type="button" aria-pressed="false" aria-controls="flora-fluxo-demo"
+                  data-title="Conferir e confirmar" data-detail="A assinante pode pedir ajustes antes de confirmar a composição.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm-4 9 3 3 5-6"/></svg>
+                  <span><strong>Revisão:</strong> Prévia editável — a pessoa decide.</span>
+                </button>
+              </li>
+              <li>
+                <button class="flora-step" type="button" aria-pressed="false" aria-controls="flora-fluxo-demo"
+                  data-title="Pedido registrado" data-detail="A aplicação usa o fluxo normal de criação da cesta.">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6a7 3 0 1 0 14 0A7 3 0 1 0 5 6zm0 0v12a7 3 0 0 0 14 0V6M5 12a7 3 0 0 0 14 0"/></svg>
+                  <span><strong>Gravação:</strong> Confirmação explícita — cria a cesta.</span>
+                </button>
+              </li>
+          </ul>
+        </div>
+        <video class="flora-video" src="cenarios/flora-animacao-nova.mp4" aria-label="Animação da Flora"
+          muted loop playsinline preload="metadata"></video>
+        <div class="flora-demo" id="flora-fluxo-demo" aria-live="polite" aria-atomic="true">
+          <h3>Jangada → OpenRouter</h3>
+          <p>Gemini pode assumir como provedor alternativo, quando configurado.</p>
+        </div>
+      </section>
+      <section class="slide office-slide" id="flora-escritorio" aria-label="Escritório da Flora">
+        <iframe title="Escritório da Flora — simulação do backend" data-src="ESCRITORIO_FLORA.html"></iframe>
+      </section>
+      <section class="slide qr-slide" id="encerramento" aria-labelledby="encerramento-titulo">
+        <h2 id="encerramento-titulo">cestadovale.vercel.app</h2>
+        <p>ACESSE O SITE</p>
+        <img class="landing-preview" src="cenarios/site-landing-recorte.png" alt="Prévia da página inicial do site Cesta do Vale" />
+      </section>
+    </main>
+    <script>
+      const slides = [...document.querySelectorAll('.slide')];
+      slides.forEach((slide, index) => {
+        slide.dataset.number = String(index + 1).padStart(2, '0');
+        slide.dataset.total = slides.length;
+      });
+      let current = 0;
+      const video = document.querySelector('.flora-video');
+      const office = document.querySelector('.office-slide iframe');
+      function showSlide(index) {
+        const videoWasVisible = slides[current].contains(video);
+        current = Math.max(0, Math.min(index, slides.length - 1));
+        slides.forEach((slide, position) => slide.classList.toggle('active', position === current));
+        if (slides[current].contains(video) && !videoWasVisible) video.play().catch(() => {});
+        if (!slides[current].contains(video) && videoWasVisible) video.pause();
+        if (slides[current].contains(office) && !office.hasAttribute('src')) office.src = office.dataset.src;
+      }
+      window.addEventListener('message', (event) => {
+        if (event.source === office.contentWindow && event.data === 'flora-office-back' && slides[current].contains(office)) {
+          showSlide(current - 1);
+          slides[current].querySelector('button')?.focus({ preventScroll: true });
+        }
+        if (event.source === office.contentWindow && event.data === 'flora-office-next' && slides[current].contains(office)) {
+          showSlide(current + 1);
+          document.body.focus();
+        }
+      });
+      document.addEventListener('keydown', (event) => { if (['INPUT','TEXTAREA','IFRAME'].includes(event.target.tagName) || event.defaultPrevented) return; if (event.key === ' ' && ['BUTTON','A'].includes(event.target.tagName)) return; if (['ArrowRight','ArrowLeft','PageDown','PageUp',' '].includes(event.key)) event.preventDefault(); if (['ArrowRight','PageDown',' '].includes(event.key)) showSlide(current + 1); if (['ArrowLeft','PageUp'].includes(event.key)) showSlide(current - 1); if (event.key === 'Home') showSlide(0); if (event.key === 'End') showSlide(slides.length - 1); });
+
+      document.querySelectorAll('.flora-slide').forEach((slide) => {
+        const steps = [...slide.querySelectorAll('.flora-step')];
+        const demo = slide.querySelector('.flora-demo');
+        const heading = demo.querySelector('h3');
+        const detail = demo.querySelector('p');
+        steps.forEach((step) => step.addEventListener('click', () => {
+          steps.forEach((item) => item.setAttribute('aria-pressed', String(item === step)));
+          heading.textContent = step.dataset.title;
+          detail.textContent = step.dataset.detail;
+          if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            demo.animate([{ opacity: .65, translate: '0 6px' }, { opacity: 1 }], { duration: 180 });
+          }
+        }));
+      });
+
+      const openLinkedSlide = () => showSlide(slides.findIndex((slide) => slide.id && '#' + slide.id === location.hash));
+      window.addEventListener('hashchange', openLinkedSlide);
+      openLinkedSlide();
+    </script>
+  </body>
+</html>
