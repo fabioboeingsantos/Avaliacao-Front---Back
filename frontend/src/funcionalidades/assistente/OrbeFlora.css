@@ -39,13 +39,14 @@
   width: 52%;
   height: 52%;
   object-fit: contain;
-  transform: scale(calc(1 + var(--flora-orbe-nivel, .28) * .22));
+  /* Mantém a marca imóvel enquanto os anéis externos continuam animados. */
+  transform: none;
   filter:
     brightness(1.12)
     contrast(1.06)
-    drop-shadow(0 0 calc(5px + var(--flora-orbe-nivel, .28) * 12px) color-mix(in srgb, var(--flora-orbe-dourado) 85%, transparent))
-    drop-shadow(0 0 calc(10px + var(--flora-orbe-nivel, .28) * 18px) color-mix(in srgb, var(--flora-orbe-verde) 55%, transparent));
-  transition: transform 90ms linear, filter 120ms ease;
+    drop-shadow(0 0 8px color-mix(in srgb, var(--flora-orbe-dourado) 82%, transparent))
+    drop-shadow(0 0 14px color-mix(in srgb, var(--flora-orbe-verde) 52%, transparent));
+  transition: filter 180ms ease;
 }
 
 .flora-orbe-aneis {

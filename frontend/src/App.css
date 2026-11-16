@@ -537,7 +537,8 @@
   align-items: center;
   gap: 20px;
   min-width: 0;
-  justify-self: center;
+  justify-self: start;
+  margin-inline-start: 0;
 }
 
 .capacidades-flora {
