@@ -110,7 +110,7 @@ function TelaPedirCesta({
     pedidoInicial?.modoNome === 'Cesta pronta' ? 'pronta' : pedidoInicial ? 'selecionavel' : '',
   )
   const [tamanhoSelecionado, setTamanhoSelecionado] = useState(() => {
-    const tamanho = tamanhos.find((item) => item.nome === pedidoInicial?.tamanhoNome)
+    const tamanho = tamanhos.find((item) => item.id === pedidoInicial?.tamanho || item.nome === pedidoInicial?.tamanhoNome)
     return tamanho?.id ?? ''
   })
   const [quantidadesSelecionadas, setQuantidadesSelecionadas] = useState(() => {
@@ -130,9 +130,9 @@ function TelaPedirCesta({
   }))
 
   // Informa que a repetição usa o catálogo e os preços atuais antes da confirmação.
-  const mensagemRepeticao = pedidoInicial
+  const [mensagemRepeticao] = useState(() => pedidoInicial
     ? 'Última composição carregada. Confira estoque, quantidades e valores antes de confirmar.'
-    : ''
+    : '')
 
   // Limpa a referência no componente pai sem perder a seleção já carregada nesta tela.
   useEffect(() => {

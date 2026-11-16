@@ -100,6 +100,41 @@ def test_resposta_ambigua_volta_com_duvida_e_sem_proposta(monkeypatch):
     assert resultado.qa.duvidas == ["Qual tamanho de cesta você prefere?"]
 
 
+def test_nome_desconhecido_omitido_pelo_modelo_impede_previa(monkeypatch):
+    preparar_modelo(monkeypatch, {
+        "status": "proposta",
+        "proposta": {
+            "tipo": "pedido_cesta", "tamanho": "pequena",
+            "produtos": [{"produto_id": "tomate", "quantidade": 1}],
+        },
+        "mensagem": "Confira.",
+    })
+    resultado = pedido_cesta.propor_cesta("Quero uma cesta pequena com tomate e xyzabc.", object())
+    assert resultado.proposta is None
+    assert resultado.falta is None
+    assert "xyzabc" in resultado.mensagem
+
+
+def test_modelo_pode_identificar_produto_esgotado_sem_escolher_substituto(monkeypatch):
+    cliente = preparar_modelo(monkeypatch, {
+        "status": "proposta",
+        "proposta": {
+            "tipo": "pedido_cesta", "tamanho": "pequena",
+            "produtos": [{"produto_id": "tomate", "quantidade": 2}],
+        },
+        "mensagem": "Confira.",
+    })
+    catalogo = [{**CATALOGO_FICTICIO[0], "estoque": 0}, CATALOGO_FICTICIO[1]]
+    monkeypatch.setattr(pedido_cesta, "carregar_catalogo", lambda _sessao: catalogo)
+    resultado = pedido_cesta.propor_cesta("Quero uma cesta pequena com 2 tomates.", object())
+
+    assert resultado.proposta is None
+    assert resultado.falta.produto_id == "tomate"
+    assert resultado.falta.quantidade == 2
+    assert [alternativa.id for alternativa in resultado.falta.alternativas] == ["cebola"]
+    assert json.loads(cliente.argumentos["prompt"])["catalogo_esgotado"][0]["id"] == "tomate"
+
+
 def test_tamanho_escrito_pela_pessoa_prevalece_sobre_tamanho_diferente_do_modelo(monkeypatch):
     """Preservar o tamanho explícito e validar os limites sem corrigir silenciosamente."""
     preparar_modelo(monkeypatch, {
@@ -127,5 +162,5 @@ def test_falha_estruturada_vira_indisponibilidade_segura(monkeypatch):
     monkeypatch.setattr(pedido_cesta, "carregar_catalogo", lambda _sessao: CATALOGO_FICTICIO)
     monkeypatch.setattr(pedido_cesta, "criar_llm", lambda _papel: cliente)
 
-    with pytest.raises(AssistenteIndisponivel, match="continue manualmente"):
+    with pytest.raises(AssistenteIndisponivel, match="monte a cesta manualmente"):
         pedido_cesta.propor_cesta("Quero uma cesta fictícia.", object())

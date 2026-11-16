@@ -115,6 +115,7 @@ function adaptarCestaDaApi(cesta) {
       new Date(`${cesta.semana}T12:00:00`),
     ),
     modoNome: cesta.modo === 'pronta' ? 'Cesta pronta' : 'Cesta selecionável',
+    tamanho: cesta.tamanho,
     tamanhoNome: cesta.tamanho_nome,
     limite: cesta.limite,
     situacao: cesta.situacao,
@@ -211,8 +212,10 @@ function App() {
   const [pedidoEmRevisao, setPedidoEmRevisao] = useState(null)
   // Guarda a composição escolhida no histórico até a tela de novo pedido ser montada.
   const [pedidoParaRepetir, setPedidoParaRepetir] = useState(null)
+  const [pedidoDestacadoNoHistorico, setPedidoDestacadoNoHistorico] = useState(null)
   const [pedidos, setPedidos] = useState([])
   const [produtosDisponiveis, setProdutosDisponiveis] = useState([])
+  const [filtrosConsulta, setFiltrosConsulta] = useState(null)
   const [catalogoCarregado, setCatalogoCarregado] = useState(false)
   const [notificacoes, setNotificacoes] = useState([])
   const cestasAnterioresRef = useRef(null)
@@ -267,7 +270,7 @@ function App() {
   const controleTema = <TemaToggle tema={tema} aoAlternar={alternarTema} />
 
   // Busca as cestas compartilhadas pelo backend quando uma pessoa entra.
-  async function carregarCestasDoServidor(assinante) {
+  async function carregarCestasDoServidor(assinante, { propagarErro = false } = {}) {
     try {
       const filtro = assinante ? `?assinante=${encodeURIComponent(assinante)}` : ''
       const cestasDaApi = await chamarApi(`/cestas${filtro}`)
@@ -278,7 +281,9 @@ function App() {
       setNotificacoes((atuais) => atualizarNotificacoesComNomes(atuais, cestasAdaptadas))
       setMensagemApi('')
     } catch {
-      setMensagemApi('Não foi possível carregar as cestas. Verifique se a API está ligada.')
+      const mensagem = 'Não foi possível carregar as cestas. Verifique se a API está ligada.'
+      setMensagemApi(mensagem)
+      if (propagarErro) throw new Error(mensagem)
     }
   }
 
@@ -514,6 +519,8 @@ function App() {
 
   // Encerra a sessão no servidor antes de limpar o estado autenticado da tela.
   function limparSessaoLocal() {
+    setPedidoDestacadoNoHistorico(null)
+    setFiltrosConsulta(null)
     if (window.location.pathname === '/flora') {
       window.history.replaceState({}, '', window.history.state?.origem || '/')
     }
@@ -999,6 +1006,24 @@ function App() {
   // Mantém a ação de saída disponível em todas as telas autenticadas.
   async function confirmarAssistente(proposta) {
     if (proposta.tipo === 'consulta_cestas') {
+      if (perfilAtual === 'assinante' && proposta.acao && proposta.cesta_id) {
+        const cesta = adaptarCestaDaApi(await chamarApi(`/cestas/${proposta.cesta_id}`))
+        if (proposta.acao === 'repetir') {
+          await carregarProdutosDoServidor()
+          repetirPedido(cesta)
+        } else {
+          setPedidos((atuais) => [...atuais.filter((pedido) => pedido.id !== cesta.id), cesta])
+          setPedidoDestacadoNoHistorico(cesta.id)
+          setAbaAtual('historico')
+        }
+        return
+      }
+      if (proposta.filtros && perfilAtual === 'produtor') {
+        await carregarCestasDoServidor(null, { propagarErro: true })
+        setFiltrosConsulta(proposta.filtros)
+        setAbaAtual('consulta')
+        return
+      }
       const cesta = pedidos.find((item) => item.id === proposta.cesta_id)
       if (proposta.cesta_id && !cesta) throw new Error('Atualize a lista para consultar essa cesta.')
       if (perfilAtual === 'produtor') {
@@ -1162,9 +1187,16 @@ function App() {
 
     return envolverAreaAutenticada(
       <TelaSeparacao
+        key={abaAtual === 'consulta' ? 'consulta' : 'operacao'}
         cestas={cestasDaSemana}
         produtos={produtosDisponiveis}
-        modo={abaAtual === 'estoque' ? 'estoque' : abaAtual === 'entregas' ? 'entregas' : 'separacao'}
+        modo={['estoque', 'entregas', 'consulta'].includes(abaAtual) ? abaAtual : 'separacao'}
+        filtrosConsulta={filtrosConsulta}
+        aoAbrirConsulta={() => {
+          if (abaAtual === 'consulta') return
+          setFiltrosConsulta(null)
+          setAbaAtual('consulta')
+        }}
         aoAbrirEstoque={() => setAbaAtual('estoque')}
         aoAbrirEntregas={() => setAbaAtual('entregas')}
         aoVoltarSeparacao={() => setAbaAtual('separacao')}
@@ -1195,6 +1227,8 @@ function App() {
   if (abaAtual === 'historico') {
     return envolverAreaAutenticada(
       <TelaHistoricoPedidos
+        pedidoDestacado={pedidoDestacadoNoHistorico}
+        aoExibirPedidoDestacado={() => setPedidoDestacadoNoHistorico(null)}
         usuario={formatarNomeUsuario(usuarioAutenticado)}
         pedidos={pedidos}
         aoAbrirPedido={() => setAbaAtual('pedido')}

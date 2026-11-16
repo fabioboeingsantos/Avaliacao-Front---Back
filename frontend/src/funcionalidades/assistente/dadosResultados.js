@@ -25,6 +25,7 @@ export function itensDaProposta(proposta, produtos) {
 
 export function textoDoResultado(dados, produtos) {
   const visual = dados.visualizacao
+  if (visual?.tipo === 'colheita') return dados.mensagem
   if (visual) {
     return [visual.resumo,
       ...(visual.produtos || []).map((p) => `${p.nome}${p.preco_unitario != null ? `: ${moeda(p.preco_unitario)} por unidade` : ''}${visual.tipo === 'estoque' ? `; ${p.estoque} unidades em estoque` : ''}.`),

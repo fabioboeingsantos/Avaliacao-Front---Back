@@ -23,17 +23,50 @@ test.beforeEach(async ({ page }) => {
 })
 
 async function pedirCesta(page) {
-  await page.getByRole('button', { name: /Montar cesta/ }).click()
+  await page.getByRole('button', { name: /^Montar cesta Escolha seus/ }).click()
   await page.getByRole('button', { name: /Cesta selecionável/ }).click()
   await page.getByLabel('Sua mensagem', { exact: true }).fill('Quero 2 alfaces')
+  const propostaRecebida = page.waitForResponse((resposta) =>
+    new URL(resposta.url()).pathname === '/api/assistente/pedido' &&
+    resposta.request().method() === 'POST',
+  )
   await page.getByRole('button', { name: 'Enviar', exact: true }).click()
+  expect((await propostaRecebida).ok()).toBe(true)
   await expect(page.getByRole('button', { name: 'Confirmar cesta', exact: true })).toBeVisible()
 }
+
+test('ajusta a prévia pelo chat e desfaz antes de confirmar', async ({ page }) => {
+  await page.route('**/api/assistente/pedido', async (route) => {
+    const { mensagem, rascunho } = route.request().postDataJSON()
+    if (mensagem === 'Só uma alface') {
+      expect(rascunho).toEqual(proposta.proposta)
+      await route.fulfill({ json: {
+        ...proposta,
+        proposta: { ...proposta.proposta, produtos: [{ produto_id: 'alface', quantidade: 1 }] },
+      } })
+    } else {
+      await route.fulfill({ json: proposta })
+    }
+  })
+  await pedirCesta(page)
+  const previa = page.getByRole('region', { name: 'Cesta pequena' })
+  await expect(previa).toContainText(/R\$\s*3,00/)
+  await page.getByRole('button', { name: 'Ajustar itens' }).click()
+  await expect(page.getByLabel('Sua mensagem', { exact: true })).toBeFocused()
+  await page.getByLabel('Sua mensagem', { exact: true }).fill('Só uma alface')
+  await page.getByRole('button', { name: 'Enviar', exact: true }).click()
+  await expect(previa).toContainText('Quantidade ajustada')
+  await expect(previa).toContainText(/R\$\s*1,50/)
+  await page.getByRole('button', { name: 'Desfazer último ajuste' }).click()
+  await expect(previa).toContainText('2 × Alface')
+  await expect(previa).toContainText(/R\$\s*3,00/)
+})
 
 test('confirma uma vez e substitui a resposta por agradecimento', async ({ page }) => {
   let pedidos = 0
   page.on('request', (req) => { if (req.method() === 'POST' && new URL(req.url()).pathname === '/api/cestas') pedidos += 1 })
   await pedirCesta(page)
+  expect(pedidos).toBe(0)
   await page.getByRole('button', { name: 'Confirmar cesta', exact: true }).click()
   await expect(page.getByText('Muito obrigada por escolher a Cesta do Vale', { exact: false })).toBeVisible()
   await expect(page.getByText('Revise a sugestão antes de confirmar.', { exact: true })).toHaveCount(0)

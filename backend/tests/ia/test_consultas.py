@@ -1,11 +1,15 @@
 """Consultas operacionais não podem inventar dados nem executar gravações."""
 
+from datetime import date, timedelta
+
 import pytest
 
 from ia import consultas
 from ia.contratos import PropostaAgente
 from ia.validacao import validar_proposta
-from ..conftest import fazer_login
+from modelos.cesta import Cesta
+from modelos.separacao import Separacao
+from ..conftest import SessaoDeTeste, fazer_login
 
 
 @pytest.fixture
@@ -27,6 +31,88 @@ def dados_consulta(monkeypatch):
 
 def perguntar(texto, perfil="produtor"):
     return consultas.responder(texto, perfil, None, 1, "simulado")
+
+
+def test_resumo_colheita_soma_saldo_da_semana_para_produtor(cliente):
+    hoje = date.today()
+    inicio = hoje - timedelta(days=hoje.weekday())
+    with SessaoDeTeste() as sessao:
+        sessao.get(Cesta, 1).semana = inicio
+        sessao.get(Cesta, 1).situacao = "Em separação"
+        sessao.get(Cesta, 2).semana = inicio - timedelta(days=1)
+        sessao.add(Separacao(cesta_id=1, produto_id="alface", quantidade=1))
+        sessao.commit()
+
+    pergunta = {"mensagem": "Quanto ainda falta separar para esta semana?"}
+    fazer_login(cliente, "vanderlei", "vanderlei123")
+    resposta = cliente.post("/assistente/analisar", json=pergunta)
+    assert resposta.status_code == 200
+    visualizacao = resposta.json()["visualizacao"]
+    assert visualizacao["tipo"] == "colheita"
+    assert visualizacao["total"] == 1
+    assert [(p["id"], p["quantidade"]) for p in visualizacao["produtos"]] == [("alface", 1)]
+    assert visualizacao["filtros"]["periodo_colheita"] == {
+        "inicio": inicio.isoformat(), "fim": (inicio + timedelta(days=6)).isoformat(),
+    }
+
+    with SessaoDeTeste() as sessao:
+        sessao.get(Cesta, 1).situacao = "Preparado para envio"
+        sessao.get(Cesta, 2).situacao = "Cancelado"
+        sessao.get(Cesta, 2).semana = hoje
+        sessao.commit()
+    vazio = cliente.post("/assistente/analisar", json=pergunta).json()["visualizacao"]
+    assert vazio["total"] == 0
+    assert vazio["produtos"] == []
+
+
+def test_consulta_produtor_combina_situacao_tamanho_e_produto(cliente):
+    fazer_login(cliente, "vanderlei", "vanderlei123")
+    consulta = cliente.post("/assistente/analisar", json={
+        "mensagem": "Mostre as cestas médias pendentes que têm alface.",
+    })
+    assert consulta.status_code == 200
+    visualizacao = consulta.json()["visualizacao"]
+    assert visualizacao["filtros"] == {
+        "situacoes": ["Pendente"], "tamanho": "media", "produto_id": "alface",
+        "periodo_colheita": None,
+    }
+    assert visualizacao["total"] == 1
+    assert [pedido["id"] for pedido in visualizacao["pedidos"]] == [2]
+
+
+def test_atendimento_da_assinante_usa_pedidos_da_conta_e_preserva_o_estado(cliente, monkeypatch):
+    monkeypatch.setenv("ASSISTENTE_MODO", "openrouter")
+    fazer_login(cliente, "aline", "aline123")
+
+    def consultar(mensagem):
+        resposta = cliente.post("/assistente/analisar", json={"mensagem": mensagem})
+        assert resposta.status_code == 200
+        return resposta.json()
+
+    acompanhamento = consultar("Onde está minha cesta?")
+    assert "Pendente" in acompanhamento["mensagem"]
+    assert acompanhamento["visualizacao"]["pedidos"][0]["id"] == 1
+    cancelamento = consultar("Ainda posso cancelar minha cesta?")
+    assert cancelamento["visualizacao"]["pedidos"][0]["acao"] == "cancelamento"
+    repeticao = consultar("Como repito meu último pedido?")
+    assert repeticao["visualizacao"]["pedidos"][0]["acao"] == "repetir"
+    assert consultar("Posso cancelar o pedido #2?")["visualizacao"] is None
+    assert cliente.get("/cestas/1").json()["situacao"] == "Pendente"
+
+    assert cliente.post("/cestas/1/cancelar").status_code == 200
+    cancelado = consultar("Posso cancelar o pedido #1?")
+    assert "Cancelado" in cancelado["mensagem"]
+    assert cancelado["visualizacao"]["pedidos"][0]["acao"] is None
+
+
+@pytest.mark.parametrize("mensagem", [
+    "Mostre as cestas pendentes com xyzabc.",
+    "Mostre as cestas pequenas ou médias.",
+])
+def test_consulta_ambigua_pede_esclarecimento(dados_consulta, mensagem):
+    resultado = perguntar(mensagem)
+    assert resultado["status"] == "esclarecimento"
+    assert resultado["visualizacao"] is None
 
 
 @pytest.mark.parametrize("texto", [

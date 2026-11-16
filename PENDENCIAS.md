@@ -42,7 +42,7 @@ Esse registro é histórico; a revisão atual não verificou chave, disponibilid
 - [ ] Validar conversa contínua, esclarecimento de uma pergunta por vez e voz nos navegadores de destino.
 - [ ] Completar as operações do produtor pelo assistente: envio, encerramento e desfazer separações,
   respeitando permissões, situação da cesta e confirmação explícita.
-- [ ] Aplicar filtros solicitados em linguagem natural à lista de cestas.
+- [x] Aplicar filtros de situação, tamanho e produto solicitados à Flora na consulta de cestas do produtor.
 - [ ] Validar visualmente no navegador os dois perfis e testar o fluxo completo, da solicitação
   à confirmação e gravação, além da alternativa manual.
 

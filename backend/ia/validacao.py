@@ -53,7 +53,7 @@ OPERACOES_POR_PERFIL = {
 }
 
 
-def validar_proposta(proposta, perfil, catalogo, cestas):
+def validar_proposta(proposta, perfil, catalogo, cestas, *, conferir_estoque=True):
     """Bloqueia propostas inválidas mesmo se o QA do modelo aprovar."""
     if proposta is None:
         return ["A solicitação ainda não tem uma proposta completa."]
@@ -78,7 +78,7 @@ def validar_proposta(proposta, perfil, catalogo, cestas):
             esperados = set(COMPOSICAO_CESTA_PRONTA[:LIMITES_POR_TAMANHO[p.tamanho]])
             if set(ids) != esperados or any(item.quantidade != 1 for item in p.produtos):
                 erros.append("A composição não corresponde à cesta pronta. Use uma cesta selecionável para personalizar.")
-        if any(item.quantidade > produtos.get(item.produto_id, {}).get("estoque", 0) for item in p.produtos):
+        if conferir_estoque and any(item.quantidade > produtos.get(item.produto_id, {}).get("estoque", 0) for item in p.produtos):
             erros.append("A composição precisa ser ajustada à disponibilidade atual.")
     cesta = next((c for c in cestas if c["id"] == p.cesta_id), None)
     if p.cesta_id is not None and cesta is None:

@@ -8,7 +8,9 @@ from esquemas.assistente import EntradaAssistente, ResultadoAssistente
 from modelos.usuario import Usuario
 from rotas.autenticacao import exigir_permissao
 from ia.servico import analisar
-from ia.pedido_cesta import EntradaPropostaCesta, ResultadoPropostaCesta, propor_cesta
+from ia.pedido_cesta import (
+    EntradaPropostaCesta, EntradaSubstituicao, ResultadoPropostaCesta, propor_cesta, substituir_produto,
+)
 from ia.provedores.contrato import AssistenteIndisponivel
 from esquemas.voz import EntradaVoz
 from servicos.voz_flora import sintetizar, VozIndisponivel
@@ -29,12 +31,27 @@ def propor_pedido_de_cesta(
     if usuario.perfil != "assinante":
         raise HTTPException(status_code=403, detail="Esta função está disponível para assinantes.")
     try:
+        if dados.rascunho is not None:
+            return propor_cesta(dados.mensagem, sessao, dados.rascunho)
         return propor_cesta(dados.mensagem, sessao)
     except AssistenteIndisponivel:
         raise HTTPException(
             status_code=503,
             detail="A IA está indisponível agora. Tente novamente ou monte a cesta manualmente.",
         ) from None
+
+
+@router.post("/pedido/substituicao", response_model=ResultadoPropostaCesta)
+def escolher_substituicao(
+    dados: EntradaSubstituicao,
+    sessao: Session = Depends(obter_sessao),
+    usuario: Usuario = Depends(exigir_permissao("assistente.usar")),
+):
+    if usuario.perfil != "assinante":
+        raise HTTPException(status_code=403, detail="Esta função está disponível para assinantes.")
+    if dados.rascunho.tipo != "pedido_cesta" or dados.rascunho.modo != "selecionavel":
+        raise HTTPException(status_code=422, detail="Escolha uma substituição em uma cesta selecionável.")
+    return substituir_produto(dados, sessao)
 
 
 @router.post("/voz")

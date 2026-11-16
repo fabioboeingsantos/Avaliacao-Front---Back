@@ -1,16 +1,18 @@
 import { imagemProduto } from '../../utilitarios/imagemProduto'
 import { dataSemana, itensDaProposta, moeda, nomeTamanho } from './dadosResultados'
 
-export function VisualizacaoResultado({ dados, perfil, desabilitado, selecoes = {}, aoAlterarProduto, aoAbrirPedido }) {
+export function VisualizacaoResultado({ dados, perfil, desabilitado, selecoes = {}, aoAlterarProduto, aoAbrirPedido, aoAbrirLista }) {
   if (!dados) return null
   return <div className="flora-resultados">
-    {dados.produtos?.length > 0 && <ul className={dados.tipo === 'catalogo' ? 'flora-grade-catalogo' : 'flora-lista-produtos'} aria-label={dados.tipo === 'estoque' ? 'Estoque consultado' : 'Produtos disponíveis'}>
+    {perfil === 'produtor' && dados.filtros && <button className="flora-botao-primario" type="button" disabled={desabilitado} onClick={() => aoAbrirLista(dados.filtros)}>{dados.tipo === 'colheita' ? 'Ver cestas' : 'Ver cestas filtradas'}</button>}
+    {dados.produtos?.length > 0 && <ul className={dados.tipo === 'catalogo' ? 'flora-grade-catalogo' : 'flora-lista-produtos'} aria-label={dados.tipo === 'colheita' ? 'Produtos por separar' : dados.tipo === 'estoque' ? 'Estoque consultado' : 'Produtos disponíveis'}>
       {dados.produtos.map((p) => <li key={p.id}>
         <img src={imagemProduto(p.id)} alt="" loading="lazy" />
         <div className="flora-produto-info">
           <strong>{p.nome}</strong>
           {p.preco_unitario != null && <span>{moeda(p.preco_unitario)} / unidade</span>}
           {dados.tipo === 'estoque' && <span>{p.estoque} {p.estoque === 1 ? 'unidade em estoque' : 'unidades em estoque'}</span>}
+          {dados.tipo === 'colheita' && <span>{p.quantidade} {p.quantidade === 1 ? 'unidade' : 'unidades'} por separar</span>}
         </div>
         {perfil === 'assinante' && dados.tipo === 'catalogo' && (() => {
           const quantidade = selecoes[p.id] || 0
@@ -37,15 +39,36 @@ export function VisualizacaoResultado({ dados, perfil, desabilitado, selecoes = 
           <span>{i.quantidade} × {i.nome}</span>
           {i.quantidade_separada != null && <small>{i.quantidade_separada} {i.quantidade_separada === 1 ? 'separada' : 'separadas'}</small>}
         </li>)}</ul>}
-        <button className="flora-botao-discreto" type="button" disabled={desabilitado} onClick={() => aoAbrirPedido(p.id)}>Abrir pedido</button>
+        <button className="flora-botao-discreto" type="button" disabled={desabilitado} onClick={() => aoAbrirPedido(p.id, p.acao)}>{p.acao === 'repetir' ? 'Repetir composição' : 'Abrir pedido'}</button>
       </li>)}
     </ul>}
     {dados.tipo === 'pedidos' && dados.total > dados.pedidos.length && <small>Exibindo os {dados.pedidos.length} pedidos mais recentes. Peça um número de pedido para consultar os demais.</small>}
   </div>
 }
 
-export function PreviaProposta({ proposta, produtos, atual, confirmado, ocupado, ouvindo, rascunho, aoConfirmar, aoAjustar, aoCancelar }) {
+export function OpcoesSubstituicao({ falta, desabilitado, aoEscolher, aoCancelar }) {
+  return <section className="flora-previa" aria-label={`Opções para ${falta.nome}`}>
+    {falta.alternativas.length > 0
+      ? <ul className="flora-itens-proposta">{falta.alternativas.map((produto) => <li key={produto.id}>
+        <div className="flora-item-proposta-info">
+          <strong>{falta.quantidade} × {produto.nome}</strong>
+          <small>{moeda(produto.preco_unitario * falta.quantidade)}</small>
+        </div>
+        <button className="flora-botao-discreto" type="button" disabled={desabilitado} onClick={() => aoEscolher(produto.id)}>Trocar por {produto.nome}</button>
+      </li>)}</ul>
+      : <p>Não há outro produto da mesma categoria com essa quantidade disponível.</p>}
+    <div className="flora-acoes-previa">
+      <button className="flora-botao-discreto" type="button" disabled={desabilitado} onClick={() => aoEscolher(null)}>Continuar sem {falta.nome}</button>
+      <button className="flora-botao-discreto" type="button" disabled={desabilitado} onClick={aoCancelar}>Cancelar</button>
+    </div>
+  </section>
+}
+
+export function PreviaProposta({ proposta, produtos, comparacao, produtosAnteriores = [], atual, confirmado, ocupado, ouvindo, rascunho, aoConfirmar, aoAjustar, aoCancelar }) {
   const itens = itensDaProposta(proposta, produtos)
+  const quantidadesAnteriores = new Map(comparacao?.produtos.map((item) => [item.produto_id, item.quantidade]))
+  const removidos = itensDaProposta(comparacao ?? {}, produtosAnteriores)
+    .filter((item) => !itens.some((atual) => atual.produto_id === item.produto_id))
   const pedido = proposta.tipo === 'pedido_cesta'
   const consulta = proposta.tipo === 'consulta_cestas'
   const totalDisponivel = pedido && itens.length > 0 && itens.every((i) => i.centavos != null)
@@ -57,9 +80,12 @@ export function PreviaProposta({ proposta, produtos, atual, confirmado, ocupado,
     {pedido && <small>{proposta.modo === 'pronta' ? 'Cesta pronta' : 'Cesta selecionável'}</small>}
     {itens.length > 0 && <ul className="flora-itens-proposta">{itens.map((i) => <li key={i.produto_id}>
       <img src={imagemProduto(i.produto_id)} alt="" loading="lazy" />
-      <div className="flora-item-proposta-info"><strong>{i.quantidade} × {i.nome}</strong>{pedido && i.centavos != null && <small>{moeda(i.centavos / 100)} / unidade</small>}</div>
+      <div className="flora-item-proposta-info"><strong>{i.quantidade} × {i.nome}</strong>
+        {comparacao && quantidadesAnteriores.get(i.produto_id) !== i.quantidade && <span className="flora-etiqueta">{quantidadesAnteriores.has(i.produto_id) ? 'Quantidade ajustada' : 'Adicionado'}</span>}
+        {pedido && i.centavos != null && <small>{moeda(i.centavos / 100)} / unidade</small>}</div>
       {pedido && i.centavos != null && <span>{moeda(i.centavos * i.quantidade / 100)}</span>}
     </li>)}</ul>}
+    {removidos.length > 0 && <p className="flora-nota">Itens retirados: {removidos.map((item) => item.nome).join(', ')}.</p>}
     {totalDisponivel && <div className="flora-total"><span>Total estimado</span><strong>{moeda(total)}</strong></div>}
     {atual && !confirmado && <>
       {pedido && <p className="flora-nota">Preço e estoque são conferidos ao confirmar o pedido.</p>}

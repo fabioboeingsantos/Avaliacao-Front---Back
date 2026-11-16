@@ -466,13 +466,17 @@ def reabrir_separacao(sessao: Session, id_cesta: int) -> dict:
     return serializar_cesta(repositorio.atualizar_cesta(sessao, cesta))
 
 
+def pode_cancelar_cesta(cesta: dict) -> bool:
+    return cesta["situacao"] == "Pendente" and not cesta["separacoes"]
+
+
 def cancelar_cesta(sessao: Session, id_cesta: int, usuario_id: int) -> dict:
     """Cancela a cesta da assinante somente antes do início da separação."""
 
     cesta = buscar_cesta(sessao, id_cesta, usuario_id=usuario_id)
     if cesta["situacao"] == "Cancelado":
         return cesta
-    if cesta["situacao"] != "Pendente" or cesta["separacoes"]:
+    if not pode_cancelar_cesta(cesta):
         raise QuantidadeExcedida(
             "Só é possível cancelar o pedido enquanto ele estiver pendente."
         )

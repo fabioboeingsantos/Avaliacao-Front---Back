@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { analisarPedido, proporCesta } from './api'
+import { analisarPedido, escolherSubstituicao, proporCesta } from './api'
 import OrbeFlora from './OrbeFlora'
-import { PreviaProposta, VisualizacaoResultado } from './ResultadosFlora'
+import { OpcoesSubstituicao, PreviaProposta, VisualizacaoResultado } from './ResultadosFlora'
 import { textoDoResultado } from './dadosResultados'
 import useRespostaFalada from './useAudioFlora'
 import './Assistente.css'
@@ -11,8 +11,12 @@ const tarefas = {
     { nome: 'Montar cesta', detalhe: 'Escolha seus produtos ou uma cesta pronta', montar: true },
     { nome: 'Ver catálogo', detalhe: 'Produtos e preços disponíveis', mensagem: 'Mostre o catálogo completo.' },
     { nome: 'Meus pedidos', detalhe: 'Acompanhe suas cestas', mensagem: 'Quais são os meus pedidos?' },
+    { nome: 'Acompanhar cesta', detalhe: 'Veja a situação do pedido', mensagem: 'Onde está minha cesta?' },
+    { nome: 'Cancelar pedido', detalhe: 'Confira se ainda pode cancelar', mensagem: 'Ainda posso cancelar minha cesta?' },
+    { nome: 'Repetir composição', detalhe: 'Use os itens da última cesta', mensagem: 'Como repito meu último pedido?' },
   ],
   produtor: [
+    { nome: 'Resumo da colheita', detalhe: 'Veja o que falta separar nesta semana', mensagem: 'Quanto ainda falta separar para esta semana?' },
     { nome: 'Ver estoque', detalhe: 'Consulte produtos e quantidades', mensagem: 'Mostre o estoque completo.' },
     { nome: 'Pedidos pendentes', detalhe: 'Veja o que precisa de atenção', mensagem: 'Mostre os pedidos pendentes.' },
     { nome: 'Separar pedido', detalhe: 'Informe o número do pedido', rascunho: 'Quero separar o pedido número ' },
@@ -49,6 +53,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
   const [mensagem, setMensagem] = useState('')
   const [historico, setHistorico] = useState([])
   const [resultado, setResultado] = useState(null)
+  const [ajusteAnterior, setAjusteAnterior] = useState(null)
   const [detalheAberto, setDetalheAberto] = useState(false)
   const [operacao, setOperacao] = useState(null)
   const [erro, setErro] = useState('')
@@ -70,6 +75,9 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
   const digitando = Boolean(mensagem.trim()) && !ouvindo && !ocupado
   const aprovado = resultado?.status === 'proposta' && resultado?.qa?.status === 'aprovado'
   const proposta = resultado?.proposta
+  const produtosDaPrevia = resultado?.precos?.length
+    ? resultado.precos.map((produto) => ({ ...produto, precoUnitario: produto.preco_unitario }))
+    : produtos
   const textoConclusao = proposta?.tipo === 'pedido_cesta'
     ? 'Pedido confirmado com sucesso.'
     : proposta?.concluir_separacao ? 'Separação concluída. O pedido está preparado para envio.'
@@ -325,7 +333,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
     }
   }
 
-  async function enviarMensagemTexto(texto = mensagem, { falarResposta = false } = {}) {
+  async function enviarMensagemTexto(texto = mensagem, { falarResposta = false, substituicao } = {}) {
     const enviada = texto.trim()
     if (!enviada || ocupado || ouvindo || concluido) return
     parar()
@@ -338,24 +346,35 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
     setErro('')
     setAviso('')
     setEstadoVoz('')
-    setResultado(null)
-    setDetalheAberto(false)
+    if (!modoPropostaCesta || !resultadoAnterior?.proposta) {
+      setResultado(null)
+      setDetalheAberto(false)
+    }
     setHistorico([...conversaAnterior, { id: ++proximoId.current, papel: 'usuario', texto: enviada }])
     setMensagem('')
     try {
       const contexto = conversaAnterior.slice(-100).map(({ papel, texto: conteudo }) => ({ papel, texto: conteudo.slice(0, 4000) }))
       // Separar a proposta de cesta do chat geral para preservar consultas e tarefas do produtor.
-      const dados = modoPropostaCesta && perfil === 'assinante'
-        ? await proporCesta(enviada, controle.signal)
-        : await analisarPedido(enviada, controle.signal, contexto)
+      const dados = substituicao
+        ? await escolherSubstituicao(resultadoAnterior.rascunho, resultadoAnterior.falta.produto_id, substituicao.id, controle.signal)
+        : modoPropostaCesta && perfil === 'assinante'
+          ? await proporCesta(enviada, controle.signal, resultadoAnterior?.rascunho ?? resultadoAnterior?.proposta ?? undefined)
+          : await analisarPedido(enviada, controle.signal, contexto)
       if (!montado.current) return
       if (controle.signal.aborted) throw new DOMException('Resposta interrompida', 'AbortError')
       const id = ++proximoId.current
       selecoesCatalogoRef.current = {}
       textoBaseSelecaoRef.current = null
       setSelecoesCatalogo({})
-      setResultado({ ...dados, id })
-      setDetalheAberto(dados.status === 'proposta' && dados.qa?.status === 'aprovado' && Boolean(dados.proposta))
+      const rascunhoAnterior = resultadoAnterior?.rascunho ?? resultadoAnterior?.proposta
+      const rascunhoNovo = dados.rascunho ?? dados.proposta
+      if (modoPropostaCesta && rascunhoAnterior && rascunhoNovo &&
+          JSON.stringify(rascunhoAnterior) !== JSON.stringify(rascunhoNovo)) {
+        setAjusteAnterior(resultadoAnterior)
+      }
+      const manterPrevia = modoPropostaCesta && rascunhoAnterior && !rascunhoNovo
+      setResultado(manterPrevia ? resultadoAnterior : { ...dados, id })
+      setDetalheAberto(Boolean(manterPrevia ? resultadoAnterior.proposta : dados.proposta && dados.qa?.status === 'aprovado'))
       if (dados.status === 'cancelado') {
         setEscolhendoProdutos(false)
         setEtapaMontagem(null)
@@ -371,7 +390,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
       if (!montado.current) return
       setHistorico(conversaAnterior)
       setResultado(resultadoAnterior)
-      setMensagem(enviada)
+      setMensagem(substituicao ? '' : enviada)
       if (falha.name === 'AbortError') setAviso('Resposta interrompida. Sua mensagem está pronta para editar ou enviar novamente.')
       else setErro(falha.message || 'Não consegui responder. Sua mensagem foi preservada para tentar novamente.')
     } finally {
@@ -423,6 +442,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
   function cancelarProposta() {
     if (ocupado || ouvindo || concluido) return
     setResultado(null)
+    setAjusteAnterior(null)
     setDetalheAberto(false)
     setHistorico((atual) => [...atual, {
       id: ++proximoId.current,
@@ -434,14 +454,14 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
     acionarPulso(true)
   }
 
-  async function abrirPedido(id) {
-    if (ocupado || ouvindo) return
+  async function abrirConsulta(criterios) {
+    if (ocupado || ouvindo || concluido) return
     parar()
     acionarPulso(false)
     setErro('')
     setOperacao('abrir')
     try {
-      await aoConfirmar({ tipo: 'consulta_cestas', cesta_id: id })
+      await aoConfirmar({ tipo: 'consulta_cestas', ...criterios })
       if (montado.current) fechar()
     } catch (falha) {
       if (montado.current) setErro(falha.message)
@@ -583,9 +603,28 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
       {operacao && <div className="flora-processando" role="status"><span className="flora-pontos" aria-hidden="true">•••</span><span>{operacao === 'confirmar' ? 'Confirmando…' : operacao === 'abrir' ? 'Abrindo pedido…' : 'Flora está respondendo…'}</span>{operacao === 'analisar' && <button className="flora-botao-discreto" type="button" onClick={() => requisicao.current?.abort()}>Interromper</button>}</div>}
       {concluido && <p className="flora-sucesso" role="status">{textoConclusao}</p>}
     </div>
-      {resultado?.visualizacao && <VisualizacaoResultado key={resultado.id} dados={resultado.visualizacao} perfil={perfil} desabilitado={ocupado || ouvindo || concluido} selecoes={selecoesCatalogo} aoAlterarProduto={alterarProdutoCatalogo} aoAbrirPedido={abrirPedido} />}
-      {detalheAberto && aprovado && proposta && <PreviaProposta proposta={proposta} produtos={produtos} atual={true} confirmado={concluido} ocupado={ocupado} ouvindo={ouvindo} rascunho={Boolean(mensagem.trim())} aoConfirmar={confirmar} aoCancelar={cancelarProposta} aoAjustar={() => {
-        if (modoPropostaCesta) continuarSemAssistente()
+      {resultado?.visualizacao && <VisualizacaoResultado key={resultado.id} dados={resultado.visualizacao} perfil={perfil} desabilitado={ocupado || ouvindo || concluido} selecoes={selecoesCatalogo} aoAlterarProduto={alterarProdutoCatalogo} aoAbrirPedido={(id, acao) => abrirConsulta({ cesta_id: id, acao })} aoAbrirLista={(filtros) => abrirConsulta({ filtros })} />}
+      {resultado?.falta && <OpcoesSubstituicao falta={resultado.falta} desabilitado={ocupado || ouvindo || Boolean(mensagem.trim())} aoCancelar={cancelarProposta} aoEscolher={(id) => {
+        const alternativa = resultado.falta.alternativas.find((produto) => produto.id === id)
+        const texto = alternativa ? `Trocar por ${alternativa.nome}` : `Continuar sem ${resultado.falta.nome}`
+        enviarMensagemTexto(texto, { substituicao: { id } })
+      }} />}
+      {modoPropostaCesta && ajusteAnterior && (proposta || resultado?.falta) && !concluido && <button
+        type="button" className="flora-botao-discreto" disabled={ocupado || ouvindo}
+        onClick={() => {
+          parar()
+          setResultado(ajusteAnterior)
+          setDetalheAberto(Boolean(ajusteAnterior.proposta))
+          setAjusteAnterior(null)
+          setErro('')
+          setAviso('Último ajuste desfeito. Confira a composição restaurada.')
+        }}
+      >Desfazer último ajuste</button>}
+      {detalheAberto && aprovado && proposta && <PreviaProposta proposta={proposta} produtos={produtosDaPrevia} comparacao={ajusteAnterior?.proposta ?? ajusteAnterior?.rascunho} produtosAnteriores={produtos} atual={true} confirmado={concluido} ocupado={ocupado} ouvindo={ouvindo} rascunho={Boolean(mensagem.trim())} aoConfirmar={confirmar} aoCancelar={cancelarProposta} aoAjustar={() => {
+        if (modoPropostaCesta) {
+          preencherMensagem('')
+          setAviso('Diga o que quer mudar, como “só um tomate” ou “troque a couve por alface”.')
+        }
         else preencherMensagem(proposta.tipo === 'pedido_cesta' ? 'Altere a cesta: ' : `Na separação do pedido ${proposta.cesta_id}, altere: `)
       }} />}
       {erro && <div className="flora-retorno flora-retorno-erro" role="alert"><p>{erro}</p>{mensagem.trim() && !ocupado && <button className="flora-botao-discreto" type="button" onClick={() => enviarMensagemTexto()}>Tentar novamente</button>}</div>}

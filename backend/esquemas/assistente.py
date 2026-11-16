@@ -1,5 +1,6 @@
 """Entrada e saída HTTP do assistente."""
 
+from datetime import date
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -42,15 +43,29 @@ class PedidoConsulta(BaseModel):
     semana: str | None = None
     valor_total: float | None = None
     produtos: list[ProdutoConsulta] = Field(default_factory=list)
+    acao: Literal["cancelamento", "repetir"] | None = None
+
+
+class PeriodoColheita(BaseModel):
+    inicio: date
+    fim: date
+
+
+class FiltrosConsultaCestas(BaseModel):
+    situacoes: list[str]
+    tamanho: Literal["pequena", "media", "grande"] | None = None
+    produto_id: str | None = None
+    periodo_colheita: PeriodoColheita | None = None
 
 
 class VisualizacaoAssistente(BaseModel):
-    tipo: Literal["catalogo", "estoque", "pedidos"]
+    tipo: Literal["catalogo", "estoque", "pedidos", "colheita"]
     resumo: str
     total: int
     maximo_unidades: int | None = None
     produtos: list[ProdutoConsulta] = Field(default_factory=list)
     pedidos: list[PedidoConsulta] = Field(default_factory=list)
+    filtros: FiltrosConsultaCestas | None = None
 
 
 class ResultadoAssistente(BaseModel):

@@ -6,7 +6,7 @@ import httpx
 import pytest
 
 from ia.contratos import InterpretacaoAgente
-from ia.provedores import openrouter as provedor_openrouter
+from ia.provedores import jangada_fallback, openrouter as provedor_openrouter
 from ia.provedores.contrato import AssistenteIndisponivel
 from ..conftest import fazer_login
 
@@ -22,6 +22,8 @@ def respostas_padrao(qa=None, proposta=None):
 
 
 def preparar(monkeypatch, respostas):
+    # Os testes do adaptador Jangada têm sua própria suíte, com o cliente LLM simulado.
+    monkeypatch.setattr(jangada_fallback, "chamar_agente", provedor_openrouter.chamar_agente)
     monkeypatch.setenv("ASSISTENTE_MODO", "openrouter")
     monkeypatch.setenv("OPENROUTER_API_KEY", "chave-ficticia-openrouter")
     monkeypatch.setenv("OPENROUTER_MODEL", "openrouter/free")

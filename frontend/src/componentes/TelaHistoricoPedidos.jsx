@@ -34,6 +34,8 @@ function TelaHistoricoPedidos({
   aoAbrirDetalhes,
   aoCancelarPedido,
   aoRepetirPedido,
+  pedidoDestacado,
+  aoExibirPedidoDestacado,
 }) {
   const [pedidoCancelando, setPedidoCancelando] = useState(null)
   const [erroCancelamento, setErroCancelamento] = useState('')
@@ -99,7 +101,12 @@ function TelaHistoricoPedidos({
       ) : (
         <section className="lista-historico" aria-label="Pedidos registrados">
           {pedidosOrdenados.map((pedido) => (
-            <details className="cartao-historico" key={pedido.id}>
+            <details className="cartao-historico" key={pedido.id} ref={pedido.id === pedidoDestacado ? (cartao) => {
+              if (!cartao) return
+              cartao.open = true
+              cartao.querySelector('summary')?.focus()
+              aoExibirPedidoDestacado()
+            } : undefined}>
               <summary className="resumo-pedido-recolhido">
               <div className="cabecalho-historico">
                 <div className="identidade-cesta-historico">
@@ -165,7 +172,7 @@ function TelaHistoricoPedidos({
               >
                 Repetir composição
               </button>
-              {pedido.situacao === 'Pendente' && (
+              {pedido.situacao === 'Pendente' && !pedido.separacoes?.length && (
                 <button
                   className="botao botao-cancelar-pedido"
                   type="button"
