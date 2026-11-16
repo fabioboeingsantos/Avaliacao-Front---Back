@@ -537,16 +537,15 @@
   align-items: center;
   gap: 20px;
   min-width: 0;
-  justify-self: start;
-  margin-inline-start: clamp(0px, 5.3vw, 64px);
+  justify-self: center;
 }
 
 .capacidades-flora {
   margin: 0;
   padding-inline-start: 20px;
   color: var(--cor-texto-escuro);
-  font-size: .875rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.7;
 }
 
 .botao-flora {
@@ -570,7 +569,7 @@
 }
 
 .apresentacao-flora-produtor {
-  margin-inline-start: -14px;
+  margin-inline-start: 0;
 }
 
 .botao-flora .flora-orbe {
@@ -2192,6 +2191,25 @@ button.botao-visibilidade:disabled {
 /* Dá mais espaço horizontal para o produtor consultar várias cestas no computador. */
 .pagina-produtor {
   width: min(100%, 1120px);
+}
+
+.inicio-produtor {
+  display: grid;
+  min-height: 280px;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.inicio-produtor h1,
+.inicio-produtor p {
+  margin: 0;
+}
+
+.inicio-produtor h1 {
+  color: var(--cor-verde-escuro);
 }
 
 /* Agrupa os filtros que ajudam o produtor a localizar uma cesta. */

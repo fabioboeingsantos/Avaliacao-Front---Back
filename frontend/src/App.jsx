@@ -370,7 +370,7 @@ function App() {
     setPerfilAtual(perfil)
     setErroRestauracao('')
     setErroLogout('')
-    setAbaAtual(perfil === 'produtor' ? 'separacao' : 'pedido')
+    setAbaAtual(perfil === 'produtor' ? 'inicio' : 'pedido')
     setCatalogoCarregado(false)
     cestasAnterioresRef.current = null
     try {
@@ -1191,7 +1191,7 @@ function App() {
         key={abaAtual === 'consulta' ? 'consulta' : 'operacao'}
         cestas={cestasDaSemana}
         produtos={produtosDisponiveis}
-        modo={['estoque', 'entregas', 'consulta'].includes(abaAtual) ? abaAtual : 'separacao'}
+        modo={['inicio', 'estoque', 'entregas', 'consulta'].includes(abaAtual) ? abaAtual : 'separacao'}
         filtrosConsulta={filtrosConsulta}
         aoAbrirConsulta={() => {
           if (abaAtual === 'consulta') return

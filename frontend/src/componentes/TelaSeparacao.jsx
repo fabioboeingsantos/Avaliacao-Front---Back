@@ -182,6 +182,30 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
   const cestasPendentes = cestas.filter((cesta) => cesta.situacao === 'Pendente')
   const produtosComEstoqueBaixo = produtos.filter((produto) => produto.estoque <= 10)
 
+  if (modo === 'inicio') {
+    return (
+      <main className="pagina-pedido pagina-produtor">
+        <header className="cabecalho-pagina">
+          <div>
+            <p className="marca-pequena">Cesta do Vale</p>
+            <p className="contexto-usuario">Vanderlei · produtor</p>
+          </div>
+          <nav className="abas-pedido" aria-label="Navegação do produtor">
+            <StarBorder className="aba-navegacao" type="button" aria-haspopup="dialog" onClick={aoAbrirCatalogo}>Catálogo</StarBorder>
+            <StarBorder className="aba-navegacao" type="button" onClick={aoVoltarSeparacao}>A separação</StarBorder>
+            <StarBorder className="aba-navegacao" type="button" onClick={aoAbrirConsulta}>Consultar cestas</StarBorder>
+            <StarBorder className="aba-navegacao" type="button" onClick={aoAbrirEntregas}>Cestas e entregas</StarBorder>
+            <StarBorder className="aba-navegacao" type="button" onClick={aoAbrirEstoque}>Gerenciar estoque</StarBorder>
+          </nav>
+        </header>
+        <section className="inicio-produtor" aria-labelledby="titulo-inicio-produtor">
+          <h1 id="titulo-inicio-produtor">O que você gostaria de fazer?</h1>
+          <p>Selecione uma opção no menu para abrir essa área.</p>
+        </section>
+      </main>
+    )
+  }
+
   return (
     <main className="pagina-pedido pagina-produtor">
       <header className="cabecalho-pagina">
