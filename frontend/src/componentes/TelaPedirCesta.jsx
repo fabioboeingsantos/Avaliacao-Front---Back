@@ -1,3 +1,4 @@
+import StarBorder from './StarBorder'
 import { useEffect, useState } from 'react'
 
 // Formata os preços unitários e subtotais exibidos durante a montagem da cesta.
@@ -271,18 +272,18 @@ function TelaPedirCesta({
 
         <div className="cabecalho-acoes">
           <nav className="abas-pedido" aria-label="Navegação dos pedidos">
-            <button className="aba-navegacao aba-ativa" type="button" aria-current="page">
+            <StarBorder className="aba-navegacao aba-ativa" type="button" aria-current="page">
               Novo pedido
-            </button>
-            <button className="aba-navegacao" type="button" onClick={aoAbrirHistorico}>
+            </StarBorder>
+            <StarBorder className="aba-navegacao" type="button" onClick={aoAbrirHistorico}>
               Histórico
-            </button>
+            </StarBorder>
           </nav>
         </div>
       </header>
 
       <section className="introducao-pedido" aria-labelledby="titulo-pedido">
-        <button className="botao-menu-catalogo catalogo-acima-saudacao" type="button" aria-haspopup="dialog" onClick={aoAbrirCatalogo}>Catálogo</button>
+        <StarBorder className="botao-menu-catalogo catalogo-acima-saudacao" type="button" aria-haspopup="dialog" onClick={aoAbrirCatalogo}>Catálogo</StarBorder>
         <p className="texto-saudacao">Olá, {usuario}</p>
         <h1 id="titulo-pedido">Peça sua cesta da semana</h1>
         <p>
@@ -470,7 +471,7 @@ function TelaPedirCesta({
                     </label>
                     {selecionado && (
                       <div className="controle-quantidade-selecionavel">
-                        <button
+                        <StarBorder
                           className="botao-quantidade-fechamento"
                           type="button"
                           aria-label={`Diminuir quantidade de ${produto.nome}`}
@@ -480,7 +481,7 @@ function TelaPedirCesta({
                           }}
                         >
                           −
-                        </button>
+                        </StarBorder>
                         <input
                           className="campo-quantidade-selecionavel"
                           type="number"
@@ -511,7 +512,7 @@ function TelaPedirCesta({
                             }
                           }}
                         />
-                        <button
+                        <StarBorder
                           className="botao-quantidade-fechamento"
                           type="button"
                           aria-label={`Aumentar quantidade de ${produto.nome}`}
@@ -522,7 +523,7 @@ function TelaPedirCesta({
                           }}
                         >
                           +
-                        </button>
+                        </StarBorder>
                         <span>de {Math.min(limitePorProduto, produto.estoque)} un.</span>
                       </div>
                     )}
@@ -545,9 +546,9 @@ function TelaPedirCesta({
 
         {modoSelecionado && tamanhoSelecionado && (
           <div className="acoes-pedido">
-            <button className="botao botao-primario" type="button" onClick={prepararPedido}>
+            <StarBorder className="botao botao-primario" type="button" onClick={prepararPedido}>
               Continuar para finalização
-            </button>
+            </StarBorder>
           </div>
         )}
 

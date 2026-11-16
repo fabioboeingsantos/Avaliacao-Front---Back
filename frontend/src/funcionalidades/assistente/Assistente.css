@@ -285,10 +285,14 @@
 .flora-opcao-texto { display: grid; gap: 6px; min-width: 0; }
 .flora-opcao-texto strong { color: var(--cor-verde-escuro); font-size: .9rem; }
 .flora-opcao-texto > span { font-size: .78rem; font-weight: 400; line-height: 1.4; }
-.assistente-dialogo .flora-tarefa { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 6px; padding: 14px 12px; text-align: left; }
-.assistente-dialogo .flora-tarefa { cursor: pointer; }
+.assistente-dialogo .flora-tarefa { box-sizing: border-box; display: flex; width: 100%; height: auto; min-height: 72px; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 0; padding: 0; border: 0; color: var(--cor-texto); font: inherit; text-align: left; appearance: none; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease; }
+.assistente-dialogo .flora-tarefa .glass-surface__content { box-sizing: border-box; display: flex; width: 100%; height: 100%; min-height: 72px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 6px; padding: 12px; text-align: left; }
+.assistente-dialogo .flora-tarefa.glass-surface--fallback { background: rgb(255 255 255 / 38%); }
+.assistente-dialogo .flora-tarefa:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgb(31 69 44 / 14%); }
+.assistente-dialogo .flora-tarefa:disabled { cursor: wait; opacity: .58; }
+.assistente-dialogo .flora-tarefa:focus-visible { outline: 3px solid var(--cor-amarelo-colheita); outline-offset: 2px; }
 .flora-tarefa strong { font-size: .875rem; color: var(--cor-verde-escuro); }
-.flora-tarefa span { font-size: .75rem; font-weight: 400; line-height: 1.4; }
+.flora-tarefa .glass-surface__content > span { font-size: .75rem; font-weight: 400; line-height: 1.4; }
 .flora-mensagem { min-width: 0; width: fit-content; max-width: 94%; border-radius: 14px; padding: 13px 15px; overflow-wrap: anywhere; }
 .flora-mensagem-flora { align-self: flex-start; background: var(--cor-branco); border: 1px solid var(--cor-borda); }
 .flora-mensagem-usuario { align-self: flex-end; background: #245832; color: #fff; }
@@ -349,7 +353,7 @@
 .flora-previa .flora-nota { margin: 12px 0 0; font-size: .75rem; line-height: 1.45; }
 .flora-acoes-previa { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 
-.flora-rodape { display: grid; flex-shrink: 0; gap: 10px; padding: 14px 20px 10px; max-height: 75%; overflow-y: auto; border-top: 1px solid var(--cor-borda); background: var(--cor-creme-natural); }
+.flora-rodape { display: grid; flex-shrink: 0; gap: 10px; padding: 14px 20px 10px; max-height: 75%; overflow-x: hidden; overflow-y: auto; border-top: 1px solid var(--cor-borda); background: var(--cor-creme-natural); }
 .flora-compositor { display: grid; gap: 8px; }
 .flora-compositor > label { font-size: .8rem; font-weight: 600; }
 .flora-compositor textarea { display: block; width: 100%; min-height: 72px; max-height: 120px; resize: vertical; padding: 11px 12px; border: 1px solid var(--cor-borda); border-radius: 10px; background: var(--cor-branco); color: var(--cor-texto-escuro); font: inherit; font-size: 1rem; line-height: 1.45; }
@@ -383,7 +387,8 @@
   .flora-rodape { padding: 12px 12px max(6px, env(safe-area-inset-bottom)); gap: 7px; }
   .flora-sugestoes { grid-template-columns: 1fr; gap: 7px; }
   .flora-opcoes-montagem { grid-template-columns: 1fr; }
-  .assistente-dialogo .flora-tarefa { gap: 3px; padding: 10px 12px; }
+  .assistente-dialogo .flora-tarefa { min-height: 66px; }
+  .assistente-dialogo .flora-tarefa .glass-surface__content { min-height: 66px; gap: 3px; padding: 9px 12px; }
   .flora-mensagem { max-width: 98%; padding: 11px 12px; }
   .flora-compositor textarea { min-height: 68px; max-height: 100px; }
   .flora-previa { padding: 10px; }

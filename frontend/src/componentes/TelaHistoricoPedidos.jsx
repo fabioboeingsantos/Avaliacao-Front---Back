@@ -1,3 +1,4 @@
+import StarBorder from './StarBorder'
 import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
@@ -74,12 +75,12 @@ function TelaHistoricoPedidos({
 
         <div className="cabecalho-acoes">
           <nav className="abas-pedido" aria-label="Navegação dos pedidos">
-            <button className="aba-navegacao" type="button" onClick={aoAbrirPedido}>
+            <StarBorder className="aba-navegacao" type="button" onClick={aoAbrirPedido}>
               Novo pedido
-            </button>
-            <button className="aba-navegacao aba-ativa" type="button" aria-current="page">
+            </StarBorder>
+            <StarBorder className="aba-navegacao aba-ativa" type="button" aria-current="page">
               Histórico
-            </button>
+            </StarBorder>
           </nav>
         </div>
       </header>
@@ -94,9 +95,9 @@ function TelaHistoricoPedidos({
         <section className="estado-vazio estado-vazio-historico">
           <h2>Você ainda não tem pedidos</h2>
           <p>Quando você finalizar um pedido, ele aparecerá aqui.</p>
-          <button className="botao botao-primario" type="button" onClick={aoAbrirPedido}>
+          <StarBorder className="botao botao-primario" type="button" onClick={aoAbrirPedido}>
             Fazer novo pedido
-          </button>
+          </StarBorder>
         </section>
       ) : (
         <section className="lista-historico" aria-label="Pedidos registrados">
@@ -158,29 +159,29 @@ function TelaHistoricoPedidos({
                 <span>Valor final do pedido</span>
                 <strong>{formatarMoeda(pedido.valorTotal)}</strong>
               </div>
-              <button
+              <StarBorder
                 className="botao botao-secundario botao-detalhes-cesta"
                 type="button"
                 onClick={() => aoAbrirDetalhes(pedido)}
               >
                 Ver detalhes e separacao
-              </button>
-              <button
+              </StarBorder>
+              <StarBorder
                 className="botao botao-secundario botao-repetir-pedido"
                 type="button"
                 onClick={() => aoRepetirPedido(pedido)}
               >
                 Repetir composição
-              </button>
+              </StarBorder>
               {pedido.situacao === 'Pendente' && !pedido.separacoes?.length && (
-                <button
+                <StarBorder
                   className="botao botao-cancelar-pedido"
                   type="button"
                   disabled={pedidoCancelando === pedido.id}
                   onClick={() => cancelarPedido(pedido)}
                 >
                   {pedidoCancelando === pedido.id ? 'Cancelando...' : 'Cancelar pedido'}
-                </button>
+                </StarBorder>
               )}
               </div>
             </details>

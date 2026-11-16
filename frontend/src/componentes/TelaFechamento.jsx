@@ -1,3 +1,4 @@
+import StarBorder from './StarBorder'
 import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
@@ -46,9 +47,9 @@ function TelaFechamento({
         <section className="estado-vazio estado-vazio-historico">
           <h1>Nenhuma cesta aberta</h1>
           <p>Escolha uma cesta na tela de separação para registrar os produtos.</p>
-          <button className="botao botao-primario" type="button" onClick={aoAbrirSeparacao}>
+          <StarBorder className="botao botao-primario" type="button" onClick={aoAbrirSeparacao}>
             Voltar para a separação
-          </button>
+          </StarBorder>
         </section>
       </main>
     )
@@ -206,12 +207,12 @@ function TelaFechamento({
 
         <div className="cabecalho-acoes">
           <nav className="abas-pedido" aria-label="Navegação do produtor">
-            <button className="aba-navegacao" type="button" onClick={aoAbrirSeparacao}>
+            <StarBorder className="aba-navegacao" type="button" onClick={aoAbrirSeparacao}>
               A separação
-            </button>
-            <button className="aba-navegacao aba-ativa" type="button" aria-current="page">
+            </StarBorder>
+            <StarBorder className="aba-navegacao aba-ativa" type="button" aria-current="page">
               O fechamento
-            </button>
+            </StarBorder>
           </nav>
         </div>
       </header>
@@ -267,7 +268,7 @@ function TelaFechamento({
             Use os botões para ajustar cada produto. Depois, registre tudo junto.
           </p>
           {permiteEditarQuantidades && (
-            <button
+            <StarBorder
               className="botao botao-secundario botao-selecionar-todos"
               type="button"
               disabled={
@@ -279,7 +280,7 @@ function TelaFechamento({
               onClick={selecionarTodosProdutos}
             >
               Selecionar todos os produtos
-            </button>
+            </StarBorder>
           )}
         </div>
 
@@ -309,7 +310,7 @@ function TelaFechamento({
                 </span>
                 {permiteEditarQuantidades ? (
                   <div className="controle-quantidade-fechamento" aria-label={`Quantidade de ${produto.nome}`}>
-                    <button
+                    <StarBorder
                       className="botao-quantidade-fechamento"
                       type="button"
                       aria-label={`Diminuir quantidade de ${produto.nome}`}
@@ -321,11 +322,11 @@ function TelaFechamento({
                       onClick={() => alterarQuantidade(produto.id, quantidadePlanejada - 1)}
                     >
                       −
-                    </button>
+                    </StarBorder>
                     <output className="valor-quantidade-fechamento" aria-live="polite">
                       {quantidades[produto.id]}
                     </output>
-                    <button
+                    <StarBorder
                       className="botao-quantidade-fechamento"
                       type="button"
                       aria-label={`Aumentar quantidade de ${produto.nome}`}
@@ -337,8 +338,8 @@ function TelaFechamento({
                       onClick={() => alterarQuantidade(produto.id, quantidadePlanejada + 1)}
                     >
                       +
-                    </button>
-                    <button
+                    </StarBorder>
+                    <StarBorder
                       className="botao-completar-produto"
                       type="button"
                       disabled={
@@ -349,7 +350,7 @@ function TelaFechamento({
                       onClick={() => alterarQuantidade(produto.id, maximoPermitido)}
                     >
                       Completar
-                    </button>
+                    </StarBorder>
                   </div>
                 ) : (
                   <span className="quantidade-fixa-produto">
@@ -363,7 +364,7 @@ function TelaFechamento({
 
         {!separacaoJaConcluida ? (
           <>
-            <button
+            <StarBorder
               className="botao botao-primario"
               type="submit"
               disabled={salvando}
@@ -373,27 +374,27 @@ function TelaFechamento({
                 : separacaoCompleta
                   ? 'Salvar e concluir separação'
                   : 'Salvar progresso da separação'}
-            </button>
+            </StarBorder>
             {!separacaoCompleta && totalPlanejado > 0 && (
-              <button
+              <StarBorder
                 className="botao botao-secundario"
                 type="button"
                 disabled={salvando}
                 onClick={encerrarComFaltantes}
               >
                 Encerrar com faltantes e ajustar valor
-              </button>
+              </StarBorder>
             )}
           </>
         ) : cesta.situacao !== 'Entregue' && cesta.situacao !== 'Cancelado' ? (
-          <button
+          <StarBorder
             className="botao botao-secundario"
             type="button"
             disabled={salvando}
             onClick={editarSeparacaoNovamente}
           >
             Editar separação novamente
-          </button>
+          </StarBorder>
         ) : null}
       </form>
       <aside
@@ -410,13 +411,13 @@ function TelaFechamento({
           <><strong>Todos os itens estão planejados.</strong> Salve para registrar e concluir a separação.</>
         )}
       </aside>
-      <button
+      <StarBorder
         className="botao botao-secundario botao-voltar-separacao"
         type="button"
         onClick={aoAbrirSeparacao}
       >
         Voltar para a lista de separação
-      </button>
+      </StarBorder>
     </main>
   )
 }

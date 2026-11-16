@@ -1,3 +1,4 @@
+import StarBorder from './StarBorder'
 import { useState } from 'react'
 import { chamarApi } from '../api'
 
@@ -125,9 +126,9 @@ function TelaLogin({ aoEntrar, aoCadastrar, mensagemSistema, modoInicial = 'entr
   // Renderiza os campos e as ações correspondentes ao modo de acesso atual.
   return (
     <div className="fundo-dialogo-acesso">
-      <button className="fechar-dialogo-fundo" type="button" onClick={aoFechar} aria-label="Fechar acesso" />
+      <StarBorder className="fechar-dialogo-fundo" type="button" onClick={aoFechar} aria-label="Fechar acesso" />
         <section className="cartao-login janela-acesso" role="dialog" aria-modal="true" aria-labelledby="titulo-login">
-          <button className="botao-fechar-acesso" type="button" onClick={aoFechar} aria-label="Voltar à página inicial">×</button>
+          <StarBorder className="botao-fechar-acesso" type="button" onClick={aoFechar} aria-label="Voltar à página inicial">×</StarBorder>
           <header className="cabecalho-login">
             <p className="marca-login">Cesta do Vale</p>
             <p className="contexto-login">Acesso da assinante e do produtor</p>
@@ -196,7 +197,7 @@ function TelaLogin({ aoEntrar, aoCadastrar, mensagemSistema, modoInicial = 'entr
                     autoComplete={modo === 'entrar' ? 'current-password' : 'new-password'}
                     placeholder="Digite sua senha"
                   />
-                  <button
+                  <StarBorder
                     className="botao-visibilidade"
                     type="button"
                     onClick={() => setMostrarSenha((visivel) => !visivel)}
@@ -204,7 +205,7 @@ function TelaLogin({ aoEntrar, aoCadastrar, mensagemSistema, modoInicial = 'entr
                     title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
                   >
                     👁
-                  </button>
+                  </StarBorder>
                 </span>
               </label>
             )}
@@ -224,7 +225,7 @@ function TelaLogin({ aoEntrar, aoCadastrar, mensagemSistema, modoInicial = 'entr
                     autoComplete="new-password"
                     placeholder="Digite a senha novamente"
                   />
-                  <button
+                  <StarBorder
                     className="botao-visibilidade"
                     type="button"
                     onClick={() => setMostrarConfirmarSenha((visivel) => !visivel)}
@@ -232,7 +233,7 @@ function TelaLogin({ aoEntrar, aoCadastrar, mensagemSistema, modoInicial = 'entr
                     title={mostrarConfirmarSenha ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
                   >
                     👁
-                  </button>
+                  </StarBorder>
                 </span>
               </label>
             )}
@@ -249,32 +250,32 @@ function TelaLogin({ aoEntrar, aoCadastrar, mensagemSistema, modoInicial = 'entr
               </p>
             )}
 
-            <button className="botao botao-primario botao-login" type="submit" disabled={carregando}>
+            <StarBorder className="botao botao-primario botao-login" type="submit" disabled={carregando}>
               {modo === 'entrar' && (carregando ? 'Validando...' : 'Entrar')}
               {modo === 'cadastro' && 'Criar cadastro'}
               {modo === 'recuperar' && 'Recuperar senha'}
               {modo === 'reenviar' && 'Reenviar confirmação'}
               {modo === 'verificar' && 'Confirmar e-mail'}
               {modo === 'redefinir' && 'Salvar nova senha'}
-            </button>
+            </StarBorder>
           </form>
 
           <nav className="acoes-login" aria-label="Ações de acesso">
             {modo === 'entrar' && (
               <>
-                <button type="button" onClick={() => trocarModo('cadastro')}>
+                <StarBorder type="button" onClick={() => trocarModo('cadastro')}>
                   Criar cadastro
-                </button>
-                <button type="button" onClick={() => trocarModo('recuperar')}>
+                </StarBorder>
+                <StarBorder type="button" onClick={() => trocarModo('recuperar')}>
                   Esqueci minha senha
-                </button>
+                </StarBorder>
               </>
             )}
 
             {modo !== 'entrar' && (
-              <button type="button" onClick={() => trocarModo('entrar')}>
+              <StarBorder type="button" onClick={() => trocarModo('entrar')}>
                 Voltar para entrar
-              </button>
+              </StarBorder>
             )}
           </nav>
         </section>

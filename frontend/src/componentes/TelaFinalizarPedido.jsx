@@ -1,3 +1,4 @@
+import StarBorder from './StarBorder'
 import { useState } from 'react'
 
 // Mantém a apresentação monetária padronizada em reais e por unidade.
@@ -20,9 +21,9 @@ function TelaFinalizarPedido({
         <section className="estado-vazio estado-vazio-historico">
           <h1>Nenhum pedido em finalização</h1>
           <p>Escolha os produtos antes de abrir a etapa de confirmação.</p>
-          <button className="botao botao-primario" type="button" onClick={aoAbrirPedido}>
+          <StarBorder className="botao botao-primario" type="button" onClick={aoAbrirPedido}>
             Voltar para novo pedido
-          </button>
+          </StarBorder>
         </section>
       </main>
     )
@@ -52,15 +53,15 @@ function TelaFinalizarPedido({
 
         <div className="cabecalho-acoes">
           <nav className="abas-pedido" aria-label="Navegação dos pedidos">
-            <button className="aba-navegacao" type="button" onClick={aoAbrirPedido}>
+            <StarBorder className="aba-navegacao" type="button" onClick={aoAbrirPedido}>
               Novo pedido
-            </button>
-            <button className="aba-navegacao aba-ativa" type="button" aria-current="page">
+            </StarBorder>
+            <StarBorder className="aba-navegacao aba-ativa" type="button" aria-current="page">
               Finalização
-            </button>
-            <button className="aba-navegacao" type="button" onClick={aoAbrirHistorico}>
+            </StarBorder>
+            <StarBorder className="aba-navegacao" type="button" onClick={aoAbrirHistorico}>
               Histórico
-            </button>
+            </StarBorder>
           </nav>
         </div>
       </header>
@@ -107,12 +108,12 @@ function TelaFinalizarPedido({
       {erro && <p className="mensagem mensagem-erro" role="alert">{erro}</p>}
 
       <div className="acoes-finalizacao">
-        <button className="botao botao-primario" type="button" disabled={finalizando} onClick={finalizarPedido}>
+        <StarBorder className="botao botao-primario" type="button" disabled={finalizando} onClick={finalizarPedido}>
           {finalizando ? 'Verificando estoque...' : 'Finalizar pedido'}
-        </button>
-        <button className="botao-link" type="button" onClick={aoAbrirPedido}>
+        </StarBorder>
+        <StarBorder className="botao-link" type="button" onClick={aoAbrirPedido}>
           Voltar e editar
-        </button>
+        </StarBorder>
       </div>
     </main>
   )

@@ -1,3 +1,4 @@
+import StarBorder from './StarBorder'
 import { useState } from 'react'
 
 // Permite registrar somente a quantidade de estrelas, sem comentários nesta primeira versão.
@@ -48,7 +49,7 @@ function AvaliacaoEstrelas({ titulo, valor, aoSalvar }) {
         aria-label="Escolha de uma a cinco estrelas"
       >
         {[1, 2, 3, 4, 5].map((estrela) => (
-          <button
+          <StarBorder
             className={`botao-estrela ${estrela <= estrelasSelecionadas ? 'estrela-ativa' : ''} ${estrelasEmFoco !== null && estrela <= estrelasEmFoco ? 'estrela-em-foco' : ''}`}
             key={estrela}
             type="button"
@@ -61,17 +62,17 @@ function AvaliacaoEstrelas({ titulo, valor, aoSalvar }) {
             onClick={() => setEstrelasSelecionadas(estrela)}
           >
             ★
-          </button>
+          </StarBorder>
         ))}
       </div>
-      <button
+      <StarBorder
         className="botao botao-secundario botao-salvar-avaliacao"
         type="button"
         disabled={salvando}
         onClick={salvarAvaliacao}
       >
         {salvando ? 'Salvando...' : 'Salvar avaliação'}
-      </button>
+      </StarBorder>
       {erro && <small className="erro-avaliacao" role="alert">{erro}</small>}
     </section>
   )

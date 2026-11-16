@@ -1,3 +1,4 @@
+import StarBorder from './componentes/StarBorder'
 import { useEffect, useRef, useState } from 'react'
 import TelaLogin from './componentes/TelaLogin'
 import TelaInicio from './componentes/TelaInicio'
@@ -21,7 +22,7 @@ function TemaToggle({ tema, aoAlternar }) {
   const proximoTema = temaEscuro ? 'claro' : 'escuro'
 
   return (
-    <button
+    <StarBorder
       className="controle-tema"
       type="button"
       onClick={aoAlternar}
@@ -31,7 +32,7 @@ function TemaToggle({ tema, aoAlternar }) {
     >
       {temaEscuro ? <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" /></svg>
         : <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z" /><path d="M16 3v4m-2-2h4" /></svg>}
-    </button>
+    </StarBorder>
   )
 }
 
@@ -1098,21 +1099,21 @@ function App() {
 
   function envolverAreaAutenticada(conteudo) {
     return (
-      <>
+      <div className={`area-autenticada area-autenticada-${perfilAtual}`}>
         <header className={`barra-sessao${assistenteAberto ? ' flora-pagina-aberta' : ''}`}>
           <div className="acoes-sessao">
             <div className="identidade-sessao">
               <span>
                 Conectado como <strong>{formatarNomeUsuario(usuarioAutenticado)}</strong>
               </span>
-              <button
+              <StarBorder
                 className="botao-sair-sessao"
                 type="button"
                 onClick={sairDoSistema}
                 disabled={saindo}
               >
                 {saindo ? 'Saindo...' : 'Sair'}
-              </button>
+              </StarBorder>
             </div>
             <SinoNotificacoes
               notificacoes={notificacoes}
@@ -1120,10 +1121,10 @@ function App() {
               aoSelecionarNotificacao={abrirDestinoDaNotificacao}
             />
             {controleTema}
-            {perfilAtual === 'assinante' && abaAtual !== 'pedido' && <button className="botao-menu-catalogo" type="button" aria-haspopup="dialog" onClick={abrirCatalogo}>Catálogo</button>}
+            {perfilAtual === 'assinante' && abaAtual !== 'pedido' && <StarBorder className="botao-menu-catalogo" type="button" aria-haspopup="dialog" onClick={abrirCatalogo}>Catálogo</StarBorder>}
           </div>
           <div className={`apresentacao-flora${perfilAtual === 'produtor' ? ' apresentacao-flora-produtor' : ''}`}>
-          <button
+          <StarBorder
             type="button"
             className={`botao-flora${perfilAtual === 'produtor' ? ' botao-flora-produtor' : ''}`}
             onClick={abrirPaginaFlora}
@@ -1133,7 +1134,7 @@ function App() {
             <OrbeFlora pausado={assistenteAberto} />
             <span className="rotulo-flora">Flora</span>
             <span className="descricao-flora">Assistente virtual I.A</span>
-          </button>
+          </StarBorder>
           <ul className="capacidades-flora">
             {perfilAtual === 'produtor' ? <>
               <li>Consulte produtos e estoque.</li>
@@ -1164,7 +1165,7 @@ function App() {
           carregando={catalogoConsultando} erro={erroCatalogo}
           aoRecarregar={abrirCatalogo} aoFechar={() => setCatalogoAberto(false)} aoAdicionar={adicionarProduto}
         />}
-      </>
+      </div>
     )
   }
 

@@ -100,3 +100,23 @@ test('catálogo soma, subtrai e retira itens sem ultrapassar limite', async ({ p
   const semRolagemHorizontal = await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)
   expect(semRolagemHorizontal).toBe(true)
 })
+
+test('consulta o catálogo durante a montagem e envia os produtos escolhidos', async ({ page }) => {
+  await page.route('**/api/assistente/pedido', async (route) => {
+    expect(route.request().postDataJSON().mensagem).toContain('2 Alface')
+    await route.fulfill({ json: proposta })
+  })
+  await page.getByRole('button', { name: /^Montar cesta Escolha seus/ }).click()
+  await page.getByRole('button', { name: /Cesta selecionável/ }).click()
+  const consulta = page.waitForResponse((resposta) =>
+    new URL(resposta.url()).pathname === '/api/assistente/analisar' &&
+    resposta.request().postDataJSON().mensagem === 'Mostre o catálogo completo.',
+  )
+  await page.getByRole('button', { name: 'Consultar catálogo' }).click()
+  expect((await consulta).ok()).toBe(true)
+  const adicionar = page.getByRole('button', { name: 'Adicionar uma unidade de Alface' })
+  await adicionar.click({ clickCount: 2 })
+  await expect(page.getByLabel('Sua mensagem', { exact: true })).toHaveValue(/2 Alface/)
+  await page.getByRole('button', { name: 'Enviar', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Confirmar cesta', exact: true })).toBeVisible()
+})

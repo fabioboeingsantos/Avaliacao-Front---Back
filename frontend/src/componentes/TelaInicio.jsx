@@ -1,10 +1,12 @@
+import StarBorder from './StarBorder'
+
 function TelaInicio({ aoEntrar, aoCriarConta }) {
   return (
     <main className="pagina-inicial">
       <header className="acoes-iniciais" aria-label="Acesso">
-        <button className="botao-entrar-inicial" type="button" onClick={aoEntrar}>
+        <StarBorder className="botao-entrar-inicial" type="button" onClick={aoEntrar}>
           Entrar
-        </button>
+        </StarBorder>
       </header>
 
       <section className="mensagem-inicial mensagem-inicial-vitrine" aria-labelledby="titulo-inicial">
@@ -14,9 +16,9 @@ function TelaInicio({ aoEntrar, aoCriarConta }) {
         <p className="descricao-inicial">
           Escolha sua cesta, acompanhe a separação e receba os produtos frescos da semana.
         </p>
-        <button className="botao-criar-conta-inicial" type="button" onClick={aoCriarConta}>
+        <StarBorder className="botao-criar-conta-inicial" type="button" onClick={aoCriarConta}>
           Criar conta grátis
-        </button>
+        </StarBorder>
 
         <div className="vitrine-videos-inicial" aria-label="Apresentação em vídeo">
           <article className="cartao-video-inicial">

@@ -1,10 +1,11 @@
+import StarBorder from '../../componentes/StarBorder'
 import { imagemProduto } from '../../utilitarios/imagemProduto'
 import { dataSemana, itensDaProposta, moeda, nomeTamanho } from './dadosResultados'
 
 export function VisualizacaoResultado({ dados, perfil, desabilitado, selecoes = {}, aoAlterarProduto, aoAbrirPedido, aoAbrirLista }) {
   if (!dados) return null
   return <div className="flora-resultados">
-    {perfil === 'produtor' && dados.filtros && <button className="flora-botao-primario" type="button" disabled={desabilitado} onClick={() => aoAbrirLista(dados.filtros)}>{dados.tipo === 'colheita' ? 'Ver cestas' : 'Ver cestas filtradas'}</button>}
+    {perfil === 'produtor' && dados.filtros && <StarBorder className="flora-botao-primario" type="button" disabled={desabilitado} onClick={() => aoAbrirLista(dados.filtros)}>{dados.tipo === 'colheita' ? 'Ver cestas' : 'Ver cestas filtradas'}</StarBorder>}
     {dados.produtos?.length > 0 && <ul className={dados.tipo === 'catalogo' ? 'flora-grade-catalogo' : 'flora-lista-produtos'} aria-label={dados.tipo === 'colheita' ? 'Produtos por separar' : dados.tipo === 'estoque' ? 'Estoque consultado' : 'Produtos disponíveis'}>
       {dados.produtos.map((p) => <li key={p.id}>
         <img src={imagemProduto(p.id)} alt="" loading="lazy" />
@@ -19,11 +20,11 @@ export function VisualizacaoResultado({ dados, perfil, desabilitado, selecoes = 
           const maximo = Math.max(0, Math.min(dados.maximo_unidades || 10, p.estoque ?? 10))
           return <div className="flora-produto-acoes-selecao">
             <div className="flora-produto-escolha" aria-label={`Selecionar ${p.nome}`}>
-              <button type="button" disabled={desabilitado || quantidade === 0} aria-label={`Retirar uma unidade de ${p.nome}`} onClick={() => aoAlterarProduto(p.id, p.nome, -1, maximo)}>−</button>
+              <StarBorder type="button" disabled={desabilitado || quantidade === 0} aria-label={`Retirar uma unidade de ${p.nome}`} onClick={() => aoAlterarProduto(p.id, p.nome, -1, maximo)}>−</StarBorder>
               <output aria-live="polite" aria-label={`${quantidade} unidades de ${p.nome}`}>{quantidade}</output>
-              <button type="button" disabled={desabilitado || quantidade >= maximo} aria-label={`Adicionar uma unidade de ${p.nome}`} onClick={() => aoAlterarProduto(p.id, p.nome, 1, maximo)}>+</button>
+              <StarBorder type="button" disabled={desabilitado || quantidade >= maximo} aria-label={`Adicionar uma unidade de ${p.nome}`} onClick={() => aoAlterarProduto(p.id, p.nome, 1, maximo)}>+</StarBorder>
             </div>
-            {quantidade > 0 && <button className="flora-remover-produto" type="button" disabled={desabilitado} onClick={() => aoAlterarProduto(p.id, p.nome, -quantidade, maximo)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m2 0-.8 14H6.8L6 6" /><path d="M10 10v6m4-6v6" /></svg>Retirar item</button>}
+            {quantidade > 0 && <StarBorder className="flora-remover-produto" type="button" disabled={desabilitado} onClick={() => aoAlterarProduto(p.id, p.nome, -quantidade, maximo)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m2 0-.8 14H6.8L6 6" /><path d="M10 10v6m4-6v6" /></svg>Retirar item</StarBorder>}
           </div>
         })()}
       </li>)}
@@ -39,7 +40,7 @@ export function VisualizacaoResultado({ dados, perfil, desabilitado, selecoes = 
           <span>{i.quantidade} × {i.nome}</span>
           {i.quantidade_separada != null && <small>{i.quantidade_separada} {i.quantidade_separada === 1 ? 'separada' : 'separadas'}</small>}
         </li>)}</ul>}
-        <button className="flora-botao-discreto" type="button" disabled={desabilitado} onClick={() => aoAbrirPedido(p.id, p.acao)}>{p.acao === 'repetir' ? 'Repetir composição' : 'Abrir pedido'}</button>
+        <StarBorder className="flora-botao-discreto" type="button" disabled={desabilitado} onClick={() => aoAbrirPedido(p.id, p.acao)}>{p.acao === 'repetir' ? 'Repetir composição' : 'Abrir pedido'}</StarBorder>
       </li>)}
     </ul>}
     {dados.tipo === 'pedidos' && dados.total > dados.pedidos.length && <small>Exibindo os {dados.pedidos.length} pedidos mais recentes. Peça um número de pedido para consultar os demais.</small>}
@@ -54,12 +55,12 @@ export function OpcoesSubstituicao({ falta, desabilitado, aoEscolher, aoCancelar
           <strong>{falta.quantidade} × {produto.nome}</strong>
           <small>{moeda(produto.preco_unitario * falta.quantidade)}</small>
         </div>
-        <button className="flora-botao-discreto" type="button" disabled={desabilitado} onClick={() => aoEscolher(produto.id)}>Trocar por {produto.nome}</button>
+        <StarBorder className="flora-botao-discreto" type="button" disabled={desabilitado} onClick={() => aoEscolher(produto.id)}>Trocar por {produto.nome}</StarBorder>
       </li>)}</ul>
       : <p>Não há outro produto da mesma categoria com essa quantidade disponível.</p>}
     <div className="flora-acoes-previa">
-      <button className="flora-botao-discreto" type="button" disabled={desabilitado} onClick={() => aoEscolher(null)}>Continuar sem {falta.nome}</button>
-      <button className="flora-botao-discreto" type="button" disabled={desabilitado} onClick={aoCancelar}>Cancelar</button>
+      <StarBorder className="flora-botao-discreto" type="button" disabled={desabilitado} onClick={() => aoEscolher(null)}>Continuar sem {falta.nome}</StarBorder>
+      <StarBorder className="flora-botao-discreto" type="button" disabled={desabilitado} onClick={aoCancelar}>Cancelar</StarBorder>
     </div>
   </section>
 }
@@ -92,9 +93,9 @@ export function PreviaProposta({ proposta, produtos, comparacao, produtosAnterio
       {proposta.concluir_separacao && <p className="flora-nota">Confira as quantidades antes de concluir a separação.</p>}
       {rascunho && <p className="flora-nota">Envie ou limpe sua mensagem antes de confirmar esta sugestão.</p>}
       <div className="flora-acoes-previa">
-        <button className="flora-botao-primario" type="button" disabled={ocupado || ouvindo || rascunho} onClick={aoConfirmar}>{ocupado ? 'Aguarde…' : pedido ? 'Confirmar cesta' : consulta ? 'Abrir consulta' : proposta.concluir_separacao ? 'Concluir separação' : 'Salvar separação'}</button>
-        {!consulta && <button className="flora-botao-discreto" type="button" disabled={ocupado || ouvindo} onClick={aoAjustar}>Ajustar {pedido ? 'itens' : 'quantidades'}</button>}
-        <button className="flora-botao-discreto flora-cancelar-proposta" type="button" disabled={ocupado || ouvindo} onClick={aoCancelar}>Cancelar</button>
+        <StarBorder className="flora-botao-primario" type="button" disabled={ocupado || ouvindo || rascunho} onClick={aoConfirmar}>{ocupado ? 'Aguarde…' : pedido ? 'Confirmar cesta' : consulta ? 'Abrir consulta' : proposta.concluir_separacao ? 'Concluir separação' : 'Salvar separação'}</StarBorder>
+        {!consulta && <StarBorder className="flora-botao-discreto" type="button" disabled={ocupado || ouvindo} onClick={aoAjustar}>Ajustar {pedido ? 'itens' : 'quantidades'}</StarBorder>}
+        <StarBorder className="flora-botao-discreto flora-cancelar-proposta" type="button" disabled={ocupado || ouvindo} onClick={aoCancelar}>Cancelar</StarBorder>
       </div>
     </>}
   </section>

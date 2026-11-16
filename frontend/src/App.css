@@ -69,7 +69,34 @@
   padding: 24px 16px 48px;
 }
 
-/* Landing page sobre a foto da feira, com foco na mensagem, na vitrine dupla de vídeos e no cadastro. */
+/* Dá às áreas autenticadas uma base visual leve, adaptada aos dois temas. */
+.area-autenticada {
+  min-height: 100vh;
+  padding: 12px clamp(12px, 2vw, 24px) 32px;
+  background:
+    radial-gradient(ellipse at 12% 4%, color-mix(in srgb, var(--cor-verde-claro) 58%, transparent), transparent 42%),
+    var(--cor-creme-natural);
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.area-autenticada .barra-sessao {
+  width: min(100%, 1120px);
+  padding: 12px 72px 12px 18px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--cor-branco) 90%, var(--cor-verde-claro));
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--cor-verde-escuro) 8%, transparent);
+}
+
+.area-autenticada .pagina-pedido {
+  margin-top: 16px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 18px;
+  background: var(--cor-branco);
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--cor-verde-escuro) 7%, transparent);
+}
+
+/* Fundo estático da feira na entrada do sistema. */
 .pagina-inicial {
   position: relative;
   display: grid;
@@ -78,8 +105,21 @@
   place-items: center;
   overflow: hidden;
   padding: 16px 20px;
-  background: linear-gradient(110deg, rgb(10 24 14 / 62%), rgb(10 24 14 / 38%)),
-    url('/imagens/feira-comunitaria-capa.webp') center / cover no-repeat;
+  background: url('/imagens/feira-comunitaria-capa.webp') center / cover no-repeat;
+}
+
+.pagina-inicial::before {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: rgb(10 24 14 / 30%);
+  content: '';
+  pointer-events: none;
+}
+
+.mensagem-inicial {
+  position: relative;
+  z-index: 1;
 }
 
 .acoes-iniciais {
@@ -237,7 +277,25 @@
 }
 
 .fechar-dialogo-fundo { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; cursor: default; }
-.janela-acesso { position: relative; z-index: 1; max-height: calc(100svh - 40px); overflow-y: auto; box-shadow: 0 22px 70px rgb(0 0 0 / 38%); }
+.janela-acesso {
+  position: relative;
+  z-index: 1;
+  max-height: calc(100svh - 40px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  box-shadow: 0 22px 70px rgb(0 0 0 / 38%);
+}
+
+.janela-acesso::-webkit-scrollbar {
+  display: none;
+}
+
+/* Impede que a área da animação dos botões aumente o tamanho rolável do formulário. */
+.janela-acesso .star-border {
+  overflow: hidden;
+}
 .botao-fechar-acesso { position: absolute; top: 9px; right: 12px; width: 36px; height: 36px; border: 0; border-radius: 50%; color: var(--cor-verde-escuro); background: var(--cor-verde-claro); font-size: 26px; line-height: 1; cursor: pointer; }
 
 .cartao-login {
@@ -2648,6 +2706,10 @@ button.botao-visibilidade:disabled {
     padding: 10px 68px 0 14px;
   }
 
+  .area-autenticada .barra-sessao {
+    padding: 10px 68px 10px 14px;
+  }
+
   .identidade-sessao {
     flex: 1 0 100%;
     justify-content: flex-end;
@@ -2688,7 +2750,10 @@ button.botao-visibilidade:disabled {
   }
 
   .pagina-inicial {
+    height: auto;
     min-height: 100svh;
+    max-height: none;
+    overflow: visible;
     padding: 88px 14px 24px;
     background-position: 56% center;
   }
@@ -2708,6 +2773,10 @@ button.botao-visibilidade:disabled {
   .mensagem-inicial {
     padding: 26px 20px;
     border-radius: 20px;
+  }
+
+  .mensagem-inicial-vitrine {
+    max-height: none;
   }
 
   .vitrine-videos-inicial {

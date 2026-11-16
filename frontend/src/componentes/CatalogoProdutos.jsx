@@ -1,3 +1,4 @@
+import StarBorder from './StarBorder'
 import { useEffect, useRef, useState } from 'react'
 import './CatalogoProdutos.css'
 
@@ -70,7 +71,7 @@ export default function CatalogoProdutos({ perfil, produtos, carregando, erro, a
   }}>
     <header className="catalogo-barra">
       <span>DA HORTA PARA A SUA MESA</span>
-      <button type="button" className="catalogo-fechar" aria-label="Fechar catálogo" disabled={salvando} onClick={aoFechar}>Fechar <span aria-hidden="true">×</span></button>
+      <StarBorder type="button" className="catalogo-fechar" aria-label="Fechar catálogo" disabled={salvando} onClick={aoFechar}>Fechar <span aria-hidden="true">×</span></StarBorder>
     </header>
     <section className="catalogo-editorial" aria-labelledby="titulo-catalogo">
       <div className="catalogo-introducao">
@@ -90,7 +91,7 @@ export default function CatalogoProdutos({ perfil, produtos, carregando, erro, a
     <div className="catalogo-conteudo">
       <div className="catalogo-titulo-selecao">
         <div><p className="catalogo-sobretitulo">Explore por categoria</p><h3>{produtor ? 'Seu catálogo' : 'Escolha o que combina com você'}</h3></div>
-        {produtor && <button ref={botaoAdicionar} className="catalogo-acao-principal" type="button" disabled={carregando || adicionando} onClick={() => { setAdicionando(true); setSucesso('') }}>+ Adicionar item</button>}
+        {produtor && <StarBorder ref={botaoAdicionar} className="catalogo-acao-principal" type="button" disabled={carregando || adicionando} onClick={() => { setAdicionando(true); setSucesso('') }}>+ Adicionar item</StarBorder>}
       </div>
       {sucesso && <p className="catalogo-sucesso" role="status">{sucesso}</p>}
       {produtor && adicionando && <form className="catalogo-formulario" onSubmit={salvar} aria-labelledby="titulo-novo-produto">
@@ -102,13 +103,13 @@ export default function CatalogoProdutos({ perfil, produtos, carregando, erro, a
           <label>Estoque inicial<input name="estoque" type="number" required min="0" step="1" max="2147483647" defaultValue="0" inputMode="numeric" /></label>
         </fieldset>
         {erroFormulario && <p role="alert">{erroFormulario}</p>}
-        <div className="catalogo-acoes-formulario"><button className="catalogo-acao-principal" type="submit" disabled={salvando}>{salvando ? 'Salvando…' : 'Salvar item'}</button><button type="button" disabled={salvando} onClick={fecharFormulario}>Cancelar</button></div>
+        <div className="catalogo-acoes-formulario"><StarBorder className="catalogo-acao-principal" type="submit" disabled={salvando}>{salvando ? 'Salvando…' : 'Salvar item'}</StarBorder><StarBorder type="button" disabled={salvando} onClick={fecharFormulario}>Cancelar</StarBorder></div>
       </form>}
       <div className="catalogo-ferramentas">
-        <div className="catalogo-filtros" role="group" aria-label="Categorias do catálogo">{categorias.map((item) => <button key={item.id} type="button" aria-pressed={categoria === item.id} onClick={() => setCategoria(item.id)}>{item.nome}</button>)}</div>
+        <div className="catalogo-filtros" role="group" aria-label="Categorias do catálogo">{categorias.map((item) => <StarBorder key={item.id} type="button" aria-pressed={categoria === item.id} onClick={() => setCategoria(item.id)}>{item.nome}</StarBorder>)}</div>
         <label className="catalogo-busca"><span>Buscar produto</span><input type="search" placeholder="O que você procura?" value={busca} onChange={(evento) => setBusca(evento.target.value)} /></label>
       </div>
-      {carregando ? <p role="status">Carregando o catálogo…</p> : erro ? <div role="alert"><p>{erro}</p><button type="button" onClick={aoRecarregar}>Tentar novamente</button></div> : <>
+      {carregando ? <p role="status">Carregando o catálogo…</p> : erro ? <div role="alert"><p>{erro}</p><StarBorder type="button" onClick={aoRecarregar}>Tentar novamente</StarBorder></div> : <>
         <p className="catalogo-contagem" role="status">{filtrados.length} {filtrados.length === 1 ? 'produto' : 'produtos'} {produtor ? 'no catálogo' : 'disponíveis'}</p>
         {filtrados.length ? <div className="catalogo-grade">{filtrados.map((produto) => <article className="catalogo-produto" key={produto.id}>
           <div className="catalogo-foto"><img src={produto.imagem} alt={produto.imagem.startsWith('/marca/') ? `Imagem ilustrativa para ${produto.nome}` : produto.nome} loading="lazy" /><span>{categorias.find((item) => item.id === produto.categoria)?.nome || 'Produtos'}</span>{produto.imagem.startsWith('/marca/') && <small className="catalogo-imagem-ilustrativa">Imagem ilustrativa</small>}</div>

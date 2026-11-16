@@ -1,3 +1,4 @@
+import StarBorder from './StarBorder'
 import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
@@ -43,9 +44,9 @@ function TelaDetalhesCesta({
         <section className="estado-vazio estado-vazio-historico">
           <h1>Cesta nao encontrada</h1>
           <p>Volte ao historico para escolher outra cesta.</p>
-          <button className="botao botao-primario" type="button" onClick={aoAbrirHistorico}>
+          <StarBorder className="botao botao-primario" type="button" onClick={aoAbrirHistorico}>
             Voltar ao historico
-          </button>
+          </StarBorder>
         </section>
       </main>
     )
@@ -90,12 +91,12 @@ function TelaDetalhesCesta({
 
         <div className="cabecalho-acoes">
           <nav className="abas-pedido" aria-label="Navegacao dos pedidos">
-            <button className="aba-navegacao" type="button" onClick={aoAbrirPedido}>
+            <StarBorder className="aba-navegacao" type="button" onClick={aoAbrirPedido}>
               Novo pedido
-            </button>
-            <button className="aba-navegacao aba-ativa" type="button" aria-current="page">
+            </StarBorder>
+            <StarBorder className="aba-navegacao aba-ativa" type="button" aria-current="page">
               Historico
-            </button>
+            </StarBorder>
           </nav>
         </div>
       </header>
@@ -155,7 +156,7 @@ function TelaDetalhesCesta({
           <p>{pedidoEncerradoComFaltantes
             ? 'Ao confirmar, você aceita as quantidades que chegaram e o valor ajustado do pedido.'
             : 'Recebeu sua cesta? Confirme para atualizar a situação para “Entregue”.'}</p>
-          <button
+          <StarBorder
             className="botao botao-primario"
             type="button"
             disabled={confirmando}
@@ -166,7 +167,7 @@ function TelaDetalhesCesta({
               : pedidoEncerradoComFaltantes
                 ? 'Aceitar quantidades e encerrar pedido'
                 : 'Concluído: recebi a cesta'}
-          </button>
+          </StarBorder>
         </section>
       )}
       {cesta.situacao === 'Enviado' && (
@@ -249,9 +250,9 @@ function TelaDetalhesCesta({
         <strong>{formatarMoeda(cesta.valorTotal)}</strong>
       </section>
 
-      <button className="botao botao-secundario" type="button" onClick={aoAbrirHistorico}>
+      <StarBorder className="botao botao-secundario" type="button" onClick={aoAbrirHistorico}>
         Voltar ao historico
-      </button>
+      </StarBorder>
     </main>
   )
 }

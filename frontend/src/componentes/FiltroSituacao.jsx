@@ -1,3 +1,4 @@
+import StarBorder from './StarBorder'
 import { useEffect, useRef, useState } from 'react'
 
 const SITUACOES = [
@@ -68,7 +69,7 @@ export default function FiltroSituacao({ valor, aoAlterar, quantidadePendentes, 
         onBlur={(evento) => {
           if (!evento.currentTarget.contains(evento.relatedTarget)) setAberto(false)
         }}>
-        <button className="acionador-situacao" type="button" ref={acionador}
+        <StarBorder className="acionador-situacao" type="button" ref={acionador}
           aria-haspopup="listbox" aria-expanded={aberto} aria-controls="opcoes-filtro-situacao"
           aria-labelledby="rotulo-filtro-situacao valor-filtro-situacao"
           aria-describedby={quantidadePendentes > 0 ? 'aviso-filtro-situacao' : undefined}
@@ -82,12 +83,12 @@ export default function FiltroSituacao({ valor, aoAlterar, quantidadePendentes, 
           <span id="valor-filtro-situacao">{opcoesSituacao[selecionada]?.rotulo ?? opcoesSituacao[0].rotulo}</span>
           {quantidadePendentes > 0 && <span className="indicador-notificacao-situacao" aria-hidden="true" />}
           <span className="seta-seletor-situacao" aria-hidden="true">⌄</span>
-        </button>
+        </StarBorder>
         {quantidadePendentes > 0 && <span id="aviso-filtro-situacao" className="texto-acessivel-situacao">{aviso} na opção Pendente.</span>}
         {aberto && (
           <div id="opcoes-filtro-situacao" className="opcoes-situacao" role="listbox" aria-labelledby="rotulo-filtro-situacao">
             {opcoesSituacao.map((opcao, indice) => (
-              <button key={opcao.valor} type="button" role="option" aria-selected={valor === opcao.valor}
+              <StarBorder key={opcao.valor} type="button" role="option" aria-selected={valor === opcao.valor}
                 className="opcao-situacao" tabIndex={-1} ref={(elemento) => { opcoes.current[indice] = elemento }}
                 onKeyDown={(evento) => navegar(evento, indice)} onClick={() => escolher(opcao)}>
                 <span>{opcao.rotulo}</span>
@@ -98,7 +99,7 @@ export default function FiltroSituacao({ valor, aoAlterar, quantidadePendentes, 
                   </span>
                 )}
                 {valor === opcao.valor && <span className="marca-situacao-selecionada" aria-hidden="true">✓</span>}
-              </button>
+              </StarBorder>
             ))}
           </div>
         )}

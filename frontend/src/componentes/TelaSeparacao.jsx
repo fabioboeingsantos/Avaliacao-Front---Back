@@ -1,3 +1,4 @@
+import StarBorder from './StarBorder'
 import { useState } from 'react'
 import { obterRotuloSituacao } from '../utilitarios/situacaoCesta'
 import { formatarIdSolicitacao } from '../utilitarios/identificadorPedido'
@@ -191,32 +192,32 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
 
         <div className="cabecalho-acoes">
           <nav className="abas-pedido" aria-label="Navegação do produtor">
-            <button className="aba-navegacao" type="button" aria-haspopup="dialog" onClick={aoAbrirCatalogo}>Catálogo</button>
-            <button
+            <StarBorder className="aba-navegacao" type="button" aria-haspopup="dialog" onClick={aoAbrirCatalogo}>Catálogo</StarBorder>
+            <StarBorder
               className={`aba-navegacao ${modo === 'separacao' ? 'aba-ativa' : ''}`}
               type="button"
               aria-current={modo === 'separacao' ? 'page' : undefined}
               onClick={aoVoltarSeparacao}
             >
               A separação
-            </button>
-            <button type="button" className={`aba-navegacao ${consulta ? 'aba-ativa' : ''}`} aria-current={consulta ? 'page' : undefined} onClick={aoAbrirConsulta}>Consultar cestas</button>
-            <button
+            </StarBorder>
+            <StarBorder type="button" className={`aba-navegacao ${consulta ? 'aba-ativa' : ''}`} aria-current={consulta ? 'page' : undefined} onClick={aoAbrirConsulta}>Consultar cestas</StarBorder>
+            <StarBorder
               className={`aba-navegacao ${modo === 'entregas' ? 'aba-ativa' : ''}`}
               type="button"
               aria-current={modo === 'entregas' ? 'page' : undefined}
               onClick={aoAbrirEntregas}
             >
               Cestas e entregas
-            </button>
-            <button
+            </StarBorder>
+            <StarBorder
               className={`aba-navegacao ${modo === 'estoque' ? 'aba-ativa' : ''}`}
               type="button"
               aria-current={modo === 'estoque' ? 'page' : undefined}
               onClick={aoAbrirEstoque}
             >
               Gerenciar estoque
-            </button>
+            </StarBorder>
           </nav>
         </div>
       </header>
@@ -252,9 +253,9 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
                   <strong>Separação pronta para concluir</strong>
                   <p>{cesta.tamanhoNome} · pedido #{formatarIdSolicitacao(cesta.id)} já tem todos os itens separados.</p>
                 </div>
-                <button className="botao botao-primario" type="button" onClick={() => aoAbrirFechamento(cesta)}>
+                <StarBorder className="botao botao-primario" type="button" onClick={() => aoAbrirFechamento(cesta)}>
                   Concluir pedido
-                </button>
+                </StarBorder>
               </article>
             ))}
 
@@ -268,9 +269,9 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
                     )).join(' · ')}
                   </p>
                 </div>
-                <button className="botao botao-secundario" type="button" onClick={aoAbrirEstoque}>
+                <StarBorder className="botao botao-secundario" type="button" onClick={aoAbrirEstoque}>
                   Ver estoque
-                </button>
+                </StarBorder>
               </article>
             )}
           </div>
@@ -281,7 +282,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
         <div className="cabecalho-filtros-separacao">
           <h2 id="titulo-filtros-separacao">Filtrar cestas</h2>
           {cestasPendentes.length > 0 && (
-            <button
+            <StarBorder
               className="alerta-pendencias-cestas"
               type="button"
               onClick={() => setFiltroSituacao('Pendente')}
@@ -292,7 +293,7 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
                 <strong>{cestasPendentes.length} pedido{cestasPendentes.length === 1 ? '' : 's'} pendente{cestasPendentes.length === 1 ? '' : 's'}</strong>
                 <small>Ver pendências</small>
               </span>
-            </button>
+            </StarBorder>
           )}
         </div>
         <div className="campos-filtro-separacao">
@@ -322,10 +323,10 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
         </div>
         {consulta && periodoColheita && <p>
           Itens por separar de {formatarDataColheita(periodoColheita.inicio)} a {formatarDataColheita(periodoColheita.fim)}.{' '}
-          <button className="botao botao-secundario" type="button" onClick={() => {
+          <StarBorder className="botao botao-secundario" type="button" onClick={() => {
             setPeriodoColheita(null)
             setFiltroSituacao('todos')
-          }}>Limpar filtro da colheita</button>
+          }}>Limpar filtro da colheita</StarBorder>
         </p>}
       </section>}
 
@@ -387,17 +388,17 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
                 {mensagensEstoque[produto.id] && (
                   <small role="status">{mensagensEstoque[produto.id]}</small>
                 )}
-                <button className="botao botao-secundario" type="submit" disabled={estoqueSalvando === produto.id}>
+                <StarBorder className="botao botao-secundario" type="submit" disabled={estoqueSalvando === produto.id}>
                   {estoqueSalvando === produto.id ? 'Salvando...' : 'Atualizar estoque'}
-                </button>
-                <button
+                </StarBorder>
+                <StarBorder
                   className="botao botao-secundario"
                   type="button"
                   disabled={precoSalvando === produto.id}
                   onClick={() => salvarPreco(produto)}
                 >
                   {precoSalvando === produto.id ? 'Salvando...' : 'Atualizar preço'}
-                </button>
+                </StarBorder>
               </div>
             </form>
           ))}
@@ -489,31 +490,31 @@ function TelaSeparacao({ cestas, produtos = [], aoAbrirFechamento, aoMarcarEnvia
                         <>
                           <span>Separação concluída; cesta pronta para envio.</span>
                           <div className="botoes-envio-cesta-produtor">
-                            <button
+                            <StarBorder
                               className="botao botao-primario"
                               type="button"
                               onClick={() => marcarComoEnviado(cesta)}
                               disabled={envioSalvando === cesta.id}
                             >
                               {envioSalvando === cesta.id ? 'Registrando envio...' : 'Confirmar envio'}
-                            </button>
-                            <button
+                            </StarBorder>
+                            <StarBorder
                               className="botao botao-secundario"
                               type="button"
                               onClick={() => aoAbrirFechamento(cesta)}
                             >
                               Editar separação
-                            </button>
+                            </StarBorder>
                           </div>
                         </>
                       ) : (
-                        <button
+                        <StarBorder
                           className="botao botao-primario"
                           type="button"
                           onClick={() => aoAbrirFechamento(cesta)}
                         >
                           Separar produtos
-                        </button>
+                        </StarBorder>
                       )}
                       {mensagensEnvio[cesta.id] && (
                         <p className="mensagem mensagem-erro" role="alert">{mensagensEnvio[cesta.id]}</p>

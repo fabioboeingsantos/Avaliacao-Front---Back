@@ -1,3 +1,5 @@
+import StarBorder from '../../componentes/StarBorder'
+import GlassSurface from '../../componentes/GlassSurface'
 import { useEffect, useRef, useState } from 'react'
 import { analisarPedido, escolherSubstituicao, proporCesta } from './api'
 import OrbeFlora from './OrbeFlora'
@@ -333,7 +335,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
     }
   }
 
-  async function enviarMensagemTexto(texto = mensagem, { falarResposta = false, substituicao } = {}) {
+  async function enviarMensagemTexto(texto = mensagem, { falarResposta = false, substituicao, consultarCatalogo = false } = {}) {
     const enviada = texto.trim()
     if (!enviada || ocupado || ouvindo || concluido) return
     parar()
@@ -346,18 +348,18 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
     setErro('')
     setAviso('')
     setEstadoVoz('')
-    if (!modoPropostaCesta || !resultadoAnterior?.proposta) {
+    if (!consultarCatalogo && (!modoPropostaCesta || !resultadoAnterior?.proposta)) {
       setResultado(null)
       setDetalheAberto(false)
     }
     setHistorico([...conversaAnterior, { id: ++proximoId.current, papel: 'usuario', texto: enviada }])
-    setMensagem('')
+    if (!consultarCatalogo) setMensagem('')
     try {
       const contexto = conversaAnterior.slice(-100).map(({ papel, texto: conteudo }) => ({ papel, texto: conteudo.slice(0, 4000) }))
       // Separar a proposta de cesta do chat geral para preservar consultas e tarefas do produtor.
       const dados = substituicao
         ? await escolherSubstituicao(resultadoAnterior.rascunho, resultadoAnterior.falta.produto_id, substituicao.id, controle.signal)
-        : modoPropostaCesta && perfil === 'assinante'
+        : modoPropostaCesta && perfil === 'assinante' && !consultarCatalogo
           ? await proporCesta(enviada, controle.signal, resultadoAnterior?.rascunho ?? resultadoAnterior?.proposta ?? undefined)
           : await analisarPedido(enviada, controle.signal, contexto)
       if (!montado.current) return
@@ -373,7 +375,11 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
         setAjusteAnterior(resultadoAnterior)
       }
       const manterPrevia = modoPropostaCesta && rascunhoAnterior && !rascunhoNovo
-      setResultado(manterPrevia ? resultadoAnterior : { ...dados, id })
+      if (consultarCatalogo && manterPrevia) {
+        setResultado({ ...resultadoAnterior, visualizacao: dados.visualizacao, id })
+      } else {
+        setResultado(manterPrevia ? resultadoAnterior : { ...dados, id })
+      }
       setDetalheAberto(Boolean(manterPrevia ? resultadoAnterior.proposta : dados.proposta && dados.qa?.status === 'aprovado'))
       if (dados.status === 'cancelado') {
         setEscolhendoProdutos(false)
@@ -390,7 +396,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
       if (!montado.current) return
       setHistorico(conversaAnterior)
       setResultado(resultadoAnterior)
-      setMensagem(substituicao ? '' : enviada)
+      if (!consultarCatalogo) setMensagem(substituicao ? '' : enviada)
       if (falha.name === 'AbortError') setAviso('Resposta interrompida. Sua mensagem está pronta para editar ou enviar novamente.')
       else setErro(falha.message || 'Não consegui responder. Sua mensagem foi preservada para tentar novamente.')
     } finally {
@@ -563,44 +569,44 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
           </div>
         </div>
       </div>
-      <button className="flora-fechar" type="button" onClick={fechar} aria-label="Fechar conversa com a Flora"><Icone nome="fechar" /></button>
+      <StarBorder className="flora-fechar" type="button" onClick={fechar} aria-label="Fechar conversa com a Flora"><Icone nome="fechar" /></StarBorder>
     </header>
 
     <div className="flora-espaco-trabalho">
     <section className="flora-area-resultados" aria-label="Resultados da Flora" tabIndex={0}>
-      {resultado?.status === 'proposta' && resultado?.qa?.status === 'aprovado' && !detalheAberto && <button className="flora-abrir-detalhe flora-botao-discreto" type="button" onClick={() => setDetalheAberto(true)}>Ver proposta da Flora</button>}
+      {resultado?.status === 'proposta' && resultado?.qa?.status === 'aprovado' && !detalheAberto && <StarBorder className="flora-abrir-detalhe flora-botao-discreto" type="button" onClick={() => setDetalheAberto(true)}>Ver proposta da Flora</StarBorder>}
       {!historico.length && <div className="flora-inicio">
         <p>{etapaMontagem === 'modo' ? 'Como você prefere montar sua cesta?' : etapaMontagem === 'tamanho' ? 'Qual tamanho de cesta pronta você quer?' : perfil === 'produtor' ? `Olá${nomeFormatado ? `, ${nomeFormatado}` : ''}! Ajudo com estoque, pedidos e separações.` : `Olá${nomeFormatado ? `, ${nomeFormatado}` : ''}! Posso ajudar com sua cesta e seus pedidos.`}</p>
         <div className={`flora-sugestoes${etapaMontagem === 'modo' ? ' flora-sugestoes-modos' : ''}`} aria-label="Como a Flora pode ajudar">
           {etapaMontagem === 'modo' ? <div className="flora-opcoes-montagem" role="group" aria-label="Escolha como montar sua cesta">
-            <button className="flora-opcao-cesta" type="button" disabled={ouvindo} onClick={() => { setEtapaMontagem('tamanho'); acionarPulso(true) }}>
+            <StarBorder className="flora-opcao-cesta" type="button" disabled={ouvindo} onClick={() => { setEtapaMontagem('tamanho'); acionarPulso(true) }}>
               <span className="flora-opcao-radio" aria-hidden="true" />
               <img src="/marca/cesta-pequena.png" alt="" />
               <span className="flora-opcao-texto"><strong>Cesta pronta</strong><span>Produtos e quantidades definidos pela Cesta do Vale.</span></span>
-            </button>
-            <button className="flora-opcao-cesta" type="button" disabled={ouvindo} onClick={iniciarCestaSelecionavel}>
+            </StarBorder>
+            <StarBorder className="flora-opcao-cesta" type="button" disabled={ouvindo} onClick={iniciarCestaSelecionavel}>
               <span className="flora-opcao-radio" aria-hidden="true" />
               <img src="/marca/cesta-selecionavel.png" alt="" />
               <span className="flora-opcao-texto"><strong>Cesta selecionável</strong><span>Escolha os produtos disponíveis dentro do limite.</span></span>
-            </button>
-          </div> : etapaMontagem === 'tamanho' ? [{ nome: 'Pequena', limite: 5 }, { nome: 'Média', limite: 8 }, { nome: 'Grande', limite: 12 }].map((opcao) => <button key={opcao.nome} className="flora-tarefa" type="button" disabled={ouvindo} onClick={() => enviarMensagemTexto(`Quero uma cesta pronta ${opcao.nome.toLowerCase()}.`)}><strong>{opcao.nome}</strong><span>{opcao.limite} produtos diferentes</span></button>) : (tarefas[perfil] || tarefas.assinante).map((tarefa) => <button key={tarefa.nome} className="flora-tarefa" type="button" disabled={ocupado || ouvindo} onClick={() => { if (tarefa.montar) iniciarMontagem(); else if (tarefa.rascunho) preencherMensagem(tarefa.rascunho); else enviarMensagemTexto(tarefa.mensagem) }}>
+            </StarBorder>
+          </div> : etapaMontagem === 'tamanho' ? [{ nome: 'Pequena', limite: 5 }, { nome: 'Média', limite: 8 }, { nome: 'Grande', limite: 12 }].map((opcao) => <GlassSurface key={opcao.nome} as="button" type="button" className="flora-tarefa" width="100%" height="auto" borderRadius={14} borderWidth={0.07} brightness={100} opacity={0.9} blur={5} displace={0.35} backgroundOpacity={0.22} saturation={1.15} distortionScale={-40} disabled={ouvindo} onClick={() => enviarMensagemTexto(`Quero uma cesta pronta ${opcao.nome.toLowerCase()}.`)}><strong>{opcao.nome}</strong><span>{opcao.limite} produtos diferentes</span></GlassSurface>) : (tarefas[perfil] || tarefas.assinante).map((tarefa) => <GlassSurface key={tarefa.nome} as="button" type="button" className="flora-tarefa" width="100%" height="auto" borderRadius={14} borderWidth={0.07} brightness={100} opacity={0.9} blur={5} displace={0.35} backgroundOpacity={0.22} saturation={1.15} distortionScale={-40} disabled={ocupado || ouvindo} onClick={() => { if (tarefa.montar) iniciarMontagem(); else if (tarefa.rascunho) preencherMensagem(tarefa.rascunho); else enviarMensagemTexto(tarefa.mensagem) }}>
             <strong>{tarefa.nome}</strong><span>{tarefa.detalhe}</span>
-          </button>)}
+          </GlassSurface>)}
         </div>
-        {etapaMontagem && <button className="flora-botao-discreto flora-voltar" type="button" onClick={() => { setEtapaMontagem(etapaMontagem === 'tamanho' ? 'modo' : null); acionarPulso(true) }}>Voltar</button>}
+        {etapaMontagem && <StarBorder className="flora-botao-discreto flora-voltar" type="button" onClick={() => { setEtapaMontagem(etapaMontagem === 'tamanho' ? 'modo' : null); acionarPulso(true) }}>Voltar</StarBorder>}
       </div>}
     <div className="flora-resposta-atual" aria-live="polite">
       {historico.filter((item) => item.papel === 'flora').slice(-1).map((item) => <article key={item.id} className="flora-mensagem flora-mensagem-flora" aria-label="Resposta da Flora">
         <strong className="flora-autor">{item.papel === 'usuario' ? 'Você' : 'Flora'}</strong>
         <p className="resposta-texto-flora">{item.dados?.visualizacao?.resumo || item.dados?.mensagem || item.texto}</p>
-        {item.mostrarCatalogo && <button className="flora-botao-discreto" type="button" disabled={ocupado || ouvindo || concluido} onClick={() => enviarMensagemTexto('Mostre o catálogo completo.')}>Consultar catálogo</button>}
-        {item.papel === 'flora' && suportaAudio && <button className="flora-ouvir flora-botao-discreto" type="button" disabled={ouvindo || ocupado || ((falando || carregandoAudio) && audioMensagem !== item.id)} aria-pressed={audioMensagem === item.id && falando} onClick={() => ouvir(item)}>
+        {item.mostrarCatalogo && <StarBorder className="flora-botao-discreto" type="button" disabled={ocupado || ouvindo || concluido} onClick={() => enviarMensagemTexto('Mostre o catálogo completo.', { consultarCatalogo: true })}>Consultar catálogo</StarBorder>}
+        {item.papel === 'flora' && suportaAudio && <StarBorder className="flora-ouvir flora-botao-discreto" type="button" disabled={ouvindo || ocupado || ((falando || carregandoAudio) && audioMensagem !== item.id)} aria-pressed={audioMensagem === item.id && falando} onClick={() => ouvir(item)}>
           <Icone nome={audioMensagem === item.id && (falando || carregandoAudio) ? 'parar' : 'audio'} />
           {audioMensagem === item.id && carregandoAudio ? 'Cancelar áudio' : audioMensagem === item.id && falando ? 'Parar áudio' : 'Ouvir resposta'}
-        </button>}
+        </StarBorder>}
         {item.id === audioMensagem && erroAudio && <small className="flora-erro-audio" role="alert">{erroAudio}</small>}
       </article>)}
-      {operacao && <div className="flora-processando" role="status"><span className="flora-pontos" aria-hidden="true">•••</span><span>{operacao === 'confirmar' ? 'Confirmando…' : operacao === 'abrir' ? 'Abrindo pedido…' : 'Flora está respondendo…'}</span>{operacao === 'analisar' && <button className="flora-botao-discreto" type="button" onClick={() => requisicao.current?.abort()}>Interromper</button>}</div>}
+      {operacao && <div className="flora-processando" role="status"><span className="flora-pontos" aria-hidden="true">•••</span><span>{operacao === 'confirmar' ? 'Confirmando…' : operacao === 'abrir' ? 'Abrindo pedido…' : 'Flora está respondendo…'}</span>{operacao === 'analisar' && <StarBorder className="flora-botao-discreto" type="button" onClick={() => requisicao.current?.abort()}>Interromper</StarBorder>}</div>}
       {concluido && <p className="flora-sucesso" role="status">{textoConclusao}</p>}
     </div>
       {resultado?.visualizacao && <VisualizacaoResultado key={resultado.id} dados={resultado.visualizacao} perfil={perfil} desabilitado={ocupado || ouvindo || concluido} selecoes={selecoesCatalogo} aoAlterarProduto={alterarProdutoCatalogo} aoAbrirPedido={(id, acao) => abrirConsulta({ cesta_id: id, acao })} aoAbrirLista={(filtros) => abrirConsulta({ filtros })} />}
@@ -609,7 +615,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
         const texto = alternativa ? `Trocar por ${alternativa.nome}` : `Continuar sem ${resultado.falta.nome}`
         enviarMensagemTexto(texto, { substituicao: { id } })
       }} />}
-      {modoPropostaCesta && ajusteAnterior && (proposta || resultado?.falta) && !concluido && <button
+      {modoPropostaCesta && ajusteAnterior && (proposta || resultado?.falta) && !concluido && <StarBorder
         type="button" className="flora-botao-discreto" disabled={ocupado || ouvindo}
         onClick={() => {
           parar()
@@ -619,7 +625,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
           setErro('')
           setAviso('Último ajuste desfeito. Confira a composição restaurada.')
         }}
-      >Desfazer último ajuste</button>}
+      >Desfazer último ajuste</StarBorder>}
       {detalheAberto && aprovado && proposta && <PreviaProposta proposta={proposta} produtos={produtosDaPrevia} comparacao={ajusteAnterior?.proposta ?? ajusteAnterior?.rascunho} produtosAnteriores={produtos} atual={true} confirmado={concluido} ocupado={ocupado} ouvindo={ouvindo} rascunho={Boolean(mensagem.trim())} aoConfirmar={confirmar} aoCancelar={cancelarProposta} aoAjustar={() => {
         if (modoPropostaCesta) {
           preencherMensagem('')
@@ -627,15 +633,15 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
         }
         else preencherMensagem(proposta.tipo === 'pedido_cesta' ? 'Altere a cesta: ' : `Na separação do pedido ${proposta.cesta_id}, altere: `)
       }} />}
-      {erro && <div className="flora-retorno flora-retorno-erro" role="alert"><p>{erro}</p>{mensagem.trim() && !ocupado && <button className="flora-botao-discreto" type="button" onClick={() => enviarMensagemTexto()}>Tentar novamente</button>}</div>}
+      {erro && <div className="flora-retorno flora-retorno-erro" role="alert"><p>{erro}</p>{mensagem.trim() && !ocupado && <StarBorder className="flora-botao-discreto" type="button" onClick={() => enviarMensagemTexto()}>Tentar novamente</StarBorder>}</div>}
       {aviso && <p className="flora-retorno" role="status">{aviso}</p>}
-      {concluido && <button className="flora-botao-primario flora-continuar" type="button" onClick={fechar}>{perfil === 'assinante' ? 'Continuar nos meus pedidos' : 'Continuar nos pedidos'}</button>}
-      {!concluido && <button className="flora-alternativa" type="button" disabled={ocupado || ouvindo} onClick={continuarSemAssistente}>{perfil === 'assinante' ? 'Montar cesta sem assistente' : 'Ir para a separação de pedidos'}</button>}
+      {concluido && <StarBorder className="flora-botao-primario flora-continuar" type="button" onClick={fechar}>{perfil === 'assinante' ? 'Continuar nos meus pedidos' : 'Continuar nos pedidos'}</StarBorder>}
+      {!concluido && <StarBorder className="flora-alternativa" type="button" disabled={ocupado || ouvindo} onClick={continuarSemAssistente}>{perfil === 'assinante' ? 'Montar cesta sem assistente' : 'Ir para a separação de pedidos'}</StarBorder>}
     </section>
     <div className="flora-coluna-chat">
     <footer className="flora-rodape">
       {!concluido && <>
-        {estadoVoz && <div className={`flora-estado-voz${ouvindo ? ' flora-gravando' : ''}`} role="status"><span>{estadoVoz}</span>{ouvindo && <button className="flora-botao-discreto" type="button" onClick={descartarGravacao}>Descartar</button>}</div>}
+        {estadoVoz && <div className={`flora-estado-voz${ouvindo ? ' flora-gravando' : ''}`} role="status"><span>{estadoVoz}</span>{ouvindo && <StarBorder className="flora-botao-discreto" type="button" onClick={descartarGravacao}>Descartar</StarBorder>}</div>}
         <form className="flora-compositor" onSubmit={(evento) => { evento.preventDefault(); enviarMensagemTexto() }}>
           <label htmlFor="mensagem-assistente">Sua mensagem</label>
           <textarea ref={campoMensagem} id="mensagem-assistente" value={mensagem} maxLength={2000} rows={2} required readOnly={ouvindo || ocupado} aria-describedby="flora-ajuda-mensagem" onChange={(evento) => { selecoesCatalogoRef.current = {}; textoBaseSelecaoRef.current = null; setSelecoesCatalogo({}); setMensagem(evento.target.value); setEstadoVoz(''); setAviso(''); acionarPulso(false) }} onKeyDown={(evento) => {
@@ -644,9 +650,9 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
             if (!evento.repeat && !ocupado && !ouvindo && mensagem.trim()) evento.currentTarget.form?.requestSubmit()
           }} placeholder={perfil === 'produtor' ? 'Ex.: Mostre os pedidos que aguardam separação.' : escolhendoProdutos ? 'Ex.: 2 tomates, 1 alface e 3 cenouras.' : 'Ex.: Monte uma cesta pequena com alface, tomate e cenoura.'} />
           <div className="flora-compositor-acoes">
-            {suporteVoz && <button className={`flora-botao-microfone${ouvindo ? ' flora-microfone-ativo' : ''}`} type="button" disabled={ocupado} onClick={alternarMicrofone} aria-pressed={ouvindo}><Icone nome={ouvindo ? 'parar' : 'microfone'} />{ouvindo ? 'Parar' : 'Falar mensagem'}</button>}
-            {mensagem && !ouvindo && <button className="flora-botao-discreto flora-limpar" type="button" disabled={ocupado} onClick={() => preencherMensagem('')}>Limpar</button>}
-            <button className="flora-botao-primario flora-enviar" type="submit" disabled={ocupado || ouvindo || !mensagem.trim()}><Icone nome="enviar" />Enviar</button>
+            {suporteVoz && <StarBorder className={`flora-botao-microfone${ouvindo ? ' flora-microfone-ativo' : ''}`} type="button" disabled={ocupado} onClick={alternarMicrofone} aria-pressed={ouvindo}><Icone nome={ouvindo ? 'parar' : 'microfone'} />{ouvindo ? 'Parar' : 'Falar mensagem'}</StarBorder>}
+            {mensagem && !ouvindo && <StarBorder className="flora-botao-discreto flora-limpar" type="button" disabled={ocupado} onClick={() => preencherMensagem('')}>Limpar</StarBorder>}
+            <StarBorder className="flora-botao-primario flora-enviar" type="submit" disabled={ocupado || ouvindo || !mensagem.trim()}><Icone nome="enviar" />Enviar</StarBorder>
           </div>
           <small id="flora-ajuda-mensagem" className="flora-ajuda-mensagem">{suporteVoz ? <><span className="flora-ajuda-teclado">Enter envia · Shift + Enter quebra a linha.</span><span className="flora-ajuda-toque">Revise sua mensagem antes de enviar.</span></> : 'Microfone indisponível neste navegador. Você pode digitar.'}{mensagem.length > 1800 && <span> {mensagem.length}/2000</span>}</small>
         </form>
