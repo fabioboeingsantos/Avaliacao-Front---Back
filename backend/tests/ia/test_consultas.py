@@ -105,6 +105,22 @@ def test_atendimento_da_assinante_usa_pedidos_da_conta_e_preserva_o_estado(clien
     assert cancelado["visualizacao"]["pedidos"][0]["acao"] is None
 
 
+def test_repetir_composicao_apresenta_tres_pedidos_mais_recentes(monkeypatch):
+    # Simular um histórico fictício para verificar a quantidade e a ordem das opções.
+    cestas = [{"id": indice, "situacao": "Entregue"} for indice in range(1, 6)]
+    monkeypatch.setattr(consultas, "listar_cestas", lambda sessao, usuario_id: cestas)
+
+    mensagem, status, pedidos, acao = consultas.atendimento_assinante(
+        "Como repito meu último pedido?", None, 42,
+    )
+
+    # Confirmar que os três pedidos recentes chegam à tela como alternativas de repetição.
+    assert status == "resposta"
+    assert [pedido["id"] for pedido in pedidos] == [5, 4, 3]
+    assert acao == "repetir"
+    assert all(f"#{pedido['id']:04d}" in mensagem for pedido in pedidos)
+
+
 @pytest.mark.parametrize("mensagem", [
     "Mostre as cestas pendentes com xyzabc.",
     "Mostre as cestas pequenas ou médias.",

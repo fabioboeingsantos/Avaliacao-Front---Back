@@ -86,14 +86,24 @@ def atendimento_assinante(texto, sessao, usuario_id):
             return "Qual pedido você quer consultar? Envie o número junto com sua pergunta.", "esclarecimento", ativos, None
         cestas = ativos or cestas
 
-    cesta = max(cestas, key=lambda item: item["id"])
+    # Ordenar do pedido mais recente para o mais antigo para priorizar o histórico recente.
+    cestas = sorted(cestas, key=lambda item: item["id"], reverse=True)
+    cesta = cestas[0]
     resumo = f"Pedido #{cesta['id']:04d} · {cesta['situacao']}."
     if cancelar and pode_cancelar_cesta(cesta):
         return f"{resumo} Você ainda pode cancelar. Abra o pedido para revisar e confirmar o cancelamento.", "resposta", [cesta], "cancelamento"
     if cancelar:
         resumo += " O cancelamento está disponível enquanto o pedido estiver pendente e a separação ainda não tiver começado."
     if repetir:
-        return f"{resumo} Use Repetir composição para montar uma nova cesta e conferir os itens disponíveis e os preços atuais.", "resposta", [cesta], "repetir"
+        # Apresentar até três opções do histórico para a pessoa escolher qual composição repetir.
+        anteriores = cestas[:3]
+        numeros_anteriores = ", ".join(f"#{item['id']:04d}" for item in anteriores)
+        mensagem = (
+            f"Encontrei {len(anteriores)} pedidos recentes: {numeros_anteriores}. "
+            "Escolha Repetir composição no pedido desejado para montar uma nova cesta e conferir "
+            "os itens disponíveis e os preços atuais."
+        )
+        return mensagem, "resposta", anteriores, "repetir"
     return resumo, "resposta", [cesta], None
 
 
