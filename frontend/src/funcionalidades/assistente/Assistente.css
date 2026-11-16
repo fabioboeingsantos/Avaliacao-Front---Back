@@ -23,7 +23,8 @@
 .assistente-dialogo.flora-com-detalhe { width: min(1080px, calc(100% - 32px)); }
 .assistente-dialogo::backdrop { background: #14271e99; }
 .assistente-dialogo :focus-visible { outline: 3px solid var(--cor-amarelo-colheita); outline-offset: 3px; }
-.assistente-dialogo button {
+/* Manter a base dos controles do diálogo sem sobrescrever o botão primário padrão. */
+.assistente-dialogo button:not(.botao-primario) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -46,7 +47,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 .assistente-dialogo button svg { flex-shrink: 0; }
-.assistente-dialogo button:hover:not(:disabled) { background: var(--cor-verde-claro); border-color: var(--cor-verde-horta); box-shadow: none; transform: none; }
+.assistente-dialogo button:not(.botao-primario):hover:not(:disabled) { background: var(--cor-verde-claro); border-color: var(--cor-verde-horta); box-shadow: none; transform: none; }
 .assistente-dialogo button:disabled { opacity: .55; cursor: not-allowed; box-shadow: none; transform: none; }
 .assistente-dialogo .flora-botao-primario { color: #fff; border-color: var(--flora-acao); background: var(--flora-acao); }
 .assistente-dialogo .flora-botao-primario:hover:not(:disabled) { color: #fff; border-color: #173d22; background: #173d22; }
@@ -285,14 +286,12 @@
 .flora-opcao-texto { display: grid; gap: 6px; min-width: 0; }
 .flora-opcao-texto strong { color: var(--cor-verde-escuro); font-size: .9rem; }
 .flora-opcao-texto > span { font-size: .78rem; font-weight: 400; line-height: 1.4; }
-.assistente-dialogo .flora-tarefa { box-sizing: border-box; display: flex; width: 100%; height: auto; min-height: 72px; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 0; padding: 0; border: 0; color: var(--cor-texto); font: inherit; text-align: left; appearance: none; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease; }
-.assistente-dialogo .flora-tarefa .glass-surface__content { box-sizing: border-box; display: flex; width: 100%; height: 100%; min-height: 72px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 6px; padding: 12px; text-align: left; }
-.assistente-dialogo .flora-tarefa.glass-surface--fallback { background: rgb(255 255 255 / 38%); }
-.assistente-dialogo .flora-tarefa:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgb(31 69 44 / 14%); }
+.assistente-dialogo .flora-tarefa { box-sizing: border-box; display: flex; width: 100%; height: auto; min-height: 72px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 6px; padding: 12px; text-align: left; }
 .assistente-dialogo .flora-tarefa:disabled { cursor: wait; opacity: .58; }
 .assistente-dialogo .flora-tarefa:focus-visible { outline: 3px solid var(--cor-amarelo-colheita); outline-offset: 2px; }
-.flora-tarefa strong { font-size: .875rem; color: var(--cor-verde-escuro); }
-.flora-tarefa .glass-surface__content > span { font-size: .75rem; font-weight: 400; line-height: 1.4; }
+/* Preservar o texto branco do botão primário padrão também no título do atalho. */
+.flora-tarefa.botao-primario strong { font-size: .875rem; color: var(--cor-branco); }
+.flora-tarefa > span { font-size: .75rem; font-weight: 400; line-height: 1.4; }
 .flora-mensagem { min-width: 0; width: fit-content; max-width: 94%; border-radius: 14px; padding: 13px 15px; overflow-wrap: anywhere; }
 .flora-mensagem-flora { align-self: flex-start; background: var(--cor-branco); border: 1px solid var(--cor-borda); }
 .flora-mensagem-usuario { align-self: flex-end; background: #245832; color: #fff; }
@@ -375,7 +374,8 @@
 .flora-retorno p { margin: 0; }
 .flora-retorno-erro { background: var(--cor-fundo-erro); color: var(--cor-erro); border-color: color-mix(in srgb, var(--cor-erro) 35%, var(--cor-borda)); }
 .flora-retorno button { margin: 4px 0 -4px -8px; }
-.assistente-dialogo .flora-alternativa { justify-self: center; min-height: 44px; padding: 8px; color: var(--cor-verde-escuro); border-color: transparent; background: transparent; font-size: .8rem; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
+/* Separar a ação alternativa do conteúdo e conservar o estilo brilhante do botão primário do sistema. */
+.assistente-dialogo .flora-alternativa { display: flex; width: fit-content; max-width: 100%; min-height: 44px; margin: 14px auto 6px; padding: 10px 16px; white-space: normal; text-align: center; }
 .flora-continuar { width: 100%; }
 
 @media (max-width: 520px) {
@@ -388,7 +388,7 @@
   .flora-sugestoes { grid-template-columns: 1fr; gap: 7px; }
   .flora-opcoes-montagem { grid-template-columns: 1fr; }
   .assistente-dialogo .flora-tarefa { min-height: 66px; }
-  .assistente-dialogo .flora-tarefa .glass-surface__content { min-height: 66px; gap: 3px; padding: 9px 12px; }
+  .assistente-dialogo .flora-tarefa { min-height: 66px; gap: 3px; padding: 9px 12px; }
   .flora-mensagem { max-width: 98%; padding: 11px 12px; }
   .flora-compositor textarea { min-height: 68px; max-height: 100px; }
   .flora-previa { padding: 10px; }

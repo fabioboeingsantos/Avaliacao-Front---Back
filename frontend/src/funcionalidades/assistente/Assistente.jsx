@@ -1,5 +1,4 @@
 import StarBorder from '../../componentes/StarBorder'
-import GlassSurface from '../../componentes/GlassSurface'
 import { useEffect, useRef, useState } from 'react'
 import { analisarPedido, escolherSubstituicao, proporCesta } from './api'
 import OrbeFlora from './OrbeFlora'
@@ -589,9 +588,9 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
               <img src="/marca/cesta-selecionavel.png" alt="" />
               <span className="flora-opcao-texto"><strong>Cesta selecionável</strong><span>Escolha os produtos disponíveis dentro do limite.</span></span>
             </StarBorder>
-          </div> : etapaMontagem === 'tamanho' ? [{ nome: 'Pequena', limite: 5 }, { nome: 'Média', limite: 8 }, { nome: 'Grande', limite: 12 }].map((opcao) => <GlassSurface key={opcao.nome} as="button" type="button" className="flora-tarefa" width="100%" height="auto" borderRadius={14} borderWidth={0.07} brightness={100} opacity={0.9} blur={5} displace={0.35} backgroundOpacity={0.22} saturation={1.15} distortionScale={-40} disabled={ouvindo} onClick={() => enviarMensagemTexto(`Quero uma cesta pronta ${opcao.nome.toLowerCase()}.`)}><strong>{opcao.nome}</strong><span>{opcao.limite} produtos diferentes</span></GlassSurface>) : (tarefas[perfil] || tarefas.assinante).map((tarefa) => <GlassSurface key={tarefa.nome} as="button" type="button" className="flora-tarefa" width="100%" height="auto" borderRadius={14} borderWidth={0.07} brightness={100} opacity={0.9} blur={5} displace={0.35} backgroundOpacity={0.22} saturation={1.15} distortionScale={-40} disabled={ocupado || ouvindo} onClick={() => { if (tarefa.montar) iniciarMontagem(); else if (tarefa.rascunho) preencherMensagem(tarefa.rascunho); else enviarMensagemTexto(tarefa.mensagem) }}>
+          </div> : etapaMontagem === 'tamanho' ? [{ nome: 'Pequena', limite: 5 }, { nome: 'Média', limite: 8 }, { nome: 'Grande', limite: 12 }].map((opcao) => <StarBorder key={opcao.nome} type="button" className="botao botao-primario flora-tarefa" disabled={ouvindo} onClick={() => enviarMensagemTexto(`Quero uma cesta pronta ${opcao.nome.toLowerCase()}.`)}><strong>{opcao.nome}</strong><span>{opcao.limite} produtos diferentes</span></StarBorder>) : (tarefas[perfil] || tarefas.assinante).map((tarefa) => <StarBorder key={tarefa.nome} type="button" className="botao botao-primario flora-tarefa" disabled={ocupado || ouvindo} onClick={() => { if (tarefa.montar) iniciarMontagem(); else if (tarefa.rascunho) preencherMensagem(tarefa.rascunho); else enviarMensagemTexto(tarefa.mensagem) }}>
             <strong>{tarefa.nome}</strong><span>{tarefa.detalhe}</span>
-          </GlassSurface>)}
+          </StarBorder>)}
         </div>
         {etapaMontagem && <StarBorder className="flora-botao-discreto flora-voltar" type="button" onClick={() => { setEtapaMontagem(etapaMontagem === 'tamanho' ? 'modo' : null); acionarPulso(true) }}>Voltar</StarBorder>}
       </div>}
@@ -636,7 +635,7 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
       {erro && <div className="flora-retorno flora-retorno-erro" role="alert"><p>{erro}</p>{mensagem.trim() && !ocupado && <StarBorder className="flora-botao-discreto" type="button" onClick={() => enviarMensagemTexto()}>Tentar novamente</StarBorder>}</div>}
       {aviso && <p className="flora-retorno" role="status">{aviso}</p>}
       {concluido && <StarBorder className="flora-botao-primario flora-continuar" type="button" onClick={fechar}>{perfil === 'assinante' ? 'Continuar nos meus pedidos' : 'Continuar nos pedidos'}</StarBorder>}
-      {!concluido && <StarBorder className="flora-alternativa" type="button" disabled={ocupado || ouvindo} onClick={continuarSemAssistente}>{perfil === 'assinante' ? 'Montar cesta sem assistente' : 'Ir para a separação de pedidos'}</StarBorder>}
+      {!concluido && <StarBorder className="botao botao-primario flora-alternativa" type="button" disabled={ocupado || ouvindo} onClick={continuarSemAssistente}>{perfil === 'assinante' ? 'Montar cesta sem assistente' : 'Ir para a separação de pedidos'}</StarBorder>}
     </section>
     <div className="flora-coluna-chat">
     <footer className="flora-rodape">
