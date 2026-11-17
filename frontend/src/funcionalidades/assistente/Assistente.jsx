@@ -154,6 +154,34 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
     aoFechar()
   }
 
+  // Reiniciar a conversa ao retornar ao menu para não reutilizar intenções antigas.
+  function voltarAoMenu() {
+    if (ocupado || ouvindo) return
+    parar()
+    clearTimeout(timerResposta.current)
+    selecoesCatalogoRef.current = {}
+    textoBaseSelecaoRef.current = null
+    rascunhoAntesGravacao.current = ''
+    setMensagem('')
+    setHistorico([])
+    setResultado(null)
+    setAjusteAnterior(null)
+    setDetalheAberto(false)
+    setOperacao(null)
+    setErro('')
+    setAviso('')
+    setConcluido(false)
+    setEstadoVoz('')
+    setAudioMensagem(null)
+    setEtapaMontagem(null)
+    setModoPropostaCesta(false)
+    setEscolhendoProdutos(false)
+    setSelecoesCatalogo({})
+    setRespondendo(false)
+    acionarPulso(true)
+    requestAnimationFrame(() => dialogo.current?.querySelector('.flora-inicio .flora-tarefa')?.focus())
+  }
+
   function preencherMensagem(texto) {
     setMensagem(texto)
     setEstadoVoz('')
@@ -568,7 +596,10 @@ export default function Assistente({ perfil, nomeUsuario = '', aoFechar, aoConfi
           </div>
         </div>
       </div>
-      <StarBorder className="flora-fechar" type="button" onClick={fechar} aria-label="Fechar conversa com a Flora"><Icone nome="fechar" /></StarBorder>
+      <div className="flora-cabecalho-acoes">
+        {historico.length > 0 && <StarBorder className="flora-menu" type="button" aria-label="Voltar ao menu da Flora" disabled={ocupado || ouvindo} onClick={voltarAoMenu}>Menu</StarBorder>}
+        <StarBorder className="flora-fechar" type="button" onClick={fechar} aria-label="Fechar conversa com a Flora"><Icone nome="fechar" /></StarBorder>
+      </div>
     </header>
 
     <div className="flora-espaco-trabalho">

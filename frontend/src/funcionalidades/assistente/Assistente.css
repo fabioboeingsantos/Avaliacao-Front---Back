@@ -133,6 +133,10 @@
   text-transform: uppercase;
 }
 
+.flora-cabecalho-acoes { display: flex; align-items: center; justify-self: end; gap: 6px; }
+.assistente-dialogo .flora-menu { min-width: 44px; min-height: 40px; padding: 8px 11px; border-color: rgb(255 212 112 / 45%); color: #ffe59e; background: rgb(12 34 22 / 78%); font-size: .78rem; }
+.assistente-dialogo .flora-menu:hover:not(:disabled) { border-color: #ffd470; color: #fff; background: rgb(255 255 255 / 12%); }
+
 .flora-hud-ponto {
   width: 7px;
   height: 7px;

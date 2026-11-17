@@ -230,7 +230,7 @@ def responder(mensagem, perfil, sessao, usuario_id, modo, nome_usuario=None):
     if perfil == "produtor" and (
         re.search(r"\bresumo (?:da|de) colheita\b", texto)
         or (not NUMERO_PEDIDO.search(texto) and re.search(
-            r"\b(?:quanto[s]?|o que|quais produtos)\b.*\b(?:falta[m]? separar|a separar)\b", texto,
+            r"\b(?:quanto[s]?|quant[ao]s?|o que|quais produtos)\b.*\b(?:falta[m]? separar|a separar)\b", texto,
         ))
     ):
         periodo_explicito = re.search(r"\b(?:proxima|passada|anterior|seguinte|amanha|ontem|mes)\b|\d{1,2}/\d{1,2}", texto)

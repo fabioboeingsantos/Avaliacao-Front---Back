@@ -55,6 +55,14 @@ def test_resumo_colheita_soma_saldo_da_semana_para_produtor(cliente):
         "inicio": inicio.isoformat(), "fim": (inicio + timedelta(days=6)).isoformat(),
     }
 
+    # Reconhecer a pergunta sobre quantas cestas ainda faltam separar nesta semana.
+    pergunta_quantidade = cliente.post("/assistente/analisar", json={
+        "mensagem": "Quantas cestas faltam separar essa semana ainda?",
+    })
+    assert pergunta_quantidade.status_code == 200
+    assert pergunta_quantidade.json()["visualizacao"]["tipo"] == "colheita"
+    assert pergunta_quantidade.json()["visualizacao"]["total"] == 1
+
     with SessaoDeTeste() as sessao:
         sessao.get(Cesta, 1).situacao = "Preparado para envio"
         sessao.get(Cesta, 2).situacao = "Cancelado"

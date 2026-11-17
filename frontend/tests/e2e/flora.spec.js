@@ -86,6 +86,25 @@ test('cancelamento encerra a proposta sem enviar pedido', async ({ page }) => {
   expect(pedidos).toBe(0)
 })
 
+test('volta ao menu e inicia uma conversa sem reaproveitar o pedido cancelado', async ({ page }) => {
+  await pedirCesta(page)
+  await page.getByRole('button', { name: 'Cancelar', exact: true }).click()
+  await expect(page.getByText('Cesta cancelada.', { exact: false })).toBeVisible()
+  await page.getByRole('button', { name: 'Voltar ao menu da Flora' }).click()
+  await expect(page.getByRole('button', { name: /^Montar cesta Escolha seus/ })).toBeVisible()
+
+  const novaPergunta = page.waitForResponse(async (resposta) => {
+    if (new URL(resposta.url()).pathname !== '/api/assistente/analisar') return false
+    const corpo = resposta.request().postDataJSON()
+    expect(corpo.mensagem).toBe('Qual a previsão do tempo?')
+    expect(corpo.historico).toEqual([])
+    return true
+  })
+  await page.getByLabel('Sua mensagem', { exact: true }).fill('Qual a previsão do tempo?')
+  await page.getByRole('button', { name: 'Enviar', exact: true }).click()
+  expect((await novaPergunta).ok()).toBe(true)
+})
+
 test('catálogo soma, subtrai e retira itens sem ultrapassar limite', async ({ page }) => {
   await page.getByRole('button', { name: /Ver catálogo/ }).click()
   const adicionar = page.getByRole('button', { name: 'Adicionar uma unidade de Alface' })
