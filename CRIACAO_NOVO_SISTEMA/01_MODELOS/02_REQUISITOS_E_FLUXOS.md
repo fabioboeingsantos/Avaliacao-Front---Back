@@ -57,5 +57,8 @@ Não herdar automaticamente prazos, limites 5/8/12, unidades, categorias ou esta
 - Ações que exigem confirmação explícita: [preencher].
 - Provedor, limites e custos: [preencher].
 - Histórico, voz e alternativa manual: [preencher].
+- Quantidade de registros recentes oferecidos para escolha e consulta por identificador: [preencher].
+- Retorno ao menu e reinício do ciclo, incluindo descarte de propostas e contexto: [preencher].
+- Mensagens de indisponibilidade e comportamento após falha de todos os provedores: [preencher].
 
 O assistente não deve substituir autenticação, autorização ou validação determinística da API.

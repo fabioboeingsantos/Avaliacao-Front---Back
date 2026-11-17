@@ -1,5 +1,22 @@
 # Validação do pacote
 
+## Revisão de 16/11/2026
+
+As referências foram atualizadas a partir do checkout local baseado no commit `22d3fbd`.
+Consultar [ESTADO_ATUAL.md](ESTADO_ATUAL.md) para os comportamentos conferidos e as alterações
+locais pendentes de commit.
+
+O manifesto passou de 57 para 69 entradas. Foram conferidas a integridade das 68 cópias sincronizadas
+por SHA-256 e a correspondência com as origens. A entrada do exemplo de ambiente conserva
+seu hash anterior e foi excluída da leitura e da sincronização.
+
+Foram conferidos 34 links locais do índice, dos cinco modelos, do roteiro de hackathon e do documento de estado atual,
+todos com destinos existentes.
+Esta revisão documental utiliza a inspeção da configuração Vite para registrar a permanência
+do bloqueio `**/CRIACAO_NOVO_SISTEMA/**`. A evidência HTTP abaixo pertence à execução de 10/11.
+
+## Evidências históricas de 10/11/2026
+
 Verificações executadas em **10/11/2026**:
 
 - 57 cópias conferidas pelo SHA-256 registrado no manifesto.

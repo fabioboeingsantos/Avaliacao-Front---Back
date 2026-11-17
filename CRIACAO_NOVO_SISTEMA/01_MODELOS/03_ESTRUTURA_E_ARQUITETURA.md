@@ -14,6 +14,7 @@ novo-sistema/
 ├── Caddyfile                    # Site e proxy /api, se mantido Caddy
 ├── .github/workflows/ci.yml     # Verificações automáticas
 ├── docs/                        # Produto, arquitetura, banco e validação
+├── .docs/                       # Diário de decisões e estado atual, se adotado
 ├── CRIACAO_NOVO_SISTEMA/         # Material interno; não publicar no frontend
 ├── frontend/
 │   ├── package.json             # Dependências e scripts JavaScript
@@ -21,6 +22,8 @@ novo-sistema/
 │   ├── vite.config.js           # Build, desenvolvimento e bloqueio da pasta interna
 │   ├── Dockerfile               # Build da tela e imagem do servidor web
 │   ├── vercel.json              # Publicação/rewrite, se mantida Vercel
+│   ├── playwright.config.js     # Navegadores e servidores dos testes E2E
+│   ├── tests/                   # Testes unitários e E2E
 │   ├── public/                  # Arquivos públicos; nunca colocar documentação interna aqui
 │   └── src/
 │       ├── api.js               # Cliente HTTP e política de sessão
@@ -63,6 +66,10 @@ O backend carrega o `.env` da raiz; o Vite usa o ambiente de `frontend`.
 | Interface | Componentização e estados de carregamento | Jornadas, textos, marca e acessibilidade |
 | Infraestrutura | Modelo de serviços e CI | Domínios, banco, portas e variáveis |
 | IA | Proposta, validação e confirmação | Prompts, ferramentas e permissões |
+
+No sistema de origem, a montagem de cesta usa `backend/ia/modelos.py`, `ferramentas.py`
+e `pedido_cesta.py`. A cadeia é OpenRouter gratuito → Gemini pela Jangada, com lista de tools
+vazia. Registrar a decisão do novo projeto antes de adaptar essa funcionalidade.
 
 Não copie migrações históricas do domínio antigo para um banco com entidades diferentes.
 Se o domínio mudar, planeje uma migração inicial própria. Se reaproveitar o esquema, valide a

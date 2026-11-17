@@ -1,6 +1,9 @@
 # Confirmação de conta e recuperação de senha
 
-Implementação local de 04/11/2026. O envio real requer um provedor SMTP configurado no backend.
+Documentação revisada em **10/11/2026** conforme o código. O envio real requer um provedor SMTP
+configurado no backend; esta revisão não executou entrega real de e-mails.
+
+Guia em PDF: [passo a passo de e-mail](../output/pdf/passo_a_passo_email.pdf).
 
 ## Comportamento
 
@@ -24,6 +27,11 @@ Implementação local de 04/11/2026. O envio real requer um provedor SMTP config
 
 Preencha no ambiente do backend (ou `.env` da raiz no desenvolvimento):
 
+`backend/.env` e `.env.local` não são carregados automaticamente pelo backend.
+Na Vercel, configure as variáveis no projeto da **API**, no ambiente desejado, e faça um novo
+deploy para aplicá-las. `EMAIL_FRONTEND_URL` deve apontar para a tela, sem `/api` ou barra final.
+Para desenvolvimento, use `http://127.0.0.1:5173` ou `http://localhost:5173`.
+
 ```dotenv
 EMAIL_FRONTEND_URL=https://cestadovale.vercel.app
 SMTP_HOST=smtp.seu-provedor.com
@@ -40,10 +48,30 @@ Não coloque essas credenciais em variáveis `VITE_`, no Git ou em logs.
 Configure SPF/DKIM/DMARC conforme as instruções do provedor e confirme o remetente/domínio.
 Sem configuração válida, o cadastro continua funcionando e a conta fica utilizável imediatamente. Somente solicitações de envio/recuperação retornam 503.
 
+### Exemplo com Gmail
+
+Use `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587` e `SMTP_SECURITY=starttls`.
+Configure o endereço autorizado em `SMTP_FROM` e `SMTP_USER` e uma **senha de app** em
+`SMTP_PASSWORD`. Para gerar essa senha, a conta deve ter verificação em duas etapas.
+A opção pode não estar disponível em contas de trabalho/escola, com Proteção Avançada ou com
+verificação em duas etapas somente por chaves de segurança. Confira as regras da conta com o
+administrador ou use outro provedor autorizado.
+
+Referências: [senhas de app](https://support.google.com/mail/answer/185833?hl=pt-BR) e
+[configuração SMTP](https://support.google.com/mail/answer/7104828?hl=pt-BR), do Google.
+
+### Se a confirmação passar a ser obrigatória
+
+Essa regra **não está implementada**. Exigiria alterar a autenticação para verificar
+`email_verificado`, adaptar a interface e validar os fluxos de reenvio e recuperação.
+Configurar SMTP ou enviar o link não bloqueia automaticamente contas não confirmadas.
+
 ## Migração e publicação
 
 1. Configure SMTP e teste o remetente no provedor antes da ativação.
-2. Faça backup do banco e escolha um único método para aplicar a revisão `20261104_0012`:
+2. Confira a conexão e a revisão efetiva com `python -m alembic current`, dentro de `backend`.
+   Faça backup do banco. O head atual é `20261107_0015`; a revisão de e-mail é `20261104_0012`.
+   Para um banco gerenciado por Alembic, escolha um único método de atualização:
    - **Recomendado:** configure a conexão do Supabase para o backend e, na pasta `backend`, rode
      `python -m alembic upgrade head`.
    - **SQL Editor do Supabase:** cole e execute
@@ -53,7 +81,10 @@ Sem configuração válida, o cadastro continua funcionando e a conta fica utili
      após executar o SQL, rode `python -m alembic stamp 20261104_0012` com a mesma conexão
      do Supabase para alinhar o histórico. Não use `stamp` se a revisão atual for diferente:
      nesse caso, aplique a sequência de migrações com `upgrade head`.
-3. Publique o backend e o frontend no mesmo ciclo de atualização.
+     Esse SQL cobre apenas a revisão de e-mail: depois de alinhar o histórico, execute
+     `python -m alembic upgrade head` para aplicar as revisões posteriores e confira `current`.
+3. Reinicie a API local ou publique um novo deploy do backend para carregar as variáveis.
+   Publique o frontend também se seu código ou configuração de build tiverem mudado.
 4. Teste entrega real, confirmação, reenvio e recuperação com uma caixa de e-mail sob seu controle.
 
 **Contas existentes:** a migração as marca como não confirmadas, mas elas continuam podendo entrar.
@@ -62,6 +93,11 @@ Se quiser, use **Reenviar confirmação** para confirmar um endereço sob seu co
 
 `criar_tabelas.py` também atualiza essas colunas em bancos locais antigos, mas o caminho
 recomendado para banco versionado/produção é Alembic.
+
+Se o esquema foi criado por `criar_tabelas.py`/`create_all`, reconcilie o esquema e o histórico
+antes de executar migrações. `stamp` não altera tabelas nem ativa RLS. A cadeia integral desde
+SQLite vazio tem uma pendência na criação de chave estrangeira da revisão `20261005_0002`;
+consulte o [README](../README.md) e a [análise do sistema](ANALISE_SISTEMA.md).
 
 ## Rotas
 
@@ -86,10 +122,15 @@ recuperação, expiração, finalidade/uso único, revogação das sessões, sen
 limites de tentativas, falta de configuração, falhas SMTP, TLS e migração reversível.
 Nenhum teste envia e-mail externo ou aplica alterações no banco de produção.
 
-Validação local em 04/11/2026: **72 testes passaram**, frontend compilado e lint sem avisos.
+Registro histórico de 04/11/2026: **72 testes passaram**, frontend compilado e lint sem avisos.
 O ambiente virtual antigo apontava para um Python indisponível; foi criado `.venv-tests/`
 isolado, ignorado pelo Git. Para repetir neste computador, na pasta `backend` execute
 `..\.venv-tests\Scripts\python.exe -m pytest tests -q`.
+
+Esse resultado não certifica a revisão atual. Em 10/11/2026, a suíte em `backend/.venv` não
+iniciou por apontar para um Python 3.12 ausente; esta atualização do guia não reexecutou a suíte
+nem validou SMTP externo. A disponibilidade de `.venv-tests` e de suas dependências deve ser
+conferida antes de usar o comando histórico.
 
 ## Limites operacionais
 
@@ -101,7 +142,9 @@ Os limites reaproveitam o armazenamento em memória do MVP. Em múltiplas instâ
 é necessário armazenamento compartilhado (por exemplo Redis) para um limite global efetivo.
 Os testes locais não comprovam entregabilidade nem execução de tarefas na hospedagem real.
 
-O Row Level Security fica ativado em `tokens_conta` sem políticas públicas; o backend precisa
-acessar o banco por uma conexão administrativa guardada somente no servidor.
+A migração de e-mail e o SQL alternativo ativam RLS em `tokens_conta` no PostgreSQL sem criar
+políticas públicas. Criar tabelas e apenas marcar a revisão não executa essa proteção.
+Confira RLS, privilégios e políticas no banco de destino. O backend precisa de uma conexão
+autorizada para os acessos necessários, guardada somente no servidor.
 
 Referência de segurança: [OWASP Forgot Password Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html).

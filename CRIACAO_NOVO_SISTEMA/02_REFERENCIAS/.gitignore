@@ -3,6 +3,7 @@ backend/.venv/
 .venv-tests/
 backend/venv/
 backend/*.db
+backend/cesta_do_vale
 .imagegen-venv/
 __pycache__/
 .pytest_cache/

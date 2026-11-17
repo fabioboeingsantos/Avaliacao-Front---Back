@@ -34,6 +34,9 @@
 - [ ] Validar migrações desde banco vazio e atualização de uma versão anterior.
 - [ ] Executar lint e build do frontend.
 - [ ] Testar o fluxo completo no navegador e no celular.
+- [ ] Executar testes unitários do frontend e E2E Playwright, se adotados.
+- [ ] Conferir contraste de textos, campos e botões nos temas claro e escuro.
+- [ ] Testar seleção entre registros recentes e reinício do contexto pelo menu do assistente, se adotado.
 - [ ] Testar requisições simultâneas nas transições críticas.
 - [ ] Testar logout, expiração, recuperação e invalidação de sessões conforme a política escolhida.
 - [ ] Conferir que o build não inclui documentação interna ou credenciais.

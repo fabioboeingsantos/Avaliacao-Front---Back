@@ -1,7 +1,10 @@
 # Criação de um novo sistema
 
-Pacote de referência preparado em **10/11/2026** a partir do Cesta do Vale.
+Pacote de referência atualizado em **16/11/2026** a partir do Cesta do Vale.
 Esta pasta pode ser copiada para o novo projeto como documentação interna.
+
+Para participar do hackathon com outro tema, começar pelo [roteiro de adaptação](HACKATHON.md).
+Ele orienta o preenchimento dos modelos e a escolha dos recursos a reaproveitar após receber o desafio.
 
 ## O que está aqui
 
@@ -15,6 +18,8 @@ Esta pasta pode ser copiada para o novo projeto como documentação interna.
 | `02_REFERENCIAS/` | Cópias dos documentos e configurações do projeto de origem, preservando os caminhos relativos |
 | `MANIFESTO.json` | Origem, destino e SHA-256 de cada cópia |
 | [VALIDACAO.md](VALIDACAO.md) | Evidências de integridade e do bloqueio de acesso local |
+| [ESTADO_ATUAL.md](ESTADO_ATUAL.md) | Comportamentos atuais, fontes e alterações locais pendentes |
+| [HACKATHON.md](HACKATHON.md) | Roteiro para adaptar o projeto ao tema do desafio |
 
 ## Como iniciar um novo projeto
 
@@ -36,15 +41,15 @@ meu-novo-sistema/
 
 Depois, siga esta ordem:
 
-1. Leia este `00_COMECE_AQUI.md` no novo projeto.
-2. Preencha [01_DEFINICAO_E_PERSONAS.md](01_MODELOS/01_DEFINICAO_E_PERSONAS.md) com o objetivo,
+1. Ler este `00_COMECE_AQUI.md` e o [estado atual](ESTADO_ATUAL.md) no novo projeto.
+2. Preencher [01_DEFINICAO_E_PERSONAS.md](01_MODELOS/01_DEFINICAO_E_PERSONAS.md) com o objetivo,
    as novas personas, suas tarefas e permissões. Diferencie a pessoa fictícia do perfil técnico.
-3. Preencha [02_REQUISITOS_E_FLUXOS.md](01_MODELOS/02_REQUISITOS_E_FLUXOS.md) com as funcionalidades,
+3. Preencher [02_REQUISITOS_E_FLUXOS.md](01_MODELOS/02_REQUISITOS_E_FLUXOS.md) com as funcionalidades,
    regras e jornadas que serão mantidas ou alteradas, antes de adaptar o banco ou as telas.
-4. Revise [03_ESTRUTURA_E_ARQUITETURA.md](01_MODELOS/03_ESTRUTURA_E_ARQUITETURA.md) para definir
+4. Revisar [03_ESTRUTURA_E_ARQUITETURA.md](01_MODELOS/03_ESTRUTURA_E_ARQUITETURA.md) para definir
    os diretórios, as tecnologias e as conexões do novo sistema.
-5. Use [04_CHECKLIST_DE_CRIACAO.md](01_MODELOS/04_CHECKLIST_DE_CRIACAO.md) para acompanhar o trabalho.
-6. Preencha [05_BRIEFING_PARA_IMPLEMENTACAO.md](01_MODELOS/05_BRIEFING_PARA_IMPLEMENTACAO.md)
+5. Usar [04_CHECKLIST_DE_CRIACAO.md](01_MODELOS/04_CHECKLIST_DE_CRIACAO.md) para acompanhar o trabalho.
+6. Preencher [05_BRIEFING_PARA_IMPLEMENTACAO.md](01_MODELOS/05_BRIEFING_PARA_IMPLEMENTACAO.md)
    para reunir as decisões e indicar esse arquivo a quem implementará o projeto.
 
 Trocar apenas nomes e imagens é suficiente somente quando as tarefas, permissões e entidades
@@ -74,11 +79,12 @@ personas**. A primeira etapa será preencher e revisar os modelos antes de escre
   [TDR](02_REFERENCIAS/docs/TDR.md) e [fluxos](02_REFERENCIAS/docs/FLUXOS.md): modelos de documentação.
 - [Banco](02_REFERENCIAS/docs/banco-de-dados.md): referência conceitual, ainda incompleta em relação à implementação.
 - [Styleguide](02_REFERENCIAS/docs/styleguide/COMPONENTES.md): padrões visuais a adaptar à nova marca.
-- [Arquitetura da IA](02_REFERENCIAS/docs/ia/arquitetura.md): referência opcional se houver assistente.
+- [Diário de obra](02_REFERENCIAS/.docs/README.md) e [funcionalidade de IA](02_REFERENCIAS/.docs/ia.md) registram as decisões recentes.
+- [Arquitetura da IA](02_REFERENCIAS/docs/ia/arquitetura.md) e [fallback Jangada](02_REFERENCIAS/docs/ia/FALLBACK_JANGADA.md) descrevem os caminhos do assistente.
 
 As cópias são um retrato da data acima, sem sincronização automática. Briefing, PRD, TDR,
 documentação do banco e alguns registros de IA conservam decisões antigas. Em caso de divergência,
-priorize README, passo a passo e análise revisados e confirme a decisão no novo projeto.
+consultar primeiro o [estado atual](ESTADO_ATUAL.md), conferir o código indicado e confirmar a decisão no novo projeto.
 Os relatórios antigos de testes não comprovam o funcionamento de um sistema novo.
 
 ## O que o pacote não contém

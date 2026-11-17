@@ -1,6 +1,8 @@
 # Acesso ao servidor local
 
-Este guia inicia a API e o frontend em dois terminais do PowerShell. O banco local usa SQLite. Estes passos são apenas para desenvolvimento e não fazem deploy.
+Este guia inicia a API e o frontend localmente pelo PowerShell. A configuração atual usa o banco PostgreSQL do Supabase, definido no `.env` da raiz. Estes passos são apenas para desenvolvimento e não fazem deploy.
+
+Em 12/11/2026, o Python 3.12.10 foi restaurado, as dependências existentes da API carregaram corretamente, a API respondeu em `/health`, o frontend respondeu com HTTP 200 e a conexão com o Supabase foi confirmada com `SELECT 1`. Os serviços foram iniciados em segundo plano, conforme a seção abaixo.
 
 No arquivo `.env` da raiz, use `FRONTEND_URL=http://localhost:5173,http://127.0.0.1:5173` para permitir o acesso do Vite à API. Os endereços da porta `8080` são para o Docker Compose.
 
@@ -14,22 +16,33 @@ cd C:\Users\fabio\Desktop\Avaliacao-Front---Back
 
 ### Python e dependências da API
 
-Confira se o Python 3.12 está instalado:
+Confira o Python pelo caminho usado nesta máquina, sem depender do launcher `py` ou do `PATH`:
 
 ```powershell
-py -3.12 --version
+$pythonLocal = Join-Path $env:LOCALAPPDATA 'Programs\Python\Python312\python.exe'
+& $pythonLocal --version
 ```
 
-Se o launcher disser que não há runtime instalado, instale-o uma vez:
+Para instalar o Python 3.12:
 
 ```powershell
-py install 3.12
+winget install --id Python.Python.3.12 --exact --scope user --accept-package-agreements --accept-source-agreements
 ```
+
+Se o ambiente virtual mostrar `No Python at ...`, a instalação base pode estar ausente ou inacessível. Nesta máquina, `winget repair` não ofereceu reparo; a reinstalação abaixo restaurou o Python 3.12.10 e permitiu reutilizar o ambiente virtual existente:
+
+```powershell
+winget install --id Python.Python.3.12 --exact --scope user --force --accept-package-agreements --accept-source-agreements
+& $pythonLocal --version
+& .\backend\.venv\Scripts\python.exe --version
+```
+
+Se ocorrer `Acesso negado` em uma sessão restrita de automação, execute com a autorização de acesso necessária. Isso, por si só, não comprova que o Python está ausente.
 
 Crie o ambiente e instale as dependências (uma vez, ou quando `requirements.txt` mudar):
 
 ```powershell
-py -3.12 -m venv backend\.venv
+& $pythonLocal -m venv backend\.venv
 backend\.venv\Scripts\python.exe -m pip install --upgrade pip
 backend\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
 ```
@@ -49,22 +62,27 @@ cd C:\Users\fabio\Desktop\Avaliacao-Front---Back\frontend
 npm install
 ```
 
-## Iniciar a API
+## Configuração do banco e autenticação
+
+A API carrega automaticamente o `.env` da raiz. `SUPABASE_DB_URL` tem prioridade sobre `DATABASE_URL` e sobre `BANCO_DRIVER`/`BANCO_NOME`. Assim, ter `BANCO_DRIVER=sqlite` no arquivo não ativa o SQLite enquanto uma URL externa estiver preenchida.
+
+Mantenha a URL em `SUPABASE_DB_URL` e a senha em `SUPABASE_DB_PASSWORD`, sem copiá-las para a documentação. Para o banco remoto, preserve `sslmode=require` na URL. A chave `JWT_SECRET_KEY` também deve estar no `.env`, com pelo menos 32 caracteres. A inicialização abaixo usa essas configurações existentes.
+
+Para optar pelo SQLite, deixe `SUPABASE_DB_URL` e `DATABASE_URL` vazias e configure `BANCO_DRIVER=sqlite` e `BANCO_NOME=./cesta_do_vale.db`. Com a API iniciada dentro de `backend`, esse arquivo fica em `backend/cesta_do_vale.db`.
+
+## Iniciar a API em um terminal
 
 Abra o primeiro terminal do PowerShell:
 
 ```powershell
 cd C:\Users\fabio\Desktop\Avaliacao-Front---Back\backend
-.\.venv\Scripts\Activate.ps1
-$env:JWT_SECRET_KEY = "chave-local-de-desenvolvimento-com-mais-de-32-caracteres"
-python criar_tabelas.py
-python -m fastapi dev main.py
+& .\.venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
-Confirme que o prompt mostra `(.venv)`. Se a ativação falhar, pare e confira se a etapa de preparação criou `backend\.venv`. Deixe o terminal da API aberto.
+O executável do ambiente virtual é chamado diretamente; não é necessário ativá-lo. Deixe o terminal da API aberto. Não é necessário executar `criar_tabelas.py` para iniciar a API usando o banco já configurado.
 
 - API: `http://127.0.0.1:8000`
-- Saúde da API: `http://127.0.0.1:8000/saude`
+- Saúde da API: `http://127.0.0.1:8000/health`
 - Documentação interativa: `http://127.0.0.1:8000/docs`
 
 A rota `/` não tem uma página inicial e pode mostrar `{"detail":"Not Found"}`; isso não significa que a API esteja desligada.
@@ -75,16 +93,81 @@ Abra um segundo terminal do PowerShell. O comando precisa ser executado dentro d
 
 ```powershell
 cd C:\Users\fabio\Desktop\Avaliacao-Front---Back\frontend
-npm run dev
+npm.cmd run dev -- --host 127.0.0.1 --port 5173
 ```
 
 Abra o endereço informado pelo Vite, normalmente `http://localhost:5173`. Se aparecer erro `ENOENT` procurando `package.json` na raiz, entre na pasta `frontend` e tente novamente.
+
+## Iniciar em segundo plano
+
+Este foi o modo usado na última inicialização. Execute na raiz do projeto, somente se as portas `8000` e `5173` estiverem livres:
+
+```powershell
+$projeto = (Get-Location).Path
+New-Item -ItemType Directory -Path (Join-Path $projeto 'tmp') -Force | Out-Null
+Start-Process -FilePath (Join-Path $projeto 'backend\.venv\Scripts\python.exe') -ArgumentList '-m','uvicorn','main:app','--host','127.0.0.1','--port','8000' -WorkingDirectory (Join-Path $projeto 'backend') -WindowStyle Hidden -RedirectStandardOutput (Join-Path $projeto 'tmp\api-local.log') -RedirectStandardError (Join-Path $projeto 'tmp\api-local.err')
+Start-Process -FilePath 'C:\Program Files\nodejs\node.exe' -ArgumentList 'node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','5173' -WorkingDirectory (Join-Path $projeto 'frontend') -WindowStyle Hidden -RedirectStandardOutput (Join-Path $projeto 'tmp\frontend-local.log') -RedirectStandardError (Join-Path $projeto 'tmp\frontend-local.err')
+```
+
+Após alguns segundos, confira os serviços:
+
+```powershell
+(Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:8000/health').Content
+(Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:5173').StatusCode
+```
+
+O resultado esperado é `status: ok` na API e `200` no frontend. A rota `/health` confirma que a API está ligada; ela não verifica o banco. Para confirmar a conexão sem alterar dados, execute dentro de `backend`:
+
+```powershell
+& .\.venv\Scripts\python.exe -c "from configuracao import obter_url_banco; from sqlalchemy import create_engine, text; engine = create_engine(obter_url_banco()); conn = engine.connect(); print(conn.execute(text('SELECT 1')).scalar()); conn.close(); engine.dispose()"
+```
+
+O resultado esperado é `1`. Se aparecer `password authentication failed`, atualize `SUPABASE_DB_PASSWORD` com a senha atual do projeto Supabase e reinicie a API. Consulte `tmp/api-local.err` e `tmp/frontend-local.err` se os serviços não iniciarem. Evite compartilhar logs que contenham credenciais.
 
 ## Contas de demonstração
 
 - Assinante: usuário `aline`, senha `aline123`.
 - Produtor: usuário `vanderlei`, senha `vanderlei123`.
 
+Essas contas dependem dos dados cadastrados no banco selecionado. Sua existência no Supabase não foi verificada nesta inicialização.
+
+## Chat de teste no terminal com fallback Jangada
+
+O chat de terminal demonstra OpenRouter como principal e Gemini como reserva. Configure as quatro variáveis (`OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `GEMINI_API_KEY` e `GEMINI_MODEL`) no `.env` da raiz. Para instalar os extras dos dois provedores no ambiente virtual usado no terminal:
+
+```powershell
+# Instala os adaptadores Gemini e OpenRouter (que usa o extra openai) no ambiente do projeto.
+uv pip install --python .\.imagegen-venv\Scripts\python.exe "jangada-ai[gemini,openai]"
+```
+
+Para iniciar o chat no modo normal, execute na raiz do projeto:
+
+```powershell
+# Inicia o chat; a Jangada tenta OpenRouter e passa ao Gemini em falhas elegíveis.
+python .\chat_jangada.py
+```
+
+Para uma demonstração controlada em sala, simule uma conexão recusada antes de alcançar a OpenRouter. A resposta deve identificar `gemini` como provedor e imprimir que o fallback foi acionado:
+
+```powershell
+# Define a variável somente para este terminal PowerShell.
+$env:JANGADA_DEMO_FORCAR_FALLBACK = "1"
+# Inicia a demonstração; digite uma mensagem e depois 'sair'.
+python .\chat_jangada.py
+# Remove a variável depois de encerrar o chat para voltar ao modo normal.
+Remove-Item Env:JANGADA_DEMO_FORCAR_FALLBACK
+```
+
+Execute cada comando separadamente, pressionando Enter e aguardando o resultado. O modo forçado redireciona a conexão do adaptador para uma porta local sem serviço; a falha de conexão aciona o fallback e a chamada ao Gemini é real, podendo consumir cota. O modo normal também usa o Gemini automaticamente se o OpenRouter falhar com um erro elegível, como 429, timeout, conexão, 404 ou 5xx. Falhas de autenticação (401/403) e requisições inválidas (400) não acionam fallback por padrão.
+
+Essa demonstração é um utilitário de terminal e não ativa fallback no backend do site. O fluxo, as limitações e o roteiro estão em [docs/ia/FALLBACK_JANGADA.md](docs/ia/FALLBACK_JANGADA.md). O agente de revisão da Flora está em `backend/ia/agentes/qa.py`, onde QA significa *Quality Assurance* (garantia da qualidade).
+
 ## Encerrar
 
-Pressione `Ctrl+C` em cada terminal. A chave JWT definida com `$env:` vale somente para o terminal atual. Os dados do SQLite permanecem no arquivo local do banco.
+Se iniciou em dois terminais, pressione `Ctrl+C` em cada um. Se iniciou em segundo plano, identifique os processos nas portas usadas:
+
+```powershell
+Get-NetTCPConnection -State Listen -LocalPort 8000,5173 | Select-Object LocalAddress,LocalPort,OwningProcess
+```
+
+Confira o processo com `Get-Process -Id <OwningProcess>` e encerre somente o serviço desejado com `Stop-Process -Id <OwningProcess>`. Encerrar a API não apaga os dados do Supabase nem do SQLite.

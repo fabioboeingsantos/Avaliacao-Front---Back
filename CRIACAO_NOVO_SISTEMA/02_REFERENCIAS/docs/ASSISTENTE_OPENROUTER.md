@@ -17,7 +17,7 @@ A configuração local está ativa (`ASSISTENTE_MODO=openrouter`) e fixa o model
    ```dotenv
    ASSISTENTE_MODO=openrouter
    OPENROUTER_API_KEY=preencha_localmente
-   OPENROUTER_MODEL=nvidia/nemotron-3.5-super-vl:free
+   IA_MODELO_PADRAO=nvidia/nemotron-3.5-super-vl:free
    OPENROUTER_TIMEOUT_SECONDS=40
    OPENROUTER_MAX_TOKENS=2048
    ```
@@ -49,9 +49,9 @@ No teste inicial com seleção automática, houve respostas incompatíveis e
 incompletas; por isso a configuração local passou a usar o modelo fixo acima.
 
 É possível fixar um modelo gratuito diferente por função, configurando
-`OPENROUTER_MODEL_INTERPRETE`, `OPENROUTER_MODEL_ASSINANTE`,
-`OPENROUTER_MODEL_PRODUTOR` e `OPENROUTER_MODEL_QA`. Campos vazios usam
-`OPENROUTER_MODEL`. Para testes comparáveis, prefira fixar modelos após verificar
+`IA_MODELO_INTERPRETE`, `IA_MODELO_ASSINANTE`,
+`IA_MODELO_PRODUTOR` e `IA_MODELO_QA`. Campos vazios usam
+`IA_MODELO_PADRAO` quando não há um modelo legado para o papel. Para testes comparáveis, prefira fixar modelos após verificar
 a disponibilidade e o suporte a JSON no catálogo e na conta.
 
 ## Uso gratuito e falhas
