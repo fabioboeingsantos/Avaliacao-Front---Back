@@ -1,5 +1,9 @@
 # Cesta do Vale
 
+Nome oficial do projeto e do repositório GitHub: **Cesta Do Vale**. O nome da pasta
+local pode continuar diferente; em outros computadores, clone o repositório pelo novo
+endereço `https://github.com/fabioboeingsantos/Cesta-Do-Vale` após a renomeação no GitHub.
+
 Sistema web para pedidos semanais de cestas de uma horta comunitária. A assinante consulta o catálogo,
 monta e acompanha o pedido; o produtor gerencia produtos e estoque, separa os itens e conclui a entrega.
 
